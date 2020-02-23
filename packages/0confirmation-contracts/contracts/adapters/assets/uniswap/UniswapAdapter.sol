@@ -1,7 +1,7 @@
 pragma solidity ^0.6.2;
 
 import { ILiquidationModule } from "../../../interfaces/ILiquidationModule.sol";
-import { IUniswapFactory } from "github.com/PhABC/uniswap-solidity/contracts/interfaces/IUniswapFactory.sol";
+import { IUniswapFactory } from "../../../interfaces/IUniswapFactory.sol";
 import { IUniswapExchange } from "../../../interfaces/IUniswapExchange.sol";
 
 contract UniswapAdapter {

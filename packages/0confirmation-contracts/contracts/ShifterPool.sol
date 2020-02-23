@@ -1,9 +1,7 @@
 pragma solidity ^0.6.2;
 
-import { ShifterRegistry } from "github.com/renproject/darknode-sol/contracts/Shifter/ShifterRegistry.sol";
-import { Shifter } from "github.com/renproject/darknode-sol/contracts/Shifter/Shifter.sol";
-import { IShifter } from "github.com/renproject/darknode-sol/contracts/Shifter/IShifter.sol";
-
+import { IShifterRegistry } from "./interfaces/IShifterRegistry.sol";
+import { IShifter } from "./interfaces/IShifter.sol";
 import { ShifterPoolLib } from "./ShifterPoolLib.sol";
 import { BorrowProxy } from "./BorrowProxy.sol";
 

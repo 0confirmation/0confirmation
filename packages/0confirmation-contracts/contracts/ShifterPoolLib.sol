@@ -1,9 +1,9 @@
 pragma solidity ^0.6.2;
 
-import { ECDSA } from "github.com/OpenZeppelin/openzeppelin-contracts/contracts/cryptography/ECDSA.sol";
+import { ECDSA } from "@openzeppelin/contracts/cryptography/ECDSA.sol";
 import { BorrowProxyLib } from "./BorrowProxyLib.sol";
 import { RenVMShiftMessageLib } from "./RenVMShiftMessageLib.sol";
-import { IShifter } from "github.com/renproject/darknode-sol/contracts/Shifter/IShifter.sol";
+import { IShifter } from "./interfaces/IShifter.sol";
 
 library ShifterPoolLib {
   using BorrowProxyLib for *;

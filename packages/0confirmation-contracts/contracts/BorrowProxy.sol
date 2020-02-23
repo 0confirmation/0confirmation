@@ -2,21 +2,21 @@ pragma solidity ^0.6.2;
 
 import { BorrowProxyLib } from "./BorrowProxyLib.sol";
 import { SliceLib } from "./utils/SliceLib.sol";
-import { IShifter } from "github.com/renproject/darknode-sol/contracts/Shifter/IShifter.sol";
+import { IShifter } from "./interfaces/IShifter.sol";
 import { IBorrowProxyController } from "./interfaces/IBorrowProxyController.sol";
 
 contract BorrowProxy {
   using SliceLib for *;
   BorrowProxyLib.ProxyIsolate public isolate;
   modifier onlyOwner {
-    require(msg.sender == isolate.owner, "borrow proxy can only be used by borrower");
+   require(msg.sender == isolate.owner, "borrow proxy can only be used by borrower");
     _;
   }
   constructor() public {
     isolate.masterAddress = msg.sender;
     isolate.owner = IBorrowProxyController(isolate.masterAddress).getProxyOwnerHandler();
   } 
-  function validateProxyRecord(ShifterPoolLib.ProxyRecord memory record) internal returns (bool) {
+  function validateProxyRecord(bytes memory record) internal returns (bool) {
     return ShifterPool(isolate.masterAddress).validateProxyRecordHandler(record);
   }
   function proxy(address to, uint256 value, bytes memory payload) public onlyOwner {
