@@ -1,0 +1,18 @@
+version: "3.7"
+services:
+  nginx:
+    container_name: "nginx"
+    image:
+      nginx:alpine
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - /root/nginx.conf:/etc/nginx/nginx.conf
+      - /etc/letsencrypt:/etc/letsencrypt
+  rendezvous:
+    container_name: "rendezvous"
+    privileged: true
+    user: 0:0
+    image:
+      libp2p/websocket-star-rendezvous:release
