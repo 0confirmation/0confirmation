@@ -1,33 +1,44 @@
 pragma solidity ^0.6.2;
+pragma experimental ABIEncoderV2;
 
 import { IShifterRegistry } from "./interfaces/IShifterRegistry.sol";
 import { IShifter } from "./interfaces/IShifter.sol";
 import { ShifterPoolLib } from "./ShifterPoolLib.sol";
+import { ShifterBorrowProxyLib } from "./ShifterBorrowProxyLib.sol";
+import { RenVMShiftMessageLib } from "./RenVMShiftMessageLib.sol";
 import { BorrowProxy } from "./BorrowProxy.sol";
+import { BorrowProxyLib } from "./BorrowProxyLib.sol";
+import { TokenUtils } from "./utils/TokenUtils.sol";
 
 contract ShifterPool {
   using ShifterPoolLib for *;
-  ShifterPoolLib.Isolate public isolate;
-  constructor(address shifterRegistry) public {
+  using TokenUtils for *;
+  using ShifterBorrowProxyLib for *;
+  using BorrowProxyLib for *;
+  using RenVMShiftMessageLib for *;
+  ShifterPoolLib.Isolate isolate;
+  constructor(address shifterRegistry, uint256 poolFee) public {
     isolate.shifterRegistry = shifterRegistry;
+    isolate.poolFee = poolFee;
   }
-  function borrow(address token, ShifterPoolLib.RenVMShiftMessage memory shiftMessage, ShifterPoolLib.LiquidityProvisionMessage memory liquidityProvision) external {
+  function borrow(address token, RenVMShiftMessageLib.RenVMShiftMessage memory shiftMessage, ShifterPoolLib.LiquidityProvisionMessage memory liquidityProvision) public {
     bytes32 borrowerSalt = shiftMessage.computeBorrowerSalt(token, msg.sender);
-    address proxyAddress = shiftMessage.computeBorrowerAddress(borrowerSalt);
+    address proxyAddress = borrowerSalt.deriveBorrowerAddress();
     require(!isolate.borrowProxyController.isInitialized(proxyAddress), "shift message already used");
-    ShifterPoolLib.LenderRecord memory record;
-    ShifterPoolLib.ProxyRecord memory proxyRecord = ShifterPoolLib.ProxyRecord({
+    ShifterBorrowProxyLib.LenderRecord memory loan;
+    ShifterBorrowProxyLib.ProxyRecord memory proxyRecord = ShifterBorrowProxyLib.ProxyRecord({
       token: token,
+      timeoutExpiry: liquidityProvision.timeoutExpiry,
       message: shiftMessage,
-      record: record
+      loan: loan
     });
     bytes32 provisionHash = liquidityProvision.deriveProvisionHash(borrowerSalt);
     require(isolate.provisionHashAlreadyUsed(provisionHash), "liquidity provision message already used");
     address keeper = provisionHash.recoverAddressFromHash(liquidityProvision.signature);
-    proxyRecord.loan = ShifterPoolLib.LenderRecord({
+    proxyRecord.loan = ShifterBorrowProxyLib.LenderRecord({
       keeper: keeper,
       amount: liquidityProvision.amount,
-      keeperFee: liquidityProvision.fee,
+      keeperFee: liquidityProvision.keeperFee,
       poolFee: isolate.poolFee
     });
     require(token.sendToken(proxyAddress, proxyRecord.loan.computePostFee()));
@@ -35,8 +46,7 @@ contract ShifterPool {
     bytes memory data = abi.encode(proxyRecord);
     isolate.borrowProxyController.mapProxyRecord(proxyAddress, data);
     isolate.borrowProxyController.setProxyOwner(proxyAddress, msg.sender);
-    emit BorrowProxyLib.BorrowerProxyMade(msg.sender, proxyAddress, data);
-    assert(BorrowProxyLib.deployBorrowProxy(borrowerSalt) == proxyAddress, "fatal: borrower address mismatch");
+    emit BorrowProxyLib.BorrowProxyMade(msg.sender, proxyAddress, data);
   }
   function validateProxyRecordHandler(bytes memory proxyRecord) public view returns (bool) {
     return isolate.borrowProxyController.validateProxyRecord(msg.sender, proxyRecord);
@@ -44,7 +54,7 @@ contract ShifterPool {
   function getProxyOwnerHandler() public view returns (address) {
     return isolate.borrowProxyController.getProxyOwner(msg.sender);
   }
-  function getShifterPoolHandler(address token) public view returns (IShifter) {
+  function getShifterHandler(address token) public view returns (IShifter) {
     return isolate.getShifter(token);
   }
 }

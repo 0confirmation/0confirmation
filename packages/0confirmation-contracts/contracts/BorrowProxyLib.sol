@@ -1,4 +1,5 @@
 pragma solidity ^0.6.2;
+pragma experimental ABIEncoderV2;
 
 import { BorrowProxy } from "./BorrowProxy.sol";
 import { IModuleRegistryProvider } from "./interfaces/IModuleRegistryProvider.sol";
@@ -16,6 +17,7 @@ library BorrowProxyLib {
   struct ControllerIsolate {
     mapping (address => bytes32) proxyInitializerRecord;
     mapping (address => address) ownerByProxy;
+    mapping (address => bool) isKeeper;
   }
   struct Module {
     address assetHandler;
@@ -26,8 +28,8 @@ library BorrowProxyLib {
     Module encapsulated;
   }
   function delegate(ModuleExecution memory module, ProxyIsolate storage isolate, bytes memory payload, uint256 value) internal {
-    module.encapsulated.assetHandler.delegatecall(abi.encode(module.encapsulated.assetHandler, module.encapsulated.liquidationModule, tx.origin, module.to, value, payload));
-    assert(false, "asset handler does not exist");
+    (bool success,) = module.encapsulated.assetHandler.delegatecall(abi.encode(module.encapsulated.assetHandler, module.encapsulated.liquidationModule, tx.origin, module.to, value, payload));
+    revert("module did not resolve in a termination"); 
   }
   function isDefined(Module memory module) internal pure returns (bool) {
     return module.assetHandler != address(0x0);
@@ -39,7 +41,7 @@ library BorrowProxyLib {
     mapping (bytes32 => Module) modules;
   }
   function isDisbursing(ProxyIsolate storage isolate) internal pure returns (bool) {
-    return isolate.signaturePublished && !isolate.unbound;
+    return isolate.isLiquidating && isolate.liquidationIndex != isolate.liquidationSet.set.length;
   }
   event BorrowProxyMade(address indexed user, address indexed proxyAddress, bytes record);
   function deployBorrowProxy(bytes32 salt) internal returns (address output) {
@@ -75,8 +77,8 @@ library BorrowProxyLib {
     return keccak256(abi.encodePacked(exthash, signature));
   }
   function resolveModule(ModuleRegistry storage registry, address to, bytes4 sig) internal view returns (Module memory) {
-    BorrowProxyLib.Module memory module = registry.modules[computeCodeResolverKey(to, sig)];
-    if (!module.isDefined()) module = registry.modules[computeModuleKey(to, sig)];
+    Module memory module = registry.modules[computeCodeResolverKey(to, sig)];
+    if (!isDefined(module)) module = registry.modules[computeModuleKey(to, sig)];
     return module;
   }
 
@@ -99,19 +101,22 @@ library BorrowProxyLib {
   function getProxyOwner(ControllerIsolate storage isolate, address proxyAddress) internal view returns (address) {
     return isolate.ownerByProxy[proxyAddress];
   }
-  function registerModuleByAddress(ModuleRegistry storage registry, address to, bytes4 signature, BorrowProxyLib.Module memory module) internal {
+  function registerModuleByAddress(ModuleRegistry storage registry, address to, bytes4 signature, Module memory module) internal {
     registry.modules[computeModuleKey(to, signature)] = module;
   }
-  function registerAddressByCodeHash(ModuleRegistry storage registry, bytes32 exthash, bytes4 signature, BorrowProxyLib.Module memory module) internal {
-    registry.modules[computeCodeResolverKey(exthash, signature)] = module;
+  function registerAddressByCodeHash(ModuleRegistry storage registry, address to, bytes4 signature, Module memory module) internal {
+    registry.modules[computeCodeResolverKey(to, signature)] = module;
   }
-  function fetchModule(ProxyIsolate storage isolate, address to, bytes4 signature) public returns (Module memory) {
-    return IModuleRegistryProvider(isolate.masterAddress).fetchModuleHandler(to, signature);
+  function fetchModule(ProxyIsolate storage isolate, address to, bytes4 signature) public returns (ModuleExecution memory) {
+    return ModuleExecution({
+      encapsulated: IModuleRegistryProvider(isolate.masterAddress).fetchModuleHandler(to, signature),
+      to: to
+    });
   }
-  function registerKeeper(BorrowProxyLib.ProxyIsolate storage isolate, address provider) internal {
-    isolate.isProvider[provider] = true;
+  function registerKeeper(ControllerIsolate storage isolate, address provider) internal {
+    isolate.isKeeper[provider] = true;
   }
-  function unregisterKeeper(BorrowProxyLib.ProxyIsolate storage isolate, address provider) internal {
-    isolate.isProvider[provider] = false;
+  function unregisterKeeper(ControllerIsolate storage isolate, address provider) internal {
+    isolate.isKeeper[provider] = false;
   }
 }

@@ -3,8 +3,12 @@ pragma solidity ^0.6.2;
 import { ILiquidationModule } from "../../../interfaces/ILiquidationModule.sol";
 import { IUniswapFactory } from "../../../interfaces/IUniswapFactory.sol";
 import { IUniswapExchange } from "../../../interfaces/IUniswapExchange.sol";
+import { SliceLib } from "../../../utils/SliceLib.sol";
+import { ShifterBorrowProxyLib } from "../../../ShifterBorrowProxyLib.sol";
 
 contract UniswapAdapter {
+  using SliceLib for *;
+  using ShifterBorrowProxyLib for *;
   struct ExternalIsolate {
     address factoryAddress;
   }
@@ -48,8 +52,8 @@ contract UniswapAdapter {
     sig = payload.toSlice(0, 4).asWord();
     args = payload.toSlice(4).copy();
   }
-  fallback() external payable {
-    (address moduleAddress, address liquidationModule, address origin, address to, uint256 value, bytes memory payload) = abi.decode(msg.data, (address,address,address,uint256,bytes));
+  receive() payable external {
+    (address moduleAddress, address liquidationModule, address txOrigin, address to, uint256 value, bytes memory payload) = abi.decode(msg.data, (address,address,address,uint256,bytes));
     (IUniswapFactory factory, address tokenAddress) = validateExchange(moduleAddress, to);
     (bytes4 sig, bytes memory args) = splitPayload(payload);
     address newToken;
@@ -87,36 +91,35 @@ contract UniswapAdapter {
       (uint256 eth_bought, uint256 max_tokens, uint256 deadline, address recipient) = abi.decode(args, (uint256, uint256, uint256, address));
       require(recipient == address(this));
     } else if (sig == IUniswapExchange.tokenToTokenSwapInput.selector) {
-      (uint256 tokens_sold, uint256 min_tokens_bought, uint256 min_eth_bought, uint256 deadline, address token_addr) = abi.decode(args, (uint256, uint256, uint256, uint256, address));
+      (uint256 tokens_sold, uint256 min_tokens_bought, uint256 min_eth_bought, uint256 deadline, address payable token_addr) = abi.decode(args, (uint256, uint256, uint256, uint256, address));
       if (tokens_sold > 0 || min_tokens_bought > 0 || min_eth_bought > 0) newToken = token_addr;
     } else if (sig == IUniswapExchange.tokenToTokenTransferInput.selector) {
-      (uint256 tokens_sold, uint256 min_tokens_bought, uint256 min_eth_bought, uint256 deadline, address recipient, address token_addr) = abi.decode(args, (uint256, uint256, uint256, uint256, address, address));
+      (uint256 tokens_sold, uint256 min_tokens_bought, uint256 min_eth_bought, uint256 deadline, address recipient, address payable token_addr) = abi.decode(args, (uint256, uint256, uint256, uint256, address, address));
       if (tokens_sold > 0 || min_tokens_bought > 0 || min_eth_bought > 0) newToken = token_addr;
       require(recipient == address(this));
     } else if (sig == IUniswapExchange.tokenToTokenSwapOutput.selector) {
-      (uint256 tokens_bought, uint256 max_tokens_sold, uint256 max_eth_sold, uint256 deadline, address token_addr) = abi.decode(args, (uint256, uint256, uint256, uint256, address));
+      (uint256 tokens_bought, uint256 max_tokens_sold, uint256 max_eth_sold, uint256 deadline, address payable token_addr) = abi.decode(args, (uint256, uint256, uint256, uint256, address));
       if (tokens_bought > 0 && (max_tokens_sold > 0 || max_eth_sold > 0)) newToken = token_addr;
-      require(recipient == address(this));
     } else if (sig == IUniswapExchange.tokenToTokenTransferOutput.selector) {
-      (uint256 tokens_bought, uint256 max_tokens_sold, uint256 max_eth_sold, uint256 deadline, address recipient, address token_addr) = abi.decode(args, (uint256, uint256, uint256, uint256, address, address));
+      (uint256 tokens_bought, uint256 max_tokens_sold, uint256 max_eth_sold, uint256 deadline, address recipient, address payable token_addr) = abi.decode(args, (uint256, uint256, uint256, uint256, address, address));
       if (tokens_bought > 0 && (max_tokens_sold != 0 || max_eth_sold != 0)) newToken = token_addr;
       require(recipient != address(this));
     } else if (sig == IUniswapExchange.tokenToExchangeSwapInput.selector) {
-      (uint256 tokens_sold, uint256 min_tokens_bought, uint256 min_eth_bought, uint256 deadline, address exchange_addr) = abi.decode(args, (uint256, uint256, uint256, uint256, address));
+      (uint256 tokens_sold, uint256 min_tokens_bought, uint256 min_eth_bought, uint256 deadline, address payable exchange_addr) = abi.decode(args, (uint256, uint256, uint256, uint256, address));
       if (tokens_sold > 0) newToken = IUniswapExchange(exchange_addr).tokenAddress();
     } else if (sig == IUniswapExchange.tokenToExchangeTransferInput.selector) {
-      (uint256 tokens_sold, uint256 min_tokens_bought, uint256 min_eth_bought, uint256 deadline, address recipient, address exchange_addr) = abi.decode(args, (uint256, uint256, uint256, uint256, address, address));
+      (uint256 tokens_sold, uint256 min_tokens_bought, uint256 min_eth_bought, uint256 deadline, address recipient, address payable exchange_addr) = abi.decode(args, (uint256, uint256, uint256, uint256, address, address));
       require(recipient == address(this));
       if (tokens_sold > 0) newToken = IUniswapExchange(exchange_addr).tokenAddress();
     } else if (sig == IUniswapExchange.tokenToExchangeSwapOutput.selector) {
-      (uint256 tokens_bought, uint256 max_tokens_sold, uint256 max_eth_sold, uint256 deadline, address exchange_addr) = abi.decode(args, (uint256, uint256, uint256, uint256, address));
+      (uint256 tokens_bought, uint256 max_tokens_sold, uint256 max_eth_sold, uint256 deadline, address payable exchange_addr) = abi.decode(args, (uint256, uint256, uint256, uint256, address));
       if (tokens_bought > 0) newToken = IUniswapExchange(exchange_addr).tokenAddress();
     } else if (sig == IUniswapExchange.tokenToExchangeTransferOutput.selector) {
       (uint256 tokens_bought, uint256 max_tokens_sold, uint256 max_eth_sold, uint256 deadline, address recipient, address exchange_addr) = abi.decode(args, (uint256, uint256, uint256, uint256, address, address));
       require(recipient == address(this));
       if (tokens_bought > 0) newToken = IUniswapExchange(exchange_addr).tokenAddress();
     } else revert("unsupported contract call");
-    if (newToken) require(ILiquidationModule(liquidationModule).notify.delegatecall(abi.encode(newToken)));
+    if (newToken != address(0x0)) require(liquidationModule.delegateNotify(abi.encode(newToken)));
     (bool success, bytes memory retval) = to.call.value(value)(payload);
     if (success) assembly {
       return(add(0x20, retval), mload(retval))

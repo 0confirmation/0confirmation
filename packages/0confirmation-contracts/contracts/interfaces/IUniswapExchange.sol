@@ -11,7 +11,8 @@ interface IUniswapExchange {
    * @dev User specifies exact input (msg.value).
    * @dev User cannot specify minimum output or deadline.
    */
-  fallback () external payable;
+  receive() external;
+  
 
  /**
    * @dev Pricing function for converting between ETH && Tokens.

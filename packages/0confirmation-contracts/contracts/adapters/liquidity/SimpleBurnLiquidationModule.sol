@@ -2,8 +2,11 @@ pragma solidity ^0.6.2;
 
 import { AddressSetLib } from "../../utils/AddressSetLib.sol";
 import { IUniswapExchange } from "../../interfaces/IUniswapExchange.sol";
+import { IUniswapFactory } from "../../interfaces/IUniswapFactory.sol";
+import { IERC20 } from "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 
 contract SimpleBurnLiquidationModule {
+  using AddressSetLib for *;
   struct Isolate {
     address factoryAddress;
     uint256 liquidated;
@@ -55,7 +58,7 @@ contract SimpleBurnLiquidationModule {
     }
     return swap(key);
   }
-  function getIsolatePointer(address moduleAddress) internal view returns (ExternalIsolate storage) {
+  function getIsolatePointer(address moduleAddress) internal view returns (Isolate storage) {
     return toIsolatePointer(computeIsolatePointer(moduleAddress));
   }
   function getExternalIsolateHandler() external returns (ExternalIsolate memory) {

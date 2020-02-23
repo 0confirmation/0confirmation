@@ -3,6 +3,6 @@ pragma experimental ABIEncoderV2;
 
 import { BorrowProxyLib } from "../BorrowProxyLib.sol";
 
-contract IModuleRegistryProvider {
+interface IModuleRegistryProvider {
   function fetchModuleHandler(address to, bytes4 sig) external returns (BorrowProxyLib.Module memory);
 }

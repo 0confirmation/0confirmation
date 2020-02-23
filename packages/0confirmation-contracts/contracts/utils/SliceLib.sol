@@ -55,7 +55,7 @@ library SliceLib {
     uint256 data = slice.data;
     uint256 length = slice.length;
     assembly {
-      mask := sub(shl(mul(length, 0x8), 0x1), 0x1)
+      let mask := sub(shl(mul(length, 0x8), 0x1), 0x1)
       word := and(mload(sub(data, sub(0x20, length))), mask)
     }
   }
