@@ -5,14 +5,14 @@ library AddressSetLib {
     mapping (address => bool) uniq;
     address[] set;
   }
-  function insert(AddressSet storage addressSet, address item) internal pure {
+  function insert(AddressSet storage addressSet, address item) internal {
     if (addressSet.uniq[item]) return;
     addressSet.set.push(item);
   }
-  function get(AddressSet storage addressSet, uint256 i) internal pure returns (address) {
+  function get(AddressSet storage addressSet, uint256 i) internal view returns (address) {
     return addressSet.set[i];
   }
-  function size(AddressSet storage addressSet) internal pure returns (uint256) {
+  function size(AddressSet storage addressSet) internal view returns (uint256) {
     return addressSet.set.length;
   }
 }

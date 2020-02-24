@@ -7,6 +7,8 @@ library TokenUtils {
     (bool success,) = token.call(abi.encodeWithSignature("transfer(address,uint256)", target, amount));
     return success;
   }
+  function transferTokenFrom(address token, address from, address to, uint256 amount) internal returns (bool) {
+    (bool success,) = token.call(abi.encodeWithSignature("transferFrom(address,address,uint256)", from, to, amount));
+    return success;
+  }
 }
-    
-    

@@ -5,6 +5,9 @@ import { BorrowProxyLib } from "./BorrowProxyLib.sol";
 import { RenVMShiftMessageLib } from "./RenVMShiftMessageLib.sol";
 import { IShifter } from "./interfaces/IShifter.sol";
 import { IShifterRegistry } from "./interfaces/IShifterRegistry.sol";
+import { ERC20Detailed } from "openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol";
+import { IERC20 } from "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
+import { LiquidityToken } from "./LiquidityToken.sol";
 
 library ShifterPoolLib {
   using BorrowProxyLib for *;
@@ -13,6 +16,7 @@ library ShifterPoolLib {
     uint256 poolFee;
     mapping (address => bool) isKeeper;
     mapping (bytes32 => bool) provisionExecuted;
+    mapping (address => address) tokenToLiquidityToken;
     BorrowProxyLib.ControllerIsolate borrowProxyController;
     BorrowProxyLib.ModuleRegistry registry;
   }
@@ -23,6 +27,17 @@ library ShifterPoolLib {
     uint256 poolFee;
     uint256 timeoutExpiry;
     bytes signature;
+  }
+  function launchLiquidityToken(Isolate storage isolate, address token, string memory name, string memory symbol) internal returns (address) {
+    require(isolate.tokenToLiquidityToken[token] == address(0x0), "already deployed liquidity token for target token");
+    address liquidityToken = address(new LiquidityToken(token, name, symbol));
+    isolate.tokenToLiquidityToken[token] = liquidityToken;
+    return liquidityToken;
+  }
+  function getLiquidityToken(Isolate storage isolate, address token) internal view returns (address) {
+    address retval = isolate.tokenToLiquidityToken[token];
+    require(retval != address(0x0), "not a registered liquidity token");
+    return retval;
   }
   function deriveProvisionHash(LiquidityProvisionMessage memory provision, bytes32 salt) internal pure returns (bytes32) {
     return keccak256(abi.encodePacked(provision.amount, provision.timeoutExpiry, provision.nonce, salt));

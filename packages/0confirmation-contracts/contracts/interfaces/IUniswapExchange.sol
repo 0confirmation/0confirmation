@@ -11,7 +11,7 @@ interface IUniswapExchange {
    * @dev User specifies exact input (msg.value).
    * @dev User cannot specify minimum output or deadline.
    */
-  receive() external;
+  receive() payable external;
   
 
  /**

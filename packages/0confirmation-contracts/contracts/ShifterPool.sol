@@ -9,6 +9,7 @@ import { RenVMShiftMessageLib } from "./RenVMShiftMessageLib.sol";
 import { BorrowProxy } from "./BorrowProxy.sol";
 import { BorrowProxyLib } from "./BorrowProxyLib.sol";
 import { TokenUtils } from "./utils/TokenUtils.sol";
+import { LiquidityToken } from "./LiquidityToken.sol";
 
 contract ShifterPool {
   using ShifterPoolLib for *;
@@ -41,7 +42,7 @@ contract ShifterPool {
       keeperFee: liquidityProvision.keeperFee,
       poolFee: isolate.poolFee
     });
-    require(token.sendToken(proxyAddress, proxyRecord.loan.computePostFee()));
+    require(LiquidityToken(isolate.getLiquidityToken(token)).loan(proxyAddress, proxyRecord.loan.computePostFee()), "insufficient funds in liquidity pool");
     isolate.preventProvisionReplay(provisionHash);
     bytes memory data = abi.encode(proxyRecord);
     isolate.borrowProxyController.mapProxyRecord(proxyAddress, data);
@@ -56,5 +57,13 @@ contract ShifterPool {
   }
   function getShifterHandler(address token) public view returns (IShifter) {
     return isolate.getShifter(token);
+  }
+  function getLiquidityTokenHandler(address token) public view returns (LiquidityToken) {
+    return LiquidityToken(isolate.getLiquidityToken(token));
+  }
+  function relayResolveLoan(address liquidityToken) public returns (bool) {
+    require(isolate.borrowProxyController.proxyInitializerRecord[msg.sender] != bytes32(0x0), "not a registered borrow proxy");
+    require(LiquidityToken(liquidityToken).resolveLoan(msg.sender));
+    return true;
   }
 }

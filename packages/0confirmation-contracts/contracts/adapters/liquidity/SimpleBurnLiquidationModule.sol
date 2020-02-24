@@ -1,4 +1,5 @@
 pragma solidity ^0.6.2;
+pragma experimental ABIEncoderV2;
 
 import { AddressSetLib } from "../../utils/AddressSetLib.sol";
 import { IUniswapExchange } from "../../interfaces/IUniswapExchange.sol";
@@ -29,17 +30,17 @@ contract SimpleBurnLiquidationModule {
     Isolate storage isolate = getIsolatePointer(moduleAddress);
     IUniswapFactory factory = IUniswapFactory(isolate.factoryAddress);
     uint256 i;
-    for (i = isolate.liquidated; i < isolate.toLiquidate.list.length; i++) {
+    for (i = isolate.liquidated; i < isolate.toLiquidate.set.length; i++) {
       if (gasleft() < 3e5) {
         isolate.liquidated = i;
         return false;
       }
-      address tokenAddress = isolate.toLiquidate.list[i];
+      address tokenAddress = isolate.toLiquidate.set[i];
       uint256 tokenBalance = IERC20(tokenAddress).balanceOf(address(this));
-      address exchangeAddress = factory.getExchange(tokenAddress);
+      address payable exchangeAddress = factory.getExchange(tokenAddress);
       IERC20(tokenAddress).approve(exchangeAddress, 0); // needed for many tokens
       IERC20(tokenAddress).approve(exchangeAddress, tokenBalance);
-      IUniswapExchange(exchangeAddress).tokenToEthInput(tokenBalance, 0, block.number + 1, address(this), address(this));
+      IUniswapExchange(exchangeAddress).tokenToEthSwapInput(tokenBalance, 0, block.number + 1);
     }
     isolate.liquidated = i;
     return true;
@@ -50,7 +51,7 @@ contract SimpleBurnLiquidationModule {
   function cast(uint256 v) internal pure returns (uint256) {
     return v;
   }
-  function toIsolatePointer(uint256 key) internal view returns (Isolate storage) {
+  function toIsolatePointer(uint256 key) internal returns (Isolate storage) {
     function (uint256) internal returns (Isolate storage) swap;
     function (uint256) internal returns (uint256) real = cast;
     assembly {
@@ -58,7 +59,7 @@ contract SimpleBurnLiquidationModule {
     }
     return swap(key);
   }
-  function getIsolatePointer(address moduleAddress) internal view returns (Isolate storage) {
+  function getIsolatePointer(address moduleAddress) internal returns (Isolate storage) {
     return toIsolatePointer(computeIsolatePointer(moduleAddress));
   }
   function getExternalIsolateHandler() external returns (ExternalIsolate memory) {

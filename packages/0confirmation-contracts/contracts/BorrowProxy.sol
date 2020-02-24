@@ -32,6 +32,6 @@ contract BorrowProxy {
     bytes4 sig = bytes4(uint32(uint256(payload.toSlice(0, 4).asWord())));
     BorrowProxyLib.ModuleExecution memory module = isolate.fetchModule(to, sig);
     require(module.encapsulated.isDefined(), "function handler not registered");
-    module.delegate(isolate, payload, value);
+    module.delegate(payload, value);
   }
 }
