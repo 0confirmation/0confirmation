@@ -24,7 +24,6 @@ library ShifterPoolLib {
     uint256 amount;
     uint256 nonce;
     uint256 keeperFee;
-    uint256 poolFee;
     uint256 timeoutExpiry;
     bytes signature;
   }
