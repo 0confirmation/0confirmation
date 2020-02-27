@@ -12,7 +12,7 @@ function App() {
         <div style={ { height: '100%' } }>
           <div><img src={MainInfo} className="App-logo" alt="logo" /></div>
           <div><a href="mailto:info@0confirmation.com"><img src={EmailInfo} className="App-logo" alt="logo" /></a></div>
-          <div><a href="t.me/zeroconfirmation"><img src={TelegramInfo} className="App-logo" alt="logo" /></a></div>
+          <div><a href="https://t.me/zeroconfirmation"><img src={TelegramInfo} className="App-logo" alt="logo" /></a></div>
         </div>
       </header>
     </div>
