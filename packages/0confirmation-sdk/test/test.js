@@ -10,6 +10,5 @@ const deployMocks = require('./lib/deploy-mocks');
 describe('0confirmation sdk', () => {
   it('should deploy', async () => {
     const deploy = await deployMocks(provider);
-    console.log(deploy);
   });
 });

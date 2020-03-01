@@ -14,8 +14,8 @@ const path = require('path');
       }
     }
   };
-  const { contracts } = await truffleCompile.compile(config);
-  await truffleCompile.save(config, contracts);
+//  const { contracts } = await truffleCompile.compile(config);
+//  await truffleCompile.save(config, contracts);
   const vyperConfig = {
     contracts_directory: path.join(__dirname, '..', '..', '..', 'node_modules', 'contracts-vyper', 'contracts'),
     contracts_build_directory: path.join(__dirname, '..', 'test', 'build'),

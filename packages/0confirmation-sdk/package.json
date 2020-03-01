@@ -4,6 +4,10 @@
   "description": "0confirmation sdk",
   "main": "sdk.js",
   "scripts": {
+    "task:prepare": "cross-env docker-compose -f test/docker-compose.yaml build",
+    "task:build:exchange": "cross-env docker-compose -f test/docker-compose.yaml run -T build-uniswap-exchange > test/build-uniswap/exchange.txt",
+    "task:build:factory": "cross-env docker-compose -f test/docker-compose.yaml run -T build-uniswap-factory > test/build-uniswap/factory.txt",
+    "build": "npm-run-all task:prepare task:build:*",
     "test": "npx mocha"
   },
   "repository": {
@@ -27,6 +31,7 @@
     "bufferutil": "^4.0.1",
     "chai": "^4.2.0",
     "contracts-vyper": "https://github.com/Uniswap/contracts-vyper",
+    "cross-env": "^7.0.0",
     "darknode-sol": "https://github.com/renproject/darknode-sol",
     "emasm": "^0.1.10",
     "ethers": "^4.0.45",
@@ -41,6 +46,7 @@
     "libp2p-websocket-star": "^0.10.2",
     "libp2p-websockets": "^0.12.2",
     "mocha": "^7.1.0",
+    "npm-run-all": "^4.1.5",
     "openzeppelin-solidity": "https://github.com/OpenZeppelin/openzeppelin-contracts#v2.5.0",
     "peer-info": "^0.15.1",
     "pull-stream": "^3.6.9",
