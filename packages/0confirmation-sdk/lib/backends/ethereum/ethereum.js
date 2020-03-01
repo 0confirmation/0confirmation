@@ -7,8 +7,7 @@ const {
     isProvider
   }
 } = require('ethers/provider');
-const { ABICoder } = require('ethers/utils/abi-coder');
-const abi = new ABICoder([]);
+const abi = require('ethers/utils').defaultAbiCoder;
 
 const stripHexPrefix = (s) => s.substr(0, 2) === '0x' ? s.substr(2) : s;
 
@@ -17,7 +16,7 @@ const PROXY_SIGNATURE = id('proxy(address,uint256,bytes)').substr(0, 10);
 const providerMethods = {
   eth_accounts(driver) {
     return async () => {
-      const accounts = await driver.ethereum.send('eth_accounts');
+      const accounts = await driver.getBackend('ethereum').asWrapped().send('eth_accounts', []);
       return driver.getActiveBorrowProxy(accounts).borrower;
     };
   },
@@ -29,9 +28,9 @@ const providerMethods = {
   async eth_sendTransaction(driver) {
     return async (params) => {
       const [ payload ] = params;
-      const accounts = await driver.ethereum.send('eth_accounts', []);
-      const proxy = driver.getActiveBorrowProxy(accounts);
-      return await driver.ethereum.send('eth_sendTransaction', [{
+      const accounts = await driver.getBackend('ethereum').asWrapped().send('eth_accounts', []);
+      const proxy = await (driver.getBackend('zero').asWrapped()).send('0cf_getActiveBorrowProxy', [ accounts ]);
+      return await (driver.getBackend('ethereum').asWrapped()).send('eth_sendTransaction', [{
         from: proxy.borrower,
         to: proxy.address,
         data: PROXY_SIGNATURE + stripHexPrefix(abi.encode(['address', 'uint256', 'bytes' ], [ payload.to, payload.value, payload.data ])),
@@ -45,6 +44,7 @@ const providerMethods = {
 
 const mapProviderMethods = (driver) => Object.keys(providerMethods).reduce((r, v) => {
   r[v] = providerMethods[v](driver);
+  return r;
 }, {});
 
 const makeSend = (driver) => {
@@ -82,7 +82,7 @@ const makeProviderProxy = (driver) => {
   });
   Object.defineProperty(proxy, 'connected', {
     get() {
-      return driver.ethereum.provider.connected;
+      return driver.ethereum._cache.provider.connected;
     },
     set(v) {
       driver.ethereum._cache.provider.connected = v;
@@ -107,8 +107,9 @@ class EthereumBackend {
     provider
   }) {
     this.name = 'ethereum';
+    this.prefixes = ['eth'];
     this.driver = driver;
-    const rawProvider = typeof provider === 'string' ? new Web3.providers.HttpProvider(provider) : isProvider(provider) ? provider.provider : provider,
+    this.provider = provider;
     this._cache = {
       provider: rawProvider,
       send: rawProvider.send
@@ -120,11 +121,9 @@ class EthereumBackend {
       host: this._cache.provider.host,
       connected: this._cache.provider.connected
     };
-    const ethers = isProvider(provider) ? provider : new Web3Provider(mockProvider);
-    this.ethers = ethers;
   }
   send(...args) {
-    return this.ethers.send(...args);
+    return new WrappedRPC(this).asWrapped().send(...args);
   }
   injectProvider() {
     install(this.driver);

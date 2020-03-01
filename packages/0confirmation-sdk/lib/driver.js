@@ -1,8 +1,9 @@
 'use strict';
 
+const RenVMBackend = require('./backends/renvm');
 const EthereumBackend = require('./backends/ethereum');
 const ZeroBackend = require('./backends/zero');
-const Socket = require('./p2p/Socket');
+const RPCWrapper = require('./util/rpc-wrapper');
 const difference = require('lodash/difference');
 
 const builtInBackends = {
@@ -16,6 +17,7 @@ class ZeroDriver {
     backends
   }) {
     this.backends = {};
+    this.prefixes = {};
     const backendNames = Object.keys(backendNames);
     const addons = difference(backends, builtInBackends);
     Object.keys(builtInBackends).forEach((v) => {
@@ -30,20 +32,45 @@ class ZeroDriver {
     });
   }
   registerBackend(backend) {
-    return this.backends[backend.name] = backend;
+    this.backends[backend.name] = backend;
+    backend.prefixes.forEach((prefix) => {
+      this.prefixes[prefix] = backend;
+    });
   }
   getBackend(name) {
-    return this.backends[name];
+    return new RPCWrapper(this.backends[name]);
+  }
+  getBackendByPrefix(prefix) {
+    return this.getBackend(this.prefixes[prefix].name);
   }
   async initialize() {
     for (const backend of Object.keys(this.backend)) {
       if (this.backends[backend].initialize) await this.backends[backend].initialize();
     }
   }
-  getProvider() {
-    return this.ethereum.getProvider();
-  },
   injectProvider() {
     this.ethereum.injectProvider();
+  }
+  async send({
+    jsonrpc,
+    id,
+    method,
+    params
+  }) {
+    const prefix = method.split('_')[0];
+    try {
+      return this.getBackendByPrefix(prefix).send({
+        jsonrpc,
+        id,
+        method,
+        params
+      });
+    } catch (e) {
+      return {
+        jsonrpc: '2.0',
+        id,
+        error: e
+      };
+    }
   }
 }
