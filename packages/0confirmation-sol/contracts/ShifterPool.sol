@@ -1,6 +1,7 @@
 pragma solidity ^0.6.2;
 pragma experimental ABIEncoderV2;
 
+import { Ownable } from "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import { IShifterRegistry } from "./interfaces/IShifterRegistry.sol";
 import { IShifter } from "./interfaces/IShifter.sol";
 import { ShifterPoolLib } from "./ShifterPoolLib.sol";
@@ -21,6 +22,21 @@ contract ShifterPool {
   constructor(address shifterRegistry, uint256 poolFee) public {
     isolate.shifterRegistry = shifterRegistry;
     isolate.poolFee = poolFee;
+  }
+  function setup(BorrowProxyLib.ModuleRegistration[] memory modulesByCode, ShifterPoolLib.LiquidityTokenLaunch[] memory tokenLaunches) public {
+    for (uint256 i = 0; i < modulesByCode.length; i++) {
+      BorrowProxyLib.ModuleRegistration memory registration = modulesByCode[i];
+      for (uint256 j = 0; j < registration.sigs.length; j++) {
+        isolate.registry.registerModuleByCodeHash(registration.target, registration.sigs[i], BorrowProxyLib.Module({
+          assetHandler: registration.assetHandler,
+          liquidationModule: registration.liquidationModule
+        }));
+      }
+    }
+    for (uint256 i = 0; i < tokenLaunches.length; i++) {
+      ShifterPoolLib.LiquidityTokenLaunch memory launch = tokenLaunches[i];
+      isolate.tokenToLiquidityToken[launch.token] = launch.liqToken;
+    }
   }
   function borrow(address token, RenVMShiftMessageLib.RenVMShiftMessage memory shiftMessage, ShifterPoolLib.LiquidityProvisionMessage memory liquidityProvision) public {
     bytes32 borrowerSalt = shiftMessage.computeBorrowerSalt(token, msg.sender);

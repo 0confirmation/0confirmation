@@ -5,12 +5,6 @@ const ERC20Shifted = require('../build/zBTC');
 const ShifterRegistry = require('../build/ShifterRegistry');
 const path = require('path');
 const Shifter = require('../build/BTCShifter');
-const { soliditySha3: id } = require('web3-utils');
-const emasm = require('emasm');
-const makeConstructor = require('emasm/macros/make-constructor');
-
-const wrapConstructor = (bytecode) => emasm(makeConstructor(['bytes:runtime-contract-code', [ bytecode ] ]));
-
 const Factory = {
   bytecode: fs.readFileSync(path.join(__dirname, '..', 'build-uniswap', 'factory.txt'), 'utf8').trim()
 };
@@ -20,26 +14,16 @@ const Exchange = {
 };
 
 const abi = require('ethers/utils').defaultAbiCoder;
-const stripHexPrefix = (s) => s.substr(0, 2) === '0x' ? s.substr(2) : s;
-const addHexPrefix = (s) => s.substr(0, 2) === '0x' ? s : '0x' + s;
+const {
+  stripHexPrefix,
+  addHexPrefix,
+  encodeParameters,
+  encodeFunctionCall,
+  defaultTransaction,
+  id,
+  testDeploy
+} = require('./deploy-utils');
 
-const encodeParameters = (types, params) => stripHexPrefix(abi.encode(types, params));
-
-const encodeFunctionCall = (sig, types, inputs) => addHexPrefix(id(sig).substr(0, 10)) + encodeParameters(types, inputs);
-
-const defaultTransaction = (o) => Object.assign({
-  gasPrice: '0x1',
-  gas: '0x' + (6e6).toString(16)
-}, o);
-
-const testDeploy = async (provider, binary, types, params) => {
-  const [ from ] = await provider.send('eth_accounts', []);
-  const receipt = await provider.waitForTransaction(await provider.send('eth_sendTransaction', [ defaultTransaction({
-    from,
-    data: addHexPrefix(binary + (types && encodeParameters(types, params) || ''))
-  }) ]));
-  return receipt.contractAddress.toLowerCase();
-};
 
 const deployRenBackend = async (provider) => {
   const [ from, feeAccount ] = await provider.send('eth_accounts', []);

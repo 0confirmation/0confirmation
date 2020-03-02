@@ -55,6 +55,34 @@ contract UniswapAdapter {
     sig = bytes4(payload.toSlice(0, 4).asWord());
     args = payload.toSlice(4).copy();
   }
+  function getSignatures() public pure returns (bytes4[] memory retval) {
+    retval = new bytes4[](25);
+    retval[0] = IUniswapExchange.getInputPrice.selector;
+    retval[1] = IUniswapExchange.getOutputPrice.selector;
+    retval[2] = IUniswapExchange.tokenToEthSwapInput.selector;
+    retval[3] = IUniswapExchange.tokenToEthSwapOutput.selector;
+    retval[4] = IUniswapExchange.getEthToTokenInputPrice.selector;
+    retval[5] = IUniswapExchange.getEthToTokenOutputPrice.selector;
+    retval[6] = IUniswapExchange.getTokenToEthInputPrice.selector;
+    retval[7] = IUniswapExchange.getTokenToEthOutputPrice.selector;
+    retval[8] = IUniswapExchange.tokenAddress.selector;
+    retval[9] = IUniswapExchange.addLiquidity.selector;
+    retval[10] = IUniswapExchange.removeLiquidity.selector;
+    retval[11] = IUniswapExchange.ethToTokenSwapInput.selector;
+    retval[12] = IUniswapExchange.ethToTokenTransferInput.selector;
+    retval[13] = IUniswapExchange.ethToTokenSwapOutput.selector;
+    retval[14] = IUniswapExchange.ethToTokenTransferOutput.selector;
+    retval[15] = IUniswapExchange.tokenToEthTransferInput.selector;
+    retval[16] = IUniswapExchange.tokenToEthTransferOutput.selector;
+    retval[17] = IUniswapExchange.tokenToTokenSwapInput.selector;
+    retval[18] = IUniswapExchange.tokenToTokenTransferInput.selector;
+    retval[19] = IUniswapExchange.tokenToTokenSwapOutput.selector;
+    retval[20] = IUniswapExchange.tokenToTokenTransferOutput.selector;
+    retval[21] = IUniswapExchange.tokenToExchangeSwapInput.selector;
+    retval[22] = IUniswapExchange.tokenToExchangeTransferInput.selector;
+    retval[23] = IUniswapExchange.tokenToExchangeSwapOutput.selector;
+    retval[24] = IUniswapExchange.tokenToExchangeTransferOutput.selector;
+  }
   receive() payable external {
     (address payable moduleAddress, address liquidationModule, /* address txOrigin */, address to, uint256 value, bytes memory payload) = abi.decode(msg.data, (address, address, address, address, uint256, bytes));
     (/* IUniswapFactory factory */, address tokenAddress) = validateExchange(moduleAddress, to);

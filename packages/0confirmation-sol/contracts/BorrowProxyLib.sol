@@ -23,6 +23,12 @@ library BorrowProxyLib {
     address assetHandler;
     address liquidationModule;
   }
+  struct ModuleRegistration {
+    address target;
+    bytes4[] sigs;
+    address assetHandler;
+    address liquidationModule;
+  }
   struct ModuleExecution {
     address to;
     Module encapsulated;
@@ -116,7 +122,7 @@ library BorrowProxyLib {
   function registerModuleByAddress(ModuleRegistry storage registry, address to, bytes4 signature, Module memory module) internal {
     registry.modules[computeModuleKey(to, signature)] = module;
   }
-  function registerAddressByCodeHash(ModuleRegistry storage registry, address to, bytes4 signature, Module memory module) internal {
+  function registerModuleByCodeHash(ModuleRegistry storage registry, address to, bytes4 signature, Module memory module) internal {
     registry.modules[computeCodeResolverKey(to, signature)] = module;
   }
   function fetchModule(ProxyIsolate storage isolate, address to, bytes4 signature) public returns (ModuleExecution memory) {

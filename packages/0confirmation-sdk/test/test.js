@@ -6,9 +6,11 @@ const provider = new Web3Provider(ganache.provider());
 
 const fs = require('fs-extra');
 const deployMocks = require('./lib/deploy-mocks');
+const deployZeroBackend = require('./lib/deploy-0cf');
 
 describe('0confirmation sdk', () => {
   it('should deploy', async () => {
-    const deploy = await deployMocks(provider);
+    const mocks = await deployMocks(provider);
+    const { shifterPool } = await deployZeroBackend(provider, mocks);
   });
 });
