@@ -19,18 +19,22 @@ contract ShifterPool {
   using BorrowProxyLib for *;
   using RenVMShiftMessageLib for *;
   ShifterPoolLib.Isolate isolate;
-  constructor(address shifterRegistry, uint256 poolFee) public {
+  function setup(address shifterRegistry, uint256 poolFee, BorrowProxyLib.ModuleRegistration[] memory modulesByCode, BorrowProxyLib.ModuleRegistration[] memory modulesByAddress, ShifterPoolLib.LiquidityTokenLaunch[] memory tokenLaunches) public {
     isolate.shifterRegistry = shifterRegistry;
     isolate.poolFee = poolFee;
-  }
-  function setup(BorrowProxyLib.ModuleRegistration[] memory modulesByCode, ShifterPoolLib.LiquidityTokenLaunch[] memory tokenLaunches) public {
+    assembly {
+      return(0x0, 0x0)
+    }
     for (uint256 i = 0; i < modulesByCode.length; i++) {
       BorrowProxyLib.ModuleRegistration memory registration = modulesByCode[i];
       for (uint256 j = 0; j < registration.sigs.length; j++) {
-        isolate.registry.registerModuleByCodeHash(registration.target, registration.sigs[i], BorrowProxyLib.Module({
-          assetHandler: registration.assetHandler,
-          liquidationModule: registration.liquidationModule
-        }));
+        isolate.registry.registerModuleByCodeHash(registration.target, registration.sigs[i], registration.module);
+      }
+    }
+    for (uint256 i = 0; i < modulesByAddress.length; i++) {
+      BorrowProxyLib.ModuleRegistration memory registration = modulesByAddress[i];
+      for (uint256 j = 0; j < registration.sigs.length; j++) {
+        isolate.registry.registerModuleByCodeHash(registration.target, registration.sigs[i], registration.module);
       }
     }
     for (uint256 i = 0; i < tokenLaunches.length; i++) {

@@ -1,6 +1,6 @@
 'use strict';
 
-const { Web3Provider } = require('ethers/utils/web3-provider');
+const { Web3Provider } = require('ethers/providers/web3-provider');
 
 module.exports = class RPCWrapper {
   constructor(provider) {

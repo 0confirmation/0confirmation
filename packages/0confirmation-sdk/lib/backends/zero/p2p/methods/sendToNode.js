@@ -1,5 +1,5 @@
 const pull = require('pull-stream')
-const { tryStringify } = require('../lib/encoding')
+const { tryStringify } = require('../util/encoding')
 
 module.exports = async function sendToNode(peerId, protocol, data) {
   let peer = this.peers[peerId]

@@ -22,7 +22,7 @@ class ZeroBackend {
       multiaddr: fromPresetOrMultiAddr[multiaddr]
     });
   }
-  initialize() {
+  async initialize() {
     await this.socket.start();
   }
   send({
@@ -47,3 +47,5 @@ class ZeroBackend {
     }
   }
 }
+
+module.exports = ZeroBackend;

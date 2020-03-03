@@ -26,8 +26,7 @@ library BorrowProxyLib {
   struct ModuleRegistration {
     address target;
     bytes4[] sigs;
-    address assetHandler;
-    address liquidationModule;
+    Module module;
   }
   struct ModuleExecution {
     address to;
@@ -43,11 +42,9 @@ library BorrowProxyLib {
     (bool success,) = liquidationModule.delegatecall(abi.encodeWithSignature("notify(address,bytes)", liquidationModule, payload));
     return success;
   }
-  event Discard(bool success); // ignore compiler warning
   function delegate(ModuleExecution memory module, bytes memory payload, uint256 value) internal {
-    (bool success,) = module.encapsulated.assetHandler.delegatecall(abi.encode(module.encapsulated.assetHandler, module.encapsulated.liquidationModule, tx.origin, module.to, value, payload));
-    emit Discard(success);
-    revert("module did not resolve in a termination"); 
+    (bool success, bytes memory retval) = module.encapsulated.assetHandler.delegatecall(abi.encode(module.encapsulated.assetHandler, module.encapsulated.liquidationModule, tx.origin, module.to, value, payload));
+    require(success, string(retval));
   }
   function isDefined(Module memory module) internal pure returns (bool) {
     return module.assetHandler != address(0x0);

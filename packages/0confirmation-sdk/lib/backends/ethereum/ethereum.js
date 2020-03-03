@@ -1,12 +1,12 @@
 'use strict';
 
-const { Web3Provider } = require('ethers/provider/web3-provider');
+const { Web3Provider } = require('ethers/providers/web3-provider');
 const { id } = require('ethers/utils');
 const {
   Provider: {
     isProvider
   }
-} = require('ethers/provider');
+} = require('ethers/providers');
 const abi = require('ethers/utils').defaultAbiCoder;
 
 const stripHexPrefix = (s) => s.substr(0, 2) === '0x' ? s.substr(2) : s;
@@ -111,8 +111,8 @@ class EthereumBackend {
     this.driver = driver;
     this.provider = provider;
     this._cache = {
-      provider: rawProvider,
-      send: rawProvider.send
+      provider,
+      send: provider.send
     };
     const mockProvider = {
       send(...args) {

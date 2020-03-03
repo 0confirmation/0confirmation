@@ -1,4 +1,4 @@
-const { tryParse } = require('../lib/encoding')
+const { tryParse } = require('../util/encoding')
 
 module.exports = function subscribe(event, fn) {
   return this.node.pubsub.subscribe(

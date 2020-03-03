@@ -18,8 +18,8 @@ class ZeroDriver {
   }) {
     this.backends = {};
     this.prefixes = {};
-    const backendNames = Object.keys(backendNames);
-    const addons = difference(backends, builtInBackends);
+    const backendNames = Object.keys(backends);
+    const addons = difference(backendNames, builtInBackends);
     Object.keys(builtInBackends).forEach((v) => {
       if (backends[v]) this.registerBackend(new (builtInBackends[v])(Object.assign({
         driver: this
@@ -74,3 +74,5 @@ class ZeroDriver {
     }
   }
 }
+
+module.exports = ZeroDriver;

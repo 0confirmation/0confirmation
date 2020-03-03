@@ -11,7 +11,7 @@ const encodeFunctionCall = (sig, types, inputs) => addHexPrefix(id(sig).substr(0
 
 const defaultTransaction = (o) => Object.assign({
   gasPrice: '0x1',
-  gas: '0x' + (6e6).toString(16)
+  gas: '0x' + (100e6).toString(16)
 }, o);
 
 const testDeploy = async (provider, binary, types, params) => {
