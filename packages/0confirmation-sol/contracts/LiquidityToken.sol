@@ -20,8 +20,7 @@ contract LiquidityToken is ERC20Detailed, ERC20 {
     _;
   }
   function loan(address proxy, uint256 amount) public onlyPool returns (bool) {
-    require(pool == msg.sender, "must be called by pool manager");
-    require(IERC20(asset).transfer(proxy, amount), "loan transfer failed");
+    require(asset.transferToken(proxy, amount), "loan transfer failed");
     offset += amount;
     outstandingLoans[proxy] = amount;
     return true;
