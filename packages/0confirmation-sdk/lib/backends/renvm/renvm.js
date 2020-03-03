@@ -17,7 +17,7 @@ class RenVMBackend {
     params
   }) {
     switch (method) {
-      case 'renvm_queryTx':
+      case 'ren_queryTx':
         return this.ren.queryTx(...params);
     }
   }

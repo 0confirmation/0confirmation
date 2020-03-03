@@ -2,12 +2,10 @@ pragma solidity ^0.6.2;
 
 import { ECDSA } from "openzeppelin-solidity/contracts/cryptography/ECDSA.sol";
 import { BorrowProxyLib } from "./BorrowProxyLib.sol";
-import { RenVMShiftMessageLib } from "./RenVMShiftMessageLib.sol";
 import { IShifter } from "./interfaces/IShifter.sol";
 import { IShifterRegistry } from "./interfaces/IShifterRegistry.sol";
-import { ERC20Detailed } from "openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol";
-import { IERC20 } from "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import { LiquidityToken } from "./LiquidityToken.sol";
+import { ShifterBorrowProxyLib } from "./ShifterBorrowProxyLib.sol";
 
 library ShifterPoolLib {
   using BorrowProxyLib for *;
@@ -19,6 +17,18 @@ library ShifterPoolLib {
     mapping (address => address) tokenToLiquidityToken;
     BorrowProxyLib.ControllerIsolate borrowProxyController;
     BorrowProxyLib.ModuleRegistry registry;
+  }
+  function computeLoanParams(Isolate storage isolate, uint256 amount, uint256 bond, uint256 timeoutExpiry) internal returns (ShifterBorrowProxyLib.LenderParams memory) {
+    require(timeoutExpiry >= block.number + 1e5, "timeout insufficient");
+    uint256 baseKeeperFee = uint256(1 ether).div(100); // 1%
+    require(bond.mul(uint256(1 ether)).div(amount) > uint256(1 ether).div(100), "bond below minimum");
+    uint256 keeperFee = amount < bond ? baseKeeperFee : uint256(baseKeeperFee).mul(bond).div(amount);
+    return BorrowProxyLib.LenderParams({
+      keeperFee: keeperFee,
+      poolFee: isolate.poolFee,
+      timeoutExpiry: timeoutExpiry,
+      bond: bond
+    });
   }
   struct LiquidityProvisionMessage {
     uint256 amount;

@@ -39,14 +39,18 @@ const computeShiftInTxHash = ({
 const maybeCoerceToShiftInHash = (input) => typeof input === 'object' ? computeShiftInTxHash(input) : input;
 
 const computeNHash = ({
-  tx,
+  txhash, // utxo hash
+  vout,
   nonce
 }) => soliditySha3({
   t: 'bytes32',
-  v: maybeCoerceToShiftInTxHash(tx)
+  v: nonce
 }, {
   t: 'bytes32',
-  v: nonce
+  v: txhash
+}, {
+  t: 'bytes32',
+  v: vout
 });
 
 const maybeCoerceToNHash = (input) => typeof input === 'object' ? computeNHash(input) : input;
@@ -59,7 +63,7 @@ const computeHashForDarknodeSignature = ({
   nonce
 }) => soliditySha3({
   t: 'bytes32',
-  v: maybeCoerceToPHash(pHash)
+  v: maybeCoerceToPHash(p)
 }, {
   t: 'uint256',
   v: amount

@@ -1,6 +1,7 @@
 pragma solidity ^0.6.2;
 pragma experimental ABIEncoderV2;
 
+import { Create2 } from "openzeppelin-solidity/contracts/utils/Create2.sol";
 import { BorrowProxy } from "./BorrowProxy.sol";
 import { IModuleRegistryProvider } from "./interfaces/IModuleRegistryProvider.sol";
 import { AddressSetLib } from "./utils/AddressSetLib.sol";
@@ -24,13 +25,26 @@ library BorrowProxyLib {
     address liquidationModule;
   }
   struct ModuleRegistration {
+    ModuleRegistrationType moduleType;
     address target;
     bytes4[] sigs;
     Module module;
   }
+  enum ModuleRegistrationType {
+    UNINITIALIZED,
+    BY_CODEHASH,
+    BY_ADDRESS
+  }
   struct ModuleExecution {
     address to;
     Module encapsulated;
+  }
+  function registryRegisterModule(ModuleRegistry storage registry, ModuleRegistration memory registration) internal {
+    if (registration.moduleType == ModuleRegistrationType.BY_CODEHASH) for (uint256 i = 0; i < registration.sigs.length; i++) {
+      registerModuleByCodeHash(registry, registration.target, registration.sigs[i], registration.module);
+    } else if (registration.moduleType == ModuleRegistrationType.BY_ADDRESS) for (uint256 i = 0; i < registration.sigs.length; i++) {
+      registerModuleByAddress(registry, registration.target, registration.sigs[i], registration.module);
+    }
   }
   function delegateLiquidate(address liquidationModule) internal returns (bool) {
     (bool success, bytes memory retval) = liquidationModule.delegatecall(abi.encodeWithSignature("liquidate(address)", liquidationModule));
@@ -61,26 +75,11 @@ library BorrowProxyLib {
   event BorrowProxyMade(address indexed user, address indexed proxyAddress, bytes record);
   function deployBorrowProxy(bytes32 salt) internal returns (address output) {
     bytes memory creationCode = type(BorrowProxy).creationCode;
-    assembly {
-      output := create2(0, add(creationCode, 0x20), mload(creationCode), salt)
-    }
+    return Create2.deploy(salt, creationCode);
   }
   function deriveBorrowerAddress(bytes32 borrowerSalt) internal view returns (address) {
-    bytes memory spacer = new bytes(21);
-    bytes memory deploymentCode = type(BorrowProxy).creationCode;
-    uint256 deploymentCodeLength = deploymentCode.length;
-    spacer[0] = bytes1(uint8(0xff));
-    bytes memory preImage;
-    assembly {
-      mstore(deploymentCode, borrowerSalt)
-      mstore(sub(deploymentCode, 0x20), address())
-      mstore8(sub(deploymentCode, 0x21), 0xff)
-      preImage := sub(deploymentCode, 0x35)
-      mstore(preImage, add(deploymentCodeLength, 0x35))
-    }
-    return address(uint160(uint256(keccak256(preImage))));
+    return Create2.computeAddress(borrowerSalt, type(BorrowProxy).creationCode);
   }
-
   function computeModuleKey(address to, bytes4 signature) internal pure returns (bytes32) {
     return keccak256(abi.encodePacked(to, signature));
   }
