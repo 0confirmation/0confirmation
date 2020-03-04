@@ -25,11 +25,13 @@ class ZeroDriver {
         driver: this
       }, backends[v])));
     });
+/*
     addons.forEach((v) => {
       this.registerBackend(Object.assign({
         driver: this
       }, backends[v]));
     });
+*/
   }
   registerBackend(backend) {
     this.backends[backend.name] = backend;
@@ -44,7 +46,7 @@ class ZeroDriver {
     return this.getBackend(this.prefixes[prefix].name);
   }
   async initialize() {
-    for (const backend of Object.keys(this.backend)) {
+    for (const backend of Object.keys(this.backends)) {
       if (this.backends[backend].initialize) await this.backends[backend].initialize();
     }
   }

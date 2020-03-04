@@ -8,7 +8,7 @@ class RenVMBackend {
     network = 'testnet'
   }) {
     this.name = 'renvm';
-    this.prefixes = ['renvm'];
+    this.prefixes = ['ren'];
     this.ren = new RenVM(network);
   }
   async send({

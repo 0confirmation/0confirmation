@@ -13,6 +13,7 @@ library BorrowProxyLib {
     address owner;
     uint256 liquidationIndex;
     bool isLiquidating;
+    uint256 preBalance;
     AddressSetLib.AddressSet liquidationSet;
   }
   struct ControllerIsolate {

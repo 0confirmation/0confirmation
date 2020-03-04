@@ -16,7 +16,6 @@ contract ShifterPool is Ownable {
   using TokenUtils for *;
   using ShifterBorrowProxyLib for *;
   using BorrowProxyLib for *;
-  using RenVMShiftMessageLib for *;
   ShifterPoolLib.Isolate isolate;
   function setup(address shifterRegistry, uint256 poolFee, BorrowProxyLib.ModuleRegistration[] memory modules, ShifterPoolLib.LiquidityTokenLaunch[] memory tokenLaunches) public onlyOwner {
     require(isolate.shifterRegistry == address(0x0), "already initialized");
@@ -33,11 +32,11 @@ contract ShifterPool is Ownable {
       isolate.tokenToLiquidityToken[launch.token] = launch.liqToken;
     }
   }
-  function executeBorrow(ShifterPoolLib.LiquidityRequestParcel memory liquidityRequestParcel, uint256 bond, uint256 timeoutExpiry) public {
+  function executeBorrow(ShifterBorrowProxyLib.LiquidityRequestParcel memory liquidityRequestParcel, uint256 bond, uint256 timeoutExpiry) public payable {
     require(liquidityRequestParcel.gasRequested == msg.value, "supplied ether is not equal to gas requested");
     bytes32 requestHash = liquidityRequestParcel.computeLiquidityRequestHash();
     require(liquidityRequestParcel.validateSignature(requestHash), "liquidity request signature rejected");
-    ShifterPoolLib.LiquidityRequest memory liquidityRequest = liquidityRequestParcel.request;
+    ShifterBorrowProxyLib.LiquidityRequest memory liquidityRequest = liquidityRequestParcel.request;
     bytes32 borrowerSalt = liquidityRequest.computeBorrowerSalt();
     address proxyAddress = borrowerSalt.deriveBorrowerAddress();
     require(!isolate.borrowProxyController.isInitialized(proxyAddress), "proxy has already been initialized");
@@ -49,7 +48,7 @@ contract ShifterPool is Ownable {
       loan: loan
     });
     bytes memory data = abi.encode(proxyRecord);
-    require(LiquidityToken(isolate.getLiquidityToken(token)).loan(proxyAddress, proxyRecord.loan.computePostFee()), "insufficient funds in liquidity pool");
+    require(LiquidityToken(isolate.getLiquidityToken(liquidityRequest.token)).loan(proxyAddress, proxyRecord.computePostFee()), "insufficient funds in liquidity pool");
     isolate.borrowProxyController.mapProxyRecord(proxyAddress, data);
     isolate.borrowProxyController.setProxyOwner(proxyAddress, liquidityRequest.borrower);
     liquidityRequest.borrower.transfer(msg.value);

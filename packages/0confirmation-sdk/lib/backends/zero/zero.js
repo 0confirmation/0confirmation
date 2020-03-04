@@ -19,7 +19,7 @@ class ZeroBackend {
     this.prefixes = ['0cf'];
     this.driver = driver;
     this.socket = new Socket(peerInfo, {
-      multiaddr: fromPresetOrMultiAddr[multiaddr]
+      multiaddr: fromPresetOrMultiAddr(multiaddr) || multiaddr
     });
   }
   async initialize() {

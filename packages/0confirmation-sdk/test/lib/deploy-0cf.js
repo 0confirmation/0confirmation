@@ -26,6 +26,7 @@ const deployZeroBackend = async (provider, mocks) => {
     to: uniswapAdapter,
     data: encodeFunctionCall('getSignatures()', [], [])
   }]))[0];
+  console.log(sigs);
   const zeroBtc = await testDeploy(provider, LiquidityToken.bytecode, [ 'address', 'string', 'string' ], [ renbtc, 'zeroBTC', 'zeroBTC' ])
   const shifterPool = await testDeploy(provider, ShifterPool.bytecode, [], []);
   await provider.waitForTransaction(await provider.send('eth_sendTransaction', [ defaultTransaction({

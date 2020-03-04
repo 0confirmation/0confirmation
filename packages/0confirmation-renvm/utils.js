@@ -105,4 +105,3 @@ Object.assign(module.exports, {
   computeNHash,
   computeShiftInTxHash
 });
-

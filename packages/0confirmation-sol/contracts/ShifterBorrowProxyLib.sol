@@ -12,7 +12,7 @@ library ShifterBorrowProxyLib {
     LenderRecord loan;
   }
   struct LiquidityRequest {
-    address borrower;
+    address payable borrower;
     address token;
     bytes32 nonce;
     uint256 amount;
@@ -49,18 +49,18 @@ library ShifterBorrowProxyLib {
     bytes darknodeSignature;
   }
   function computeNHash(TriggerParcel memory parcel) internal pure returns (bytes32) {
-    return keccak256(abi.encodePacked(parcel.request.nonce, parcel.txhash, parcel.vout));
+    return keccak256(abi.encodePacked(parcel.record.request.nonce, parcel.txhash, parcel.vout));
   }
-  function computePostFee(LenderRecord memory record) internal pure returns (uint256) {
-    return record.amount.sub(computePoolFee(record).add(computeKeeperFee(record)));
+  function computePostFee(ProxyRecord memory record) internal pure returns (uint256) {
+    return record.request.amount.sub(computePoolFee(record).add(computeKeeperFee(record)));
   }
-  function computePoolFee(LenderRecord memory record) internal pure returns (uint256) {
-    return record.amount.mul(record.params.poolFee).div(uint256(1 ether));
+  function computePoolFee(ProxyRecord memory record) internal pure returns (uint256) {
+    return record.request.amount.mul(record.loan.params.poolFee).div(uint256(1 ether));
   }
-  function computeKeeperFee(LenderRecord memory record) internal pure returns (uint256) {
-    return record.amount.mul(record.params.keeperFee).div(uint256(1 ether));
+  function computeKeeperFee(ProxyRecord memory record) internal pure returns (uint256) {
+    return record.request.amount.mul(record.loan.params.keeperFee).div(uint256(1 ether));
   }
-  function computeAdjustedKeeperFee(LenderRecord memory record, uint256 actual) internal pure returns (uint256) {
-    return actual.mul(record.params.keeperFee).div(uint256(1 ether));
+  function computeAdjustedKeeperFee(ProxyRecord memory record, uint256 actual) internal pure returns (uint256) {
+    return actual.mul(record.loan.params.keeperFee).div(uint256(1 ether));
   }
 }

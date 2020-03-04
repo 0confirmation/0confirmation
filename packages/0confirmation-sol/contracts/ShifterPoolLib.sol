@@ -1,6 +1,7 @@
 pragma solidity ^0.6.2;
 
 import { ECDSA } from "openzeppelin-solidity/contracts/cryptography/ECDSA.sol";
+import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { BorrowProxyLib } from "./BorrowProxyLib.sol";
 import { IShifter } from "./interfaces/IShifter.sol";
 import { IShifterRegistry } from "./interfaces/IShifterRegistry.sol";
@@ -9,6 +10,7 @@ import { ShifterBorrowProxyLib } from "./ShifterBorrowProxyLib.sol";
 
 library ShifterPoolLib {
   using BorrowProxyLib for *;
+  using SafeMath for *;
   struct Isolate {
     address shifterRegistry;
     uint256 poolFee;
@@ -18,12 +20,12 @@ library ShifterPoolLib {
     BorrowProxyLib.ControllerIsolate borrowProxyController;
     BorrowProxyLib.ModuleRegistry registry;
   }
-  function computeLoanParams(Isolate storage isolate, uint256 amount, uint256 bond, uint256 timeoutExpiry) internal returns (ShifterBorrowProxyLib.LenderParams memory) {
+  function computeLoanParams(Isolate storage isolate, uint256 amount, uint256 bond, uint256 timeoutExpiry) internal view returns (ShifterBorrowProxyLib.LenderParams memory) {
     require(timeoutExpiry >= block.number + 1e5, "timeout insufficient");
     uint256 baseKeeperFee = uint256(1 ether).div(100); // 1%
     require(bond.mul(uint256(1 ether)).div(amount) > uint256(1 ether).div(100), "bond below minimum");
     uint256 keeperFee = amount < bond ? baseKeeperFee : uint256(baseKeeperFee).mul(bond).div(amount);
-    return BorrowProxyLib.LenderParams({
+    return ShifterBorrowProxyLib.LenderParams({
       keeperFee: keeperFee,
       poolFee: isolate.poolFee,
       timeoutExpiry: timeoutExpiry,

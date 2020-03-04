@@ -1,7 +1,7 @@
 const bb = require('bluebird')
 const PeerInfo = bb.promisifyAll(require('peer-info'))
 const Node = require('../Node')
-const toMulti = (multiaddrBase, peerId) => `${multiAddrBase}${multiaddrBase.match(/\/$/) ? '' : '/'}${peerId}`;
+const toMulti = (multiAddrBase, peerId) => `${multiAddrBase}${multiAddrBase.match(/\/$/) ? '' : '/'}${peerId}`;
 
 module.exports = async function () {
   this.peerInfo = this.peerInfo ? await PeerInfo.createAsync(this.peerInfo) : await PeerInfo.createAsync()
