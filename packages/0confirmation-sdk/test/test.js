@@ -17,7 +17,6 @@ describe('0confirmation sdk', () => {
     const mocks = await deployMocks(ethers);
     await deployZeroBackend(ethers, mocks);
   });
-/*
   it('should perform a workflow', async () => {
     const driver = new ZeroDriver({
       backends: {
