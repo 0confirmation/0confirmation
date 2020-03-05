@@ -17,6 +17,11 @@ const UniswapAdapter = require('@0confirmation/sol/build/UniswapAdapter');
 const LiquidityToken = require('@0confirmation/sol/build/LiquidityToken');
 const ShifterPool = require('@0confirmation/sol/build/ShifterPool');
 
+const ModuleTypes = {
+  BY_CODEHASH: 1,
+  BY_ADDRESS: 2
+};
+
 const deployZeroBackend = async (provider, mocks) => {
   const { exchange, factory, renbtc, shifterRegistry } = mocks;
   const [ from ] = await provider.send('eth_accounts', []);
@@ -26,7 +31,6 @@ const deployZeroBackend = async (provider, mocks) => {
     to: uniswapAdapter,
     data: encodeFunctionCall('getSignatures()', [], [])
   }]))[0];
-  console.log(sigs);
   const zeroBtc = await testDeploy(provider, LiquidityToken.bytecode, [ 'address', 'string', 'string' ], [ renbtc, 'zeroBTC', 'zeroBTC' ])
   const shifterPool = await testDeploy(provider, ShifterPool.bytecode, [], []);
   await provider.waitForTransaction(await provider.send('eth_sendTransaction', [ defaultTransaction({
@@ -36,6 +40,7 @@ const deployZeroBackend = async (provider, mocks) => {
       shifterRegistry,
       '1000',
       [{
+        moduleType: ModuleTypes.BY_CODEHASH,
         target: exchange,
         sigs,
         module: {
@@ -43,7 +48,6 @@ const deployZeroBackend = async (provider, mocks) => {
           liquidationModule: simpleBurnLiquidationModule
         }
       }],
-      [],
       [{
         token: renbtc,
         liqToken: zeroBtc
@@ -52,6 +56,7 @@ const deployZeroBackend = async (provider, mocks) => {
   }) ]));
   return {
     simpleBurnLiquidationModule,
+    zeroBtc,
     uniswapAdapter,
     shifterPool
   };

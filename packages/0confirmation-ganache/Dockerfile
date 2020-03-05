@@ -1,9 +1,10 @@
 FROM node:10
 
-RUN apk add --no-cache make gcc g++ python git bash
+RUN apt-get update && apt-get install -y build-essential python git bash
 WORKDIR /src
 ADD . .
 RUN yarn
+WORKDIR /src/packages/0confirmation-ganache
 
 EXPOSE 8545
 

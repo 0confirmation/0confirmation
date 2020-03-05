@@ -9,6 +9,9 @@
   "directories": {
     "lib": "./lib"
   },
+  "bin": {
+    "0cf-ganache": "./cli.js"
+  },
   "scripts": {
     "_mocha": "mocha --check-leaks --recursive --globals _scratch --opts ./test/.mocharc",
     "nyc_mocha": "nyc npm run _mocha",
@@ -16,8 +19,6 @@
     "build": "webpack-cli --config ./webpack/node/core.webpack.config.js",
     "build-web": "webpack-cli --config ./webpack/web-experimental/core.webpack.config.js",
     "format": "prettier --write \"{lib,perf,test}/**/*.js\" && eslint --fix --ignore-path .gitignore .",
-    "prepublishOnly": "npm run test && npm run build && npm run test-build && cp npm-shrinkwrap.json npm-shrinkwrap.json.bak && rm -rf node_modules/web3-providers-ws/node_modules/websocket/.git && npm prune --only=prod",
-    "postpublish": "rm npm-shrinkwrap.json && mv npm-shrinkwrap.json.bak npm-shrinkwrap.json && npm ci",
     "test": "npm run _lint && npm run nyc_mocha",
     "test-build": "cross-env TEST_BUILD=node npm run _mocha",
     "test-web-experimental": "cross-env TEST_BUILD=web-experimental npm run _mocha",
@@ -28,6 +29,7 @@
     "async": "2.6.2",
     "bip39": "2.5.0",
     "cachedown": "1.0.0",
+    "chalk": "^3.0.0",
     "clone": "2.1.2",
     "debug": "3.2.6",
     "encoding-down": "5.0.4",
@@ -76,8 +78,8 @@
     "portfinder": "^1.0.25",
     "prettier": "^1.19.1",
     "request": "^2.88.0",
-    "solc": "0.6.1",
     "semver": "7.1.1",
+    "solc": "0.6.1",
     "temp": "0.9.1",
     "terser-webpack-plugin": "2.3.2",
     "web3": "1.2.4",
@@ -94,18 +96,6 @@
     "url": "https://github.com/trufflesuite/ganache-core"
   },
   "license": "MIT",
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
-  "lint-staged": {
-    "*.js": [
-      "prettier --write",
-      "eslint --fix --ignore-path .gitignore",
-      "git add"
-    ]
-  },
   "eslintConfig": {
     "root": true,
     "env": {
