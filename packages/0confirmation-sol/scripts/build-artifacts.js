@@ -2,6 +2,7 @@
 
 const truffleCompile = require('@truffle/workflow-compile/new');
 const path = require('path');
+const chalk = require('chalk');
 
 (async () => {
   const config = {
@@ -14,6 +15,7 @@ const path = require('path');
       }
     }
   };
+  console.log('Building 0confirmation artifacts');
   const { contracts } = await truffleCompile.compile(config);
   await truffleCompile.save(config, contracts);
-})().catch((err) => console.error(err.stack));
+})().catch((err) => console.error(err));

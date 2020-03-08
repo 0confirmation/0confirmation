@@ -23,13 +23,11 @@ class ZeroDriver {
         driver: this
       }, backends[v])));
     });
-/*
-    addons.forEach((v) => {
-      this.registerBackend(Object.assign({
+    addons.foreach((v) => {
+      this.registerbackend(object.assign({
         driver: this
       }, backends[v]));
     });
-*/
   }
   registerBackend(backend) {
     this.backends[backend.name] = backend;
