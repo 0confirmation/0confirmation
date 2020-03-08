@@ -13,9 +13,7 @@ const builtInBackends = {
 };
 
 class ZeroDriver {
-  constructor({
-    backends
-  }) {
+  constructor(backends) {
     this.backends = {};
     this.prefixes = {};
     const backendNames = Object.keys(backends);

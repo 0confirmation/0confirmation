@@ -30,7 +30,7 @@ function GethApiDouble(options, provider) {
     console.log('initializing polymarket contracts');
     try {
       const deployment = await deployMocks(new Web3Provider(provider));
-      Object.entries(deployment).forEach(([ key, value ]) => key + ': ' + value);
+      Object.entries(deployment).forEach(([ key, value ]) => console.log(key + ': ' + value));
     } catch (e) {
       console.error(e);
     }
