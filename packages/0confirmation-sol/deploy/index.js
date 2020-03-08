@@ -11,5 +11,6 @@ const deployTestEnvironment = async (provider) => {
 Object.assign(module.exports, {
   deployTestEnvironment,
   deployMocks,
-  deployZeroBackend
+  deployZeroBackend,
+  computeTestAddresses
 });

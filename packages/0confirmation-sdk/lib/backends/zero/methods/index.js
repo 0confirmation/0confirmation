@@ -11,6 +11,5 @@ module.exports = {
   publish: require('./publish'),
   sendResponse: require('./sendResponse'),
   sendToNode: require('./sendToNode'),
-  start: require('./start'),
   subscribe: require('./subscribe')
-}
+};

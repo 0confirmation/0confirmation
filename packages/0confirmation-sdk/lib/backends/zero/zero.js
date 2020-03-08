@@ -56,6 +56,7 @@ class ZeroBackend {
         this._filterLiquidityRequests((msg) => {
           this._filters = this._filters || {};
           this._filters[filterId] = this._filters[filterId] || [];
+          this._filters[filterId].push(msg);
         });
         return resultToJsonRpc(id, () => filterId);
       case '0cf_getFilterUpdates':
@@ -64,10 +65,6 @@ class ZeroBackend {
         if (!result) return resultToJsonRpc(id, () => []);
         this._filters[getFilterUpdatesId] = [];
         return resultToJsonRpc(id, () => result);
-      case '0cf_filterLiquidityProvisions':
-      case '0cf_fillLiquidityProvision':
-        const [ peerId, requestId, liquidityProvision ] = params;
-        this.socket.sendResponse(peerId, '/receiveLiquidityProvision', requestId, liquidityProvision);
     }
   }
 }

@@ -26,15 +26,6 @@ function GethApiDouble(options, provider) {
 
   this.initialization_error = null;
   this.post_initialization_callbacks = [];
-  this.post_initialization_callbacks.push(async (cb) => {
-    console.log('initializing polymarket contracts');
-    try {
-      const deployment = await deployMocks(new Web3Provider(provider));
-      Object.entries(deployment).forEach(([ key, value ]) => console.log(key + ': ' + value));
-    } catch (e) {
-      console.error(e);
-    }
-  });
   this.state.initialize(async function(err) {
     if (err) {
       self.initialization_error = err;
