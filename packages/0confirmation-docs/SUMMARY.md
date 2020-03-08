@@ -1,3 +1,3 @@
 # Summary
 
-* [Key Terms & Roles](participants.md)
+* [Key Terms & Roles](sections/participants.md)
