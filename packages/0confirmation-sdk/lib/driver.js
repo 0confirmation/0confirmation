@@ -17,14 +17,14 @@ class ZeroDriver {
     this.backends = {};
     this.prefixes = {};
     const backendNames = Object.keys(backends);
-    const addons = difference(backendNames, builtInBackends);
+    const addons = difference(backendNames, Object.keys(builtInBackends));
     Object.keys(builtInBackends).forEach((v) => {
       if (backends[v]) this.registerBackend(new (builtInBackends[v])(Object.assign({
         driver: this
       }, backends[v])));
     });
-    addons.foreach((v) => {
-      this.registerbackend(object.assign({
+    addons.forEach((v) => {
+      this.registerBackend(Object.assign({
         driver: this
       }, backends[v]));
     });
@@ -44,6 +44,11 @@ class ZeroDriver {
   async initialize() {
     for (const backend of Object.keys(this.backends)) {
       if (this.backends[backend].initialize) await this.backends[backend].initialize();
+    }
+  }
+  async stop() {
+    for (const backend of Object.keys(this.backends)) {
+      if (this.backends[backend].stop) await this.backends[backend].stop();
     }
   }
   injectProvider() {

@@ -38,6 +38,7 @@ const createNode = async (options) => {
 class Node extends libp2p {
   constructor(options) {
     const wsstar = new WebSocketStar({ id: options.peerInfo.id });
+    options = defaultsDeep(options, defaultOptions.nodeOptions);
 
     const defaults = {
       modules: {
@@ -71,7 +72,7 @@ class Node extends libp2p {
           }
         },
         dht: {
-          enabled: options.dht || true,
+          enabled: options.dht,
           kBucketSize: 20
         },
         EXPERIMENTAL: {
@@ -80,7 +81,9 @@ class Node extends libp2p {
       }
     }
 
-    super(defaultsDeep(options, defaultOptions.nodeOptions));
+    super(Object.assign({}, defaults, {
+      peerInfo: options.peerInfo
+    }));
     Object.assign(this, {
       peerInfo: options.peerInfo,
       peerId: options.peerInfo.id.toB58String(),
@@ -88,8 +91,12 @@ class Node extends libp2p {
       pending: {},
       options: defaultsDeep(options, defaultOptions)
     });
-    this.peerInfo.multiaddrs.add(toMulti(options.multiaddr, this.peerId));
-    this.addEventHandlers();
+//    const multiaddr = toMulti(options.multiaddr, this.peerId);
+    this.peerInfo.multiaddrs.add(options.multiaddr);
+//    this.addEventHandlers();
+  }
+  async stop() {
+    await new Promise((resolve, reject) => super.stop((err) => err ? reject(err) : resolve()));
   }
 }
 

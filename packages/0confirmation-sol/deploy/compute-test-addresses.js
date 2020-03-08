@@ -46,3 +46,5 @@ const computeTestAddresses = (mnemonic) => {
     shifterPool
   };
 };
+
+module.exports = computeTestAddresses;

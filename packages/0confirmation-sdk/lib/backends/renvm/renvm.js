@@ -9,17 +9,14 @@ class RenVMBackend {
   }) {
     this.name = 'renvm';
     this.prefixes = ['ren'];
-    this.ren = new RenVM(network);
+//    this.ren = new RenVM(network);
   }
   async send({
     method,
     id,
     params
   }) {
-    switch (method) {
-      case 'ren_queryTx':
-        return this.ren.queryTx(...params);
-    }
+    return this.ren.sendMessage(method, params);
   }
 }
 

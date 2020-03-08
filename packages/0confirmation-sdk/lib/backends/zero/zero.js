@@ -28,6 +28,9 @@ class ZeroBackend {
       multiaddr: this.multiaddr
     });
   }
+  async stop() {
+    await this.socket.stop();
+  }
   _filterLiquidityRequests(handler) {
      this.socket.subscribe('/broadcastLiquidityRequest', handler);
   }
