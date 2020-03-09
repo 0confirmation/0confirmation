@@ -1,7 +1,7 @@
 'use strict';
 
 const { createNode } = require('./create-node');
-const resultToJsonRpc = require('../../util');
+const { RPCWrapper, resultToJsonRpc } = require('../../util');
 
 const presets = {
   lendnet: '/dns4/lendnet.0confirmation.com/tcp/443/wss/p2p-websocket-star/'
@@ -9,18 +9,19 @@ const presets = {
 
 const fromPresetOrMultiAddr = (multiaddr) => presets[multiaddr] || multiaddr;
 
-class ZeroBackend {
+class ZeroBackend extends RPCWrapper {
   constructor({
     driver,
     multiaddr,
     peerInfo = null
   }) {
+    super();
     this.name = 'zero';
     this.prefixes = ['0cf'];
     this.driver = driver;
     this.multiaddr = fromPresetOrMultiAddr(multiaddr);
     this.peerInfo = peerInfo;
-    this.filters = {};
+    this._filters = {};
   }
   async initialize() {
     this.socket = await createNode({
@@ -34,40 +35,38 @@ class ZeroBackend {
   _filterLiquidityRequests(handler) {
      this.socket.subscribe('/broadcastLiquidityRequest', handler);
   }
-  _filterLiquidityProvisions(handler) {
-     this.socket.subscribe('/receiveLiquidityProvision', handler);
-  }
   _nextFilterId(o) {
     return '0x' + (o._filterId = (o._filterId !== undefined ? o._filterId : -1) + 1).toString(16);
   }
-  send({
+  async send({
     id,
     method,
     params
   }) {
     switch (method) {
       case '0cf_peerId':
-        return resultToJsonRpc(id, () => this.socket.peerId);
+        return await resultToJsonRpc(id, () => this.socket.peerId);
       case '0cf_broadcastLiquidityRequest':
         const [ liquidityRequest ] = params;
-        return this.socket.publish('/broadcastLiquidityRequest', {
+        this.socket.publish('/broadcastLiquidityRequest', {
           id,
           params: [ liquidityRequest ]
         });
+        return await resultToJsonRpc(id, () => 1);
       case '0cf_filterLiquidityRequests':
         const filterId = this._nextFilterId(this);
+        this._filters[filterId] = this._filters[filterId] || [];
         this._filterLiquidityRequests((msg) => {
-          this._filters = this._filters || {};
           this._filters[filterId] = this._filters[filterId] || [];
           this._filters[filterId].push(msg);
         });
-        return resultToJsonRpc(id, () => filterId);
+        return await resultToJsonRpc(id, () => filterId);
       case '0cf_getFilterUpdates':
         const [ getFilterUpdatesId ] = params;
         const result = this._filters[getFilterUpdatesId];
-        if (!result) return resultToJsonRpc(id, () => []);
+        if (!result) return await resultToJsonRpc(id, () => []);
         this._filters[getFilterUpdatesId] = [];
-        return resultToJsonRpc(id, () => result);
+        return await resultToJsonRpc(id, () => result);
     }
   }
 }

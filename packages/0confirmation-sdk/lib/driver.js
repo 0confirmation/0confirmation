@@ -12,8 +12,9 @@ const builtInBackends = {
   renvm: RenVMBackend
 };
 
-class ZeroDriver {
+class ZeroDriver extends RPCWrapper {
   constructor(backends) {
+    super();
     this.backends = {};
     this.prefixes = {};
     const backendNames = Object.keys(backends);
@@ -36,7 +37,7 @@ class ZeroDriver {
     });
   }
   getBackend(name) {
-    return new RPCWrapper(this.backends[name]);
+    return this.backends[name];
   }
   getBackendByPrefix(prefix) {
     return this.getBackend(this.prefixes[prefix].name);
@@ -62,7 +63,7 @@ class ZeroDriver {
   }) {
     const prefix = method.split('_')[0];
     try {
-      return this.getBackendByPrefix(prefix).send({
+      return await (this.getBackendByPrefix(prefix)).send({
         jsonrpc,
         id,
         method,

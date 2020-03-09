@@ -47,7 +47,7 @@ class Node extends libp2p {
         connEncryption: [ SECIO ],
         peerDiscovery: [
           wsstar.discovery,
-          // MulticastDNS, // removing this breaks peer discovery
+          MulticastDNS, // removing this breaks peer discovery
           Bootstrap
         ],
         dht: options.dht ? KadDHT : undefined
@@ -91,9 +91,8 @@ class Node extends libp2p {
       pending: {},
       options: defaultsDeep(options, defaultOptions)
     });
-//    const multiaddr = toMulti(options.multiaddr, this.peerId);
     this.peerInfo.multiaddrs.add(options.multiaddr);
-//    this.addEventHandlers();
+    this.addEventHandlers();
   }
   async stop() {
     await new Promise((resolve, reject) => super.stop((err) => err ? reject(err) : resolve()));

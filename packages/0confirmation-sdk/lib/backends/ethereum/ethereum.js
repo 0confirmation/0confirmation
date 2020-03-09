@@ -8,6 +8,7 @@ const {
   }
 } = require('ethers/providers');
 const abi = require('ethers/utils').defaultAbiCoder;
+const { RPCWrapper }  = require('../../util');
 
 const stripHexPrefix = (s) => s.substr(0, 2) === '0x' ? s.substr(2) : s;
 
@@ -101,11 +102,12 @@ const uninstall = (driver) => {
   driver.ethereum._cache.provider.send = driver.ethereum._cache.send;
 };
 
-class EthereumBackend {
+class EthereumBackend extends RPCWrapper {
   constructor({
     driver,
     provider
   }) {
+    super();
     this.name = 'ethereum';
     this.prefixes = ['eth'];
     this.driver = driver;
