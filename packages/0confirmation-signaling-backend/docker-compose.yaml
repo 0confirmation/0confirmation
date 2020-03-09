@@ -1,9 +1,12 @@
 version: "3.7"
 services:
-  rendezvous:
-    image: libp2p/websocket-star-rendezvous:release
-    command: ["--key", "/etc/letsencrypt/live/lendnet.0confirmation.com/privkey.pem", "--cert", "/etc/letsencrypt/live/lendnet.0confirmation.com/cert.pem", "--host", "0.0.0.0", "--port", "443"]
-    privileged: true
-    user: 0:0
+  nginx:
+    image: nginx
     ports:
       - "443:443"
+      - "80:80"
+    volumes:
+      - /root/nginx.conf:/etc/nginx/nginx.conf
+      - /etc/letsencrypt:/etc/letsencrypt
+  rendezvous:
+    image: libp2p/websocket-star-rendezvous
