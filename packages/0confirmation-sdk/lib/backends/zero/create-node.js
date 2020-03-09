@@ -11,9 +11,10 @@ const Bootstrap = require('libp2p-bootstrap')
 const KadDHT = require('libp2p-kad-dht')
 const bluebird = require('bluebird');
 const PeerInfo = bluebird.promisifyAll(require('peer-info'))
+const multiaddr = require('multiaddr');
 const methods = require('./methods');
 
-const toMulti = (multiAddrBase, peerId) => `${multiAddrBase}${multiAddrBase.match(/\/$/) ? '' : '/'}${peerId}`;
+const toMulti = (multiAddrBase, peerId) => multiAddrBase + peerId;
 
 const defaultOptions = { 
   requestTimeout: 150000, 
@@ -91,9 +92,11 @@ class Node extends libp2p {
       pending: {},
       options: defaultsDeep(options, defaultOptions)
     });
-    this.peerInfo.multiaddrs.add(options.multiaddr);
+    this.peerInfo.multiaddrs.add(multiaddr(options.multiaddr));
     this.addEventHandlers();
   }
+  async start() {
+     
   async stop() {
     await new Promise((resolve, reject) => super.stop((err) => err ? reject(err) : resolve()));
   }

@@ -4,7 +4,7 @@ const { createNode } = require('./create-node');
 const { RPCWrapper, resultToJsonRpc } = require('../../util');
 
 const presets = {
-  lendnet: '/dns4/lendnet.0confirmation.com/tcp/443/wss/p2p-websocket-star/'
+  lendnet: '/dns4/lendnet.0confirmation.com/tcp/80/ws/p2p-websocket-star/'
 };
 
 const fromPresetOrMultiAddr = (multiaddr) => presets[multiaddr] || multiaddr;
@@ -57,6 +57,7 @@ class ZeroBackend extends RPCWrapper {
         const filterId = this._nextFilterId(this);
         this._filters[filterId] = this._filters[filterId] || [];
         this._filterLiquidityRequests((msg) => {
+          console.log(msg);
           this._filters[filterId] = this._filters[filterId] || [];
           this._filters[filterId].push(msg);
         });
