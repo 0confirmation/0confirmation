@@ -12,9 +12,23 @@ const KadDHT = require('libp2p-kad-dht')
 const bluebird = require('bluebird');
 const PeerInfo = bluebird.promisifyAll(require('peer-info'))
 const multiaddr = require('multiaddr');
-const methods = require('./methods');
+const { Buffer } = require('safe-buffer');
 
 const toMulti = (multiAddrBase, peerId) => multiAddrBase + peerId;
+
+const tryParse = (str) => {
+  try {
+    return JSON.parse(str);
+  } catch(e) {
+    return str;
+  }
+};
+
+const tryStringify = data => typeof data == 'string' ? data : JSON.stringify(data)
+
+const jsonBuffer = data => Buffer.from(tryStringify(data))
+
+const tryParseJsonBuffer = data => Buffer.isBuffer(data) ? tryParse(data.toString('utf8')) : tryParse(data);
 
 const defaultOptions = { 
   requestTimeout: 150000, 
@@ -40,7 +54,6 @@ class Node extends libp2p {
   constructor(options) {
     const wsstar = new WebSocketStar({ id: options.peerInfo.id });
     options = defaultsDeep(options, defaultOptions.nodeOptions);
-
     const defaults = {
       modules: {
         transport: [ TCP, WS, wsstar ],
@@ -48,7 +61,6 @@ class Node extends libp2p {
         connEncryption: [ SECIO ],
         peerDiscovery: [
           wsstar.discovery,
-          MulticastDNS, // removing this breaks peer discovery
           Bootstrap
         ],
         dht: options.dht ? KadDHT : undefined
@@ -80,7 +92,7 @@ class Node extends libp2p {
           pubsub: true
         }
       }
-    }
+    };
 
     super(Object.assign({}, defaults, {
       peerInfo: options.peerInfo
@@ -92,17 +104,42 @@ class Node extends libp2p {
       pending: {},
       options: defaultsDeep(options, defaultOptions)
     });
-    this.peerInfo.multiaddrs.add(multiaddr(options.multiaddr));
-    this.addEventHandlers();
+    this.peerInfo.multiaddrs.add(options.multiaddr);
   }
-  async start() {
-     
-  async stop() {
-    await new Promise((resolve, reject) => super.stop((err) => err ? reject(err) : resolve()));
+  async initialize() {
+    await super.start();
+    let resolve, promise;
+    promise = new Promise((_resolve) => {
+      resolve = _resolve;
+    });
+    this.on('peer:connect', resolve);
+    await super.start();
+    await promise;
+  }
+  findPeer(peerId) {
+    return new Promise((resolve, reject) => this.peerRouting.findPeer(peerId, (err, result) => err ? reject(err) : resolve(result)));
+  }
+  send(peer, protocol, data) {
+    return new Promise((resolve, reject) => this.dialProtocol(peer.peerInfo, protocol, (err, conn) => {
+      if (err) return reject(err)
+      pull(pull.values([tryStringify(data)]), conn)
+      resolve()
+    }));
+  }
+  publish(event, data) {
+    return this.pubsub.publish(event, jsonBuffer(data), () => {});
+  }
+  subscribe(event, fn) {
+    return this.pubsub.subscribe(
+      event,
+      (msg) => {
+        if (msg.from == this.peerId) return;
+        fn({ ...msg, data: tryParse(msg.data) });
+      },
+      () => {}
+    );
   }
 }
-
-Object.assign(Node.prototype, methods);
 
 Object.assign(module.exports, {
   Node,

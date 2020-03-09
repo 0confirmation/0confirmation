@@ -4,7 +4,7 @@ const { createNode } = require('./create-node');
 const { RPCWrapper, resultToJsonRpc } = require('../../util');
 
 const presets = {
-  lendnet: '/dns4/lendnet.0confirmation.com/tcp/80/ws/p2p-websocket-star/'
+  lendnet: '/dns4/lendnet.0confirmation.com/tcp/443/wss/p2p-websocket-star/'
 };
 
 const fromPresetOrMultiAddr = (multiaddr) => presets[multiaddr] || multiaddr;
@@ -13,6 +13,7 @@ class ZeroBackend extends RPCWrapper {
   constructor({
     driver,
     multiaddr,
+    dht,
     peerInfo = null
   }) {
     super();
@@ -21,19 +22,22 @@ class ZeroBackend extends RPCWrapper {
     this.driver = driver;
     this.multiaddr = fromPresetOrMultiAddr(multiaddr);
     this.peerInfo = peerInfo;
+    this.dht = dht;
     this._filters = {};
   }
   async initialize() {
-    this.socket = await createNode({
+    this.node = await createNode({
       peerInfo: this.peerInfo,
+      dht: this.dht,
       multiaddr: this.multiaddr
     });
+    await this.node.initialize();
   }
   async stop() {
-    await this.socket.stop();
+    await this.node.stop();
   }
   _filterLiquidityRequests(handler) {
-     this.socket.subscribe('/broadcastLiquidityRequest', handler);
+     this.node.subscribe('/1.0.0/broadcastLiquidityRequest', handler);
   }
   _nextFilterId(o) {
     return '0x' + (o._filterId = (o._filterId !== undefined ? o._filterId : -1) + 1).toString(16);
@@ -45,10 +49,10 @@ class ZeroBackend extends RPCWrapper {
   }) {
     switch (method) {
       case '0cf_peerId':
-        return await resultToJsonRpc(id, () => this.socket.peerId);
+        return await resultToJsonRpc(id, () => this.node.peerId);
       case '0cf_broadcastLiquidityRequest':
         const [ liquidityRequest ] = params;
-        this.socket.publish('/broadcastLiquidityRequest', {
+        this.node.publish('/broadcastLiquidityRequest', {
           id,
           params: [ liquidityRequest ]
         });
@@ -57,7 +61,7 @@ class ZeroBackend extends RPCWrapper {
         const filterId = this._nextFilterId(this);
         this._filters[filterId] = this._filters[filterId] || [];
         this._filterLiquidityRequests((msg) => {
-          console.log(msg);
+          console.log(msg.data);
           this._filters[filterId] = this._filters[filterId] || [];
           this._filters[filterId].push(msg);
         });

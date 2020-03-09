@@ -23,7 +23,8 @@ describe('0confirmation sdk', () => {
           provider: ethers
         },
         zero: {
-          multiaddr: 'lendnet'
+          multiaddr: 'lendnet',
+          dht: false
         },
         renvm: {
           network: 'testnet'
@@ -35,7 +36,8 @@ describe('0confirmation sdk', () => {
           provider: ethers
         },
         zero: {
-          multiaddr: 'lendnet'
+          multiaddr: 'lendnet',
+          dht: true
         },
         renvm: {
           network: 'testnet'
