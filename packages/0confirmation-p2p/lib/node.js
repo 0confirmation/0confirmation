@@ -13,57 +13,10 @@ const KadDHT = require('libp2p-kad-dht')
 const bluebird = require('bluebird');
 const PeerInfo = require('peer-info');
 const GossipSub = require('libp2p-gossipsub');
+const pull = require('pull-stream');
 const EventEmitter = require('events').EventEmitter;
 const wrtc = require('wrtc');
-
 const returnOp = (v) => v;
-
-class CustomWebsocketStar extends WebsocketStar {
-  constructor(...args) {
-    super(...args);
-    const { discovery } = this;
-    const [ start, stop ] = [ discovery.start, discovery.stop ].map((v) => bluebird.promisify(v, { context: discovery }));
-    Object.assign(discovery, {
-      start,
-      stop
-    });
-  }
-  createListener(...args) {
-    const listener = super.createListener(...args);
-    const { listen } = listener;
-    return Object.assign(listener, {
-      getAddrs: () => listener.ma ? [ listener.ma ] : [],
-      listen: bluebird.promisify(listen, { context: listener }),
-    });
-  }
-}
-
-const createBoundWebsocketStar = (Class, options) => {
-  const tag = Class.prototype[Symbol.toStringTag];
-  const instance = new Class(options);
-  const discovery = instance.discovery;
-  class BoundWebsocketStar {
-    constructor() {
-      return instance;
-    }
-  }
-  class BoundWebsocketDiscovery {
-    constructor() {
-      return discovery;
-    }
-  }
-  Object.setPrototypeOf(BoundWebsocketStar.prototype, Class.prototype);
-  Object.setPrototypeOf(BoundWebsocketDiscovery.prototype, EventEmitter.prototype);
-  return {
-    tag,
-    discoveryTag: 'websocketStar',
-    BoundWebsocketStar,
-    options,
-    BoundWebsocketDiscovery,
-    wsstar: instance,
-    discovery
-  };
-};
 
 const { jsonBuffer, tryParse, tryStringify } = require('./util');
 
@@ -71,7 +24,7 @@ const WStar = require('libp2p-webrtc-star');
 
 const createNode = async (options) => {
   const peerInfo = options.peerInfo || await PeerInfo.create();
-  peerInfo.multiaddrs.add(options.multiaddr);
+  peerInfo.multiaddrs.add(options.multiaddr + 'p2p/' + peerInfo.id.toB58String());
   const dhtEnable = typeof options.dht === 'undefined' || options.dht === true;
   const wstar = new WStar({
     upgrader: {
@@ -87,6 +40,7 @@ const createNode = async (options) => {
     }
   }
   BoundStar.prototype[Symbol.toStringTag] = WStar.prototype[Symbol.toStringTag];
+  BoundStar.prototype.__proto__ = WStar.prototype;
   const socket = await libp2p.create({
     peerInfo,
     modules: {
@@ -96,7 +50,7 @@ const createNode = async (options) => {
       peerDiscovery: [
 //        MulticastDNS,
         wstar.discovery,
-        Bootstrap
+//        Bootstrap
       ],
       pubsub: GossipSub,
       dht: dhtEnable ? KadDHT : undefined
@@ -105,7 +59,7 @@ const createNode = async (options) => {
       transport: {
         [ WStar.prototype[Symbol.toStringTag] ]: {
           upgrader: {
-            localPeer: peerInfo,
+            localPeer: peerInfo.id,
             upgradeInbound: returnOp,
             upgradeOutbound: returnOp
           },
@@ -115,7 +69,7 @@ const createNode = async (options) => {
       peerDiscovery: {
         mdns: {
           interval: 2000,
-          enabled: true
+          enabled: false
         },
         bootstrap: {
           interval: 5000,
@@ -144,10 +98,30 @@ const createNode = async (options) => {
     _connectedDeferred.resolve = resolve;
     _connectedDeferred.reject = reject;
   });
+  const _foundPeerDeferred = {};
+  _foundPeerDeferred.promise = new Promise((resolve, reject) => {
+    _foundPeerDeferred.resolve = resolve;
+    _foundPeerDeferred.reject = reject;
+  });
+  socket.on('peer:discovery', (peer) => console.log('from peer: ' + peerInfo.id.toB58String() + '\n' + JSON.stringify(peer)));
   return Object.assign(Object.create({
     async start() {
       this.socket.on('peer:connect', () => this._connectedDeferred.resolve());
+      this.socket.on('peer:discovery', async (peer) => {
+        try {
+          await this.socket.dial(peer);
+        } catch (e) {
+          console.error(e);
+        }
+        if (this._foundPeerDeferred.resolve) {
+          this._foundPeerDeferred.resolve();
+          delete this._foundPeerDeferred.resolve;
+        }
+      });
       return await this.socket.start();
+    },
+    async waitForPeer() {
+      return await this._foundPeerDeferred.promise;
     },
     async waitForConnect() {
       return await this._connectedDeferred.promise;
@@ -159,14 +133,30 @@ const createNode = async (options) => {
       console.log(v);
       return v;
     },
+    handleProtocol(name, fn) {
+      return this.socket.handle(name, async ({
+        stream,
+      }) => {
+        let buffer = '';
+        console.log('handled');
+        for await (const chunk of stream) {
+          buffer += chunk.toString('utf8');
+        }
+        return fn(buffer);
+      });
+    },
     async subscribe(topic, handler) {
       return await this.socket.pubsub.subscribe(topic, (msg) => handler(this.ln({ msg, data: tryParse(msg.data) })));
+    },
+    async getSubscribers(topic) {
+      return await this.socket.pubsub.getSubscribers(topic);
     },
     async findPeer(peerId) {
       return await this.peerRouting.findPeer(peerId);
     }
   }), {
     _connectedDeferred,
+    _foundPeerDeferred,
     socket
   });
 };
