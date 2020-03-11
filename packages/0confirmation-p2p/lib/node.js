@@ -14,6 +14,9 @@ const bluebird = require('bluebird');
 const PeerInfo = require('peer-info');
 const GossipSub = require('libp2p-gossipsub');
 const EventEmitter = require('events').EventEmitter;
+const wrtc = require('wrtc');
+
+const returnOp = (v) => v;
 
 class CustomWebsocketStar extends WebsocketStar {
   constructor(...args) {
@@ -43,12 +46,12 @@ const createBoundWebsocketStar = (Class, options) => {
     constructor() {
       return instance;
     }
-  };
+  }
   class BoundWebsocketDiscovery {
     constructor() {
       return discovery;
     }
-  };
+  }
   Object.setPrototypeOf(BoundWebsocketStar.prototype, Class.prototype);
   Object.setPrototypeOf(BoundWebsocketDiscovery.prototype, EventEmitter.prototype);
   return {
@@ -64,50 +67,60 @@ const createBoundWebsocketStar = (Class, options) => {
 
 const { jsonBuffer, tryParse, tryStringify } = require('./util');
 
+const WStar = require('libp2p-webrtc-star');
+
 const createNode = async (options) => {
-  const peerInfo = await PeerInfo.create(...(options.peerInfo ? [ options.peerInfo ] : []));
+  const peerInfo = options.peerInfo || await PeerInfo.create();
   peerInfo.multiaddrs.add(options.multiaddr);
-  const {
-    tag: websocketStarTag,
-    discoveryTag: websocketStarDiscoveryTag,
-    BoundWebsocketStar,
-    options: websocketStarOptions,
-    BoundWebsocketDiscovery,
-    wsstar,
-    discovery
-  } = createBoundWebsocketStar(CustomWebsocketStar, {
-    id: peerInfo.id
+  const dhtEnable = typeof options.dht === 'undefined' || options.dht === true;
+  const wstar = new WStar({
+    upgrader: {
+      localPeer: peerInfo.id,
+      upgradeInbound: returnOp,
+      upgradeOutbound: returnOp
+    },
+    wrtc
   });
+  class BoundStar {
+    constructor() {
+      return wstar;
+    }
+  }
+  BoundStar.prototype[Symbol.toStringTag] = WStar.prototype[Symbol.toStringTag];
   const socket = await libp2p.create({
     peerInfo,
     modules: {
-      transport: [ BoundWebsocketStar ],
+      transport: [ TCP, WS, BoundStar ],
       streamMuxer: [ Mplex, SPDY ],
       connEncryption: [ SECIO ],
       peerDiscovery: [
-        Bootstrap,
-        discovery
- //         MulticastDNS,
+//        MulticastDNS,
+        wstar.discovery,
+        Bootstrap
       ],
       pubsub: GossipSub,
-      dht: typeof options.dht === 'undefined' || options.dht === true ? KadDHT : undefined
+      dht: dhtEnable ? KadDHT : undefined
     },
     config: {
       transport: {
-        [ websocketStarTag ]: websocketStarOptions
+        [ WStar.prototype[Symbol.toStringTag] ]: {
+          upgrader: {
+            localPeer: peerInfo,
+            upgradeInbound: returnOp,
+            upgradeOutbound: returnOp
+          },
+          wrtc
+        }
       },
       peerDiscovery: {
-        [ websocketStarDiscoveryTag ]: {},
-/*
         mdns: {
           interval: 2000,
           enabled: true
         },
-*/
         bootstrap: {
           interval: 5000,
-          enabled: true,
-          list: [ options.multiaddr ]
+          enabled: false,
+          list: []
         }
       },
       relay: {
@@ -118,8 +131,11 @@ const createNode = async (options) => {
         }
       },
       dht: {
-        enabled: options.dht,
+        enabled: dhtEnable,
         kBucketSize: 20
+      },
+      pubsub: {
+        enabled: true
       }
     }
   });
@@ -139,8 +155,12 @@ const createNode = async (options) => {
     async publish(topic, data) {
       return await this.socket.pubsub.publish(topic, jsonBuffer(data));
     },
+    ln(v) {
+      console.log(v);
+      return v;
+    },
     async subscribe(topic, handler) {
-      return await this.socket.pubsub.subscribe(topic, (msg) => handler({ msg, data: tryParse(msg.data) }));
+      return await this.socket.pubsub.subscribe(topic, (msg) => handler(this.ln({ msg, data: tryParse(msg.data) })));
     },
     async findPeer(peerId) {
       return await this.peerRouting.findPeer(peerId);
