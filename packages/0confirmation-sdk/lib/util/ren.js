@@ -35,6 +35,7 @@ const computeBorrowProxyAddress = ({
   });
   return getCreate2Address({
     from: shifterPool,
+    salt,
     initCode: ShifterBorrowProxy.bytecode,
     amount
   });

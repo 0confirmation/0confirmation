@@ -116,16 +116,9 @@ class EthereumBackend extends RPCWrapper {
       provider,
       send: provider.send
     };
-    const mockProvider = {
-      send(...args) {
-        return this._cache.send.apply(this._cache.provider, args);
-      },
-      host: this._cache.provider.host,
-      connected: this._cache.provider.connected
-    };
   }
   send(...args) {
-    return new WrappedRPC(this).asWrapped().send(...args);
+    return this._cache.send.apply(this._cache.provider, args);
   }
   injectProvider() {
     install(this.driver);

@@ -1,6 +1,6 @@
 'use strict';
 
-const { createNode } = require('./create-node');
+const { createNode } = require('@0confirmation/p2p');
 const { RPCWrapper, resultToJsonRpc } = require('../../util');
 
 const presets = {
@@ -31,13 +31,13 @@ class ZeroBackend extends RPCWrapper {
       dht: this.dht,
       multiaddr: this.multiaddr
     });
-    await this.node.initialize();
+    await this.node.start();
   }
   async stop() {
     await this.node.stop();
   }
-  _filterLiquidityRequests(handler) {
-     this.node.subscribe('/1.0.0/broadcastLiquidityRequest', handler);
+  async _filterLiquidityRequests(handler) {
+     return await this.node.subscribe('/1.0.0/broadcastLiquidityRequest', handler);
   }
   _nextFilterId(o) {
     return '0x' + (o._filterId = (o._filterId !== undefined ? o._filterId : -1) + 1).toString(16);
@@ -49,19 +49,28 @@ class ZeroBackend extends RPCWrapper {
   }) {
     switch (method) {
       case '0cf_peerId':
-        return await resultToJsonRpc(id, () => this.node.peerId);
+        return await resultToJsonRpc(id, () => this.node.peerInfo.id.toB58String());
       case '0cf_broadcastLiquidityRequest':
-        const [ liquidityRequest ] = params;
-        this.node.publish('/broadcastLiquidityRequest', {
+        const [{
+          token,
+          amount,
+          nonce,
+          signature
+        } = {}] = (params || []);
+        await this.node.publish('/1.0.0/broadcastLiquidityRequest', {
           id,
-          params: [ liquidityRequest ]
+          params: [{
+            token,
+            amount,
+            nonce,
+            signature
+          }]
         });
         return await resultToJsonRpc(id, () => 1);
       case '0cf_filterLiquidityRequests':
         const filterId = this._nextFilterId(this);
         this._filters[filterId] = this._filters[filterId] || [];
         this._filterLiquidityRequests((msg) => {
-          console.log(msg.data);
           this._filters[filterId] = this._filters[filterId] || [];
           this._filters[filterId].push(msg);
         });

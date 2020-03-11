@@ -1,5 +1,6 @@
 FROM node:10
 WORKDIR /app
 COPY . .
-RUN npx yarn
-CMD ["npx", "yarn", "workspace" "@0confirmation/discovery", "start"]
+RUN bash -c "yarn --ignore-scripts || exit 0"
+WORKDIR packages/0confirmation-discovery
+ENTRYPOINT ["yarn", "start"]
