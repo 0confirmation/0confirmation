@@ -89,7 +89,8 @@ const createNode = async (options) => {
         kBucketSize: 20
       },
       pubsub: {
-        enabled: true
+        enabled: true,
+        emitSelf: false
       }
     }
   });
@@ -103,13 +104,14 @@ const createNode = async (options) => {
     _foundPeerDeferred.resolve = resolve;
     _foundPeerDeferred.reject = reject;
   });
-  socket.on('peer:discovery', (peer) => console.log('from peer: ' + peerInfo.id.toB58String() + '\n' + JSON.stringify(peer)));
+//  socket.on('peer:discovery', (peer) => console.log('from peer: ' + peerInfo.id.toB58String() + '\n' + JSON.stringify(peer)));
   return Object.assign(Object.create({
     async start() {
       this.socket.on('peer:connect', () => this._connectedDeferred.resolve());
       this.socket.on('peer:discovery', async (peer) => {
         try {
           await this.socket.dial(peer);
+          console.log('dialed ' + JSON.stringify(peer));
         } catch (e) {
           console.error(e);
         }
