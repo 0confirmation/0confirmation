@@ -11,8 +11,7 @@ const build = async (contracts_build_directory) => {
     contracts_build_directory,
     compilers: {
       solc: {
-        version: '0.5.12',
-        docker: true
+        version: '0.5.12'
       }
     }
   };

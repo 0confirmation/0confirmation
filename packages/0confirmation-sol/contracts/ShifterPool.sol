@@ -8,6 +8,7 @@ import { ShifterPoolLib } from "./ShifterPoolLib.sol";
 import { ShifterBorrowProxyLib } from "./ShifterBorrowProxyLib.sol";
 import { BorrowProxy } from "./BorrowProxy.sol";
 import { BorrowProxyLib } from "./BorrowProxyLib.sol";
+import { BorrowProxyFactoryLib } from "./BorrowProxyFactoryLib.sol";
 import { TokenUtils } from "./utils/TokenUtils.sol";
 import { LiquidityToken } from "./LiquidityToken.sol";
 
@@ -16,6 +17,7 @@ contract ShifterPool is Ownable {
   using TokenUtils for *;
   using ShifterBorrowProxyLib for *;
   using BorrowProxyLib for *;
+  using BorrowProxyFactoryLib for *;
   ShifterPoolLib.Isolate isolate;
   function setup(address shifterRegistry, uint256 poolFee, BorrowProxyLib.ModuleRegistration[] memory modules, ShifterPoolLib.LiquidityTokenLaunch[] memory tokenLaunches) public onlyOwner {
     require(isolate.shifterRegistry == address(0x0), "already initialized");

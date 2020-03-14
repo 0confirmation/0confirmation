@@ -1,6 +1,6 @@
 'use strict';
 
-const soliditySha3 = require('web3-utils/src/soliditySha3');
+const { soliditySha3 } = require('web3-utils');
 const { Buffer } = require('safe-buffer');
 const { Networks, Opcode, Script } = require('bitcore-lib');
 const stripHexPrefix = (s) => s.substr(0, 2) === '0x' ? s.substr(2) : s;
@@ -8,10 +8,12 @@ const addHexPrefix = (s) => '0x' + stripHexPrefix(s);
 const { isBuffer } = Buffer;
 const { getCreate2Address } = require('ethers/utils');
 const ShifterBorrowProxy = require('@0confirmation/sol/build/ShifterBorrowProxy');
+const { linkBytecode: link } = require('solc/linker')
+const kovan = require('@0confirmation/sol/deploy/kovan-addresses');
+const shifterBorrowProxyBytecode = link(ShifterBorrowProxy.bytecode, kovan.linkReferences);
 
-const computePHash = (args) => soliditySha3(...args);
-
-const maybeCoerceToPHash = (params) => Array.isArray(params) ? computePHash : params;
+const computePHash = (args) => soliditySha3(...args) || soliditySha3('');
+const maybeCoerceToPHash = (params) => Array.isArray(params) ? computePHash(params) : params;
 
 const computeBorrowProxyAddress = ({
   shifterPool,
@@ -36,19 +38,18 @@ const computeBorrowProxyAddress = ({
   return getCreate2Address({
     from: shifterPool,
     salt,
-    initCode: ShifterBorrowProxy.bytecode,
-    amount
+    initCode: shifterBorrowProxyBytecode
   });
 };
 
 const computeGHash = ({
   to,
   tokenAddress,
-  params,
+  p,
   nonce
 }) => soliditySha3({
   t: 'bytes32',
-  v: maybeCoerceToPHash(params)
+  v: maybeCoerceToPHash(p)
 }, {
   t: 'address',
   v: tokenAddress
@@ -87,10 +88,10 @@ const maybeCoerceToNHash = (input) => typeof input === 'object' ? computeNHash(i
 
 const computeHashForDarknodeSignature = ({
   p,
+  n,
   amount,
   to,
-  tokenAddress,
-  nonce
+  tokenAddress
 }) => soliditySha3({
   t: 'bytes32',
   v: maybeCoerceToPHash(p)
@@ -105,7 +106,7 @@ const computeHashForDarknodeSignature = ({
   v: to
 }, {
   t: 'bytes32',
-  v: maybeCoerceToNHash(nonce)
+  v: maybeCoerceToNHash(n)
 });
 
 const maybeCoerceToGHash = (input) => typeof input === 'object' ? computeGHash(input) : input;
@@ -113,7 +114,7 @@ const maybeCoerceToGHash = (input) => typeof input === 'object' ? computeGHash(i
 const computeGatewayAddress = ({
   isTestnet,
   g,
-  mpkh
+  mpkh = kovan.mpkh
 }) => new Script()
   .add(Buffer.from(stripHexPrefix(maybeCoerceToGHash(g)), "hex"))
   .add(Opcode.OP_DROP)

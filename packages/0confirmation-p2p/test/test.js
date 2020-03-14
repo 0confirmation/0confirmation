@@ -14,9 +14,10 @@ describe('0confirmation p2p library', () => {
       dht: true
     });
     await node2.start();
-    await node2.subscribe('/topic', (msg) => console.log('doop'));
+    await node2.subscribe('/topic', (msg) => console.log(msg));
     await node1.waitForPeer();
     await node2.waitForPeer();
+    await new Promise((resolve) => setTimeout(resolve, 10000));
     await node1.publish('/topic', { woop: 'doop' });
     await new Promise((resolve) => setTimeout(resolve, 10000));
   });

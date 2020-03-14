@@ -7,9 +7,23 @@ const Web3Provider = require('ethers/providers/web3-provider').Web3Provider;
 const bip39 = require('bip39');
 const mnemonic = bip39.generateMnemonic();
 const HDWalletProvider = require('@truffle/hdwallet-provider');
-const provider = new HDWalletProvider('3f841bf589fdf83a521e55d51afddc34fa65351161eead24f064855fc29c9580', ganache.provider({
+const key = '3f841bf589fdf83a521e55d51afddc34fa65351161eead24f064855fc29c9580';
+const provider = new HDWalletProvider(key, ganache.provider({
   mnemonic
 }));
+const ethersModule = require('ethers');
+const { send } = provider;
+provider.send = async (o) => {
+  if (o.method === 'personal_sign') {
+    const wallet = new ethersModule.Wallet('0x' + key);
+    return {
+      jsonrpc: '2.0',
+      id: o.id,
+      result: wallet.signMessage(o.params[0])
+    };
+  }
+  else return send.call(provider, o);
+};
 const mocks = computeTestAddresses(mnemonic);
 const ethers = new Web3Provider(provider);
 
@@ -19,46 +33,6 @@ const fs = require('fs-extra');
 
 describe('0confirmation sdk', () => {
   describe('0confirmation driver', async () => {
-    it('should work', async () => {
-      const borrower = new Zero({
-        backends: {
-          ethereum: {
-            provider
-          },
-          zero: {
-            multiaddr: 'lendnet',
-            dht: false
-          },
-          renvm: {
-            network: 'testnet'
-          }
-        },
-        shifterPool: mocks.shifterPool
-      });
-      const keeper = new Zero({
-        backends: {
-          ethereum: {
-            provider
-          },
-          zero: {
-            multiaddr: 'lendnet',
-            dht: false
-          },
-          renvm: {
-            network: 'testnet'
-          }
-        },
-        shifterPool: mocks.shifterPool
-      });
-      await borrower.driver.backends.zero.initialize();
-      await keeper.driver.backends.zero.initialize();
-      await keeper.driver.backends.zero.node.subscribe('/woop', (msg) => console.log(msg));
-      await borrower.driver.backends.zero.node.publish('/woop', [{ woop: 'doop' }]);
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-    });
-  });
-});
-/*
     it('should handle liquidity requests', async () => {
       const borrower = new Zero({
         backends: {
@@ -92,19 +66,29 @@ describe('0confirmation sdk', () => {
         shifterPool: mocks.shifterPool
       });
       await keeper.initializeDriver();
-      await keeper.listenForLiquidityRequests((msg) => console.log(msg));
+      console.log('keeper peer-info: ');
+      console.log(keeper.driver.backends.zero.node.socket.peerInfo.multiaddrs._multiaddrs[0]);
+      console.log('borrower peer-info: ');
+      console.log(borrower.driver.backends.zero.node.socket.peerInfo.multiaddrs._multiaddrs[0]);
+      console.log('keeper listening for liquidity requests...');
+      await keeper.listenForLiquidityRequests((msg) => {
+        console.log('liquidity request received .. computing gateway address and proxy address: ');
+        console.log(msg);
+        console.log('send btc to deposit address, watch BTC chain for deposit then issue transaction ..');
+      });
       await new Promise((resolve) => setTimeout(resolve, 10000));
       const [ from ] = await ethers.send('eth_accounts', []);
-      await borrower.broadcastLiquidityRequest({
+      console.log('requesting 1000 renbtc and 1000 wei for gas:');
+      const ln = (v) => ((console.log(v)), v);
+      console.log('broadcast details: ');
+      await borrower.broadcastLiquidityRequest(ln({
         from,
         token: mocks.renbtc,
         amount: '1000',
         nonce: '0x' + crypto.randomBytes(32).toString('hex'),
         gasRequested: '1000'
-      });
+      }));
+      await new Promise((resolve) => setTimeout(resolve, 10000));
     });
-*/
-/*
   });
 });
-*/

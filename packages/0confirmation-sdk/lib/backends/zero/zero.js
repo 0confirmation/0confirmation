@@ -3,12 +3,6 @@
 const { createNode } = require('@0confirmation/p2p');
 const { RPCWrapper, resultToJsonRpc } = require('../../util');
 
-const presets = {
-  lendnet: '/dns4/lendnet.0confirmation.com/tcp/443/wss/p2p-websocket-star/'
-};
-
-const fromPresetOrMultiAddr = (multiaddr) => presets[multiaddr] || multiaddr;
-
 class ZeroBackend extends RPCWrapper {
   constructor({
     driver,
@@ -20,7 +14,7 @@ class ZeroBackend extends RPCWrapper {
     this.name = 'zero';
     this.prefixes = ['0cf'];
     this.driver = driver;
-    this.multiaddr = fromPresetOrMultiAddr(multiaddr);
+    this.multiaddr = multiaddr;
     this.peerInfo = peerInfo;
     this.dht = dht;
     this._filters = {};
@@ -55,6 +49,7 @@ class ZeroBackend extends RPCWrapper {
           token,
           amount,
           nonce,
+          gasRequested,
           signature
         } = {}] = (params || []);
         await this.node.publish('/1.0.0/broadcastLiquidityRequest', {
@@ -63,6 +58,7 @@ class ZeroBackend extends RPCWrapper {
             token,
             amount,
             nonce,
+            gasRequested,
             signature
           }]
         });

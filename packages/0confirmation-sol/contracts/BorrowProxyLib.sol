@@ -2,7 +2,6 @@ pragma solidity ^0.6.2;
 pragma experimental ABIEncoderV2;
 
 import { Create2 } from "openzeppelin-solidity/contracts/utils/Create2.sol";
-import { BorrowProxy } from "./BorrowProxy.sol";
 import { IModuleRegistryProvider } from "./interfaces/IModuleRegistryProvider.sol";
 import { AddressSetLib } from "./utils/AddressSetLib.sol";
 
@@ -74,13 +73,6 @@ library BorrowProxyLib {
     return isolate.isLiquidating && isolate.liquidationIndex != isolate.liquidationSet.set.length;
   }
   event BorrowProxyMade(address indexed user, address indexed proxyAddress, bytes record);
-  function deployBorrowProxy(bytes32 salt) internal returns (address output) {
-    bytes memory creationCode = type(BorrowProxy).creationCode;
-    return Create2.deploy(salt, creationCode);
-  }
-  function deriveBorrowerAddress(bytes32 borrowerSalt) internal view returns (address) {
-    return Create2.computeAddress(borrowerSalt, type(BorrowProxy).creationCode);
-  }
   function computeModuleKey(address to, bytes4 signature) internal pure returns (bytes32) {
     return keccak256(abi.encodePacked(to, signature));
   }

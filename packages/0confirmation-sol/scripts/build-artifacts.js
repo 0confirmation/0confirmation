@@ -10,8 +10,7 @@ const chalk = require('chalk');
     contracts_build_directory: path.join(__dirname, '..', 'build'),
     compilers: {
       solc: {
-        version: 'stable',
-        docker: true
+        version: 'v0.6.3',
       }
     }
   };

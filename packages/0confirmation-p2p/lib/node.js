@@ -21,38 +21,27 @@ const returnOp = (v) => v;
 
 const { jsonBuffer, tryParse, tryStringify } = require('./util');
 
+const presets = {
+  lendnet: '/dns4/lendnet.0confirmation.com/tcp/9090/ws/p2p-webrtc-star/'
+};
+
+const fromPresetOrMultiAddr = (multiaddr) => presets[multiaddr] || multiaddr;
+
 const WStar = require('libp2p-webrtc-star');
 
 const createNode = async (options) => {
   const peerInfo = options.peerInfo || await PeerInfo.create();
-  peerInfo.multiaddrs.add(options.multiaddr);// + 'p2p/' + peerInfo.id.toB58String());
+  console.log(fromPresetOrMultiAddr(options.multiaddr));
+  peerInfo.multiaddrs.add(fromPresetOrMultiAddr(options.multiaddr));
   const dhtEnable = typeof options.dht === 'undefined' || options.dht === true;
-/**
-  const wstar = new WStar({
-    upgrader: {
-      localPeer: peerInfo.id,
-      upgradeInbound: returnOp,
-      upgradeOutbound: returnOp
-    },
-    wrtc
-  });
-  class BoundStar {
-    constructor() {
-      return wstar;
-    }
-  }
-  BoundStar.prototype[Symbol.toStringTag] = WStar.prototype[Symbol.toStringTag];
-  BoundStar.prototype.__proto__ = WStar.prototype;
-*/
   const socket = await libp2p.create({
     peerInfo,
     modules: {
       transport: [ TCP, WS, WStar ],
-      streamMuxer: [ Mplex ],
-      connEncryption: [ SECIO ],
+      streamMuxer: [ Mplex ], connEncryption: [ SECIO ],
       pubsub: FloodSub,
       peerDiscovery: [ Bootstrap ],
-      dht: KadDHT
+      dht: dhtEnable ? KadDHT : undefined
     },
     config: {
       peerDiscovery: {
@@ -78,28 +67,8 @@ const createNode = async (options) => {
           wrtc
         }
       },
-/*
-      peerDiscovery: {
-        mdns: {
-          interval: 2000,
-          enabled: false
-        },
-        bootstrap: {
-          interval: 5000,
-          enabled: false,
-          list: []
-        }
-      },
-      relay: {
-        enabled: true,
-        hop: {
-          enabled: true,
-          active: false
-        }
-      },
-*/
       dht: {
-        enabled: true,
+        enabled: dhtEnable,
         kBucketSize: 20
       },
       pubsub: {
@@ -118,14 +87,12 @@ const createNode = async (options) => {
     _foundPeerDeferred.resolve = resolve;
     _foundPeerDeferred.reject = reject;
   });
-//  socket.on('peer:discovery', (peer) => console.log('from peer: ' + peerInfo.id.toB58String() + '\n' + JSON.stringify(peer)));
   return Object.assign(Object.create({
     async start() {
       this.socket.on('peer:connect', () => this._connectedDeferred.resolve());
       this.socket.on('peer:discovery', async (peer) => {
         try {
           await this.socket.dial(peer);
-          console.log('dialed ' + JSON.stringify(peer));
         } catch (e) {
           console.error(e);
         }
@@ -135,7 +102,6 @@ const createNode = async (options) => {
         }
       });
       await this.socket.start();
-      await this.handleProtocol('/response', (msg) => console.log(msg));
     },
     async waitForPeer() {
       return await this._foundPeerDeferred.promise;
@@ -146,7 +112,7 @@ const createNode = async (options) => {
     async publish(topic, data) {
       return this.socket.pubsub.publish(topic, jsonBuffer(data), () => {});
     },
-    handleProtocol(name, fn) {
+    async handleProtocol(name, fn) {
       return this.socket.handle(name, async ({
         stream,
       }) => {
