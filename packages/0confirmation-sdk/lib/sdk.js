@@ -1,16 +1,28 @@
 'use strict';
 
+const UTXO_POLL_INTERVAL = 5000;
+
 const { RenVMType } = require('@renproject/ren-js-common');
-const { soliditySha3 } = require('web3-utils');
 const { toBase64 } = require('./util');
 const RenJS = require('@renproject/ren');
 const ethersUtil = require('ethers/utils');
 const ethers = require('ethers');
 const utils = require('./util');
+const abi = ethersUtil.defaultAbiCoder;
 const Driver = require('./driver');
 const { Web3Provider } = require('ethers/providers/web3-provider');
 const LiquidityToken = require('@0confirmation/sol/build/LiquidityToken');
 const ShifterPool = require('@0confirmation/sol/build/ShifterPool');
+const BorrowProxyLib = require('@0confirmation/sol/build/BorrowProxyLib');
+const Exports = require('@0confirmation/sol/build/Exports');
+
+const KECCAK256_NULL = '0x290decd9548b62a8d60345a988386fc84ba6bc95484008f6362f93160ef3e563';
+
+const ProxyRecordABI = Exports.abi.find((v) => v.name === 'ProxyRecordExport').inputs[0];
+const TriggerParcelABI = Exports.abi.find((v) => v.name === 'TriggerParcelExport').inputs[0];
+
+const decodeProxyRecord = (input) => abi.decode([ ProxyRecordABI ], input)[0];
+const encodeTriggerParcel = (input) => abi.encode([ TriggerParcelABI ], [ input ]);
 
 class UTXOWrapper {
   constructor({
@@ -95,13 +107,79 @@ class LiquidityRequestParcel {
         confirmations: 0,
         address: this.depositAddress
       }]));
-      if (utxos.length === 0) await new Promise((resolve) => setTimeout(resolve, 5000));
+      if (utxos.length === 0) await new Promise((resolve) => setTimeout(resolve, UTXO_POLL_INTERVAL));
       else break;
     }
     return new UTXOWrapper({
       request: this,
       utxo: utxos[0]
     });
+  }
+}
+
+class BorrowProxy {
+  constructor ({
+    zero,
+    shifterPool,
+    user,
+    proxyAddress,
+    record
+  }) {
+    this.zero = zero;
+    this.shifterPool = shifterPool; 
+    this.user = user;
+    this.proxyAddress = proxyAddress;
+    this.record = record;
+    this.decodedRecord = decodedRecord || decodeProxyRecord(record);
+    this.depositAddress = this.computeDepositAddress();
+  }
+  computeDepositAddress() {
+    const proxyAddress = this.proxyAddress;
+    const isTestnet = this.zero.network.isTestnet;
+    const mpkh = this.zero.network.mpkh;
+    const {
+      nonce,
+      token
+    } = this.decodedRecord.request;
+    return utils.computeGatewayAddress({
+      isTestnet,
+      mpkh,
+      g: {
+        to: proxyAddress,
+        p: [],
+        tokenAddress: token,
+        nonce
+      }
+    });
+  }
+  async repayLoan(utxo, darknodeSignature, overrides) {
+    const pHash = KECCAK256_NULL;
+    const vout = utxo.vout;
+    const txhash = utxo.txHash;
+    const record = this.decodedRecord;
+    const contract = new ethers.Contract(this.proxyAddress, ShifterBorrowProxy.abi, new Web3Provider(this.zero.driver));
+    return await contract.repayLoan(encodeTriggerParcel({
+      record,
+      pHash,
+      vout,
+      txhash
+    }), overrides);
+  }
+  async defaultLoan(overrides) {
+    const contract = new ethers.Contract(this.proxyAddress, ShifterBorrowProxy.abi, new Web3Provider(this.zero.driver));
+    return await contract.defaultLoan(this.record, overrides);
+  }
+  async waitForConfirmations(num = 6) {
+    let utxos;
+    while (true) {
+      utxos = await (this.zero.driver.sendWrapped('btc_getUTXOs', [{
+        confirmations: num,
+        address: this.depositAddress
+      }]));
+      if (utxos.length === 0) await new Promise((resolve) => setTimeout(resolve, UTXO_POLL_INTERVAL));
+      else break;
+    }
+    return utxo;
   }
 }
 
@@ -172,6 +250,25 @@ class Zero {
       from
     });
   }
+  subscribeBorrows(filterArgs, callback) {
+    const contract = new ethers.Contract(this.network.shifterPool, BorrowProxyLib.abi, new Web3Provider(this.driver));
+    const filter = contract.filters.BorrowProxyMade(...filterArgs);
+    contract.on(filter, (evt) => callback(new BorrowProxy(evt)));
+    return () => contract.removeListener(filter);
+  }
+  async getBorrowProxies(borrower) {
+    if (!borrower) {
+      borrower = (await this.send('eth_accounts', []))[0];
+    }
+    const provider = new Web3Provider(this.driver);
+    const contract = new ethers.Contract(this.network.shifterPool, BorrowProxyLib.abi, provider);
+    const filter = contract.filters.BorrowProxyMade(...filterArgs);
+    const logs = await provider.getLogs(Object.assign({
+      fromBlock: this.network.genesis || 0
+    }, filter));
+    const decoded = logs.map((v) => contract.interface.events.BorrowProxyMade.decode(v));
+    return decoded.map((v) => new ProxyRecord(v));
+  } 
   async broadcastLiquidityRequest({
     from,
     token,
@@ -202,7 +299,7 @@ class Zero {
       in: [{
         name: 'phash',
         type: RenVMType.TypeB32,
-        value: toBase64(soliditySha3(''))
+        value: toBase64(KECCAK256_NULL)
       }, {
         name: 'amount',
         type: RenVMType.TypeU64,
@@ -286,7 +383,7 @@ class Zero {
         nonce,
         amount
       },
-      gasRequested
+      gasRequested,
       signature
     }, ethersUtil.parseEther(bond), timeoutExpiry, overrides);
     return tx;
