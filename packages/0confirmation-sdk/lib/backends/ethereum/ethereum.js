@@ -109,7 +109,7 @@ class EthereumBackend extends RPCWrapper {
   }) {
     super();
     this.name = 'ethereum';
-    this.prefixes = ['eth'];
+    this.prefixes = ['eth', 'personal'];
     this.driver = driver;
     this.provider = provider;
     this._cache = {

@@ -6,7 +6,7 @@ const { Networks, Opcode, Script } = require('bitcore-lib');
 const stripHexPrefix = (s) => s.substr(0, 2) === '0x' ? s.substr(2) : s;
 const addHexPrefix = (s) => '0x' + stripHexPrefix(s);
 const { isBuffer } = Buffer;
-const { getCreate2Address } = require('ethers/utils');
+const { solidityKeccak256, getCreate2Address } = require('ethers/utils');
 const ShifterBorrowProxy = require('@0confirmation/sol/build/ShifterBorrowProxy');
 const { linkBytecode: link } = require('solc/linker')
 const kovan = require('@0confirmation/sol/deploy/kovan-addresses');
@@ -14,6 +14,26 @@ const shifterBorrowProxyBytecode = link(ShifterBorrowProxy.bytecode, kovan.linkR
 
 const computePHash = (args) => soliditySha3(...args) || soliditySha3('');
 const maybeCoerceToPHash = (params) => Array.isArray(params) ? computePHash(params) : params;
+
+const computeLiquidityRequestHash = ({
+  shifterPool,
+  token,
+  nonce,
+  amount,
+  gasRequested
+}) => ethers.solidityKeccak256([
+  'address',
+  'address',
+  'bytes32',
+  'uint256',
+  'uint256'
+], [
+  shifterPool,
+  token,
+  nonce,
+  amount,
+  gasRequested
+]);
 
 const computeBorrowProxyAddress = ({
   shifterPool,
@@ -129,6 +149,7 @@ const toBase64 = (input) => (isBuffer(input) ? input : Buffer.from(stripHexPrefi
 
 Object.assign(module.exports, {
   computeGatewayAddress,
+  computeLiquidityRequestHash,
   toBase64,
   computeBorrowProxyAddress,
   computeHashForDarknodeSignature,

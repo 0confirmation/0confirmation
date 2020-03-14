@@ -33,7 +33,7 @@ contract LiquidityToken is ERC20Detailed, ERC20 {
   function getReserve() internal view returns (uint256) {
     return offset + IERC20(asset).balanceOf(address(this));
   }
-  function addLiquidity(uint256 value) internal returns (uint256) {
+  function addLiquidity(uint256 value) public returns (uint256) {
     uint256 totalLiquidity = super.totalSupply();
     uint256 reserve = getReserve();
     uint256 totalMinted = value * totalLiquidity / reserve;
