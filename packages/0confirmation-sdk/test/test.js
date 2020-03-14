@@ -44,6 +44,9 @@ describe('0confirmation sdk', () => {
             dht: false
           },
           renvm: {
+            network: 'devnet'
+          },
+          btc: {
             network: 'testnet'
           }
         },
@@ -60,6 +63,9 @@ describe('0confirmation sdk', () => {
             dht: true
           },
           renvm: {
+            network: 'devnet'
+          },
+          btc: {
             network: 'testnet'
           }
         },

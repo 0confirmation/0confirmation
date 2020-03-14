@@ -43,9 +43,10 @@ class ZeroBackend extends RPCWrapper {
   }) {
     switch (method) {
       case '0cf_peerId':
-        return await resultToJsonRpc(id, () => this.node.peerInfo.id.toB58String());
+        return await resultToJsonRpc(id, () => this.node.socket.peerInfo.id.toB58String());
       case '0cf_broadcastLiquidityRequest':
         const [{
+          shifterPool,
           token,
           amount,
           nonce,
@@ -55,6 +56,7 @@ class ZeroBackend extends RPCWrapper {
         await this.node.publish('/1.0.0/broadcastLiquidityRequest', {
           id,
           params: [{
+            shifterPool,
             token,
             amount,
             nonce,

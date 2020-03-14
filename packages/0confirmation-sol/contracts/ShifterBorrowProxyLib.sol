@@ -35,11 +35,11 @@ library ShifterBorrowProxyLib {
   function computeBorrowerSalt(LiquidityRequest memory params) internal pure returns (bytes32) {
     return keccak256(abi.encodePacked(params.borrower, params.token, params.nonce, params.amount));
   }
-  function computeLiquidityRequestHash(LiquidityRequestParcel memory parcel) internal pure returns (bytes32) {
-    return keccak256(abi.encodePacked(parcel.request.token, parcel.request.nonce, parcel.request.amount, parcel.gasRequested));
+  function computeLiquidityRequestHash(LiquidityRequestParcel memory parcel) internal view returns (bytes32) {
+    return keccak256(abi.encodePacked(address(this), parcel.request.token, parcel.request.nonce, parcel.request.amount, parcel.gasRequested));
   }
   function validateSignature(LiquidityRequestParcel memory parcel, bytes32 hash) internal pure returns (bool) {
-    return parcel.request.borrower == ECDSA.recover(hash, parcel.signature);
+    return parcel.request.borrower == ECDSA.recover(ECDSA.toEthSignedMessageHash(hash), parcel.signature);
   }
   struct TriggerParcel {
     ProxyRecord record;

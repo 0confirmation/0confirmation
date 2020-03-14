@@ -3,13 +3,15 @@
 const RenVMBackend = require('./backends/renvm');
 const EthereumBackend = require('./backends/ethereum');
 const ZeroBackend = require('./backends/zero');
+const BTCBackend = require('./backends/btc');
 const RPCWrapper = require('./util/rpc-wrapper');
 const difference = require('lodash/difference');
 
 const builtInBackends = {
   ethereum: EthereumBackend,
   zero: ZeroBackend,
-  renvm: RenVMBackend
+  renvm: RenVMBackend,
+  btc: BTCBackend
 };
 
 class ZeroDriver extends RPCWrapper {

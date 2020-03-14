@@ -1,8 +1,7 @@
 'use strict';
 
 const path = require('path');
-const HDWalletProvider = require('@truffle/hdwallet-provider');
-const wallet = require('./deploy/test-wallet');
+const { provider } = require('./deploy/test-provider');
 
 module.exports = {
   contracts_directory: path.join(__dirname, 'contracts'),
@@ -14,7 +13,7 @@ module.exports = {
   },
   networks: {
     kovan: {
-      provider: new HDWalletProvider(wallet.substr(2), "https://kovan.infura.io/v3/2f1de898efb74331bf933d3ac469b98d"),
+      provider,
       network_id: '42'
     }
   }
