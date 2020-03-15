@@ -1,6 +1,7 @@
 'use strict';
 
 const RPCWrapper = require('../../util/rpc-wrapper');
+const resultToJsonRpc = require('../../util/result-to-jsonrpc');
 const Client = require('bitcoin-core');
 const handler = require('send-crypto/build/main/handlers/BTC/BTCHandler');
 

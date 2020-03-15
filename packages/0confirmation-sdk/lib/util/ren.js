@@ -1,20 +1,27 @@
 'use strict';
 
-const { soliditySha3 } = require('web3-utils');
 const { Buffer } = require('safe-buffer');
 const { Networks, Opcode, Script } = require('bitcore-lib');
 const ethers = require('ethers');
 const stripHexPrefix = (s) => s.substr(0, 2) === '0x' ? s.substr(2) : s;
 const addHexPrefix = (s) => '0x' + stripHexPrefix(s);
 const { isBuffer } = Buffer;
-const { solidityKeccak256, getCreate2Address } = require('ethers/utils');
+const { defaultAbiCoder: abi, solidityKeccak256, getCreate2Address } = require('ethers/utils');
 const ShifterBorrowProxy = require('@0confirmation/sol/build/ShifterBorrowProxy');
 const { linkBytecode: link } = require('solc/linker')
 const kovan = require('@0confirmation/sol/deploy/kovan-addresses');
 const shifterBorrowProxyBytecode = link(ShifterBorrowProxy.bytecode, kovan.linkReferences);
+const { Contract } = require('ethers/contract');
+const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
+const NULL_PHASH = '0x0000000000000000000000000000000000000000000000000000000000000000';
+const defaultProvider = ethers.getDefaultProvider();
 
-const computePHash = (args) => soliditySha3(...args) || soliditySha3('');
-const maybeCoerceToPHash = (params) => Array.isArray(params) ? computePHash(params) : params;
+const BYTES_TYPES = [ 'bytes' ];
+const keccakAbiEncoded = (types, values) => solidityKeccak256(BYTES_TYPES, [ abi.encode(types, values) ])
+
+const abiEncode = ([ types, params ]) => abi.encode(types, params);
+const computePHash = (p) => solidityKeccak256([ 'bytes' ], [ p ]);
+const maybeCoerceToPHash = (params) => Array.isArray(params) ? (!params[1] || params[1].length === 0) ? NULL_PHASH : computePHash(abiEncode(params)) : stripHexPrefix(params).length === 64 ? params : computePHash(params);
 
 const computeLiquidityRequestHash = ({
   shifterPool,
@@ -43,19 +50,17 @@ const computeBorrowProxyAddress = ({
   nonce,
   amount
 }) => {
-  const salt = soliditySha3({
-    t: 'address',
-    v: borrower
-  }, {
-    t: 'address',
-    v: token
-  }, {
-    t: 'bytes32',
-    v: nonce
-  }, {
-    t: 'uint256',
-    v: amount
-  });
+  const salt = solidityKeccak256([
+    'address',
+    'address',
+    'bytes32',
+    'uint256'
+  ], [
+    borrower,
+    token,
+    nonce,
+    amount
+  ]);
   return getCreate2Address({
     from: shifterPool,
     salt,
@@ -63,30 +68,30 @@ const computeBorrowProxyAddress = ({
   });
 };
 
+const consoleLog = (v) => ((console.log(v)), v);
+
 const computeGHash = ({
   to,
   tokenAddress,
   p,
   nonce
-}) => soliditySha3({
-  t: 'bytes32',
-  v: maybeCoerceToPHash(p)
-}, {
-  t: 'address',
-  v: tokenAddress
-}, {
-  t: 'address',
-  v: to
-}, {
-  t: 'bytes32',
-  v: nonce
-});
+}) => keccakAbiEncoded([
+  'bytes32',
+  'address',
+  'address',
+  'bytes32'
+], consoleLog([
+  maybeCoerceToPHash(p),
+  tokenAddress,
+  to,
+  nonce
+]));
 
 const computeShiftInTxHash = ({
   renContract,
   utxo,
   g
-}) => soliditySha3(`txHash_${renContract}_${toBase64(maybeCoerceToGHash(g))}_${toBase64(utxo.txid)}_${utxo.output_no}`);
+}) => solidityKeccak256([ 'string' ], [ `txHash_${renContract}_${toBase64(maybeCoerceToGHash(g))}_${utxo.txHash}_${utxo.vOut}` ]);
 
 const maybeCoerceToShiftInHash = (input) => typeof input === 'object' ? computeShiftInTxHash(input) : input;
 
@@ -94,16 +99,15 @@ const computeNHash = ({
   txhash, // utxo hash
   vout,
   nonce
-}) => soliditySha3({
-  t: 'bytes32',
-  v: nonce
-}, {
-  t: 'bytes32',
-  v: txhash
-}, {
-  t: 'bytes32',
-  v: vout
-});
+}) => keccakAbiEncoded([
+  'bytes32',
+  'bytes32',
+  'bytes32'
+], [
+  nonce,
+  txhash,
+  vout
+]);
 
 const maybeCoerceToNHash = (input) => typeof input === 'object' ? computeNHash(input) : input;
 
@@ -113,22 +117,19 @@ const computeHashForDarknodeSignature = ({
   amount,
   to,
   tokenAddress
-}) => soliditySha3({
-  t: 'bytes32',
-  v: maybeCoerceToPHash(p)
-}, {
-  t: 'uint256',
-  v: amount
-}, {
-  t: 'address',
-  v: tokenAddress
-}, {
-  t: 'address',
-  v: to
-}, {
-  t: 'bytes32',
-  v: maybeCoerceToNHash(n)
-});
+}) => keccakAbiEncoded([
+  'bytes32',
+  'uint256',
+  'address',
+  'address',
+  'bytes32'
+], [
+  maybeCoerceToPHash(p),
+  amount,
+  tokenAddress,
+  to,
+  maybeCoerceToNHash(n)
+]);
 
 const maybeCoerceToGHash = (input) => typeof input === 'object' ? computeGHash(input) : input;
 
@@ -144,7 +145,7 @@ const computeGatewayAddress = ({
   .add(Buffer.from(stripHexPrefix(mpkh), "hex"))
   .add(Opcode.OP_EQUALVERIFY)
   .add(Opcode.OP_CHECKSIG)
-  .toScriptHashOut().toAddress(isTestnet ? Networks.testnet : Networks.mainnet).toString();
+  .toScriptHashOut().toAddress(consoleLog(isTestnet) ? Networks.testnet : Networks.mainnet).toString();
   
 const toBase64 = (input) => (isBuffer(input) ? input : Buffer.from(stripHexPrefix(input), 'hex')).toString('base64');
 
@@ -157,5 +158,9 @@ Object.assign(module.exports, {
   computeGHash,
   computePHash,
   computeNHash,
+  stripHexPrefix,
+  addHexPrefix,
+  NULL_PHASH,
+  NULL_ADDRESS,
   computeShiftInTxHash
 });

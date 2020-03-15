@@ -18,7 +18,7 @@ class RenVMBackend extends RPCWrapper {
     id,
     params
   }) {
-    return this.ren.sendMessage(method, params);
+    return await this.ren.lightnode.sendMessage(method, params);
   }
 }
 

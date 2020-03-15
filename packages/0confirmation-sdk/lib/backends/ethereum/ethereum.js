@@ -117,8 +117,8 @@ class EthereumBackend extends RPCWrapper {
       send: provider.send
     };
   }
-  send(...args) {
-    return this._cache.send.apply(this._cache.provider, args);
+  async send(o) {
+    return await this.provider.send(o);
   }
   injectProvider() {
     install(this.driver);

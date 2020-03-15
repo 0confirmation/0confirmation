@@ -3,10 +3,12 @@
 const UTXO_POLL_INTERVAL = 5000;
 
 const { RenVMType } = require('@renproject/ren-js-common');
-const { toBase64 } = require('./util');
+const { NULL_PHASH, toBase64 } = require('./util');
 const RenJS = require('@renproject/ren');
 const ethersUtil = require('ethers/utils');
 const ethers = require('ethers');
+const defaultProvider = ethers.getDefaultProvider();
+const { Contract } = require('ethers/contract');
 const utils = require('./util');
 const abi = ethersUtil.defaultAbiCoder;
 const Driver = require('./driver');
@@ -16,13 +18,40 @@ const ShifterPool = require('@0confirmation/sol/build/ShifterPool');
 const BorrowProxyLib = require('@0confirmation/sol/build/BorrowProxyLib');
 const Exports = require('@0confirmation/sol/build/Exports');
 
-const KECCAK256_NULL = '0x290decd9548b62a8d60345a988386fc84ba6bc95484008f6362f93160ef3e563';
+const BYTES_TYPES = [ 'bytes' ];
 
 const ProxyRecordABI = Exports.abi.find((v) => v.name === 'ProxyRecordExport').inputs[0];
 const TriggerParcelABI = Exports.abi.find((v) => v.name === 'TriggerParcelExport').inputs[0];
 
 const decodeProxyRecord = (input) => abi.decode([ ProxyRecordABI ], input)[0];
 const encodeTriggerParcel = (input) => abi.encode([ TriggerParcelABI ], [ input ]);
+
+const DummyABI = {
+  name: 'dummy',
+  constant: false,
+  inputs: [],
+  outputs: [],
+  payable: true,
+  stateMutability: 'payable',
+  type: 'function'
+};
+
+const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
+
+const CONST_PHASH = NULL_PHASH;
+
+const DummyExpandedABI = Object.assign({}, DummyABI, {
+  inputs: [{
+    name: "_amount",
+    type: "uint256"
+  }, {
+    name: "_nHash",
+    type: "bytes32"
+  }, {
+    name: "_sig",
+    type: "bytes"
+  }]
+});
 
 class UTXOWrapper {
   constructor({
@@ -39,7 +68,7 @@ class UTXOWrapper {
       token: this.request.message.token,
       amount: this.request.message.amount,
       nonce: this.request.message.nonce,
-      proxyAddress: this.request.proxyAddress,
+      to: this.request.proxyAddress,
       utxo: this.utxo
     });
   }
@@ -74,7 +103,7 @@ class LiquidityRequestParcel {
       mpkh: zero.network.mpkh,
       g: {
         to: proxyAddress,
-        p: [],
+        p: CONST_PHASH,
         tokenAddress: token,
         nonce
       }
@@ -112,7 +141,10 @@ class LiquidityRequestParcel {
     }
     return new UTXOWrapper({
       request: this,
-      utxo: utxos[0]
+      utxo: {
+        vOut: utxos[0].output_no,
+        txHash: toBase64('0x' + utxos[0].txid)
+      }
     });
   }
 }
@@ -146,23 +178,23 @@ class BorrowProxy {
       mpkh,
       g: {
         to: proxyAddress,
-        p: [],
+        p: CONST_PHASH,
         tokenAddress: token,
         nonce
       }
     });
   }
   async repayLoan(utxo, darknodeSignature, overrides) {
-    const pHash = KECCAK256_NULL;
-    const vout = utxo.vout;
-    const txhash = utxo.txHash;
+    const pHash = CONST_PHASH;
+    const vOut = utxo.vOut;
+    const txHash = utxo.txHash;
     const record = this.decodedRecord;
     const contract = new ethers.Contract(this.proxyAddress, ShifterBorrowProxy.abi, new Web3Provider(this.zero.driver));
     return await contract.repayLoan(encodeTriggerParcel({
       record,
       pHash,
-      vout,
-      txhash
+      vOut,
+      txHash
     }), overrides);
   }
   async defaultLoan(overrides) {
@@ -179,7 +211,11 @@ class BorrowProxy {
       if (utxos.length === 0) await new Promise((resolve) => setTimeout(resolve, UTXO_POLL_INTERVAL));
       else break;
     }
-    return utxo;
+    const utxo = utxos[0];
+    return {
+      vOut: utxo.output_no,
+      txHash: toBase64('0x' + utxo.txid)
+    };
   }
 }
 
@@ -210,7 +246,7 @@ class LiquidityRequest {
       nonce: this.nonce,
       amount: this.amount,
       gasRequested: this.gasRequested
-    }), this.from ]);
+    }), this.from || (await this.zero.driver.sendWrapped('eth_accounts', []))[0] ]);
     return new LiquidityRequestParcel(Object.assign({}, this, {
       signature
     }));
@@ -292,34 +328,40 @@ class Zero {
   async submitToRenVM({
     token,
     amount,
-    proxyAddress,
+    to,
     nonce,
     utxo
   }) {
-    return await this.driver.sendWrapped('ren_submitTx', [{
-      to: RenJS.Tokens.BTC.Mint,
-      in: [{
-        name: 'phash',
-        type: RenVMType.TypeB32,
-        value: toBase64(KECCAK256_NULL)
-      }, {
-        name: 'amount',
-        type: RenVMType.TypeU64,
-        value: toBase64(amount)
-      }, {
-        name: 'token',
-        type: RenVMType.ExtTypeEthCompatAddress,
-        value: toBase64(token)
-      }, {
-        name: 'n',
-        type: RenVMType.TypeB32,
-        value: toBase64(nonce)
-      }, {
-        name: 'utxo',
-        type: RenVMType.ExtTypeBtcCompatUTXO,
-        value: utxo
-      }]
-    }]);
+    return await this.driver.sendWrapped('ren_submitTx', {
+      tx: {
+        to: RenJS.Tokens.BTC.Mint,
+        in: [{
+          name: 'p',
+          type: RenVMType.ExtEthCompatPayload,
+          value: {
+            abi: toBase64(Buffer.from(JSON.stringify([ DummyExpandedABI ])).toString('hex')),
+            value: toBase64(Buffer.from([]).toString('hex')),
+            fn: toBase64(Buffer.from('dummy').toString('hex'))
+          }
+        }, {
+          name: 'token',
+          type: RenVMType.ExtTypeEthCompatAddress,
+          value: utils.stripHexPrefix(token)
+        }, {
+          name: 'to',
+          type: RenVMType.ExtTypeEthCompatAddress,
+          value: utils.stripHexPrefix(to)
+        }, {
+          name: 'n',
+          type: RenVMType.TypeB32,
+          value: toBase64(nonce)
+        }, {
+          name: 'utxo',
+          type: RenVMType.ExtTypeBtcCompatUTXO,
+          value: utxo
+        }]
+      }
+    });
   }
   async listenForLiquidityRequests(callback) {
     return await (this.driver.getBackend('zero'))._filterLiquidityRequests((msg) => {
@@ -395,4 +437,9 @@ class Zero {
   }
 }
 
-module.exports = Zero;
+module.exports = Object.assign(Zero, {
+  BorrowProxy,
+  LiquidityRequestParcel,
+  LiquidityRequest,
+  UTXOWrapper
+});
