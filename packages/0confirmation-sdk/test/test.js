@@ -1,12 +1,11 @@
 'use strict';
 
-const ganache = require('@0confirmation/ganache');
-const computeTestAddresses = require('@0confirmation/sol/deploy/compute-test-addresses');
 const crypto = require('crypto');
 const Web3Provider = require('ethers/providers/web3-provider').Web3Provider;
 const bip39 = require('bip39');
 const mnemonic = bip39.generateMnemonic();
 const HDWalletProvider = require('@truffle/hdwallet-provider');
+const ganache = require('ganache-cli');
 const key = '3f841bf589fdf83a521e55d51afddc34fa65351161eead24f064855fc29c9580';
 const provider = new HDWalletProvider(key, ganache.provider({
   mnemonic
@@ -24,7 +23,6 @@ provider.send = async (o) => {
   }
   else return send.call(provider, o);
 };
-const mocks = computeTestAddresses(mnemonic);
 const ethers = new Web3Provider(provider);
 
 const Zero = require('../lib/sdk');
@@ -50,7 +48,7 @@ describe('0confirmation sdk', () => {
             network: 'testnet'
           }
         },
-        shifterPool: mocks.shifterPool
+        shifterPool: '0x' + Array(40).fill('1').join('')
       });
       await borrower.initializeDriver();
       const keeper = new Zero({
@@ -69,7 +67,7 @@ describe('0confirmation sdk', () => {
             network: 'testnet'
           }
         },
-        shifterPool: mocks.shifterPool
+        shifterPool: '0x' + Array(40).fill('1').join('')
       });
       await keeper.initializeDriver();
       console.log('keeper peer-info: ');
@@ -89,7 +87,7 @@ describe('0confirmation sdk', () => {
       console.log('broadcast details: ');
       await borrower.broadcastLiquidityRequest(ln({
         from,
-        token: mocks.renbtc,
+        token: '0x' + Array(40).fill('f').join(''),
         amount: '1000',
         nonce: '0x' + crypto.randomBytes(32).toString('hex'),
         gasRequested: '1000'

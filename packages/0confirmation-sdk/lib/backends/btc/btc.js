@@ -6,6 +6,7 @@ const handler = require('send-crypto/build/main/handlers/BTC/BTCHandler');
 
 class BTCBackend extends RPCWrapper {
   constructor(options) {
+    super();
     this.testnet = options.network === 'testnet'
     this.handler = handler;
     this.name = 'btc';
@@ -24,3 +25,5 @@ class BTCBackend extends RPCWrapper {
     }
   }
 }
+
+module.exports = BTCBackend;

@@ -12,8 +12,7 @@ const Bootstrap = require('libp2p-bootstrap')
 const KadDHT = require('libp2p-kad-dht')
 const bluebird = require('bluebird');
 const PeerInfo = require('peer-info');
-//const GossipSub = require('libp2p-gossipsub');
-const FloodSub = require('libp2p-floodsub');
+const GossipSub = require('libp2p-gossipsub');
 const pull = require('pull-stream');
 const EventEmitter = require('events').EventEmitter;
 const wrtc = require('wrtc');
@@ -31,15 +30,15 @@ const WStar = require('libp2p-webrtc-star');
 
 const createNode = async (options) => {
   const peerInfo = options.peerInfo || await PeerInfo.create();
-  console.log(fromPresetOrMultiAddr(options.multiaddr));
   peerInfo.multiaddrs.add(fromPresetOrMultiAddr(options.multiaddr));
   const dhtEnable = typeof options.dht === 'undefined' || options.dht === true;
   const socket = await libp2p.create({
     peerInfo,
     modules: {
       transport: [ TCP, WS, WStar ],
-      streamMuxer: [ Mplex ], connEncryption: [ SECIO ],
-      pubsub: FloodSub,
+      streamMuxer: [ Mplex ],
+      connEncryption: [ SECIO ],
+      pubsub: GossipSub,
       peerDiscovery: [ Bootstrap ],
       dht: dhtEnable ? KadDHT : undefined
     },
@@ -110,14 +109,13 @@ const createNode = async (options) => {
       return await this._connectedDeferred.promise;
     },
     async publish(topic, data) {
-      return this.socket.pubsub.publish(topic, jsonBuffer(data), () => {});
+      return this.socket.pubsub.publish(topic, jsonBuffer(data));
     },
     async handleProtocol(name, fn) {
       return this.socket.handle(name, async ({
         stream,
       }) => {
         let buffer = '';
-        console.log('handled');
         for await (const chunk of stream) {
           buffer += chunk.toString('utf8');
         }
@@ -125,7 +123,7 @@ const createNode = async (options) => {
       });
     },
     async subscribe(topic, handler) {
-      return this.socket.pubsub.subscribe(topic, (msg) => handler({ msg, data: tryParse(msg.data) }), () => {});
+      return this.socket.pubsub.subscribe(topic, (msg) => handler({ msg, data: tryParse(msg.data) }));
     },
     async getSubscribers(topic) {
       return this.socket.pubsub.getSubscribers(topic);

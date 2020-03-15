@@ -195,20 +195,22 @@ class LiquidityRequest {
   }) {
     Object.assign(this, {
       shifterPool,
+      from,
       token,
       nonce,
       amount,
+      zero,
       gasRequested
     });
   }
   async sign() {
-    const signature = await zero.driver.sendWrapped('personal_sign', [ utils.computeLiquidityRequestHash({
+    const signature = await this.zero.driver.sendWrapped('personal_sign', [ utils.computeLiquidityRequestHash({
       shifterPool: this.shifterPool,
       token: this.token,
       nonce: this.nonce,
       amount: this.amount,
       gasRequested: this.gasRequested
-    }), from ]);
+    }), this.from ]);
     return new LiquidityRequestParcel(Object.assign({}, this, {
       signature
     }));
@@ -286,7 +288,7 @@ class Zero {
     const parcel = await liquidityRequest.sign();
     await parcel.broadcast();
     return parcel;
-  } 
+  }
   async submitToRenVM({
     token,
     amount,

@@ -3,6 +3,7 @@
 const { soliditySha3 } = require('web3-utils');
 const { Buffer } = require('safe-buffer');
 const { Networks, Opcode, Script } = require('bitcore-lib');
+const ethers = require('ethers');
 const stripHexPrefix = (s) => s.substr(0, 2) === '0x' ? s.substr(2) : s;
 const addHexPrefix = (s) => '0x' + stripHexPrefix(s);
 const { isBuffer } = Buffer;
@@ -21,7 +22,7 @@ const computeLiquidityRequestHash = ({
   nonce,
   amount,
   gasRequested
-}) => ethers.solidityKeccak256([
+}) => solidityKeccak256([
   'address',
   'address',
   'bytes32',
