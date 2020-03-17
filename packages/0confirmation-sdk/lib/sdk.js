@@ -4,10 +4,10 @@ const UTXO_POLL_INTERVAL = 5000;
 const DARKNODE_QUERY_TX_INTERVAL = 5000;
 
 const { RenVMType } = require('@renproject/ren-js-common');
-const { NULL_PHASH, toBase64 } = require('./util');
+const { NULL_PHASH, toHex, toBase64 } = require('./util');
 const RenJS = require('@renproject/ren');
 const ethersUtil = require('ethers/utils');
-const { solidityKeccak256 } = ethersUtil;
+const { formatSignature, solidityKeccak256 } = ethersUtil;
 const ethers = require('ethers');
 const defaultProvider = ethers.getDefaultProvider();
 const { Contract } = require('ethers/contract');
@@ -99,8 +99,21 @@ class RenVMTransaction {
   }
   async waitForSignature() {
     while (true) {
-      console.log(await this.queryTx());
-      await timeout(DARKNODE_QUERY_TX_INTERVAL);
+      const result = await this.queryTx();
+      if (result.out) {
+        const {
+          out: {
+            v,
+            r,
+            s
+          }
+        } = result;
+        return formatSignature({
+          v: Number(v) + 27,
+          r: toHex(r),
+          s: toHex(s)
+        });
+      } else await timeout(DARKNODE_QUERY_TX_INTERVAL);
     }
   }
 }
@@ -128,7 +141,7 @@ class DepositedLiquidityRequestParcel {
       utxo: this.utxo
     });
   }
-  async asRenVMTransaction() {
+  asRenVMTransaction() {
     return new RenVMTransaction({
       txHash: this.computeShiftInTxHash(),
       utxo: this.utxo,
@@ -516,5 +529,5 @@ module.exports = Object.assign(Zero, {
   BorrowProxy,
   LiquidityRequestParcel,
   LiquidityRequest,
-  DepositLiquidityRequestParcel
+  DepositedLiquidityRequestParcel
 });

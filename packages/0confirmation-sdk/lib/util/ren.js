@@ -147,10 +147,13 @@ const computeGatewayAddress = ({
   
 const toBase64 = (input) => (isBuffer(input) ? input : Buffer.from(stripHexPrefix(input), 'hex')).toString('base64');
 
+const toHex = (input) => addHexPrefix(Buffer.from(input).toString('hex'));
+
 Object.assign(module.exports, {
   computeGatewayAddress,
   computeLiquidityRequestHash,
   toBase64,
+  toHex,
   computeBorrowProxyAddress,
   computeHashForDarknodeSignature,
   computeGHash,
