@@ -20,7 +20,7 @@ const makeZero = async (provider) => {
         network: 'testnet'
       },
       renvm: {
-        network: 'devnet'
+        network: 'testnet'
       },
       zero: {
         multiaddr: 'lendnet',
@@ -45,15 +45,18 @@ const ln = (v, desc) => ((console.log(desc + ': ')), (console.log(nodeUtil.inspe
     ln(v, 'liquidity request received');
     ln(v.depositAddress, 'deposit here');
     console.log('waiting for deposit ...');
-    const utxo = await v.waitForDeposit();
-    ln(utxo, 'utxo wrapper created, submit to renvm');
-    const result = await utxo.submitToRenVM();
+    const sent = await v.waitForDeposit();
+    ln(sent, 'utxo wrapper created, submit to renvm');
+    ln(sent.computeShiftInTxHash(), 'shiftIn txHash');
+    const result = await v.submitToRenVM();
     ln(result, 'renvm result');
+    const tx = result.asRenVMTransaction();
+    console.log(await tx.waitForSignature());
   });
   const liquidityRequest = borrower.createLiquidityRequest({
     token: kovan.renbtc,
-    amount: utils.parseUnits('0.0001', 'gwei').toString(),
-    nonce: '0x' + crypto.randomBytes(32).toString('hex'),
+    amount: utils.parseUnits('0.001', 8).toString(),
+    nonce: '0x68b7aed3299637f7ed8d02d40fb04a727d89bb3448ca439596bd42d65a6e16be',
     gasRequested: utils.parseEther('0.01').toString()
   });
   ln(liquidityRequest, 'liquidity request');

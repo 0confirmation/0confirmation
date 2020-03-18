@@ -2,6 +2,8 @@
 
 const RenVM = require('@renproject/ren');
 const RPCWrapper = require('../../util/rpc-wrapper');
+const promiseRetry = require('promise-retry');
+const resultToJsonRpc = require('../../util/result-to-jsonrpc');
 
 class RenVMBackend extends RPCWrapper {
   constructor({ 
@@ -18,7 +20,13 @@ class RenVMBackend extends RPCWrapper {
     id,
     params
   }) {
-    return await this.ren.lightnode.sendMessage(method, params);
+    return resultToJsonRpc(id, async () => await promiseRetry(async (retry) => {
+      try {
+        return await this.ren.renVM.network.sendMessage(method, params);
+      } catch (e) {
+        retry(e);
+      }
+    }));
   }
 }
 

@@ -9,7 +9,7 @@ const { isBuffer } = Buffer;
 const { defaultAbiCoder: abi, solidityKeccak256, getCreate2Address } = require('ethers/utils');
 const ShifterBorrowProxy = require('@0confirmation/sol/build/ShifterBorrowProxy');
 const { linkBytecode: link } = require('solc/linker')
-const kovan = require('@0confirmation/sol/deploy/kovan-addresses');
+const kovan = require('@0confirmation/sol/environments/kovan');
 const shifterBorrowProxyBytecode = link(ShifterBorrowProxy.bytecode, kovan.linkReferences);
 const { Contract } = require('ethers/contract');
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
@@ -68,8 +68,6 @@ const computeBorrowProxyAddress = ({
   });
 };
 
-const consoleLog = (v) => ((console.log(v)), v);
-
 const computeGHash = ({
   to,
   tokenAddress,
@@ -80,33 +78,33 @@ const computeGHash = ({
   'address',
   'address',
   'bytes32'
-], consoleLog([
+], [
   maybeCoerceToPHash(p),
   tokenAddress,
   to,
   nonce
-]));
+]);
 
 const computeShiftInTxHash = ({
   renContract,
   utxo,
   g
-}) => solidityKeccak256([ 'string' ], [ `txHash_${renContract}_${toBase64(maybeCoerceToGHash(g))}_${utxo.txHash}_${utxo.vOut}` ]);
+}) => toBase64(solidityKeccak256([ 'string' ], [ `txHash_${renContract}_${toBase64(maybeCoerceToGHash(g))}_${toBase64(utxo.txHash)}_${utxo.vOut}` ]));
 
 const maybeCoerceToShiftInHash = (input) => typeof input === 'object' ? computeShiftInTxHash(input) : input;
 
 const computeNHash = ({
-  txhash, // utxo hash
-  vout,
+  txHash, // utxo hash
+  vOut,
   nonce
 }) => keccakAbiEncoded([
   'bytes32',
   'bytes32',
-  'bytes32'
+  'uint256'
 ], [
   nonce,
-  txhash,
-  vout
+  txHash,
+  vOut
 ]);
 
 const maybeCoerceToNHash = (input) => typeof input === 'object' ? computeNHash(input) : input;
@@ -136,7 +134,7 @@ const maybeCoerceToGHash = (input) => typeof input === 'object' ? computeGHash(i
 const computeGatewayAddress = ({
   isTestnet,
   g,
-  mpkh = kovan.mpkh
+  mpkh
 }) => new Script()
   .add(Buffer.from(stripHexPrefix(maybeCoerceToGHash(g)), "hex"))
   .add(Opcode.OP_DROP)
@@ -145,14 +143,17 @@ const computeGatewayAddress = ({
   .add(Buffer.from(stripHexPrefix(mpkh), "hex"))
   .add(Opcode.OP_EQUALVERIFY)
   .add(Opcode.OP_CHECKSIG)
-  .toScriptHashOut().toAddress(consoleLog(isTestnet) ? Networks.testnet : Networks.mainnet).toString();
+  .toScriptHashOut().toAddress(isTestnet ? Networks.testnet : Networks.mainnet).toString();
   
 const toBase64 = (input) => (isBuffer(input) ? input : Buffer.from(stripHexPrefix(input), 'hex')).toString('base64');
+
+const toHex = (input) => addHexPrefix(Buffer.from(input).toString('hex'));
 
 Object.assign(module.exports, {
   computeGatewayAddress,
   computeLiquidityRequestHash,
   toBase64,
+  toHex,
   computeBorrowProxyAddress,
   computeHashForDarknodeSignature,
   computeGHash,

@@ -1,11 +1,13 @@
 'use strict';
 
 const UTXO_POLL_INTERVAL = 5000;
+const DARKNODE_QUERY_TX_INTERVAL = 5000;
 
 const { RenVMType } = require('@renproject/ren-js-common');
-const { NULL_PHASH, toBase64 } = require('./util');
+const { NULL_PHASH, toHex, toBase64 } = require('./util');
 const RenJS = require('@renproject/ren');
 const ethersUtil = require('ethers/utils');
+const { formatSignature, solidityKeccak256 } = ethersUtil;
 const ethers = require('ethers');
 const defaultProvider = ethers.getDefaultProvider();
 const { Contract } = require('ethers/contract');
@@ -26,6 +28,8 @@ const TriggerParcelABI = Exports.abi.find((v) => v.name === 'TriggerParcelExport
 const decodeProxyRecord = (input) => abi.decode([ ProxyRecordABI ], input)[0];
 const encodeTriggerParcel = (input) => abi.encode([ TriggerParcelABI ], [ input ]);
 
+const timeout = (n) => new Promise((resolve) => setTimeout(resolve, n));
+
 const DummyABI = {
   name: 'dummy',
   constant: false,
@@ -38,9 +42,32 @@ const DummyABI = {
 
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 
-const CONST_PHASH = NULL_PHASH;
+const pAbi = {
+  name: 'shiftIn',
+  type: 'function',
+  constant: false,
+  inputs: [{
+    type: 'address',
+    name: '_shifterRegistry',
+    value: NULL_ADDRESS
+  }, {
+    type: 'string',
+    name: '_symbol',
+    value: ''
+  }, {
+    type: 'address',
+    name: '_address',
+    value: NULL_ADDRESS
+  }]
+};
 
-const DummyExpandedABI = Object.assign({}, DummyABI, {
+const pAbiValue = abi.encode(pAbi.inputs.map((v) => v.type), [ NULL_ADDRESS, '', NULL_ADDRESS ]);
+
+const pAbiValueB32 = toBase64(pAbiValue);
+
+const CONST_PHASH = solidityKeccak256(['bytes'], [ pAbiValue ]);
+
+const pAbiExpanded = Object.assign({}, pAbi, {
   inputs: [{
     name: "_amount",
     type: "uint256"
@@ -53,7 +80,46 @@ const DummyExpandedABI = Object.assign({}, DummyABI, {
   }]
 });
 
-class UTXOWrapper {
+class RenVMTransaction {
+  constructor({
+    txHash,
+    utxo,
+    request
+  }) {
+    Object.assign(this, {
+      txHash,
+      utxo,
+      request
+    });
+  }
+  async queryTx() {
+    return await this.request.zero.driver.sendWrapped('ren_queryTx', {
+      txHash: this.txHash
+    });
+  }
+  async waitForSignature() {
+    while (true) {
+      const result = await this.queryTx();
+      if (result.out) {
+        const {
+          out: {
+            v,
+            r,
+            s
+          }
+        } = result;
+        return formatSignature({
+          v: Number(v) + 27,
+          r: toHex(r),
+          s: toHex(s)
+        });
+      } else await timeout(DARKNODE_QUERY_TX_INTERVAL);
+    }
+  }
+}
+    
+
+class DepositedLiquidityRequestParcel {
   constructor({
     request,
     utxo
@@ -61,6 +127,25 @@ class UTXOWrapper {
     Object.assign(this, {
       request,
       utxo
+    });
+  }
+  computeShiftInTxHash() {
+    return utils.computeShiftInTxHash({
+      renContract: RenJS.Tokens.BTC.Mint,
+      g: {
+        to: this.request.proxyAddress,
+        p: CONST_PHASH,
+        tokenAddress: this.request.message.token,
+        nonce: this.request.message.nonce
+      },
+      utxo: this.utxo
+    });
+  }
+  asRenVMTransaction() {
+    return new RenVMTransaction({
+      txHash: this.computeShiftInTxHash(),
+      utxo: this.utxo,
+      request: this.request
     });
   }
   async submitToRenVM() {
@@ -136,14 +221,14 @@ class LiquidityRequestParcel {
         confirmations: 0,
         address: this.depositAddress
       }]));
-      if (utxos.length === 0) await new Promise((resolve) => setTimeout(resolve, UTXO_POLL_INTERVAL));
+      if (utxos.length === 0) await timeout(UTXO_POLL_INTERVAL);
       else break;
     }
-    return new UTXOWrapper({
+    return new DepositedLiquidityRequestParcel({
       request: this,
       utxo: {
         vOut: utxos[0].output_no,
-        txHash: toBase64('0x' + utxos[0].txid)
+        txHash: '0x' + utxos[0].txid
       }
     });
   }
@@ -208,13 +293,13 @@ class BorrowProxy {
         confirmations: num,
         address: this.depositAddress
       }]));
-      if (utxos.length === 0) await new Promise((resolve) => setTimeout(resolve, UTXO_POLL_INTERVAL));
+      if (utxos.length === 0) await timeout(UTXO_POLL_INTERVAL);
       else break;
     }
     const utxo = utxos[0];
     return {
       vOut: utxo.output_no,
-      txHash: toBase64('0x' + utxo.txid)
+      txHash: '0x' + utxo.txid
     };
   }
 }
@@ -339,9 +424,9 @@ class Zero {
           name: 'p',
           type: RenVMType.ExtEthCompatPayload,
           value: {
-            abi: toBase64(Buffer.from(JSON.stringify([ DummyExpandedABI ])).toString('hex')),
-            value: toBase64(Buffer.from([]).toString('hex')),
-            fn: toBase64(Buffer.from('dummy').toString('hex'))
+            abi: toBase64(Buffer.from(JSON.stringify([ pAbiExpanded ])).toString('hex')),
+            value: pAbiValueB32,
+            fn: toBase64(Buffer.from('shiftIn').toString('hex'))
           }
         }, {
           name: 'token',
@@ -358,7 +443,10 @@ class Zero {
         }, {
           name: 'utxo',
           type: RenVMType.ExtTypeBtcCompatUTXO,
-          value: utxo
+          value: {
+            vOut: String(utxo.vOut),
+            txHash: String(toBase64(utxo.txHash))
+          }
         }]
       }
     });
@@ -441,5 +529,5 @@ module.exports = Object.assign(Zero, {
   BorrowProxy,
   LiquidityRequestParcel,
   LiquidityRequest,
-  UTXOWrapper
+  DepositedLiquidityRequestParcel
 });
