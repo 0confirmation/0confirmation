@@ -3,10 +3,11 @@ pragma experimental ABIEncoderV2;
 
 import { BorrowProxyLib } from "./BorrowProxyLib.sol";
 import { SliceLib } from "./utils/SliceLib.sol";
+import { ViewExecutor } from "./utils/ViewExecutor.sol";
 import { IShifter } from "./interfaces/IShifter.sol";
 import { IBorrowProxyController } from "./interfaces/IBorrowProxyController.sol";
 
-contract BorrowProxy {
+contract BorrowProxy is ViewExecutor {
   using SliceLib for *;
   using BorrowProxyLib for *;
   BorrowProxyLib.ProxyIsolate isolate;

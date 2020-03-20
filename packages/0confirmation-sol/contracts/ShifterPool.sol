@@ -1,7 +1,7 @@
 pragma solidity ^0.6.2;
 pragma experimental ABIEncoderV2;
 
-import { Ownable } from "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import { Ownable } from "openzeppelin-solidity/contracts/access/Ownable.sol";
 import { IShifterRegistry } from "./interfaces/IShifterRegistry.sol";
 import { IShifter } from "./interfaces/IShifter.sol";
 import { ShifterPoolLib } from "./ShifterPoolLib.sol";
@@ -10,9 +10,10 @@ import { BorrowProxy } from "./BorrowProxy.sol";
 import { BorrowProxyLib } from "./BorrowProxyLib.sol";
 import { BorrowProxyFactoryLib } from "./BorrowProxyFactoryLib.sol";
 import { TokenUtils } from "./utils/TokenUtils.sol";
+import { ViewExecutor } from "./utils/ViewExecutor.sol";
 import { LiquidityToken } from "./LiquidityToken.sol";
 
-contract ShifterPool is Ownable {
+contract ShifterPool is Ownable, ViewExecutor {
   using ShifterPoolLib for *;
   using TokenUtils for *;
   using ShifterBorrowProxyLib for *;

@@ -1,4 +1,5 @@
 pragma solidity ^0.6.2;
+pragma experimental ABIEncoderV2;
 
 import { ECDSA } from "openzeppelin-solidity/contracts/cryptography/ECDSA.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
@@ -32,6 +33,7 @@ library ShifterBorrowProxyLib {
     address keeper;
     LenderParams params;
   }
+  event ShifterBorrowProxyRepaid(address indexed user, ProxyRecord record);
   function computeBorrowerSalt(LiquidityRequest memory params) internal pure returns (bytes32) {
     return keccak256(abi.encodePacked(params.borrower, params.token, params.nonce, params.amount));
   }

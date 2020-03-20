@@ -24,6 +24,7 @@ contract ShifterBorrowProxy is BorrowProxy {
     require(parcel.record.request.token.sendToken(address(liquidityToken), amount - fee));
     require(parcel.record.request.token.sendToken(parcel.record.loan.keeper, fee));
     require(ShifterPool(isolate.masterAddress).relayResolveLoan(parcel.record.request.token, address(liquidityToken), parcel.record.loan.keeper, parcel.record.loan.params.bond, 0), "loan resolution notification failed");
+    emit ShifterBorrowProxyLib.ShifterBorrowProxyRepaid(parcel.record.request.borrower, parcel.record);
   }
   function defaultLoan(bytes memory data) public returns (bool) {
     require(validateProxyRecord(data));

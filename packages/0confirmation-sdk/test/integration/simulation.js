@@ -45,18 +45,17 @@ const ln = (v, desc) => ((console.log(desc + ': ')), (console.log(nodeUtil.inspe
     ln(v, 'liquidity request received');
     ln(v.depositAddress, 'deposit here');
     console.log('waiting for deposit ...');
-    const sent = await v.waitForDeposit();
-    ln(sent, 'utxo wrapper created, submit to renvm');
-    ln(sent.computeShiftInTxHash(), 'shiftIn txHash');
-    const result = await v.submitToRenVM();
+    const deposited = await v.waitForDeposit();
+    ln(deposited, 'utxo wrapper created, submit to renvm');
+    ln(deposited.computeShiftInTxHash(), 'shiftIn txHash');
+    const result = await deposited.submitToRenVM();
     ln(result, 'renvm result');
-    const tx = result.asRenVMTransaction();
-    console.log(await tx.waitForSignature());
+    console.log(await deposited.waitForSignature());
   });
   const liquidityRequest = borrower.createLiquidityRequest({
     token: kovan.renbtc,
     amount: utils.parseUnits('0.001', 8).toString(),
-    nonce: '0x68b7aed3299637f7ed8d02d40fb04a727d89bb3448ca439596bd42d65a6e16be',
+    nonce: '0x68b7aed3299637f7ed8d02d40fb04a727d89bb3448ca439596bd42d65a6e16cd',
     gasRequested: utils.parseEther('0.01').toString()
   });
   ln(liquidityRequest, 'liquidity request');
