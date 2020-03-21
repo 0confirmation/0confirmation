@@ -1,9 +1,6 @@
 pragma solidity ^0.6.3;
 pragma experimental ABIEncoderV2;
 
-import { IERC20 } from "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
-import { Ownable } from "openzeppelin-solidity/contracts/access/Ownable.sol";
-
 library TokenQueryLib {
   struct DataResult {
     bool success;
