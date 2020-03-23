@@ -182,6 +182,7 @@ function createScriptTasks ({ browserPlatforms, livereload }) {
         if (opts.devMode) {
           console.warn(err.stack)
         } else {
+          console.error(err)
           throw err
         }
       })
