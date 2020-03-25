@@ -11,6 +11,7 @@ const { setupTaskDisplay } = require('./display')
 
 function detectAndRunEntryTask () {
   // get requested task name and execute
+  console.log(process.argv);
   const taskName = process.argv[2]
   if (!taskName) {
     throw new Error(`MetaMask build: No task name specified`)

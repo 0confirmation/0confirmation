@@ -60,10 +60,10 @@ async function start () {
 async function setupStreams () {
   // the transport-specific streams for communication between inpage and background
   const pageStream = new LocalMessageDuplexStream({
-    name: 'contentscript',
+    name: '0cf-contentscript',
     target: '0cf-inpage',
   })
-  const extensionPort = extension.runtime.connect({ name: 'contentscript' })
+  const extensionPort = extension.runtime.connect({ name: '0cf-contentscript' })
   const extensionStream = new PortStream(extensionPort)
 
   // create and connect channel muxers
@@ -87,8 +87,8 @@ async function setupStreams () {
   )
 
   // forward communication across inpage-background for these channels only
-  forwardTrafficBetweenMuxers('provider', pageMux, extensionMux)
-  forwardTrafficBetweenMuxers('publicConfig', pageMux, extensionMux)
+  forwardTrafficBetweenMuxers('zeroProvider', pageMux, extensionMux)
+  forwardTrafficBetweenMuxers('zeroPublicConfig', pageMux, extensionMux)
 
   // connect "phishing" channel to warning system
   const phishingStream = extensionMux.createStream('phishing')
