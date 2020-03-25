@@ -13,7 +13,7 @@ module.exports = function (api) {
           },
         },
       ],
-      '@babel/preset-react',
+      '@babel/preset-react'
     ],
     plugins: [
       '@babel/plugin-transform-runtime',

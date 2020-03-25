@@ -7,7 +7,7 @@ const log = require('fancy-log')
 const { assign } = require('lodash')
 const watchify = require('watchify')
 const browserify = require('browserify')
-const envify = require('envify/custom')
+const envify = require('../vendor/envify/custom')
 const sourcemaps = require('gulp-sourcemaps')
 const sesify = require('sesify')
 const terser = require('gulp-terser-js')
@@ -23,7 +23,7 @@ module.exports = createScriptTasks
 
 
 const dependencies = Object.keys((packageJSON && packageJSON.dependencies) || {})
-const materialUIDependencies = ['@material-ui/core']
+const materialUIDependencies = ['@material-ui/core', '@material-ui/styles']
 const reactDepenendencies = dependencies.filter((dep) => dep.match(/react/))
 const d3Dependencies = ['c3', 'd3']
 
@@ -292,7 +292,7 @@ function createScriptTasks ({ browserPlatforms, livereload }) {
     }
 
     let bundler = browserify(browserifyOpts)
-      .transform('babelify')
+      .transform('babelify', { presets: ['@babel/preset-env'] })
       // Transpile any dependencies using the object spread/rest operator
       // because it is incompatible with `esprima`, which is used by `envify`
       // See https://github.com/jquery/esprima/issues/1927
@@ -301,6 +301,7 @@ function createScriptTasks ({ browserPlatforms, livereload }) {
           './**/node_modules/libp2p',
         ],
         global: true,
+        presets: ['@babel/preset-env'],
         plugins: ['@babel/plugin-proposal-object-rest-spread'],
       })
       .transform('brfs')
