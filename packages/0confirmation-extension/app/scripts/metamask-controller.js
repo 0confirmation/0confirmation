@@ -1484,8 +1484,8 @@ export default class MetamaskController extends EventEmitter {
     const mux = setupMultiplex(connectionStream)
 
     // messages between inpage and background
-    this.setupProviderConnection(mux.createStream('provider'), sender)
-    this.setupPublicConfig(mux.createStream('publicConfig'))
+    this.setupProviderConnection(mux.createStream('zeroProvider'), sender)
+    this.setupPublicConfig(mux.createStream('zeroPublicConfig'))
   }
 
   /**
@@ -1501,8 +1501,8 @@ export default class MetamaskController extends EventEmitter {
     // setup multiplexing
     const mux = setupMultiplex(connectionStream)
     // connect features
-    this.setupControllerConnection(mux.createStream('controller'))
-    this.setupProviderConnection(mux.createStream('provider'), sender, true)
+    this.setupControllerConnection(mux.createStream('zeroController'))
+    this.setupProviderConnection(mux.createStream('zeroProvider'), sender, true)
   }
 
   /**

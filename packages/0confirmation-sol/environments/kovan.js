@@ -1,5 +1,4 @@
-const RenJS = require('@renproject/ren');
-
+const RenJS = require('@renproject/ren').default;
 const testnet = new RenJS('testnet');
 
 module.exports = {

@@ -17,7 +17,7 @@ start().catch(console.error)
 
 
 async function start () {
-  const targetFiles = [`0cf-inpage.js`, `contentscript.js`, `ui.js`, `background.js`]
+  const targetFiles = [`0cf-inpage.js`, `0cf-contentscript.js`, `ui.js`, `background.js`]
   for (const buildName of targetFiles) {
     await validateSourcemapForFile({ buildName })
   }

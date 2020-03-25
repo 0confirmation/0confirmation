@@ -98,7 +98,7 @@ function createScriptTasks ({ browserPlatforms, livereload }) {
     })
     // inpage must be built before contentscript
     // because inpage bundle result is included inside contentscript
-    const contentscriptSubtask = createTask(`${taskPrefix}:contentscript`,
+    const contentscriptSubtask = createTask(`${taskPrefix}:0cf-contentscript`,
       createTaskForBuildJsExtensionContentscript({ devMode, testing })
     )
 
@@ -137,13 +137,13 @@ function createScriptTasks ({ browserPlatforms, livereload }) {
   }
 
   function createTaskForBuildJsExtensionContentscript ({ devMode, testing }) {
-    const inpage = 'inpage'
-    const contentscript = 'contentscript'
+    const inpage = '0cf-inpage'
+    const contentscript = '0cf-contentscript'
     return composeSeries(
       bundleTask({
         label: '0cf-inpage',
         filename: '0cf-inpage.js',
-        filepath: './app/scripts/inpage.js',
+        filepath: './app/scripts/0cf-inpage.js',
         externalDependencies: devMode ? undefined : externalDependenciesMap[inpage],
         devMode,
         testing,

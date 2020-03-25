@@ -1,6 +1,6 @@
 'use strict';
 
-const RenVM = require('@renproject/ren');
+const RenVM = require('@renproject/ren').default;
 const RPCWrapper = require('../../util/rpc-wrapper');
 const promiseRetry = require('promise-retry');
 const resultToJsonRpc = require('../../util/result-to-jsonrpc');
