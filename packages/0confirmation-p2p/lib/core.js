@@ -19,7 +19,7 @@ const returnOp = (v) => v;
 const { jsonBuffer, tryParse, tryStringify } = require('./util');
 
 const presets = {
-  lendnet: '/dns4/lendnet.0confirmation.com/tcp/9090/ws/p2p-webrtc-star/'
+  lendnet: '/dns4/lendnet.0confirmation.com/tcp/443/wss/p2p-webrtc-star/'
 };
 
 const fromPresetOrMultiAddr = (multiaddr) => presets[multiaddr] || multiaddr;

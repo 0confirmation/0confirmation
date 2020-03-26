@@ -7,7 +7,7 @@ const log = require('fancy-log')
 const { assign } = require('lodash')
 const watchify = require('watchify')
 const browserify = require('browserify')
-const envify = require('envify/custom')
+const envify = require('envify');
 const sourcemaps = require('gulp-sourcemaps')
 const sesify = require('sesify')
 const terser = require('gulp-terser-js')
@@ -23,7 +23,7 @@ module.exports = createScriptTasks
 
 
 const dependencies = Object.keys((packageJSON && packageJSON.dependencies) || {})
-const materialUIDependencies = ['@material-ui/core']
+const materialUIDependencies = ['@material-ui/core', '@material-ui/styles']
 const reactDepenendencies = dependencies.filter((dep) => dep.match(/react/))
 const d3Dependencies = ['c3', 'd3']
 
@@ -98,7 +98,7 @@ function createScriptTasks ({ browserPlatforms, livereload }) {
     })
     // inpage must be built before contentscript
     // because inpage bundle result is included inside contentscript
-    const contentscriptSubtask = createTask(`${taskPrefix}:contentscript`,
+    const contentscriptSubtask = createTask(`${taskPrefix}:0cf-contentscript`,
       createTaskForBuildJsExtensionContentscript({ devMode, testing })
     )
 
@@ -141,9 +141,9 @@ function createScriptTasks ({ browserPlatforms, livereload }) {
     const contentscript = '0cf-contentscript'
     return composeSeries(
       bundleTask({
-        label: inpage,
-        filename: `${inpage}.js`,
-        filepath: `./app/scripts/${inpage}.js`,
+        label: '0cf-inpage',
+        filename: '0cf-inpage.js',
+        filepath: './app/scripts/0cf-inpage.js',
         externalDependencies: devMode ? undefined : externalDependenciesMap[inpage],
         devMode,
         testing,
@@ -182,6 +182,7 @@ function createScriptTasks ({ browserPlatforms, livereload }) {
         if (opts.devMode) {
           console.warn(err.stack)
         } else {
+          console.error(err)
           throw err
         }
       })
@@ -203,7 +204,7 @@ function createScriptTasks ({ browserPlatforms, livereload }) {
         buildStream = buildStream
           .pipe(terser({
             mangle: {
-              reserved: [ 'MetamaskInpageProvider' ],
+              reserved: [ 'ZeroInpageProvider' ],
             },
           }))
       }
@@ -298,7 +299,6 @@ function createScriptTasks ({ browserPlatforms, livereload }) {
       .transform('babelify', {
         only: [
           './**/node_modules/libp2p',
-          '../../**/node_modules/libp2p'
         ],
         global: true,
         plugins: ['@babel/plugin-proposal-object-rest-spread'],
