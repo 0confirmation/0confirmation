@@ -56,9 +56,10 @@ library BorrowProxyLib {
     (bool success,) = liquidationModule.delegatecall(abi.encodeWithSignature("notify(address,bytes)", liquidationModule, payload));
     return success;
   }
-  function delegate(ModuleExecution memory module, bytes memory payload, uint256 value) internal {
+  function delegate(ModuleExecution memory module, bytes memory payload, uint256 value) internal returns (bytes memory) {
     (bool success, bytes memory retval) = module.encapsulated.assetHandler.delegatecall(abi.encode(module.encapsulated.assetHandler, module.encapsulated.liquidationModule, tx.origin, module.to, value, payload));
     require(success, string(retval));
+    return retval;
   }
   function isDefined(Module memory module) internal pure returns (bool) {
     return module.assetHandler != address(0x0);

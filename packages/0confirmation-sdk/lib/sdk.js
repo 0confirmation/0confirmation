@@ -223,11 +223,11 @@ class DepositedLiquidityRequestParcel extends LiquidityRequestParcel {
         const {
           tx: {
             out: [{
-              value: v
-            }, {
-              value: r,
-            }, {
               value: s
+            }, {
+              value: s,
+            }, {
+              value: v
             }]
           }
         } = result;

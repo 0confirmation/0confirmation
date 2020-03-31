@@ -1,7 +1,7 @@
 import EventEmitter from 'events'
 import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
-import Mascot from '../../../components/ui/mascot'
+import MetaFoxLogo from '../../../components/ui/metafox-logo'
 import Button from '../../../components/ui/button'
 import { INITIALIZE_CREATE_PASSWORD_ROUTE, INITIALIZE_SELECT_ACTION_ROUTE } from '../../../helpers/constants/routes'
 
@@ -42,11 +42,11 @@ export default class Welcome extends PureComponent {
     return (
       <div className="welcome-page__wrapper">
         <div className="welcome-page">
-          <Mascot
+          <MetaFoxLogo
             animationEventEmitter={this.animationEventEmitter}
             width="125"
             height="125"
-          />
+          /> 
           <div className="welcome-page__header">
             { t('welcome') }
           </div>
