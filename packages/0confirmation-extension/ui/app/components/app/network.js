@@ -5,7 +5,7 @@ import NetworkDropdownIcon from './dropdowns/components/network-dropdown-icon'
 
 function NetworkIndicator ({ disabled, children, hoverText, onClick, providerName }) {
   return (
-    <div
+    <div style={{color:"#ffffff"}}
       className={classnames('network-component pointer', {
         'network-component--disabled': disabled,
         'ethereum-network': providerName === 'mainnet',
