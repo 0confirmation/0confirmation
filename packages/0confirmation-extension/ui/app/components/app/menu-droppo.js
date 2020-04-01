@@ -78,7 +78,7 @@ export default class MenuDroppoComponent extends Component {
     this.manageListeners()
 
     const baseStyle = Object.assign(
-      { position: 'fixed' },
+      { position: 'fixed'},
       style,
       { zIndex },
     )

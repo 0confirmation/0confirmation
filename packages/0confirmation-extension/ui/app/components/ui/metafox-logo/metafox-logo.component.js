@@ -14,7 +14,7 @@ export default class MetaFoxLogo extends PureComponent {
 
   render () {
     const { onClick, unsetIconHeight } = this.props
-    const iconProps = unsetIconHeight ? {} : { height: 42, width: 42 }
+    const iconProps = unsetIconHeight ? {} : { height: 100, width: 100 }
 
     return (
       <div
@@ -24,7 +24,7 @@ export default class MetaFoxLogo extends PureComponent {
         })}
       >
         <img
-          height={30}
+          height={72}
           src="/images/logo/0cf.svg"
           className={classnames('app-header__metafox-logo', 'app-header__metafox-logo--horizontal')}
         />
