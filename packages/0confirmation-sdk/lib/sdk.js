@@ -85,6 +85,7 @@ class LiquidityRequest {
   constructor({
     zero,
     shifterPool,
+    borrowProxyLib,
     token,
     nonce,
     amount,
@@ -92,6 +93,7 @@ class LiquidityRequest {
   }) {
     Object.assign(this, {
       shifterPool,
+      borrowProxyLib,
       token,
       nonce,
       amount,
@@ -102,6 +104,7 @@ class LiquidityRequest {
   async sign(from) {
     const signature = await this.zero.driver.sendWrapped('personal_sign', [ utils.computeLiquidityRequestHash({
       shifterPool: this.shifterPool,
+      borrowProxyLib: this.borrowProxyLib,
       token: this.token,
       nonce: this.nonce,
       amount: this.amount,
@@ -116,6 +119,7 @@ class LiquidityRequest {
 class LiquidityRequestParcel extends LiquidityRequest {
   constructor({
     zero,
+    borrowProxyLib,
     shifterPool,
     token,
     nonce,
@@ -129,6 +133,7 @@ class LiquidityRequestParcel extends LiquidityRequest {
     super({
       zero,
       shifterPool,
+      borrowProxyLib,
       token,
       nonce,
       amount,
@@ -187,6 +192,7 @@ class DepositedLiquidityRequestParcel extends LiquidityRequestParcel {
   constructor({
     zero,
     shifterPool,
+    borrowProxyLib,
     token,
     nonce,
     amount,
@@ -200,6 +206,7 @@ class DepositedLiquidityRequestParcel extends LiquidityRequestParcel {
     super({
       zero,
       shifterPool,
+      borrowProxyLib,
       token,
       nonce,
       amount,
@@ -223,9 +230,9 @@ class DepositedLiquidityRequestParcel extends LiquidityRequestParcel {
         const {
           tx: {
             out: [{
-              value: s
+              value: r
             }, {
-              value: s,
+              value: s
             }, {
               value: v
             }]
@@ -262,16 +269,20 @@ class DepositedLiquidityRequestParcel extends LiquidityRequestParcel {
   }
 }
 
+const getProvider = (driver) => new Web3Provider(driver.getBackend('ethereum').provider);
+
 class BorrowProxy {
   constructor ({
     zero,
     shifterPool,
+    borrowProxyLib,
     user,
     proxyAddress,
     record
   }) {
     this.zero = zero;
     this.shifterPool = shifterPool; 
+    this.borrowProxyLib = borrowProxyLib;
     this.borrower = user;
     this.proxyAddress = proxyAddress;
     this.record = record;
@@ -293,7 +304,7 @@ class BorrowProxy {
     const darknodeSignature = await deposited.waitForSignature();
     const { vOut, txHash } = utxo;
     const record = this.decodedRecord;
-    const contract = new Contract(this.proxyAddress, ShifterBorrowProxy.abi, new Web3Provider(this.zero.driver));
+    const contract = new Contract(this.proxyAddress, ShifterBorrowProxy.abi, getProvider(this.zero.driver).getSigner());
     return await contract.repayLoan(encodeTriggerParcel({
       record,
       pHash: CONST_PHASH,
@@ -303,7 +314,7 @@ class BorrowProxy {
     }), overrides);
   }
   async defaultLoan(overrides) {
-    const contract = new Contract(this.proxyAddress, ShifterBorrowProxy.abi, new Web3Provider(this.zero.driver));
+    const contract = new Contract(this.proxyAddress, ShifterBorrowProxy.abi, getProvider(this.zero.driver).getSigner());
     return await contract.defaultLoan(this.record, overrides);
   }
   async waitForConfirmations(num = 6) {
@@ -338,16 +349,19 @@ class Zero {
   constructor({
     backends,
     shifterPool,
+    borrowProxyLib,
     mpkh
   }) {
     this.options = {
       shifterPool,
+      borrowProxyLib,
       mpkh
     };
     this.driver = new Driver(backends);
     const isTestnet = this.driver.getBackend('btc').testnet;
     this.network = {
       mpkh: mpkh || this.driver.backends.renvm.ren.network.contracts.renVM.mpkh,
+      borrowProxyLib,
       shifterPool: shifterPool,
       isTestnet
     };
@@ -361,6 +375,7 @@ class Zero {
     return new LiquidityRequest({
       zero: this,
       shifterPool: this.network.shifterPool,
+      borrowProxyLib: this.network.borrowProxyLib,
       token,
       amount,
       nonce,
@@ -368,7 +383,7 @@ class Zero {
     });
   }
   subscribeBorrows(filterArgs, callback) {
-    const contract = new Contract(this.network.shifterPool, BorrowProxyLib.abi, new Web3Provider(this.driver));
+    const contract = new Contract(this.network.shifterPool, BorrowProxyLib.abi, getProvider(this.driver).getSigner());
     const filter = contract.filters.BorrowProxyMade(...filterArgs);
     contract.on(filter, (evt) => callback(new BorrowProxy(evt)));
     return () => contract.removeListener(filter);
@@ -377,8 +392,8 @@ class Zero {
     if (!borrower) {
       borrower = (await this.send('eth_accounts', []))[0];
     }
-    const provider = new Web3Provider(this.driver);
-    const contract = new Contract(this.network.shifterPool, BorrowProxyLib.abi, provider);
+    const provider = getProvider(this.driver);
+    const contract = new Contract(this.network.shifterPool, BorrowProxyLib.abi, provider.getSigner());
     const filter = contract.filters.BorrowProxyMade(...filterArgs);
     const logs = await provider.getLogs(Object.assign({
       fromBlock: this.network.genesis || 0
@@ -386,7 +401,8 @@ class Zero {
     const decoded = logs.map((v) => contract.interface.events.BorrowProxyMade.decode(v));
     return decoded.map((v) => new BorrowProxy(Object.assign({
       zero: this,
-      shifterPool: this.network.shifterPool
+      shifterPool: this.network.shifterPool,
+      borrowProxyLib: this.network.borrowProxyLib
     }, v)));
   } 
   async broadcastLiquidityRequest({
@@ -460,6 +476,7 @@ class Zero {
       if (shifterPool !== this.network.shifterPool) return;
       callback(new LiquidityRequestParcel({
         zero: this,
+        borrowProxyLib: this.network.borrowProxyLib,
         shifterPool,
         token,
         nonce,
@@ -470,17 +487,20 @@ class Zero {
     });
   }
   async approvePool(token, overrides) {
-    const contract = new Contract(token, LiquidityToken.abi, new Web3Provider(this.driver));
+    const contract = new Contract(token, LiquidityToken.abi, getProvider(this.driver).getSigner());
     return await contract.approve(this.network.shifterPool, '0x' + Array(64).fill('f').join(''), overrides);
   }
   async getLiquidityTokenFor(token) {
-    const contract = new Contract(this.network.shifterPool, ShifterPool.abi, new Web3Provider(this.driver));
-    const liquidityToken = new Contract(await contract.getLiquidityTokenHandler(token), LiquidityToken.abi);
+    const contract = new Contract(this.network.shifterPool, ShifterPool.abi, getProvider(this.driver).getSigner());
+    const liquidityToken = new Contract(await contract.getLiquidityTokenHandler(token), LiquidityToken.abi, getProvider(this.driver).getSigner());
     return liquidityToken;
   }
   async approveLiquidityToken(token, overrides) {
+    console.log(token);
     const liquidityToken = await this.getLiquidityTokenFor(token);
-    const contract = new Contract(token, LiquidityToken.abi, new Web3Provider(this.driver));
+    console.log(liquidityToken);
+    const contract = new Contract(token, LiquidityToken.abi, getProvider(this.driver).getSigner());
+    console.log(liquidityToken.address);
     return await contract.approve(liquidityToken.address, '0x' + Array(64).fill('f').join(''), overrides);
   }
   async addLiquidity(token, value, overrides) {
@@ -501,7 +521,7 @@ class Zero {
       signature,
       borrower
     } = liquidityRequest;
-    const contract = new Contract(this.network.shifterPool, ShifterPool.abi, new Web3Provider(this.driver));
+    const contract = new Contract(this.network.shifterPool, ShifterPool.abi, getProvider(this.driver).getSigner());
     await contract.executeBorrow({
       request: {
         borrower,
@@ -511,7 +531,9 @@ class Zero {
       },
       gasRequested,
       signature
-    }, ethersUtil.parseEther(bond), timeoutExpiry, overrides);
+    }, ethersUtil.parseEther(bond), timeoutExpiry, Object.assign(overrides || {}, {
+      value: gasRequested
+    }));
     return tx;
   }
   async initializeDriver() {

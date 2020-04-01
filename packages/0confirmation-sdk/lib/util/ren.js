@@ -8,9 +8,8 @@ const addHexPrefix = (s) => '0x' + stripHexPrefix(s);
 const { isBuffer } = Buffer;
 const { defaultAbiCoder: abi, solidityKeccak256, getCreate2Address } = require('ethers/utils');
 const ShifterBorrowProxy = require('@0confirmation/sol/build/ShifterBorrowProxy');
+const BorrowProxyLib = require('@0confirmation/sol/build/BorrowProxyLib');
 const { linkBytecode: link } = require('solc/linker')
-const kovan = require('@0confirmation/sol/environments/kovan');
-const shifterBorrowProxyBytecode = link(ShifterBorrowProxy.bytecode, kovan.linkReferences);
 const { Contract } = require('ethers/contract');
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 const NULL_PHASH = '0x0000000000000000000000000000000000000000000000000000000000000000';
@@ -45,6 +44,7 @@ const computeLiquidityRequestHash = ({
 
 const computeBorrowProxyAddress = ({
   shifterPool,
+  borrowProxyLib,
   borrower,
   token,
   nonce,
@@ -61,6 +61,9 @@ const computeBorrowProxyAddress = ({
     nonce,
     amount
   ]);
+  const shifterBorrowProxyBytecode = link(ShifterBorrowProxy.bytecode, {
+    BorrowProxyLib: borrowProxyLib || BorrowProxyLib.networks[42].address
+  });
   return getCreate2Address({
     from: shifterPool,
     salt,
