@@ -8,7 +8,10 @@ library TokenUtils {
     return success;
   }
   function transferTokenFrom(address token, address from, address to, uint256 amount) internal returns (bool) {
+    return IERC20(token).transferFrom(from, to, amount);
+/*
     (bool success,) = token.call(abi.encodeWithSignature("transferFrom(address,address,uint256)", from, to, amount));
     return success;
+*/
   }
 }

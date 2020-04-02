@@ -11,8 +11,8 @@ contract LiquidityToken is ERC20Detailed, ERC20 {
   address public asset;
   uint256 public offset;
   mapping (address => uint256) public outstandingLoans;
-  constructor(address underlyingAsset, string memory name, string memory symbol) ERC20Detailed(name, symbol, ERC20Detailed(underlyingAsset).decimals()) public {
-    pool = msg.sender;
+  constructor(address shifterPool, address underlyingAsset, string memory name, string memory symbol) ERC20Detailed(name, symbol, ERC20Detailed(underlyingAsset).decimals()) public {
+    pool = shifterPool;
     asset = underlyingAsset;
   }
   modifier onlyPool {

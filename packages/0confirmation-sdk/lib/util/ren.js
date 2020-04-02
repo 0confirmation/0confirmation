@@ -43,8 +43,9 @@ const computeLiquidityRequestHash = ({
 ]);
 
 const computeBorrowProxyAddress = ({
-  shifterPool,
+  borrowProxyCreationCode,
   borrowProxyLib,
+  shifterPool,
   borrower,
   token,
   nonce,
@@ -61,13 +62,13 @@ const computeBorrowProxyAddress = ({
     nonce,
     amount
   ]);
-  const shifterBorrowProxyBytecode = link(ShifterBorrowProxy.bytecode, {
+  const shifterBorrowProxyBytecode = borrowProxyCreationCode || link(ShifterBorrowProxy.bytecode, {
     BorrowProxyLib: borrowProxyLib || BorrowProxyLib.networks[42].address
   });
   return getCreate2Address({
     from: shifterPool,
-    salt,
-    initCode: shifterBorrowProxyBytecode
+    salt: ethers.utils.arrayify(salt),
+    initCode: ethers.utils.arrayify(shifterBorrowProxyBytecode)
   });
 };
 

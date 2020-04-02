@@ -35,6 +35,9 @@ contract ShifterPool is Ownable, ViewExecutor {
       isolate.tokenToLiquidityToken[launch.token] = launch.liqToken;
     }
   }
+  function getBorrowProxyCreationCode() public pure returns (bytes memory) {
+    return type(BorrowProxy).creationCode;
+  }
   function executeBorrow(ShifterBorrowProxyLib.LiquidityRequestParcel memory liquidityRequestParcel, uint256 bond, uint256 timeoutExpiry) public payable {
     require(liquidityRequestParcel.gasRequested == msg.value, "supplied ether is not equal to gas requested");
     bytes32 requestHash = liquidityRequestParcel.computeLiquidityRequestHash();
