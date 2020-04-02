@@ -167,7 +167,7 @@ class LiquidityRequestParcel extends LiquidityRequest {
     return await this.zero.driver.sendWrapped('0cf_broadcastLiquidityRequest', [ this.getBroadcastMessage() ]);
   }
   async executeBorrow(bond, timeoutExpiry, overrides) {
-    return await this.zero.executeBorrow(this, bond, timeoutExpiry, overrides);
+    return await this.zero.executeBorrow(this, bond, timeoutExpiry, overrides || {});
   }
   async waitForDeposit(confirmations = 0) {
     let utxos;
@@ -311,11 +311,11 @@ class BorrowProxy {
       vout: vOut,
       txhash: txHash,
       darknodeSignature
-    }), overrides);
+    }), overrides || {});
   }
   async defaultLoan(overrides) {
     const contract = new Contract(this.proxyAddress, ShifterBorrowProxy.abi, getProvider(this.zero.driver).getSigner());
-    return await contract.defaultLoan(this.record, overrides);
+    return await contract.defaultLoan(this.record, overrides || {});
   }
   async waitForConfirmations(num = 6) {
     let utxos;
@@ -488,7 +488,7 @@ class Zero {
   }
   async approvePool(token, overrides) {
     const contract = new Contract(token, LiquidityToken.abi, getProvider(this.driver).getSigner());
-    return await contract.approve(this.network.shifterPool, '0x' + Array(64).fill('f').join(''), overrides);
+    return await contract.approve(this.network.shifterPool, '0x' + Array(64).fill('f').join(''), overrides || {});
   }
   async getLiquidityTokenFor(token) {
     const contract = new Contract(this.network.shifterPool, ShifterPool.abi, getProvider(this.driver).getSigner());
@@ -496,20 +496,17 @@ class Zero {
     return liquidityToken;
   }
   async approveLiquidityToken(token, overrides) {
-    console.log(token);
     const liquidityToken = await this.getLiquidityTokenFor(token);
-    console.log(liquidityToken);
     const contract = new Contract(token, LiquidityToken.abi, getProvider(this.driver).getSigner());
-    console.log(liquidityToken.address);
-    return await contract.approve(liquidityToken.address, '0x' + Array(64).fill('f').join(''), overrides);
+    return await contract.approve(liquidityToken.address, '0x' + Array(64).fill('f').join(''), overrides || {});
   }
   async addLiquidity(token, value, overrides) {
     const liquidityToken = await this.getLiquidityTokenFor(token);
-    await liquidityToken.addLiquidity(ethersUtil.parseEther(value), overrides);
+    await liquidityToken.addLiquidity(ethersUtil.parseEther(value), overrides || {});
   }
   async removeLiquidity(token, value, overrides) {
     const liquidityToken = await this.getLiquidityTokenFor(token);
-    await liquidityToken.removeLiquidityToken(ethersUtil.parseEther(value), overrides);
+    await liquidityToken.removeLiquidityToken(ethersUtil.parseEther(value), overrides || {});
   }
   async executeBorrow(liquidityRequest, bond, timeoutExpiry, overrides) {
     const { 
@@ -532,7 +529,8 @@ class Zero {
       gasRequested,
       signature
     }, ethersUtil.parseEther(bond), timeoutExpiry, Object.assign(overrides || {}, {
-      value: gasRequested
+      value: gasRequested,
+      gas: '0x' + (6e6).toString(16)
     }));
     return tx;
   }

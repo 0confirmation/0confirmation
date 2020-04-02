@@ -3,7 +3,7 @@
 const crypto = require('crypto');
 const Web3Provider = require('ethers/providers/web3-provider').Web3Provider;
 const bip39 = require('bip39');
-const mnemonic = bip39.generateMnemonic();
+const mnemonic = process.env.MNEMONIC || bip39.generateMnemonic();
 const seed = bip39.mnemonicToSeed(mnemonic);
 const hdkey = require('ethereumjs-wallet/hdkey');
 const hdwallet = hdkey.fromMasterSeed(seed);
@@ -16,11 +16,11 @@ const resultToJsonRpc = require('../lib/util/result-to-jsonrpc');
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 const ganache = require('ganache-cli');
 const key = privateKeys[0].substr(2);
-const provider = new HDWalletProvider(key, ganache.provider({
+const provider = new HDWalletProvider(key, process.env.EXTERNAL_GANACHE ? 'http://localhost:8545' : ganache.provider({
   mnemonic
 }));
 provider._key = key;
-const borrowerProvider = new HDWalletProvider(privateKeys[1].substr(2), ganache.provider({
+const borrowerProvider = new HDWalletProvider(privateKeys[1].substr(2), process.env.EXTERNAL_GANACHE ? 'http://localhost:8545' : ganache.provider({
   mnemonic
 }));
 borrowerProvider._key = privateKeys[1].substr(2);
