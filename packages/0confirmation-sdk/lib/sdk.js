@@ -503,6 +503,7 @@ class Zero {
   }
   async addLiquidity(token, value, overrides) {
     const liquidityToken = await this.getLiquidityTokenFor(token);
+    console.log(liquidityToken.address);
     await liquidityToken.addLiquidity(ethersUtil.parseEther(value), overrides || {});
   }
   async removeLiquidity(token, value, overrides) {

@@ -93,6 +93,8 @@ const deploy = async () => {
   const { address: simpleBurnLiquidationModule } = await simpleBurnLiquidationModuleFactory.deploy(factory, zbtc);
   const liquidityTokenFactory = getFactory(LiquidityToken);
   const { address: zerobtc } = await liquidityTokenFactory.deploy(zbtc, 'zeroBTC', 'zeroBTC');
+  console.log('zerobtc');
+  console.log(zerobtc);
   await ethersProvider.waitForTransaction((await shifterPoolContract.setup(shifterMock, '1000', [{
     moduleType: ModuleTypes.BY_CODEHASH,
     target: exchange,
