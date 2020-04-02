@@ -248,9 +248,13 @@ describe('0confirmation sdk', () => {
     const [ keeperAddress ] = await keeper.driver.sendWrapped('eth_accounts', []);
     const zbtcContract = new ethers.Contract(contracts.zbtc, ShifterERC20.abi, ethersProvider.getSigner());
     await ethersProvider.waitForTransaction((await zbtcContract.mint(keeperAddress, utils.parseUnits('1000', 8).toString())).hash);
+    console.log('woop');
     await ethersProvider.waitForTransaction((await keeper.approveLiquidityToken(contracts.zbtc)).hash);
+    console.log('woop');
     await ethersProvider.waitForTransaction((await keeper.addLiquidity(contracts.zbtc, utils.parseUnits('500', 8).toString())).hash);
+    console.log('woop');
     await ethersProvider.waitForTransaction((await keeper.approvePool(contracts.zbtc)).hash);
+    console.log('woop');
     await keeper.listenForLiquidityRequests(async (v) => {
       const deposited = await v.waitForDeposit();
       const result = await deposited.submitToRenVM();

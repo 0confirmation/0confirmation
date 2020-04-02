@@ -497,8 +497,9 @@ class Zero {
   }
   async approveLiquidityToken(token, overrides) {
     const liquidityToken = await this.getLiquidityTokenFor(token);
+    console.log(liquidityToken.address);
     const contract = new Contract(token, LiquidityToken.abi, getProvider(this.driver).getSigner());
-    return await contract.approve(liquidityToken.address, '0x' + Array(64).fill('f').join(''), overrides || {});
+    return await contract.approve(liquidityToken.address, '0x0' + Array(63).fill('f').join(''), overrides || {});
   }
   async addLiquidity(token, value, overrides) {
     const liquidityToken = await this.getLiquidityTokenFor(token);
