@@ -1,4 +1,3 @@
 FROM nginx
-WORKDIR /var/www/html
-COPY ./website/build/0confirmation/* .
+COPY ./website/build/0confirmation /var/www/html
 COPY ./service/nginx.conf /etc/nginx/nginx.conf
