@@ -4,7 +4,6 @@ import Button from '@material-ui/core/Button'
 import TextField from '../../components/ui/text-field'
 import getCaretCoordinates from 'textarea-caret'
 import { EventEmitter } from 'events'
-import logo from './logo.svg'
 import Mascot from '../../components/ui/mascot'
 import { DEFAULT_ROUTE } from '../../helpers/constants/routes'
 
@@ -143,9 +142,8 @@ export default class UnlockPage extends Component {
         <div className="unlock-page">
           <div className="unlock-page__mascot-container">
               <img 
-               width = "120"
-               height = "120"
-               src = {logo}
+               style={ { width: '120px', height: '120px' } }
+               src = "images/logo/0cf-mascot-replacement.svg"
               />
           </div>
           <h1 className="unlock-page__title">
