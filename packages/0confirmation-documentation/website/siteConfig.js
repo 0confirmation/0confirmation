@@ -11,7 +11,7 @@
 // List of projects/orgs using your project for the users page.
 const users = [
   {
-    caption: '0confirmation Dev',
+    caption: '0confirmation',
     // You will need to prepend the image path with your baseUrl
     // if it is not '/', like: '/test-site/img/image.jpg'.
     image: '/img/undraw_open_source.svg',
@@ -23,14 +23,14 @@ const users = [
 const siteConfig = {
   title: '0Confirmation', // Title for your website.
   tagline: 'Developer Portal',
-  url: 'https://your-docusaurus-test-site.com', // Your website URL
+  url: 'https://docs.0confirmation.com', // Your website URL
   baseUrl: '/', // Base URL for your project */
   // For github.io type URLs, you would set the url and baseUrl like:
   //   url: 'https://facebook.github.io',
   //   baseUrl: '/test-site/',
 
   // Used for publishing and more
-  projectName: 'test-site',
+  projectName: '0confirmation',
   organizationName: 'facebook',
   // For top-level user or org sites, the organization is still the same.
   // e.g., for the https://JoelMarcey.github.io site, it would be set like...
