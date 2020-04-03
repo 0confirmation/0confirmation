@@ -11,7 +11,6 @@ const ShifterBorrowProxy = require('@0confirmation/sol/build/ShifterBorrowProxy'
 const BorrowProxyLib = require('@0confirmation/sol/build/BorrowProxyLib');
 const { linkBytecode: link } = require('solc/linker')
 const { Contract } = require('ethers/contract');
-const queryProxyCodeHash = require('../queries/query-proxy-codehash');
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 const NULL_PHASH = '0x0000000000000000000000000000000000000000000000000000000000000000';
 const defaultProvider = ethers.getDefaultProvider();
@@ -26,7 +25,6 @@ const maybeCoerceToPHash = (params) => Array.isArray(params) ? (!params[1] || pa
 let cachedProxyCodeHash;
 
 const initializeCodeHash = async () => {
-  cachedProxyCodeHash = await queryProxyCodeHash();
   return cachedProxyCodeHash;
 };
 
@@ -69,7 +67,6 @@ const computeBorrowProxyAddress = ({
     nonce,
     amount
   ]);
-  if (!cachedProxyCodeHash) throw Error('must initialize');
   const shifterBorrowProxyBytecode = link(ShifterBorrowProxy.bytecode, {
     BorrowProxyLib: borrowProxyLib || BorrowProxyLib.networks[42].address
   });

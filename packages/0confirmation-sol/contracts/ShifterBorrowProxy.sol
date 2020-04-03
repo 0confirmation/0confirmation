@@ -1,4 +1,4 @@
-pragma solidity ^0.6.2;
+pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import { BorrowProxy } from "./BorrowProxy.sol";
@@ -15,19 +15,19 @@ contract ShifterBorrowProxy is BorrowProxy {
   constructor() BorrowProxy() public {}
   function repayLoan(bytes memory data) public returns (bool) {
     (ShifterBorrowProxyLib.TriggerParcel memory parcel) = abi.decode(data, (ShifterBorrowProxyLib.TriggerParcel));
-    require(validateProxyRecord(abi.encode(parcel.record)));
-    require(!isolate.isLiquidating);
+    require(validateProxyRecord(abi.encode(parcel.record)), "proxy record invalid");
+    require(!isolate.isLiquidating, "proxy is being liquidated");
     uint256 amount = ShifterPool(isolate.masterAddress).getShifterHandler(parcel.record.request.token).shiftIn(parcel.pHash, parcel.record.request.amount, parcel.computeNHash(), parcel.darknodeSignature);
     uint256 fee = parcel.record.computeAdjustedKeeperFee(amount);
     isolate.unbound = true;
     LiquidityToken liquidityToken = ShifterPool(isolate.masterAddress).getLiquidityTokenHandler(parcel.record.request.token);
-    require(parcel.record.request.token.sendToken(address(liquidityToken), amount - fee));
-    require(parcel.record.request.token.sendToken(parcel.record.loan.keeper, fee));
+    require(parcel.record.request.token.sendToken(address(liquidityToken), amount - fee), "token transfer failed");
+    require(parcel.record.request.token.sendToken(parcel.record.loan.keeper, fee), "keeper payout failed");
     require(ShifterPool(isolate.masterAddress).relayResolveLoan(parcel.record.request.token, address(liquidityToken), parcel.record.loan.keeper, parcel.record.loan.params.bond, 0), "loan resolution notification failed");
-    emit ShifterBorrowProxyLib.ShifterBorrowProxyRepaid(parcel.record.request.borrower, parcel.record);
+    ShifterBorrowProxyLib.emitShifterBorrowProxyRepaid(parcel.record.request.borrower, parcel.record);
   }
   function defaultLoan(bytes memory data) public returns (bool) {
-    require(validateProxyRecord(data));
+    require(validateProxyRecord(data), "proxy record invalid");
     (ShifterBorrowProxyLib.ProxyRecord memory record) = abi.decode(data, (ShifterBorrowProxyLib.ProxyRecord));
     address[] memory set = isolate.liquidationSet.set;
     if (record.loan.params.timeoutExpiry >= block.number) {
@@ -45,7 +45,7 @@ contract ShifterBorrowProxy is BorrowProxy {
       uint256 postBalance = IERC20(record.request.token).balanceOf(address(this));
       int256 reclaimed = int256(postBalance) - int256(preBalance);
       uint256 repay = uint256(int256(record.request.amount) - (reclaimed < 0 ? 0 : reclaimed));
-      require(pool.relayResolveLoan(record.request.token, address(pool.getLiquidityTokenHandler(record.request.token)), record.loan.keeper, record.request.amount - repay, repay));
+      require(pool.relayResolveLoan(record.request.token, address(pool.getLiquidityTokenHandler(record.request.token)), record.loan.keeper, record.request.amount - repay, repay), "loan resolution failure");
       return true;
     }
     return false;

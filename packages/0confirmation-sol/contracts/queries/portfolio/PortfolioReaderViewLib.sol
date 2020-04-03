@@ -1,4 +1,4 @@
-pragma solidity ^0.6.3;
+pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import { TokenQueryLib } from "../token/TokenQueryLib.sol";

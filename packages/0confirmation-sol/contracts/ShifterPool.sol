@@ -1,4 +1,4 @@
-pragma solidity ^0.6.2;
+pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import { Ownable } from "openzeppelin-solidity/contracts/access/Ownable.sol";
@@ -57,13 +57,14 @@ contract ShifterPool is Ownable, ViewExecutor {
     liquidityRequest.borrower.transfer(msg.value);
     require(liquidityRequest.token.transferTokenFrom(msg.sender, address(this), bond), "bond submission failed");
     require(borrowerSalt.deployBorrowProxy() == proxyAddress, "proxy deployment failed");
-    emit BorrowProxyLib.BorrowProxyMade(liquidityRequest.borrower, proxyAddress, data);
+    require(BorrowProxy(proxyAddress).setup(liquidityRequest.borrower), "setup phase failure");
+    BorrowProxyLib.emitBorrowProxyMade(liquidityRequest.borrower, proxyAddress, data);
   }
   function validateProxyRecordHandler(bytes memory proxyRecord) public view returns (bool) {
     return isolate.borrowProxyController.validateProxyRecord(msg.sender, proxyRecord);
   }
-  function getProxyOwnerHandler() public view returns (address) {
-    return isolate.borrowProxyController.getProxyOwner(msg.sender);
+  function getProxyOwnerHandler(address user) public view returns (address) {
+    return isolate.borrowProxyController.getProxyOwner(user);
   }
   function getShifterHandler(address token) public view returns (IShifter) {
     return isolate.getShifter(token);
@@ -71,11 +72,14 @@ contract ShifterPool is Ownable, ViewExecutor {
   function getLiquidityTokenHandler(address token) public view returns (LiquidityToken) {
     return LiquidityToken(isolate.getLiquidityToken(token));
   }
+  function fetchModuleHandler(address to, bytes4 sig) public view returns (BorrowProxyLib.Module memory) {
+    return isolate.registry.resolveModule(to, sig);
+  }
   function relayResolveLoan(address token, address liquidityToken, address keeper, uint256 bond, uint256 repay) public returns (bool) {
     require(isolate.borrowProxyController.proxyInitializerRecord[msg.sender] != bytes32(0x0), "not a registered borrow proxy");
     if (bond != 0) require(token.sendToken(keeper, bond), "failed to return bond to keeper");
     if (repay != 0) require(token.sendToken(liquidityToken, repay), "failed to repay lost funds");
-    require(LiquidityToken(liquidityToken).resolveLoan(msg.sender));
+    require(LiquidityToken(liquidityToken).resolveLoan(msg.sender), "loan resolution failure");
     return true;
   }
 }

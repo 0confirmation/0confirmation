@@ -4,6 +4,7 @@ const UTXO_POLL_INTERVAL = 5000;
 const DARKNODE_QUERY_TX_INTERVAL = 5000;
 
 const BN = require('bignumber.js');
+const resultToJsonRpc = require('./util/result-to-jsonrpc');
 const { Buffer } = require('safe-buffer');
 const networks = require('./networks');
 const { RenVMType } = require('@renproject/ren-js-common');
@@ -18,6 +19,7 @@ const utils = require('./util');
 const abi = ethersUtil.defaultAbiCoder;
 const Driver = require('./driver');
 const { Web3Provider } = require('ethers/providers/web3-provider');
+const Web3ProviderEngine = require('web3-provider-engine');
 const LiquidityToken = require('@0confirmation/sol/build/LiquidityToken');
 const ShifterPool = require('@0confirmation/sol/build/ShifterPool');
 const BorrowProxyLib = require('@0confirmation/sol/build/BorrowProxyLib');
@@ -149,7 +151,6 @@ class LiquidityRequestParcel extends LiquidityRequest {
     this.signature = this.signature || signature;
     this.borrower = borrower || ethersUtil.verifyMessage(Buffer.from(utils.computeLiquidityRequestHash(this).substr(2), 'hex'), this.signature);
     this.proxyAddress = proxyAddress || utils.computeBorrowProxyAddress(this);
-    console.log(this.proxyAddress);
     this.depositAddress = depositAddress || utils.computeGatewayAddress({
       isTestnet: this.zero.network.isTestnet,
       mpkh: this.zero.network.mpkh,
@@ -383,47 +384,43 @@ class Zero {
     };
   }
   getProvider() {
-    const ethProvider = this.driver.getBackend('ethereum')._cache.provider;
-    const send = async (o) => {
-      switch (o.method) {
-        case 'eth_accounts':
-          const borrowProxyResult = await this.driver.send({
-            method: 'eth_getBorrowProxy',
-            id: o.id,
-            params: []
-          }); 
-          borrowProxyResult.result = [ borrowProxyResult.result ];
-          return borrowProxyResult;
-        case 'eth_sign':
-        case 'personal_sign':
-        case 'eth_signTypedData':
-          throw Error('borrow proxy cannot sign messages');
-        case 'eth_sendTransaction':
-          const [ payload ] = o.params;
-          const [ from ] = await this.driver.sendWrapped('eth_accounts', []);
-          const borrowProxy = await this.driver.sendWrapped('0cf_getBorrowProxy', []);
-          return await this.driver.send({
-            method: o.method,
-            id: o.id,
-            params: [{
+    const wrappedEthProvider = getProvider(this.driver);
+    const ethProvider = wrappedEthProvider.provider;
+    const providerEngine = new Web3ProviderEngine();
+    const sendAsync = (o, cb) => {
+      resultToJsonRpc(o.id, async () => {
+        console.log(o);
+        switch (o.method) {
+          case 'eth_accounts':
+            return [ await this.driver.sendWrapped('0cf_getBorrowProxy', []) ];
+          case 'eth_sign':
+          case 'personal_sign':
+          case 'eth_signTypedData':
+            throw Error('borrow proxy cannot sign messages');
+          case 'eth_sendTransaction':
+          case 'eth_estimateGas':
+          case 'eth_call':
+            const [ payload ] = o.params;
+            const [ from ] = await wrappedEthProvider.send('eth_accounts', []);
+            const borrowProxy = await this.driver.sendWrapped('0cf_getBorrowProxy', []);
+            console.log([ from, borrowProxy ]);
+  const ln = (v) => ((console.log(v)), v);
+            ln(payload);
+            return await wrappedEthProvider.send(o.method, [ ln(Object.assign({
               from,
               to: borrowProxy,
-              data: shifterBorrowProxyInterface.functions.proxy.encode([ payload.to, payload.value, payload.data ]),
-              value: payload.value,
-              gasPrice: payload.gasPrice,
-              gas: payload.gas
-            }]
-          });
-        default:
-          return await this.driver.send(o);
-      }
+              data: shifterBorrowProxyInterface.functions.proxy.encode([ payload.to, payload.value || '0x0', payload.data || '0x' ])
+            }, payload.value && { value: payload.value } || {}, payload.gasPrice && { gasPrice: payload.gasPrice } || {}, payload.gas && { gas: payload.gas } || {}, payload.gasLimit && { gasLimit: payload.gasLimit } || {}, payload.nonce && { nonce: payload.nonce } || {})) ]);
+          default:
+            return await wrappedEthProvider.send(o.method, o.params);
+        }
+      }).then((response) => cb(null, response)).catch((err) => cb(err));
     };
-    return {
-      host: ethProvider.host,
-      connected: true,
-      isMetamask: ethProvider.isMetamask,
-      send
-    };
+    const send = (o, cb) => sendAsync(o, cb);
+    return Object.assign(providerEngine, {
+      send,
+      sendAsync
+    });
   }
   createLiquidityRequest({
     token,
@@ -576,7 +573,7 @@ class Zero {
   }
   async removeLiquidity(token, value, overrides) {
     const liquidityToken = await this.getLiquidityTokenFor(token);
-    await liquidityToken.removeLiquidityToken(value, overrides || {});
+    return await liquidityToken.removeLiquidityToken(value, overrides || {});
   }
   async executeBorrow(liquidityRequest, bond, timeoutExpiry, overrides) {
     const { 

@@ -1,4 +1,4 @@
-pragma solidity ^0.6.3;
+pragma solidity ^0.6.0;
 
 import { Create2 } from "openzeppelin-solidity/contracts/utils/Create2.sol";
 import { ShifterBorrowProxy } from "./ShifterBorrowProxy.sol";

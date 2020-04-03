@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const Web3Provider = require('ethers/providers/web3-provider').Web3Provider;
 const bip39 = require('bip39');
 const mnemonic = process.env.MNEMONIC || bip39.generateMnemonic();
+const ShifterBorrowProxy = require('@0confirmation/sol/build/ShifterBorrowProxy');
 const seed = bip39.mnemonicToSeed(mnemonic);
 const hdkey = require('ethereumjs-wallet/hdkey');
 const hdwallet = hdkey.fromMasterSeed(seed);
@@ -38,7 +39,7 @@ const ModuleTypes = {
       return {
         jsonrpc: '2.0',
         id: o.id,
-        result: wallet.signMessage(o.params[0])
+        result: wallet.signMessage(ethers.utils.arrayify(o.params[0]))
       };
     }
     else return send.call(p, o, ...args);
@@ -72,6 +73,21 @@ const Exchange = {
   bytecode: fs.readFileSync(require.resolve('contracts-vyper/bytecode/exchange.txt'), 'utf8').trim()
 };
 
+const createMarket = async (provider, factory, token) => {
+  const factoryWrapped = new ethers.Contract(factory, Factory.abi, provider.getSigner());
+  const receipt = await (await factoryWrapped.createExchange(token, { gasLimit: ethers.utils.hexlify(6e6) })).wait();
+  const { logs } = receipt;
+  const exchange = '0x' + logs[0].topics[2].substr(26);
+  const tokenWrapped = new ethers.Contract(token, LiquidityToken.abi, provider.getSigner());
+  await (await tokenWrapped.approve(exchange, utils.parseUnits('10', 8))).wait();
+  const exchangeWrapped = new ethers.Contract(exchange, Exchange.abi, provider.getSigner());
+  await (await exchangeWrapped.addLiquidity('0', utils.parseUnits('10', 8), String(Date.now()), {
+    value: utils.parseEther('10'),
+    gasLimit: ethers.utils.hexlify(6e6)
+  })).wait();
+  return exchange;
+};
+
 const deploy = async () => {
   const borrowProxyLibFactory = getFactory(BorrowProxyLib);
   const { address: borrowProxyLib } = await borrowProxyLibFactory.deploy();
@@ -83,18 +99,24 @@ const deploy = async () => {
   const zbtc = await shifterMockContract.token();
   const { address: shifterMock } = shifterMockContract;
   const factoryFactory = getFactory(Factory);
-  const { address: factory } = await factoryFactory.deploy();
+  const factoryContract = await factoryFactory.deploy();
+  const { address: factory } = factoryContract;
   const exchangeFactory = getFactory(Exchange);
   const { address: exchange } = await exchangeFactory.deploy();
+  await (await factoryContract.initializeFactory(exchange)).wait();
   const uniswapAdapterFactory = getFactory(UniswapAdapter);
   const simpleBurnLiquidationModuleFactory = getFactory(SimpleBurnLiquidationModule);
   const { address: uniswapAdapter } = await uniswapAdapterFactory.deploy(factory);
   const { address: simpleBurnLiquidationModule } = await simpleBurnLiquidationModuleFactory.deploy(factory, zbtc);
   const liquidityTokenFactory = getFactory(LiquidityToken);
+  const zbtcContract = new ethers.Contract(zbtc, ShifterERC20.abi, ethersProvider.getSigner());
+  const [ keeperAddress ] = await ethersProvider.send('eth_accounts', []);
+  await (await zbtcContract.mint(keeperAddress, utils.parseUnits('1000', 8).toString())).wait();
+  const zbtcExchange = await createMarket(ethersProvider, factory, zbtc);
   const { address: zerobtc } = await liquidityTokenFactory.deploy(shifterPool, zbtc, 'zeroBTC', 'zeroBTC');
   await ethersProvider.waitForTransaction((await shifterPoolContract.setup(shifterMock, '1000', [{
     moduleType: ModuleTypes.BY_CODEHASH,
-    target: exchange,
+    target: zbtcExchange,
     sigs: [
       '0x89f2a871',
       '0xfd11c223',
@@ -138,7 +160,7 @@ const deploy = async () => {
     zbtc,
     shifterMock,
     factory,
-    exchange,
+    exchange: zbtcExchange,
     uniswapAdapter
   };
 };
@@ -243,10 +265,8 @@ describe('0confirmation sdk', () => {
     const borrower = await makeZero(contracts, borrowerProvider);
     const keeper = await makeZero(contracts, provider);
     const deferred = defer();
-    const [ keeperAddress ] = await keeper.driver.sendWrapped('eth_accounts', []);
-    const zbtcContract = new ethers.Contract(contracts.zbtc, ShifterERC20.abi, ethersProvider.getSigner());
-    await ethersProvider.waitForTransaction((await zbtcContract.mint(keeperAddress, utils.parseUnits('1000', 8).toString())).hash);
     await ethersProvider.waitForTransaction((await keeper.approveLiquidityToken(contracts.zbtc)).hash);
+    const exchange = contracts.exchange;
     await ethersProvider.waitForTransaction((await keeper.addLiquidity(contracts.zbtc, utils.parseUnits('1', 8).toString())).hash);
     await ethersProvider.waitForTransaction((await keeper.approvePool(contracts.zbtc)).hash);
     await keeper.listenForLiquidityRequests(async (v) => {
@@ -259,8 +279,8 @@ describe('0confirmation sdk', () => {
         deferred.reject(e);
       }
     });
-    const subscribeDeferred = defer();
-    keeper.subscribeBorrows([], (v) => subscribeDeferred.resolve(v));
+//   const subscribeDeferred = defer();
+//    keeper.subscribeBorrows([], (v) => subscribeDeferred.resolve(v));
     const liquidityRequest = borrower.createLiquidityRequest({
       token: contracts.zbtc,
       amount: utils.parseUnits('0.001', 8).toString(),
@@ -268,9 +288,11 @@ describe('0confirmation sdk', () => {
       gasRequested: utils.parseEther('0.01').toString()
     });
     const liquidityRequestParcel = await liquidityRequest.sign();
-    await timeout(5000);
     await liquidityRequestParcel.broadcast();
     await deferred.promise;
-    console.log(await subscribeDeferred.promise);
+    await borrower.driver.sendWrapped('0cf_setBorrowProxy', [ (liquidityRequestParcel.proxyAddress) ]);
+    const borrowedProvider = new Web3Provider(borrower.getProvider());
+    const exchangeWrapped = new ethers.Contract(contracts.exchange, Exchange.abi, borrowedProvider.getSigner());
+    console.log(require('util').inspect(await (await exchangeWrapped.tokenToEthTransferInput(utils.parseUnits('1', 8), '0', Date.now(), (await borrower.driver.sendWrapped('0cf_getBorrowProxy', [])))).wait(), { colors: true, depth: 15 }));
   });
 });

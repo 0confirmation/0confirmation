@@ -1,9 +1,10 @@
-pragma solidity ^0.6.2;
+pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import { Create2 } from "openzeppelin-solidity/contracts/utils/Create2.sol";
 import { IModuleRegistryProvider } from "./interfaces/IModuleRegistryProvider.sol";
 import { AddressSetLib } from "./utils/AddressSetLib.sol";
+import { RevertCaptureLib } from "./utils/RevertCaptureLib.sol";
 
 library BorrowProxyLib {
   struct ProxyIsolate {
@@ -56,10 +57,11 @@ library BorrowProxyLib {
     (bool success,) = liquidationModule.delegatecall(abi.encodeWithSignature("notify(address,bytes)", liquidationModule, payload));
     return success;
   }
-  function delegate(ModuleExecution memory module, bytes memory payload, uint256 value) internal returns (bytes memory) {
+  event MyEvent(bool success);
+  function delegate(ModuleExecution memory module, bytes memory payload, uint256 value) internal returns (bool, bytes memory) {
     (bool success, bytes memory retval) = module.encapsulated.assetHandler.delegatecall(abi.encode(module.encapsulated.assetHandler, module.encapsulated.liquidationModule, tx.origin, module.to, value, payload));
-    require(success, string(retval));
-    return retval;
+    emit MyEvent(success);
+    return (success, retval);
   }
   function isDefined(Module memory module) internal pure returns (bool) {
     return module.assetHandler != address(0x0);
@@ -74,6 +76,9 @@ library BorrowProxyLib {
     return isolate.isLiquidating && isolate.liquidationIndex != isolate.liquidationSet.set.length;
   }
   event BorrowProxyMade(address indexed user, address indexed proxyAddress, bytes record);
+  function emitBorrowProxyMade(address user, address proxyAddress, bytes memory record) internal {
+    emit BorrowProxyMade(user, proxyAddress, record);
+  }
   function computeModuleKey(address to, bytes4 signature) internal pure returns (bytes32) {
     return keccak256(abi.encodePacked(to, signature));
   }
