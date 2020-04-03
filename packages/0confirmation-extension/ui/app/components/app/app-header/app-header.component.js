@@ -88,7 +88,7 @@ export default class AppHeader extends PureComponent {
     } = this.props
 
     return (
-      <div style={{backgroundColor:"#1C2232"}}
+      <div style={{backgroundColor:"#404040"}}
         className={classnames('app-header', { 'app-header--back-drop': isUnlocked })}
       >
         <div className="app-header__contents">
