@@ -21,14 +21,14 @@ library ShifterPoolLib {
     BorrowProxyLib.ModuleRegistry registry;
   }
   function computeLoanParams(Isolate storage isolate, uint256 amount, uint256 bond, uint256 timeoutExpiry) internal view returns (ShifterBorrowProxyLib.LenderParams memory) {
-    require(timeoutExpiry >= block.number + 1e5, "timeout insufficient");
+    require(timeoutExpiry >= 1e5, "timeout insufficient");
     uint256 baseKeeperFee = uint256(1 ether).div(100); // 1%
     require(bond.mul(uint256(1 ether)).div(amount) > uint256(1 ether).div(100), "bond below minimum");
     uint256 keeperFee = amount < bond ? baseKeeperFee : uint256(baseKeeperFee).mul(bond).div(amount);
     return ShifterBorrowProxyLib.LenderParams({
       keeperFee: keeperFee,
       poolFee: isolate.poolFee,
-      timeoutExpiry: timeoutExpiry,
+      timeoutExpiry: block.number + timeoutExpiry,
       bond: bond
     });
   }
@@ -45,7 +45,7 @@ library ShifterPoolLib {
   }
   function launchLiquidityToken(Isolate storage isolate, address token, string memory name, string memory symbol) internal returns (address) {
     require(isolate.tokenToLiquidityToken[token] == address(0x0), "already deployed liquidity token for target token");
-    address liquidityToken = address(new LiquidityToken(token, name, symbol));
+    address liquidityToken = address(new LiquidityToken(address(this), token, name, symbol));
     isolate.tokenToLiquidityToken[token] = liquidityToken;
     return liquidityToken;
   }

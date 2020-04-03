@@ -16,13 +16,12 @@ const resultToJsonRpc = require('../lib/util/result-to-jsonrpc');
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 const ganache = require('ganache-cli');
 const key = privateKeys[0].substr(2);
-const provider = new HDWalletProvider(key, process.env.EXTERNAL_GANACHE ? 'http://localhost:8545' : ganache.provider({
+const ganacheInstance = ganache.provider({
   mnemonic
-}));
+});
+const provider = new HDWalletProvider(key, process.env.EXTERNAL_GANACHE ? 'http://localhost:8545' : ganacheInstance);
 provider._key = key;
-const borrowerProvider = new HDWalletProvider(privateKeys[1].substr(2), process.env.EXTERNAL_GANACHE ? 'http://localhost:8545' : ganache.provider({
-  mnemonic
-}));
+const borrowerProvider = new HDWalletProvider(privateKeys[1].substr(2), process.env.EXTERNAL_GANACHE ? 'http://localhost:8545' : ganacheInstance);
 borrowerProvider._key = privateKeys[1].substr(2);
 const ethers = require('ethers');
 const { utils } = ethers;
@@ -92,7 +91,7 @@ const deploy = async () => {
   const { address: uniswapAdapter } = await uniswapAdapterFactory.deploy(factory);
   const { address: simpleBurnLiquidationModule } = await simpleBurnLiquidationModuleFactory.deploy(factory, zbtc);
   const liquidityTokenFactory = getFactory(LiquidityToken);
-  const { address: zerobtc } = await liquidityTokenFactory.deploy(zbtc, 'zeroBTC', 'zeroBTC');
+  const { address: zerobtc } = await liquidityTokenFactory.deploy(shifterPool, zbtc, 'zeroBTC', 'zeroBTC');
   await ethersProvider.waitForTransaction((await shifterPoolContract.setup(shifterMock, '1000', [{
     moduleType: ModuleTypes.BY_CODEHASH,
     target: exchange,
@@ -217,7 +216,6 @@ const makeZero = async (contracts, provider) => {
     driver: zero.driver
   }));
   await zero.initializeDriver();
-  console.log('waiting for peer bootstrap')
   await timeout(5000);
   return zero;
 };
@@ -249,15 +247,20 @@ describe('0confirmation sdk', () => {
     const zbtcContract = new ethers.Contract(contracts.zbtc, ShifterERC20.abi, ethersProvider.getSigner());
     await ethersProvider.waitForTransaction((await zbtcContract.mint(keeperAddress, utils.parseUnits('1000', 8).toString())).hash);
     await ethersProvider.waitForTransaction((await keeper.approveLiquidityToken(contracts.zbtc)).hash);
-    await ethersProvider.waitForTransaction((await keeper.addLiquidity(contracts.zbtc, utils.parseUnits('500', 8).toString())).hash);
+    await ethersProvider.waitForTransaction((await keeper.addLiquidity(contracts.zbtc, utils.parseUnits('1', 8).toString())).hash);
     await ethersProvider.waitForTransaction((await keeper.approvePool(contracts.zbtc)).hash);
     await keeper.listenForLiquidityRequests(async (v) => {
       const deposited = await v.waitForDeposit();
       const result = await deposited.submitToRenVM();
       const sig = await deposited.waitForSignature();
-      await v.executeBorrow(utils.parseUnits('0.0005', 8).toString(), '1000');
-      console.log('executed');
+      try {
+        deferred.resolve(await deposited.executeBorrow(utils.parseUnits('0.0005', 8).toString(), '100000'));
+      } catch (e) {
+        deferred.reject(e);
+      }
     });
+    const subscribeDeferred = defer();
+    keeper.subscribeBorrows([], (v) => subscribeDeferred.resolve(v));
     const liquidityRequest = borrower.createLiquidityRequest({
       token: contracts.zbtc,
       amount: utils.parseUnits('0.001', 8).toString(),
@@ -267,5 +270,7 @@ describe('0confirmation sdk', () => {
     const liquidityRequestParcel = await liquidityRequest.sign();
     await timeout(5000);
     await liquidityRequestParcel.broadcast();
+    await deferred.promise;
+    console.log(await subscribeDeferred.promise);
   });
 });

@@ -11,8 +11,8 @@ contract LiquidityToken is ERC20Detailed, ERC20 {
   address public asset;
   uint256 public offset;
   mapping (address => uint256) public outstandingLoans;
-  constructor(address underlyingAsset, string memory name, string memory symbol) ERC20Detailed(name, symbol, ERC20Detailed(underlyingAsset).decimals()) public {
-    pool = msg.sender;
+  constructor(address shifterPool, address underlyingAsset, string memory name, string memory symbol) ERC20Detailed(name, symbol, ERC20Detailed(underlyingAsset).decimals()) public {
+    pool = shifterPool;
     asset = underlyingAsset;
   }
   modifier onlyPool {
@@ -34,15 +34,15 @@ contract LiquidityToken is ERC20Detailed, ERC20 {
     return offset + IERC20(asset).balanceOf(address(this));
   }
   function addLiquidity(uint256 value) public returns (uint256) {
-    uint256 totalLiquidity = super.totalSupply();
+    uint256 totalLiquidity = totalSupply();
     uint256 reserve = getReserve();
-    uint256 totalMinted = value * totalLiquidity / reserve;
+    uint256 totalMinted = value * totalLiquidity / (reserve + 1);
     require(asset.transferTokenFrom(msg.sender, address(this), value), "transfer token failed");
     _mint(msg.sender, totalMinted);
     return totalMinted;
   }
   function removeLiquidity(uint256 value) public returns (uint256) {
-    uint256 totalLiquidity = super.totalSupply();
+    uint256 totalLiquidity = totalSupply();
     uint256 reserve = getReserve();
     uint256 totalBurned = value * reserve / totalLiquidity;
     _burn(msg.sender, totalBurned);
