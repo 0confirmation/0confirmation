@@ -21,8 +21,10 @@ const { Web3Provider } = require('ethers/providers/web3-provider');
 const LiquidityToken = require('@0confirmation/sol/build/LiquidityToken');
 const ShifterPool = require('@0confirmation/sol/build/ShifterPool');
 const BorrowProxyLib = require('@0confirmation/sol/build/BorrowProxyLib');
+const ShifterBorrowProxy = require('@0confirmation/sol/build/ShifterBorrowProxy');
 const Exports = require('@0confirmation/sol/build/Exports');
 const shifterPoolInterface = new ethers.utils.Interface(ShifterPool.abi);
+const shifterBorrowProxyInterface = new ethers.utils.Interface(ShifterBorrowProxy.abi);
 
 const BYTES_TYPES = [ 'bytes' ];
 
@@ -147,6 +149,7 @@ class LiquidityRequestParcel extends LiquidityRequest {
     this.signature = this.signature || signature;
     this.borrower = borrower || ethersUtil.verifyMessage(Buffer.from(utils.computeLiquidityRequestHash(this).substr(2), 'hex'), this.signature);
     this.proxyAddress = proxyAddress || utils.computeBorrowProxyAddress(this);
+    console.log(this.proxyAddress);
     this.depositAddress = depositAddress || utils.computeGatewayAddress({
       isTestnet: this.zero.network.isTestnet,
       mpkh: this.zero.network.mpkh,
@@ -379,6 +382,49 @@ class Zero {
       isTestnet
     };
   }
+  getProvider() {
+    const ethProvider = this.driver.getBackend('ethereum')._cache.provider;
+    const send = async (o) => {
+      switch (o.method) {
+        case 'eth_accounts':
+          const borrowProxyResult = await this.driver.send({
+            method: 'eth_getBorrowProxy',
+            id: o.id,
+            params: []
+          }); 
+          borrowProxyResult.result = [ borrowProxyResult.result ];
+          return borrowProxyResult;
+        case 'eth_sign':
+        case 'personal_sign':
+        case 'eth_signTypedData':
+          throw Error('borrow proxy cannot sign messages');
+        case 'eth_sendTransaction':
+          const [ payload ] = o.params;
+          const [ from ] = await this.driver.sendWrapped('eth_accounts', []);
+          const borrowProxy = await this.driver.sendWrapped('0cf_getBorrowProxy', []);
+          return await this.driver.send({
+            method: o.method,
+            id: o.id,
+            params: [{
+              from,
+              to: borrowProxy,
+              data: shifterBorrowProxyInterface.functions.proxy.encode([ payload.to, payload.value, payload.data ]),
+              value: payload.value,
+              gasPrice: payload.gasPrice,
+              gas: payload.gas
+            }]
+          });
+        default:
+          return await this.driver.send(o);
+      }
+    };
+    return {
+      host: ethProvider.host,
+      connected: true,
+      isMetamask: ethProvider.isMetamask,
+      send
+    };
+  }
   createLiquidityRequest({
     token,
     amount,
@@ -561,8 +607,8 @@ class Zero {
     this.network.borrowProxyCreationCode = await (new Contract(this.network.shifterPool, ShifterPool.abi, getProvider(this.driver).getSigner())).getBorrowProxyCreationCode();
   }
   async initializeDriver() {
+    await utils.initializeCodeHash();
     await this.driver.initialize();
-    await this.loadBorrowProxyCreationCode();
   }
 }
 

@@ -11,6 +11,7 @@ const ShifterBorrowProxy = require('@0confirmation/sol/build/ShifterBorrowProxy'
 const BorrowProxyLib = require('@0confirmation/sol/build/BorrowProxyLib');
 const { linkBytecode: link } = require('solc/linker')
 const { Contract } = require('ethers/contract');
+const queryProxyCodeHash = require('../queries/query-proxy-codehash');
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 const NULL_PHASH = '0x0000000000000000000000000000000000000000000000000000000000000000';
 const defaultProvider = ethers.getDefaultProvider();
@@ -21,6 +22,13 @@ const keccakAbiEncoded = (types, values) => solidityKeccak256(BYTES_TYPES, [ abi
 const abiEncode = ([ types, params ]) => abi.encode(types, params);
 const computePHash = (p) => solidityKeccak256([ 'bytes' ], [ p ]);
 const maybeCoerceToPHash = (params) => Array.isArray(params) ? (!params[1] || params[1].length === 0) ? NULL_PHASH : computePHash(abiEncode(params)) : stripHexPrefix(params).length === 64 ? params : computePHash(params);
+
+let cachedProxyCodeHash;
+
+const initializeCodeHash = async () => {
+  cachedProxyCodeHash = await queryProxyCodeHash();
+  return cachedProxyCodeHash;
+};
 
 const computeLiquidityRequestHash = ({
   shifterPool,
@@ -43,9 +51,8 @@ const computeLiquidityRequestHash = ({
 ]);
 
 const computeBorrowProxyAddress = ({
-  borrowProxyCreationCode,
-  borrowProxyLib,
   shifterPool,
+  borrowProxyLib,
   borrower,
   token,
   nonce,
@@ -62,7 +69,8 @@ const computeBorrowProxyAddress = ({
     nonce,
     amount
   ]);
-  const shifterBorrowProxyBytecode = borrowProxyCreationCode || link(ShifterBorrowProxy.bytecode, {
+  if (!cachedProxyCodeHash) throw Error('must initialize');
+  const shifterBorrowProxyBytecode = link(ShifterBorrowProxy.bytecode, {
     BorrowProxyLib: borrowProxyLib || BorrowProxyLib.networks[42].address
   });
   return getCreate2Address({
@@ -167,5 +175,6 @@ Object.assign(module.exports, {
   addHexPrefix,
   NULL_PHASH,
   NULL_ADDRESS,
+  initializeCodeHash,
   computeShiftInTxHash
 });

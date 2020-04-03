@@ -6,9 +6,9 @@ import { IShifterRegistry } from "./interfaces/IShifterRegistry.sol";
 import { IShifter } from "./interfaces/IShifter.sol";
 import { ShifterPoolLib } from "./ShifterPoolLib.sol";
 import { ShifterBorrowProxyLib } from "./ShifterBorrowProxyLib.sol";
+import { ShifterBorrowProxyFactoryLib } from "./ShifterBorrowProxyFactoryLib.sol";
 import { BorrowProxy } from "./BorrowProxy.sol";
 import { BorrowProxyLib } from "./BorrowProxyLib.sol";
-import { BorrowProxyFactoryLib } from "./BorrowProxyFactoryLib.sol";
 import { TokenUtils } from "./utils/TokenUtils.sol";
 import { ViewExecutor } from "./utils/ViewExecutor.sol";
 import { LiquidityToken } from "./LiquidityToken.sol";
@@ -17,8 +17,8 @@ contract ShifterPool is Ownable, ViewExecutor {
   using ShifterPoolLib for *;
   using TokenUtils for *;
   using ShifterBorrowProxyLib for *;
+  using ShifterBorrowProxyFactoryLib for *;
   using BorrowProxyLib for *;
-  using BorrowProxyFactoryLib for *;
   ShifterPoolLib.Isolate isolate;
   function setup(address shifterRegistry, uint256 poolFee, BorrowProxyLib.ModuleRegistration[] memory modules, ShifterPoolLib.LiquidityTokenLaunch[] memory tokenLaunches) public onlyOwner {
     require(isolate.shifterRegistry == address(0x0), "already initialized");
@@ -34,9 +34,6 @@ contract ShifterPool is Ownable, ViewExecutor {
       ShifterPoolLib.LiquidityTokenLaunch memory launch = tokenLaunches[i];
       isolate.tokenToLiquidityToken[launch.token] = launch.liqToken;
     }
-  }
-  function getBorrowProxyCreationCode() public pure returns (bytes memory) {
-    return type(BorrowProxy).creationCode;
   }
   function executeBorrow(ShifterBorrowProxyLib.LiquidityRequestParcel memory liquidityRequestParcel, uint256 bond, uint256 timeoutExpiry) public payable {
     require(liquidityRequestParcel.gasRequested == msg.value, "supplied ether is not equal to gas requested");

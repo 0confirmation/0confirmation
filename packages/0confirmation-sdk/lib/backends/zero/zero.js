@@ -44,6 +44,15 @@ class ZeroBackend extends RPCWrapper {
     switch (method) {
       case '0cf_peerId':
         return await resultToJsonRpc(id, () => this.node.socket.peerInfo.id.toB58String());
+      case '0cf_setBorrowProxy':
+        return await resultToJsonRpc(id, () => {
+          return this._borrowProxy = params[0];
+        });
+      case '0cf_getBorrowProxy':
+        return await resultToJsonRpc(id, async () => {
+          if (!this._borrowProxy) throw Error('no borrow proxy selected');
+          return this._borrowProxy;
+        });
       case '0cf_broadcastLiquidityRequest':
         const [{
           shifterPool,
