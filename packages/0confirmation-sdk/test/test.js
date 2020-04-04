@@ -17,12 +17,13 @@ const resultToJsonRpc = require('../lib/util/result-to-jsonrpc');
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 const ganache = require('ganache-cli');
 const key = privateKeys[0].substr(2);
-const ganacheInstance = ganache.provider({
-  mnemonic
+const ganacheInstance = process.env.EXTERNAL_GANACHE ? 'http://localhost:8545' : ganache.provider({
+  mnemonic,
+  gasLimit: '100000000'
 });
-const provider = new HDWalletProvider(key, process.env.EXTERNAL_GANACHE ? 'http://localhost:8545' : ganacheInstance);
+const provider = new HDWalletProvider(key, ganacheInstance);
 provider._key = key;
-const borrowerProvider = new HDWalletProvider(privateKeys[1].substr(2), process.env.EXTERNAL_GANACHE ? 'http://localhost:8545' : ganacheInstance);
+const borrowerProvider = new HDWalletProvider(privateKeys[1].substr(2), ganacheInstance);
 borrowerProvider._key = privateKeys[1].substr(2);
 const ethers = require('ethers');
 const { utils } = ethers;
@@ -79,12 +80,19 @@ const createMarket = async (provider, factory, token) => {
   const { logs } = receipt;
   const exchange = '0x' + logs[0].topics[2].substr(26);
   const tokenWrapped = new ethers.Contract(token, LiquidityToken.abi, provider.getSigner());
-  await (await tokenWrapped.approve(exchange, utils.parseUnits('10', 8))).wait();
+  await (await tokenWrapped.approve(exchange, utils.parseUnits('500', 8))).wait();
   const exchangeWrapped = new ethers.Contract(exchange, Exchange.abi, provider.getSigner());
-  await (await exchangeWrapped.addLiquidity('0', utils.parseUnits('10', 8), String(Date.now()), {
-    value: utils.parseEther('10'),
+  await (await exchangeWrapped.addLiquidity(utils.parseEther('10'), utils.parseUnits('100', 8), String(Date.now() * 2), {
+    value: utils.hexlify(utils.parseEther('10')),
     gasLimit: ethers.utils.hexlify(6e6)
   })).wait();
+/*
+  await (await exchangeWrapped.addLiquidity('1', utils.parseUnits('', 8), String(Date.now() * 2), {
+    value: utils.parseEther('1'),
+    gasLimit: ethers.utils.hexlify(6e6)
+  })).wait();
+*/
+ // console.log('doop');
   return exchange;
 };
 
@@ -267,14 +275,14 @@ describe('0confirmation sdk', () => {
     const deferred = defer();
     await ethersProvider.waitForTransaction((await keeper.approveLiquidityToken(contracts.zbtc)).hash);
     const exchange = contracts.exchange;
-    await ethersProvider.waitForTransaction((await keeper.addLiquidity(contracts.zbtc, utils.parseUnits('1', 8).toString())).hash);
+    await ethersProvider.waitForTransaction((await keeper.addLiquidity(contracts.zbtc, utils.parseUnits('5', 8).toString())).hash);
     await ethersProvider.waitForTransaction((await keeper.approvePool(contracts.zbtc)).hash);
     await keeper.listenForLiquidityRequests(async (v) => {
       const deposited = await v.waitForDeposit();
       const result = await deposited.submitToRenVM();
       const sig = await deposited.waitForSignature();
       try {
-        deferred.resolve(await deposited.executeBorrow(utils.parseUnits('0.0005', 8).toString(), '100000'));
+        deferred.resolve(await deposited.executeBorrow(utils.parseUnits('1', 8).toString(), '100000'));
       } catch (e) {
         deferred.reject(e);
       }
@@ -283,16 +291,17 @@ describe('0confirmation sdk', () => {
 //    keeper.subscribeBorrows([], (v) => subscribeDeferred.resolve(v));
     const liquidityRequest = borrower.createLiquidityRequest({
       token: contracts.zbtc,
-      amount: utils.parseUnits('0.001', 8).toString(),
+      amount: utils.parseUnits('2', 8).toString(),
       nonce: '0x68b7aed3299637f7ed8d02d40fb04a727d89bb3448ca439596bd42d65a6e16cd',
       gasRequested: utils.parseEther('0.01').toString()
     });
     const liquidityRequestParcel = await liquidityRequest.sign();
+    await timeout(2000);
     await liquidityRequestParcel.broadcast();
     await deferred.promise;
     await borrower.driver.sendWrapped('0cf_setBorrowProxy', [ (liquidityRequestParcel.proxyAddress) ]);
     const borrowedProvider = new Web3Provider(borrower.getProvider());
     const exchangeWrapped = new ethers.Contract(contracts.exchange, Exchange.abi, borrowedProvider.getSigner());
-    console.log(require('util').inspect(await (await exchangeWrapped.tokenToEthTransferInput(utils.parseUnits('1', 8), '0', Date.now(), (await borrower.driver.sendWrapped('0cf_getBorrowProxy', [])))).wait(), { colors: true, depth: 15 }));
+    console.log(require('util').inspect(await (await exchangeWrapped.tokenToEthTransferInput(utils.parseUnits('1', 8), utils.parseUnits('1', 8), String(Date.now() * 2), liquidityRequestParcel.proxyAddress, { gasLimit: ethers.utils.hexlify(6e6) })).wait(), { colors: true, depth: 15 }));
   });
 });

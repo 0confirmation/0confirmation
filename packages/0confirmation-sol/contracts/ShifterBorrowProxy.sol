@@ -50,4 +50,6 @@ contract ShifterBorrowProxy is BorrowProxy {
     }
     return false;
   }
+  fallback() external payable override {}
+  receive() external payable override {}
 }

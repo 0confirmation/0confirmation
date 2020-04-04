@@ -8,7 +8,7 @@ import { PortfolioReaderViewLib } from "./PortfolioReaderViewLib.sol";
 
 contract PortfolioQuery {
   event PortfolioQueryExport(PortfolioReaderViewLib.PortfolioEntry[] exported);
-  constructor(address borrowProxy, address moduleAddress, TokenQueryLib.TokenQueryPayload memory query) public {
+  constructor(address payable borrowProxy, address moduleAddress, TokenQueryLib.TokenQueryPayload memory query) public {
     address viewLayer = address(new PortfolioReaderView());
     bytes memory result = BorrowProxy(borrowProxy).query(viewLayer, abi.encodeWithSelector(PortfolioReaderView.render.selector, moduleAddress, query));
     assembly {

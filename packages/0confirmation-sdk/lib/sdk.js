@@ -399,18 +399,21 @@ class Zero {
             throw Error('borrow proxy cannot sign messages');
           case 'eth_sendTransaction':
           case 'eth_estimateGas':
-          case 'eth_call':
             const [ payload ] = o.params;
             const [ from ] = await wrappedEthProvider.send('eth_accounts', []);
             const borrowProxy = await this.driver.sendWrapped('0cf_getBorrowProxy', []);
-            console.log([ from, borrowProxy ]);
-  const ln = (v) => ((console.log(v)), v);
-            ln(payload);
-            return await wrappedEthProvider.send(o.method, [ ln(Object.assign({
+            return await wrappedEthProvider.send(o.method, [ Object.assign({
               from,
               to: borrowProxy,
               data: shifterBorrowProxyInterface.functions.proxy.encode([ payload.to, payload.value || '0x0', payload.data || '0x' ])
-            }, payload.value && { value: payload.value } || {}, payload.gasPrice && { gasPrice: payload.gasPrice } || {}, payload.gas && { gas: payload.gas } || {}, payload.gasLimit && { gasLimit: payload.gasLimit } || {}, payload.nonce && { nonce: payload.nonce } || {})) ]);
+            }, payload.value && { value: payload.value } || {}, payload.gasPrice && { gasPrice: payload.gasPrice } || {}, payload.gas && { gas: payload.gas } || {}, payload.gasLimit && { gasLimit: payload.gasLimit } || {}, payload.nonce && { nonce: payload.nonce } || {}) ]);
+          case 'eth_call':
+            const [ callPayload ] = o.params;
+            const callBorrowProxy = await this.driver.sendWrapped('0cf_getBorrowProxy', []);
+            return await wrappedEthProvider.send(o.method, [ Object.assign({
+              from: callBorrowProxy,
+              data: callPayload.data
+            }, callPayload.to && { to: callPayload.to } || {}, callPayload.value && { value: callPayload.value } || {}, callPayload.gasPrice && { gasPrice: callPayload.gasPrice } || {}, callPayload.gas && { gas: callPayload.gas } || {}, callPayload.gasLimit && { gasLimit: callPayload.gasLimit } || {}, callPayload.nonce && { nonce: callPayload.nonce } || {}) ]);
           default:
             return await wrappedEthProvider.send(o.method, o.params);
         }

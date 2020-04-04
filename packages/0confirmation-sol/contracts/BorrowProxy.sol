@@ -42,4 +42,8 @@ contract BorrowProxy is ViewExecutor {
       return(add(retval, 0x20), mload(retval))
     }
   }
+  receive() external payable virtual {
+    // just receive ether, do nothing
+  } 
+  fallback() external payable virtual {}
 }

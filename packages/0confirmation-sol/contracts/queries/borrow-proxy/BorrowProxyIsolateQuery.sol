@@ -4,7 +4,7 @@ import { BorrowProxy } from "../../BorrowProxy.sol";
 import { BorrowProxyIsolateReaderView } from "./BorrowProxyIsolateReaderView.sol";
 
 contract BorrowProxyIsolateQuery {
-  constructor(address borrowProxy) public {
+  constructor(address payable borrowProxy) public {
     address viewLayer = address(new BorrowProxyIsolateReaderView());
     bytes memory result = BorrowProxy(borrowProxy).query(viewLayer, abi.encodeWithSelector(BorrowProxyIsolateReaderView.render.selector));
     assembly {

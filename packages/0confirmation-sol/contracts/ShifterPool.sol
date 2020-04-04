@@ -41,7 +41,7 @@ contract ShifterPool is Ownable, ViewExecutor {
     require(liquidityRequestParcel.validateSignature(requestHash), "liquidity request signature rejected");
     ShifterBorrowProxyLib.LiquidityRequest memory liquidityRequest = liquidityRequestParcel.request;
     bytes32 borrowerSalt = liquidityRequest.computeBorrowerSalt();
-    address proxyAddress = borrowerSalt.deriveBorrowerAddress();
+    address payable proxyAddress = address(uint160(borrowerSalt.deriveBorrowerAddress()));
     require(!isolate.borrowProxyController.isInitialized(proxyAddress), "proxy has already been initialized");
     ShifterBorrowProxyLib.LenderRecord memory loan;
     loan.keeper = msg.sender;
