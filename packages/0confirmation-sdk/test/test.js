@@ -11,6 +11,8 @@ const hdwallet = hdkey.fromMasterSeed(seed);
 const { promisify } = require('bluebird');
 const privateKeys = Array(10).fill(null).map((_, i) => hdwallet.derivePath("m/44'/60'/0'/0/" + String(i)).getWallet().getPrivateKeyString());
 
+const startSignalingServer = require('@0confirmation/webrtc-star');
+
 const timeout = (n) => new Promise((resolve) => setTimeout(resolve, n));
 
 const resultToJsonRpc = require('../lib/util/result-to-jsonrpc');
@@ -86,15 +88,10 @@ const createMarket = async (provider, factory, token) => {
     value: utils.hexlify(utils.parseEther('10')),
     gasLimit: ethers.utils.hexlify(6e6)
   })).wait();
-/*
-  await (await exchangeWrapped.addLiquidity('1', utils.parseUnits('', 8), String(Date.now() * 2), {
-    value: utils.parseEther('1'),
-    gasLimit: ethers.utils.hexlify(6e6)
-  })).wait();
-*/
- // console.log('doop');
   return exchange;
 };
+
+const uniq = require('lodash/uniq');
 
 const deploy = async () => {
   const borrowProxyLibFactory = getFactory(BorrowProxyLib);
@@ -122,36 +119,10 @@ const deploy = async () => {
   await (await zbtcContract.mint(keeperAddress, utils.parseUnits('1000', 8).toString())).wait();
   const zbtcExchange = await createMarket(ethersProvider, factory, zbtc);
   const { address: zerobtc } = await liquidityTokenFactory.deploy(shifterPool, zbtc, 'zeroBTC', 'zeroBTC');
-  await ethersProvider.waitForTransaction((await shifterPoolContract.setup(shifterMock, '1000', [{
+  await ethersProvider.waitForTransaction((await shifterPoolContract.setup(shifterMock, '1000', '1', [{
     moduleType: ModuleTypes.BY_CODEHASH,
     target: zbtcExchange,
-    sigs: [
-      '0x89f2a871',
-      '0xfd11c223',
-      '0x95e3c50b',
-      '0x013efd8b',
-      '0xcd7724c3',
-      '0x59e94862',
-      '0x95b68fe7',
-      '0x2640f62c',
-      '0x9d76ea58',
-      '0x422f1043',
-      '0xf88bf15a',
-      '0xf39b5b9b',
-      '0xad65d76d',
-      '0x6b1d4db7',
-      '0x0b573638',
-      '0x7237e031',
-      '0xd4e4841d',
-      '0xddf7e1a7',
-      '0xf552d91b',
-      '0xb040d545',
-      '0xf3c0efe9',
-      '0xb1cb43bf',
-      '0xec384a3e',
-      '0xea650c7d',
-      '0x981a1327'
-    ],
+    sigs: Zero.getSignatures(Exchange.abi),
     module: {
       assetHandler: uniswapAdapter,
       liquidationModule: simpleBurnLiquidationModule
@@ -231,7 +202,7 @@ const makeZero = async (contracts, provider) => {
         network: 'testnet'
       },
       zero: {
-        multiaddr: 'lendnet',
+        multiaddr: '/ip4/127.0.0.1/tcp/9090/ws/p2p-webrtc-star/',
         dht: true
       }
     },
@@ -268,27 +239,31 @@ const nodeUtil = require('util');
 const ln = (v, desc) => ((console.log(desc + ': ')), (console.log(nodeUtil.inspect(v, { colors: true, depth: 3 }))), v);
 
 describe('0confirmation sdk', () => {
+  before(async () => {
+    await startSignalingServer();
+  });
   it('should execute a borrow', async () => {
     const contracts = await deploy();
     const borrower = await makeZero(contracts, borrowerProvider);
     const keeper = await makeZero(contracts, provider);
     const deferred = defer();
-    await ethersProvider.waitForTransaction((await keeper.approveLiquidityToken(contracts.zbtc)).hash);
+    await (await keeper.approveLiquidityToken(contracts.zbtc)).wait();
     const exchange = contracts.exchange;
-    await ethersProvider.waitForTransaction((await keeper.addLiquidity(contracts.zbtc, utils.parseUnits('5', 8).toString())).hash);
-    await ethersProvider.waitForTransaction((await keeper.approvePool(contracts.zbtc)).hash);
+    await (await keeper.addLiquidity(contracts.zbtc, utils.parseUnits('5', 8).toString())).wait();
+    await (await keeper.approvePool(contracts.zbtc)).wait();
     await keeper.listenForLiquidityRequests(async (v) => {
       const deposited = await v.waitForDeposit();
       const result = await deposited.submitToRenVM();
       const sig = await deposited.waitForSignature();
       try {
-        deferred.resolve(await deposited.executeBorrow(utils.parseUnits('1', 8).toString(), '100000'));
+        await deposited.executeBorrow(utils.parseUnits('1', 8).toString(), '100000');
+        deferred.resolve(await deposited.getBorrowProxy());
       } catch (e) {
         deferred.reject(e);
       }
     });
-//   const subscribeDeferred = defer();
-//    keeper.subscribeBorrows([], (v) => subscribeDeferred.resolve(v));
+//  const subscribeDeferred = defer();
+//  keeper.subscribeBorrows([], (v) => subscribeDeferred.resolve(v));
     const liquidityRequest = borrower.createLiquidityRequest({
       token: contracts.zbtc,
       amount: utils.parseUnits('2', 8).toString(),
@@ -298,10 +273,11 @@ describe('0confirmation sdk', () => {
     const liquidityRequestParcel = await liquidityRequest.sign();
     await timeout(2000);
     await liquidityRequestParcel.broadcast();
-    await deferred.promise;
+    const proxy = await deferred.promise;
     await borrower.driver.sendWrapped('0cf_setBorrowProxy', [ (liquidityRequestParcel.proxyAddress) ]);
     const borrowedProvider = new Web3Provider(borrower.getProvider());
     const exchangeWrapped = new ethers.Contract(contracts.exchange, Exchange.abi, borrowedProvider.getSigner());
-    console.log(require('util').inspect(await (await exchangeWrapped.tokenToEthTransferInput(utils.parseUnits('1', 8), utils.parseUnits('1', 8), String(Date.now() * 2), liquidityRequestParcel.proxyAddress, { gasLimit: ethers.utils.hexlify(6e6) })).wait(), { colors: true, depth: 15 }));
+    await (await exchangeWrapped.tokenToEthTransferInput(utils.parseUnits('1', 8), utils.parseUnits('1', 8), String(Date.now() * 2), liquidityRequestParcel.proxyAddress, { gasLimit: ethers.utils.hexlify(6e6) })).wait();
+    await (await proxy.defaultLoan({ gasLimit: ethers.utils.hexlify(6e6) })).wait();
   });
 });

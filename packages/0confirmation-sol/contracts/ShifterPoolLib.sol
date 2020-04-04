@@ -13,6 +13,7 @@ library ShifterPoolLib {
   using SafeMath for *;
   struct Isolate {
     address shifterRegistry;
+    uint256 minTimeout;
     uint256 poolFee;
     mapping (address => bool) isKeeper;
     mapping (bytes32 => bool) provisionExecuted;
@@ -21,7 +22,7 @@ library ShifterPoolLib {
     BorrowProxyLib.ModuleRegistry registry;
   }
   function computeLoanParams(Isolate storage isolate, uint256 amount, uint256 bond, uint256 timeoutExpiry) internal view returns (ShifterBorrowProxyLib.LenderParams memory) {
-    require(timeoutExpiry >= 1e5, "timeout insufficient");
+    require(timeoutExpiry >= isolate.minTimeout, "timeout insufficient");
     uint256 baseKeeperFee = uint256(1 ether).div(100); // 1%
     require(bond.mul(uint256(1 ether)).div(amount) > uint256(1 ether).div(100), "bond below minimum");
     uint256 keeperFee = amount < bond ? baseKeeperFee : uint256(baseKeeperFee).mul(bond).div(amount);

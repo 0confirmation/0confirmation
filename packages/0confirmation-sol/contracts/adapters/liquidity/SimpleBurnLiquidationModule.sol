@@ -26,24 +26,26 @@ contract SimpleBurnLiquidationModule {
   }
   function liquidate(address moduleAddress) public returns (bool) {
     SimpleBurnLiquidationModuleLib.Isolate storage isolate = SimpleBurnLiquidationModuleLib.getIsolatePointer(moduleAddress);
+    SimpleBurnLiquidationModuleLib.ExternalIsolate memory externalIsolate = SimpleBurnLiquidationModule(moduleAddress).getExternalIsolateHandler();
     IUniswapFactory factory = IUniswapFactory(isolate.factoryAddress);
+    address liquidateTo = externalIsolate.liquidateTo;
     uint256 i;
+    uint256 received = 0;
     for (i = isolate.liquidated; i < isolate.toLiquidate.set.length; i++) {
+      address tokenAddress = isolate.toLiquidate.set[i];
+      if (liquidateTo == tokenAddress) continue;
       if (gasleft() < 3e5) {
         isolate.liquidated = i;
         return false;
       }
-      address tokenAddress = isolate.toLiquidate.set[i];
       uint256 tokenBalance = IERC20(tokenAddress).balanceOf(address(this));
       address payable exchangeAddress = factory.getExchange(tokenAddress);
-      IERC20(tokenAddress).approve(exchangeAddress, 0); // needed for many tokens
-      IERC20(tokenAddress).approve(exchangeAddress, tokenBalance);
-      IUniswapExchange(exchangeAddress).tokenToEthSwapInput(tokenBalance, 0, block.number + 1);
+      tokenAddress.approveForMaxIfNeeded(exchangeAddress);
+      received += IUniswapExchange(exchangeAddress).tokenToTokenSwapInput(tokenBalance, 0, 0, block.number + 1, liquidateTo);
     }
-    SimpleBurnLiquidationModuleLib.ExternalIsolate memory externalIsolate = SimpleBurnLiquidationModule(moduleAddress).getExternalIsolateHandler();
-    uint256 received = IUniswapExchange(factory.getExchange(externalIsolate.liquidateTo)).ethToTokenSwapInput.value(address(this).balance)(0, block.number + 1);
+    received += IUniswapExchange(factory.getExchange(liquidateTo)).ethToTokenSwapInput.value(address(this).balance)(0, block.number + 1);
     isolate.liquidated = i;
-    bool success = externalIsolate.liquidateTo.sendToken(proxyIsolate.masterAddress, received);
+    bool success = liquidateTo.sendToken(proxyIsolate.masterAddress, received);
     require(success, "liquidated token transfer failed");
     return true;
   }

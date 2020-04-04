@@ -49,7 +49,7 @@ library ShifterBorrowProxyLib {
   struct TriggerParcel {
     ProxyRecord record;
     bytes32 txhash;
-    bytes32 vout;
+    uint256 vout;
     bytes32 pHash;
     bytes darknodeSignature;
   }

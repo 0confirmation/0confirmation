@@ -20,9 +20,10 @@ contract ShifterPool is Ownable, ViewExecutor {
   using ShifterBorrowProxyFactoryLib for *;
   using BorrowProxyLib for *;
   ShifterPoolLib.Isolate isolate;
-  function setup(address shifterRegistry, uint256 poolFee, BorrowProxyLib.ModuleRegistration[] memory modules, ShifterPoolLib.LiquidityTokenLaunch[] memory tokenLaunches) public onlyOwner {
+  function setup(address shifterRegistry, uint256 minTimeout, uint256 poolFee, BorrowProxyLib.ModuleRegistration[] memory modules, ShifterPoolLib.LiquidityTokenLaunch[] memory tokenLaunches) public onlyOwner {
     require(isolate.shifterRegistry == address(0x0), "already initialized");
     isolate.shifterRegistry = shifterRegistry;
+    isolate.minTimeout = minTimeout;
     isolate.poolFee = poolFee;
     for (uint256 i = 0; i < modules.length; i++) {
       BorrowProxyLib.ModuleRegistration memory registration = modules[i];

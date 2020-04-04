@@ -41,11 +41,18 @@ contract ShifterBorrowProxy is BorrowProxy {
       }
       isolate.liquidationIndex = set.length;
       ShifterPool pool = ShifterPool(isolate.masterAddress);
-      uint256 preBalance = isolate.preBalance;
       uint256 postBalance = IERC20(record.request.token).balanceOf(address(this));
-      int256 reclaimed = int256(postBalance) - int256(preBalance);
-      uint256 repay = uint256(int256(record.request.amount) - (reclaimed < 0 ? 0 : reclaimed));
-      require(pool.relayResolveLoan(record.request.token, address(pool.getLiquidityTokenHandler(record.request.token)), record.loan.keeper, record.request.amount - repay, repay), "loan resolution failure");
+      require(record.request.token.sendToken(address(pool), postBalance), "failed to transfer reclaimed funds to pool");
+      uint256 bond = record.loan.params.bond;
+      if (postBalance < record.request.amount) {
+        if (bond > postBalance - record.request.amount) {
+          bond -= (postBalance - record.request.amount);
+        } else {
+          bond = 0;
+        }
+      }
+      uint256 repay = postBalance - bond;
+      require(pool.relayResolveLoan(record.request.token, address(pool.getLiquidityTokenHandler(record.request.token)), record.loan.keeper, bond, repay), "loan resolution failure");
       return true;
     }
     return false;
