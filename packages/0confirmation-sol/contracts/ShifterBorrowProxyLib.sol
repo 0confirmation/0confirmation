@@ -3,6 +3,7 @@ pragma experimental ABIEncoderV2;
 
 import { ECDSA } from "openzeppelin-solidity/contracts/cryptography/ECDSA.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import { BorrowProxy } from "./BorrowProxy.sol";
 import { TokenUtils } from "./utils/TokenUtils.sol";
 
 library ShifterBorrowProxyLib {
@@ -18,9 +19,14 @@ library ShifterBorrowProxyLib {
     bytes32 nonce;
     uint256 amount;
   }
+  struct InitializationAction {
+    address to;
+    bytes txData;
+  }
   struct LiquidityRequestParcel {
     LiquidityRequest request;
     uint256 gasRequested;
+    InitializationAction[] actions;
     bytes signature;
   }
   struct LenderParams {
@@ -37,11 +43,24 @@ library ShifterBorrowProxyLib {
   function emitShifterBorrowProxyRepaid(address user, ProxyRecord memory record) internal {
     emit ShifterBorrowProxyRepaid(user, record);
   }
+  function triggerAction(InitializationAction memory action, address proxyAddress) internal returns (bool) {
+    (bool success, ) = proxyAddress.call.gas(gasleft())(abi.encodeWithSelector(BorrowProxy.proxy.selector, action.to, 0, action.txData));
+    return success;
+  }
+  function triggerActions(InitializationAction[] memory actions, address proxyAddress) internal returns (bool) {
+    for (uint256 i = 0; i < actions.length; i++) {
+      if (!triggerAction(actions[i], proxyAddress)) return false;
+    }
+    return true;
+  }
   function computeBorrowerSalt(LiquidityRequest memory params) internal pure returns (bytes32) {
     return keccak256(abi.encodePacked(params.borrower, params.token, params.nonce, params.amount));
   }
+  function encodeParcelActions(InitializationAction[] memory actions) internal pure returns (bytes memory) {
+    return abi.encode(actions);
+  }
   function computeLiquidityRequestHash(LiquidityRequestParcel memory parcel) internal view returns (bytes32) {
-    return keccak256(abi.encodePacked(address(this), parcel.request.token, parcel.request.nonce, parcel.request.amount, parcel.gasRequested));
+    return keccak256(abi.encodePacked(address(this), parcel.request.token, parcel.request.nonce, parcel.request.amount, parcel.gasRequested, encodeParcelActions(parcel.actions)));
   }
   function validateSignature(LiquidityRequestParcel memory parcel, bytes32 hash) internal pure returns (bool) {
     return parcel.request.borrower == ECDSA.recover(ECDSA.toEthSignedMessageHash(hash), parcel.signature);

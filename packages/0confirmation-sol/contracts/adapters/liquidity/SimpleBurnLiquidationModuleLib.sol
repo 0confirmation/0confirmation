@@ -20,8 +20,8 @@ library SimpleBurnLiquidationModuleLib {
     address factoryAddress;
     address liquidateTo;
   }
-  function computeIsolatePointer(address instance) public pure returns (uint256) {
-    return uint256(keccak256(abi.encodePacked("isolate.simple-burn", instance)));
+  function computeIsolatePointer() public pure returns (uint256) {
+    return uint256(keccak256(abi.encodePacked("isolate.simple-burn")));
   }
   function cast(uint256 v) internal pure returns (uint256) {
     return v;
@@ -34,8 +34,8 @@ library SimpleBurnLiquidationModuleLib {
     }
     return swap(key);
   }
-  function getIsolatePointer(address moduleAddress) internal returns (Isolate storage) {
-    return toIsolatePointer(computeIsolatePointer(moduleAddress));
+  function getIsolatePointer() internal returns (Isolate storage) {
+    return toIsolatePointer(computeIsolatePointer());
   }
   function getExternalIsolate(address moduleAddress) internal returns (ExternalIsolate memory) {
     return SimpleBurnLiquidationModule(moduleAddress).getExternalIsolateHandler();

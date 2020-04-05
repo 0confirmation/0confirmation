@@ -59,6 +59,7 @@ class ZeroBackend extends RPCWrapper {
           token,
           amount,
           nonce,
+          actions,
           gasRequested,
           signature
         } = {}] = (params || []);
@@ -68,6 +69,7 @@ class ZeroBackend extends RPCWrapper {
             shifterPool,
             token,
             amount,
+            actions,
             nonce,
             gasRequested,
             signature

@@ -9,8 +9,8 @@ library PortfolioReaderViewLib {
     address payable token;
     TokenQueryLib.TokenQueryResult data;
   }
-  function executePortfolioReaderViewLogic(address moduleAddress, TokenQueryLib.TokenQueryPayload memory query) internal returns (PortfolioEntry[] memory) {
-    SimpleBurnLiquidationModuleLib.Isolate storage isolate = SimpleBurnLiquidationModuleLib.getIsolatePointer(moduleAddress);
+  function executePortfolioReaderViewLogic(TokenQueryLib.TokenQueryPayload memory query) internal returns (PortfolioEntry[] memory) {
+    SimpleBurnLiquidationModuleLib.Isolate storage isolate = SimpleBurnLiquidationModuleLib.getIsolatePointer();
     address[] memory set = isolate.toLiquidate.set;
     PortfolioEntry[] memory result = new PortfolioEntry[](set.length + 1);
     result[0].token = query.token;

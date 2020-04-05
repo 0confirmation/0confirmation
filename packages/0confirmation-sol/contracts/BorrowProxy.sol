@@ -7,13 +7,15 @@ import { SliceLib } from "./utils/SliceLib.sol";
 import { ViewExecutor } from "./utils/ViewExecutor.sol";
 import { IShifter } from "./interfaces/IShifter.sol";
 import { IBorrowProxyController } from "./interfaces/IBorrowProxyController.sol";
+import { AddressSetLib } from "./utils/AddressSetLib.sol";
 
 contract BorrowProxy is ViewExecutor {
   using SliceLib for *;
   using BorrowProxyLib for *;
+  using AddressSetLib for *;
   BorrowProxyLib.ProxyIsolate isolate;
-  modifier onlyOwner {
-   require(msg.sender == isolate.owner, "borrow proxy can only be used by borrower");
+  modifier onlyOwnerOrPool {
+   require(msg.sender == isolate.owner || msg.sender == isolate.masterAddress, "borrow proxy can only be used by borrower");
     _;
   }
   function setup(address owner) public returns (bool) {
@@ -25,7 +27,7 @@ contract BorrowProxy is ViewExecutor {
   function validateProxyRecord(bytes memory record) internal returns (bool) {
     return IBorrowProxyController(isolate.masterAddress).validateProxyRecordHandler(record);
   }
-  function proxy(address to, uint256 value, bytes memory payload) public onlyOwner {
+  function proxy(address to, uint256 value, bytes memory payload) public onlyOwnerOrPool {
     if (isolate.unbound) {
       (bool success, bytes memory retval) = to.call.value(value)(payload);
       if (!success) revert(RevertCaptureLib.decodeError(retval));
@@ -38,6 +40,8 @@ contract BorrowProxy is ViewExecutor {
     require(module.encapsulated.isDefined(), "function handler not registered");
     (bool success, bytes memory retval) = module.delegate(payload, value);
     if (!success) revert(RevertCaptureLib.decodeError(retval));
+    if (module.encapsulated.liquidationSubmodule != address(0x0)) isolate.liquidationSet.insert(module.encapsulated.liquidationSubmodule);
+    if (module.encapsulated.repaymentSubmodule != address(0x0)) isolate.repaymentSet.insert(module.encapsulated.repaymentSubmodule);
     assembly {
       return(add(retval, 0x20), mload(retval))
     }

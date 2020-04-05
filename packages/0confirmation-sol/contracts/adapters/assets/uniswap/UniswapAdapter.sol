@@ -3,20 +3,17 @@ pragma experimental ABIEncoderV2;
 
 import { ILiquidationModule } from "../../../interfaces/ILiquidationModule.sol";
 import { UniswapAdapterLib } from "./UniswapAdapterLib.sol";
-import { SliceLib } from "../../../utils/SliceLib.sol";
-import { BorrowProxyLib } from "../../../BorrowProxyLib.sol";
-import { ShifterBorrowProxyLib } from "../../../ShifterBorrowProxyLib.sol";
 import { IUniswapFactory } from "../../../interfaces/IUniswapFactory.sol";
 import { IUniswapExchange } from "../../../interfaces/IUniswapExchange.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { ModuleLib } from "../../lib/ModuleLib.sol";
 import { EtherForwarder } from "./EtherForwarder.sol";
+import { BorrowProxyLib } from "../../../BorrowProxyLib.sol";
 
 contract UniswapAdapter {
-  using SliceLib for *;
-  using BorrowProxyLib for *;
-  using ShifterBorrowProxyLib for *;
-  using UniswapAdapterLib for *;
   using TokenUtils for *;
+  using ModuleLib for *;
+  using BorrowProxyLib for *;
   constructor(address factoryAddress) public {
     UniswapAdapterLib.ExternalIsolate storage isolate = UniswapAdapterLib.getIsolatePointer(address(this));
     isolate.factoryAddress = factoryAddress;
@@ -24,39 +21,11 @@ contract UniswapAdapter {
   function getExternalIsolateHandler() external payable returns (UniswapAdapterLib.ExternalIsolate memory) {
     return UniswapAdapterLib.getIsolatePointer(address(this));
   }
-  function getSignatures() public pure returns (bytes4[] memory retval) {
-    retval = new bytes4[](25);
-    retval[0] = IUniswapExchange.getInputPrice.selector;
-    retval[1] = IUniswapExchange.getOutputPrice.selector;
-    retval[2] = IUniswapExchange.tokenToEthSwapInput.selector;
-    retval[3] = IUniswapExchange.tokenToEthSwapOutput.selector;
-    retval[4] = IUniswapExchange.getEthToTokenInputPrice.selector;
-    retval[5] = IUniswapExchange.getEthToTokenOutputPrice.selector;
-    retval[6] = IUniswapExchange.getTokenToEthInputPrice.selector;
-    retval[7] = IUniswapExchange.getTokenToEthOutputPrice.selector;
-    retval[8] = IUniswapExchange.tokenAddress.selector;
-    retval[9] = IUniswapExchange.addLiquidity.selector;
-    retval[10] = IUniswapExchange.removeLiquidity.selector;
-    retval[11] = IUniswapExchange.ethToTokenSwapInput.selector;
-    retval[12] = IUniswapExchange.ethToTokenTransferInput.selector;
-    retval[13] = IUniswapExchange.ethToTokenSwapOutput.selector;
-    retval[14] = IUniswapExchange.ethToTokenTransferOutput.selector;
-    retval[15] = IUniswapExchange.tokenToEthTransferInput.selector;
-    retval[16] = IUniswapExchange.tokenToEthTransferOutput.selector;
-    retval[17] = IUniswapExchange.tokenToTokenSwapInput.selector;
-    retval[18] = IUniswapExchange.tokenToTokenTransferInput.selector;
-    retval[19] = IUniswapExchange.tokenToTokenSwapOutput.selector;
-    retval[20] = IUniswapExchange.tokenToTokenTransferOutput.selector;
-    retval[21] = IUniswapExchange.tokenToExchangeSwapInput.selector;
-    retval[22] = IUniswapExchange.tokenToExchangeTransferInput.selector;
-    retval[23] = IUniswapExchange.tokenToExchangeSwapOutput.selector;
-    retval[24] = IUniswapExchange.tokenToExchangeTransferOutput.selector;
-  }
   receive() payable external {
     // no impl
   }
   fallback() payable external {
-    (address payable moduleAddress, address liquidationModule, /* address txOrigin */, address to, uint256 value, bytes memory payload) = abi.decode(msg.data, (address, address, address, address, uint256, bytes));
+    (address payable moduleAddress, address liquidationSubmodule, /* address repaymentSubmodule */, /* address txOrigin */, address to, uint256 value, bytes memory payload) = abi.decode(msg.data, (address, address, address, address, address, uint256, bytes));
     (/* IUniswapFactory factory */, address tokenAddress) = UniswapAdapterLib.validateExchange(moduleAddress, to);
     (bytes4 sig, bytes memory args) = payload.splitPayload();
     address newToken;
@@ -135,7 +104,7 @@ contract UniswapAdapter {
       if (tokens_bought > 0) newToken = IUniswapExchange(exchange_addr).tokenAddress();
       require(tokenAddress.approveForMaxIfNeeded(to), "approval of token failed");
     } else revert("unsupported contract call");
-    if (newToken != address(0x0)) require(liquidationModule.delegateNotify(abi.encode(newToken)), "liquidation module notification failure");
+    if (newToken != address(0x0)) require(liquidationSubmodule.delegateNotify(abi.encode(newToken)), "liquidation module notification failure");
     (bool success, bytes memory retval) = to.call.value(value).gas(gasleft())(payload);
     if (usedForwarder) UniswapAdapterLib.callForwarder(address(this));
     if (success) assembly {

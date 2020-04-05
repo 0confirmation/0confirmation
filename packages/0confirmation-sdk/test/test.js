@@ -62,6 +62,7 @@ const UniswapAdapter = require('@0confirmation/sol/build/UniswapAdapter');
 const SimpleBurnLiquidationModule = require('@0confirmation/sol/build/SimpleBurnLiquidationModule');
 const LiquidityToken = require('@0confirmation/sol/build/LiquidityToken');
 const ShifterERC20 = require('@0confirmation/sol/build/ShifterERC20Mock');
+const ERC20Adapter = require('@0confirmation/sol/build/ERC20Adapter');
 const { linkBytecode: link } = require('solc/linker');
 
 const getFactory = (artifact, linkReferences) => new ethers.ContractFactory(artifact.abi, linkReferences ? link(artifact.bytecode, linkReferences) : artifact.bytecode, ethersProvider.getSigner());
@@ -111,6 +112,8 @@ const deploy = async () => {
   await (await factoryContract.initializeFactory(exchange)).wait();
   const uniswapAdapterFactory = getFactory(UniswapAdapter);
   const simpleBurnLiquidationModuleFactory = getFactory(SimpleBurnLiquidationModule);
+  const erc20AdapterFactory = getFactory(ERC20Adapter);
+  const { address: erc20Adapter } = await erc20AdapterFactory.deploy();
   const { address: uniswapAdapter } = await uniswapAdapterFactory.deploy(factory);
   const { address: simpleBurnLiquidationModule } = await simpleBurnLiquidationModuleFactory.deploy(factory, zbtc);
   const liquidityTokenFactory = getFactory(LiquidityToken);
@@ -124,8 +127,18 @@ const deploy = async () => {
     target: zbtcExchange,
     sigs: Zero.getSignatures(Exchange.abi),
     module: {
-      assetHandler: uniswapAdapter,
-      liquidationModule: simpleBurnLiquidationModule
+      assetSubmodule: uniswapAdapter,
+      repaymentSubmodule: '0x' + Array(40).fill('0').join(''),
+      liquidationSubmodule: simpleBurnLiquidationModule
+    }
+  }, {
+    moduleType: ModuleTypes.BY_ADDRESS,
+    target: zbtc,
+    sigs: Zero.getSignatures(LiquidityToken.abi),
+    module: {
+      assetSubmodule: erc20Adapter,
+      repaymentSubmodule: erc20Adapter,
+      liquidationSubmodule: '0x' + Array(40).fill('0').join('')
     }
   }],
   [{

@@ -11,10 +11,13 @@ library BorrowProxyLib {
     address masterAddress;
     bool unbound;
     address owner;
+    uint256 actualizedShift;
     uint256 liquidationIndex;
+    uint256 repaymentIndex;
+    bool isRepaying;
     bool isLiquidating;
-    uint256 preBalance;
     AddressSetLib.AddressSet liquidationSet;
+    AddressSetLib.AddressSet repaymentSet;
   }
   struct ControllerIsolate {
     mapping (address => bytes32) proxyInitializerRecord;
@@ -22,8 +25,9 @@ library BorrowProxyLib {
     mapping (address => bool) isKeeper;
   }
   struct Module {
-    address assetHandler;
-    address liquidationModule;
+    address assetSubmodule;
+    address liquidationSubmodule;
+    address repaymentSubmodule;
   }
   struct ModuleRegistration {
     ModuleRegistrationType moduleType;
@@ -47,22 +51,28 @@ library BorrowProxyLib {
       registerModuleByAddress(registry, registration.target, registration.sigs[i], registration.module);
     }
   }
-  function delegateLiquidate(address liquidationModule) internal returns (bool) {
-    (bool success, bytes memory retval) = liquidationModule.delegatecall(abi.encodeWithSignature("liquidate(address)", liquidationModule));
+  function delegateLiquidate(address liquidationSubmodule) internal returns (bool) {
+    (bool success, bytes memory retval) = liquidationSubmodule.delegatecall(abi.encodeWithSignature("liquidate(address)", liquidationSubmodule));
     if (retval.length != 0x20) return false;
     (bool decoded) = abi.decode(retval, (bool));
     return success && decoded;
   }
-  function delegateNotify(address liquidationModule, bytes memory payload) internal returns (bool) {
-    (bool success,) = liquidationModule.delegatecall(abi.encodeWithSignature("notify(address,bytes)", liquidationModule, payload));
+  function delegateRepay(address repaymentSubmodule) internal returns (bool) {
+    (bool success, bytes memory retval) = repaymentSubmodule.delegatecall(abi.encodeWithSignature("repay(address)", repaymentSubmodule));
+    if (retval.length != 0x20) return false;
+    (bool decoded) = abi.decode(retval, (bool));
+    return success && decoded;
+  }
+  function delegateNotify(address liquidationSubmodule, bytes memory payload) internal returns (bool) {
+    (bool success,) = liquidationSubmodule.delegatecall(abi.encodeWithSignature("notify(address,bytes)", liquidationSubmodule, payload));
     return success;
   }
   function delegate(ModuleExecution memory module, bytes memory payload, uint256 value) internal returns (bool, bytes memory) {
-    (bool success, bytes memory retval) = module.encapsulated.assetHandler.delegatecall.gas(gasleft())(abi.encode(module.encapsulated.assetHandler, module.encapsulated.liquidationModule, tx.origin, module.to, value, payload));
+    (bool success, bytes memory retval) = module.encapsulated.assetSubmodule.delegatecall.gas(gasleft())(abi.encode(module.encapsulated.assetSubmodule, module.encapsulated.liquidationSubmodule, module.encapsulated.repaymentSubmodule, tx.origin, module.to, value, payload));
     return (success, retval);
   }
   function isDefined(Module memory module) internal pure returns (bool) {
-    return module.assetHandler != address(0x0);
+    return module.assetSubmodule != address(0x0);
   }
   function isInitialized(ControllerIsolate storage isolate, address proxyAddress) internal view returns (bool) {
     return isolate.proxyInitializerRecord[proxyAddress] != bytes32(uint256(0x0));

@@ -8,24 +8,26 @@ import { IUniswapFactory } from "../../interfaces/IUniswapFactory.sol";
 import { IERC20 } from "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { SimpleBurnLiquidationModuleLib } from "./SimpleBurnLiquidationModuleLib.sol";
+import { ERC20AdapterLib } from "../assets/erc20/ERC20AdapterLib.sol";
 
 contract SimpleBurnLiquidationModule {
   using AddressSetLib for *;
   using TokenUtils for *;
   BorrowProxyLib.ProxyIsolate proxyIsolate;
   constructor(address factoryAddress, address liquidateTo) public {
-    SimpleBurnLiquidationModuleLib.Isolate storage isolate = SimpleBurnLiquidationModuleLib.getIsolatePointer(address(this));
+    SimpleBurnLiquidationModuleLib.Isolate storage isolate = SimpleBurnLiquidationModuleLib.getIsolatePointer();
     isolate.factoryAddress = factoryAddress;
     isolate.liquidateTo = liquidateTo;
   }
-  function notify(address moduleAddress, bytes memory payload) public returns (bool) {
+  function notify(address /* moduleAddress */, bytes memory payload) public returns (bool) {
     (address token) = abi.decode(payload, (address));
-    SimpleBurnLiquidationModuleLib.Isolate storage isolate = SimpleBurnLiquidationModuleLib.getIsolatePointer(moduleAddress);
+    SimpleBurnLiquidationModuleLib.Isolate storage isolate = SimpleBurnLiquidationModuleLib.getIsolatePointer();
     isolate.toLiquidate.insert(token);
     return true;
   }
   function liquidate(address moduleAddress) public returns (bool) {
-    SimpleBurnLiquidationModuleLib.Isolate storage isolate = SimpleBurnLiquidationModuleLib.getIsolatePointer(moduleAddress);
+    if (!ERC20AdapterLib.liquidate()) return false;
+    SimpleBurnLiquidationModuleLib.Isolate storage isolate = SimpleBurnLiquidationModuleLib.getIsolatePointer();
     SimpleBurnLiquidationModuleLib.ExternalIsolate memory externalIsolate = SimpleBurnLiquidationModule(moduleAddress).getExternalIsolateHandler();
     IUniswapFactory factory = IUniswapFactory(isolate.factoryAddress);
     address liquidateTo = externalIsolate.liquidateTo;
@@ -50,7 +52,7 @@ contract SimpleBurnLiquidationModule {
     return true;
   }
   function getExternalIsolateHandler() external returns (SimpleBurnLiquidationModuleLib.ExternalIsolate memory) {
-    SimpleBurnLiquidationModuleLib.Isolate storage isolate = SimpleBurnLiquidationModuleLib.getIsolatePointer(address(this));
+    SimpleBurnLiquidationModuleLib.Isolate storage isolate = SimpleBurnLiquidationModuleLib.getIsolatePointer();
     return SimpleBurnLiquidationModuleLib.ExternalIsolate({
       factoryAddress: isolate.factoryAddress,
       liquidateTo: isolate.liquidateTo

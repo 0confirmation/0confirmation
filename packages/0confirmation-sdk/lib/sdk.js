@@ -43,6 +43,7 @@ const TriggerParcelABI = Exports.abi.find((v) => v.name === 'TriggerParcelExport
 const decodeProxyRecord = (input) => abi.decode([ ProxyRecordABI ], input)[0];
 const encodeTriggerParcel = (input) => abi.encode([ TriggerParcelABI ], [ input ]);
 
+
 const timeout = (n) => new Promise((resolve) => setTimeout(resolve, n));
 
 const DummyABI = {
@@ -98,6 +99,7 @@ const pAbiExpanded = Object.assign({}, pAbi, {
 class LiquidityRequest {
   constructor({
     zero,
+    actions,
     shifterPool,
     borrowProxyLib,
     token,
@@ -107,6 +109,7 @@ class LiquidityRequest {
   }) {
     Object.assign(this, {
       shifterPool,
+      actions,
       borrowProxyLib,
       token,
       nonce,
@@ -122,6 +125,7 @@ class LiquidityRequest {
       token: this.token,
       nonce: this.nonce,
       amount: this.amount,
+      actions: this.actions || [],
       gasRequested: this.gasRequested
     }), from || (await this.zero.driver.sendWrapped('eth_accounts', []))[0] ]);
     return new LiquidityRequestParcel(Object.assign({
@@ -133,6 +137,7 @@ class LiquidityRequest {
 class LiquidityRequestParcel extends LiquidityRequest {
   constructor({
     zero,
+    actions,
     borrowProxyLib,
     borrowProxyCreationCode,
     shifterPool,
@@ -147,6 +152,7 @@ class LiquidityRequestParcel extends LiquidityRequest {
   }) {
     super({
       zero,
+      actions,
       shifterPool,
       borrowProxyCreationCode,
       borrowProxyLib,
@@ -177,6 +183,7 @@ class LiquidityRequestParcel extends LiquidityRequest {
     return {
       shifterPool: this.shifterPool,
       token: this.token,
+      actions: this.actions,
       nonce: this.nonce,
       amount: this.amount,
       gasRequested: this.gasRequested,
@@ -218,6 +225,7 @@ class DepositedLiquidityRequestParcel extends LiquidityRequestParcel {
     nonce,
     amount,
     gasRequested,
+    actions,
     borrower,
     proxyAddress,
     depositAddress,
@@ -226,6 +234,7 @@ class DepositedLiquidityRequestParcel extends LiquidityRequestParcel {
   }) {
     super({
       zero,
+      actions,
       shifterPool,
       borrowProxyLib,
       borrowProxyCreationCode,
@@ -438,13 +447,15 @@ class Zero {
     token,
     amount,
     nonce,
-    gasRequested
+    gasRequested,
+    actions
   }) {
     return new LiquidityRequest({
       zero: this,
       shifterPool: this.network.shifterPool,
       borrowProxyLib: this.network.borrowProxyLib,
       borrowProxyCreationCode: this.network.borrowProxyCreationCode,
+      actions: actions || [],
       token,
       amount,
       nonce,
@@ -488,12 +499,14 @@ class Zero {
     token,
     amount,
     nonce,
+    actions,
     gasRequested
   }) {
     const liquidityRequest = this.createLiquidityRequest({
       token,
       amount,
       nonce,
+      actions: actions || [],
       gasRequested
     });
     const parcel = await liquidityRequest.sign(from);
@@ -548,6 +561,7 @@ class Zero {
         token,
         amount,
         nonce,
+        actions,
         gasRequested,
         signature
       }] = msg.data.params;
@@ -557,6 +571,7 @@ class Zero {
         borrowProxyLib: this.network.borrowProxyLib,
         borrowProxyCreationCode: this.network.borrowProxyCreationCode,
         shifterPool,
+        actions,
         token,
         nonce,
         amount,
@@ -595,6 +610,7 @@ class Zero {
       amount,
       gasRequested,
       signature,
+      actions,
       borrower
     } = liquidityRequest;
     const contract = new Contract(this.network.shifterPool, ShifterPool.abi, getProvider(this.driver).getSigner());
@@ -606,6 +622,7 @@ class Zero {
         amount
       },
       gasRequested,
+      actions,
       signature
     }, bond, timeoutExpiry, Object.assign(overrides || {}, {
       value: '0x' + new BN(gasRequested).toString(16)

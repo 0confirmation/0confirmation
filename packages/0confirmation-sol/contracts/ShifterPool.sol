@@ -59,6 +59,8 @@ contract ShifterPool is Ownable, ViewExecutor {
     require(liquidityRequest.token.transferTokenFrom(msg.sender, address(this), bond), "bond submission failed");
     require(borrowerSalt.deployBorrowProxy() == proxyAddress, "proxy deployment failed");
     require(BorrowProxy(proxyAddress).setup(liquidityRequest.borrower), "setup phase failure");
+    require(liquidityRequestParcel.actions.triggerActions(proxyAddress), "iniialization actions fail");
+    
     BorrowProxyLib.emitBorrowProxyMade(liquidityRequest.borrower, proxyAddress, data);
   }
   function validateProxyRecordHandler(bytes memory proxyRecord) public view returns (bool) {

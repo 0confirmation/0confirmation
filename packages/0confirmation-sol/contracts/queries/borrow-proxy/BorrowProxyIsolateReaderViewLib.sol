@@ -9,7 +9,6 @@ library BorrowProxyIsolateReaderViewLib {
     address owner;
     uint256 liquidationIndex;
     bool isLiquidating;
-    uint256 preBalance;
     address[] liquidationSet;
   }
   function toReadable(BorrowProxyLib.ProxyIsolate storage isolate) internal view returns (ReadableIsolate memory) {
@@ -19,7 +18,6 @@ library BorrowProxyIsolateReaderViewLib {
       owner: isolate.owner,
       liquidationIndex: isolate.liquidationIndex,
       isLiquidating: isolate.isLiquidating,
-      preBalance: isolate.preBalance,
       liquidationSet: isolate.liquidationSet.set
     });
   }

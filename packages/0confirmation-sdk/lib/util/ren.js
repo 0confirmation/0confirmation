@@ -28,24 +28,36 @@ const initializeCodeHash = async () => {
   return cachedProxyCodeHash;
 };
 
+const Exports = require('@0confirmation/sol/build/Exports');
+const InitializationActionsABI = Exports.abi.find((v) => v.name === 'InitializationActionsExport').inputs[0];
+ console.log(InitializationActionsABI);
+
+const encodeInitializationActions = (input) => abi.encode([ InitializationActionsABI ], [ input.map((v) => ({
+  txData: v.calldata,
+  to: v.to
+})) ]);
+
 const computeLiquidityRequestHash = ({
   shifterPool,
   token,
   nonce,
   amount,
-  gasRequested
+  gasRequested,
+  actions = []
 }) => solidityKeccak256([
   'address',
   'address',
   'bytes32',
   'uint256',
-  'uint256'
+  'uint256',
+  'bytes'
 ], [
   shifterPool,
   token,
   nonce,
   amount,
-  gasRequested
+  gasRequested,
+  encodeInitializationActions(actions)
 ]);
 
 const computeBorrowProxyAddress = ({
