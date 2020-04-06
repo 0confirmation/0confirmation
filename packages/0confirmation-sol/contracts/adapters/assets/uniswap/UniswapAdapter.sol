@@ -105,13 +105,8 @@ contract UniswapAdapter {
       require(tokenAddress.approveForMaxIfNeeded(to), "approval of token failed");
     } else revert("unsupported contract call");
     if (newToken != address(0x0)) require(liquidationSubmodule.delegateNotify(abi.encode(newToken)), "liquidation module notification failure");
-    (bool success, bytes memory retval) = to.call.value(value).gas(gasleft())(payload);
-    if (!success) revert("break it on purpose");
+    (bool success, bytes memory retval) = to.call{ gas: gasleft(), value: value }(payload);
     if (usedForwarder) UniswapAdapterLib.callForwarder(address(this));
-    if (success) assembly {
-      return(add(0x20, retval), mload(retval))
-    } else assembly {
-      revert(add(0x20, retval), mload(retval))
-    }
+    ModuleLib.bubbleResult(success, retval);
   }
 }

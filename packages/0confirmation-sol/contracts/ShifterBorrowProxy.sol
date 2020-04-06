@@ -15,8 +15,8 @@ contract ShifterBorrowProxy is BorrowProxy {
   constructor() BorrowProxy() public {}
   uint256 constant MINIMUM_GAS_CONTINUE = 5e5;
   function repayLoan(bytes memory data) public returns (bool) {
-    (ShifterBorrowProxyLib.TriggerParcel memory parcel) = abi.decode(data, (ShifterBorrowProxyLib.TriggerParcel));
-    require(validateProxyRecord(abi.encode(parcel.record)), "proxy record invalid");
+    (ShifterBorrowProxyLib.TriggerParcel memory parcel) = data.decodeTriggerParcel();
+    require(validateProxyRecord(parcel.record.encodeProxyRecord()), "proxy record invalid");
     require(!isolate.isLiquidating, "proxy is being liquidated");
     uint256 fee = parcel.record.computeAdjustedKeeperFee(parcel.record.request.amount);
     LiquidityToken liquidityToken = ShifterPool(isolate.masterAddress).getLiquidityTokenHandler(parcel.record.request.token);
@@ -43,7 +43,7 @@ contract ShifterBorrowProxy is BorrowProxy {
     require(!isolate.isRepaying, "loan being repaid");
     require(!isolate.unbound, "loan already repaid");
     require(validateProxyRecord(data), "proxy record invalid");
-    (ShifterBorrowProxyLib.ProxyRecord memory record) = abi.decode(data, (ShifterBorrowProxyLib.ProxyRecord));
+    ShifterBorrowProxyLib.ProxyRecord memory record = data.decodeProxyRecord();
     address[] memory set = isolate.liquidationSet.set;
     if (record.loan.params.timeoutExpiry >= block.number) {
       isolate.isLiquidating = true;

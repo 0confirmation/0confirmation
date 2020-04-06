@@ -45,7 +45,7 @@ contract SimpleBurnLiquidationModule {
       tokenAddress.approveForMaxIfNeeded(exchangeAddress);
       received += IUniswapExchange(exchangeAddress).tokenToTokenSwapInput(tokenBalance, 0, 0, block.number + 1, liquidateTo);
     }
-    received += IUniswapExchange(factory.getExchange(liquidateTo)).ethToTokenSwapInput.value(address(this).balance)(0, block.number + 1);
+    received += IUniswapExchange(factory.getExchange(liquidateTo)).ethToTokenSwapInput{ value: address(this).balance }(0, block.number + 1);
     isolate.liquidated = i;
     bool success = liquidateTo.sendToken(proxyIsolate.masterAddress, received);
     require(success, "liquidated token transfer failed");

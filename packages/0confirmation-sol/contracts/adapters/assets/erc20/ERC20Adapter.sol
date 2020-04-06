@@ -32,9 +32,5 @@ contract ERC20Adapter {
     } else if (sig == IERC20.approve.selector) {
       // do nothing
     } else revert("unsupported token call");
-    assembly {
-      mstore(0x0, 0x1)
-      return(0x0, 0x20)
-    }
   }
 }

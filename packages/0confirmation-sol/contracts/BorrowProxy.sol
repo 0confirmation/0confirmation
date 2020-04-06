@@ -8,6 +8,7 @@ import { ViewExecutor } from "./utils/ViewExecutor.sol";
 import { IShifter } from "./interfaces/IShifter.sol";
 import { IBorrowProxyController } from "./interfaces/IBorrowProxyController.sol";
 import { AddressSetLib } from "./utils/AddressSetLib.sol";
+import { ModuleLib } from "./adapters/lib/ModuleLib.sol";
 
 contract BorrowProxy is ViewExecutor {
   using SliceLib for *;
@@ -29,22 +30,22 @@ contract BorrowProxy is ViewExecutor {
   }
   function proxy(address to, uint256 value, bytes memory payload) public onlyOwnerOrPool {
     if (isolate.unbound) {
-      (bool success, bytes memory retval) = to.call.value(value)(payload);
+      (bool success, bytes memory retval) = to.call{
+        value: value
+      }(payload);
       if (!success) revert(RevertCaptureLib.decodeError(retval));
-      assembly {
-        return(add(retval, 0x20), mload(retval))
-      }
+      ModuleLib.bubbleResult(success, retval);
+      return;
     }
     bytes4 sig = bytes4(uint32(uint256(payload.toSlice(0, 4).asWord())));
     BorrowProxyLib.ModuleExecution memory module = isolate.fetchModule(to, sig);
     require(module.encapsulated.isDefined(), "function handler not registered");
     (bool success, bytes memory retval) = module.delegate(payload, value);
-    if (!success) revert(RevertCaptureLib.decodeError(retval));
-    if (module.encapsulated.liquidationSubmodule != address(0x0)) isolate.liquidationSet.insert(module.encapsulated.liquidationSubmodule);
-    if (module.encapsulated.repaymentSubmodule != address(0x0)) isolate.repaymentSet.insert(module.encapsulated.repaymentSubmodule);
-    assembly {
-      return(add(retval, 0x20), mload(retval))
-    }
+//    if (!success) revert(RevertCaptureLib.decodeError(retval));
+//    if (module.encapsulated.liquidationSubmodule != address(0x0)) isolate.liquidationSet.insert(module.encapsulated.liquidationSubmodule);
+//    if (module.encapsulated.repaymentSubmodule != address(0x0)) isolate.repaymentSet.insert(module.encapsulated.repaymentSubmodule);
+    ModuleLib.bubbleResult(success, retval);
+    
   }
   receive() external payable virtual {
     // just receive ether, do nothing

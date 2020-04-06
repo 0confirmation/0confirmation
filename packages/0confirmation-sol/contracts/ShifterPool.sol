@@ -49,7 +49,7 @@ contract ShifterPool is Ownable, ViewExecutor {
       request: liquidityRequest,
       loan: loan
     });
-    bytes memory data = abi.encode(proxyRecord);
+    bytes memory data = proxyRecord.encodeProxyRecord();
     require(LiquidityToken(isolate.getLiquidityToken(liquidityRequest.token)).loan(proxyAddress, proxyRecord.computePostFee()), "insufficient funds in liquidity pool");
     isolate.borrowProxyController.mapProxyRecord(proxyAddress, data);
     isolate.borrowProxyController.setProxyOwner(proxyAddress, liquidityRequest.borrower);

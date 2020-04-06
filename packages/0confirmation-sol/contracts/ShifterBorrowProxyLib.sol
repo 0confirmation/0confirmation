@@ -23,6 +23,12 @@ library ShifterBorrowProxyLib {
     address to;
     bytes txData;
   }
+  function encodeProxyRecord(ProxyRecord memory record) internal pure returns (bytes memory) {
+    return abi.encode(record);
+  }
+  function decodeProxyRecord(bytes memory record) internal pure returns (ProxyRecord memory result) {
+    (result) = abi.decode(record, (ProxyRecord));
+  }
   struct LiquidityRequestParcel {
     LiquidityRequest request;
     uint256 gasRequested;
@@ -44,7 +50,7 @@ library ShifterBorrowProxyLib {
     emit ShifterBorrowProxyRepaid(user, record);
   }
   function triggerAction(InitializationAction memory action, address proxyAddress) internal returns (bool) {
-    (bool success, ) = proxyAddress.call.gas(gasleft())(abi.encodeWithSelector(BorrowProxy.proxy.selector, action.to, 0, action.txData));
+    (bool success, ) = proxyAddress.call{ gas: gasleft() }(abi.encodeWithSelector(BorrowProxy.proxy.selector, action.to, 0, action.txData));
     return success;
   }
   function triggerActions(InitializationAction[] memory actions, address proxyAddress) internal returns (bool) {
@@ -71,6 +77,9 @@ library ShifterBorrowProxyLib {
     uint256 vout;
     bytes32 pHash;
     bytes darknodeSignature;
+  }
+  function decodeTriggerParcel(bytes memory parcel) internal pure returns (TriggerParcel memory result) {
+    (result) = abi.decode(parcel, (TriggerParcel));
   }
   function computeNHash(TriggerParcel memory parcel) internal pure returns (bytes32) {
     return keccak256(abi.encodePacked(parcel.record.request.nonce, parcel.txhash, parcel.vout));

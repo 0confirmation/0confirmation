@@ -4,6 +4,7 @@ pragma experimental ABIEncoderV2;
 import { Create2 } from "openzeppelin-solidity/contracts/utils/Create2.sol";
 import { IModuleRegistryProvider } from "./interfaces/IModuleRegistryProvider.sol";
 import { AddressSetLib } from "./utils/AddressSetLib.sol";
+import { ExtLib } from "./utils/ExtLib.sol";
 import { RevertCaptureLib } from "./utils/RevertCaptureLib.sol";
 
 library BorrowProxyLib {
@@ -68,7 +69,7 @@ library BorrowProxyLib {
     return success;
   }
   function delegate(ModuleExecution memory module, bytes memory payload, uint256 value) internal returns (bool, bytes memory) {
-    (bool success, bytes memory retval) = module.encapsulated.assetSubmodule.delegatecall.gas(gasleft())(abi.encode(module.encapsulated.assetSubmodule, module.encapsulated.liquidationSubmodule, module.encapsulated.repaymentSubmodule, tx.origin, module.to, value, payload));
+    (bool success, bytes memory retval) = module.encapsulated.assetSubmodule.delegatecall{ gas: gasleft() }(abi.encode(module.encapsulated.assetSubmodule, module.encapsulated.liquidationSubmodule, module.encapsulated.repaymentSubmodule, tx.origin, module.to, value, payload));
     return (success, retval);
   }
   function isDefined(Module memory module) internal pure returns (bool) {
@@ -91,10 +92,7 @@ library BorrowProxyLib {
     return keccak256(abi.encodePacked(to, signature));
   }
   function computeCodeResolverKey(address to, bytes4 signature) internal view returns (bytes32) {
-    bytes32 exthash;
-    assembly {
-      exthash := extcodehash(to)
-    }
+    bytes32 exthash = ExtLib.getExtCodeHash(to);
     return keccak256(abi.encodePacked(exthash, signature));
   }
   function resolveModule(ModuleRegistry storage registry, address to, bytes4 sig) internal view returns (Module memory) {

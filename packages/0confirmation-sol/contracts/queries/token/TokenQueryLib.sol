@@ -45,6 +45,9 @@ library TokenQueryLib {
       result.approvalQueryResults[i] = queryApproval(payload.approvalQueries[i], payload.token);
     }
   }
+  function encodeResult(TokenQueryResult[] memory result) internal pure returns (bytes memory) {
+    return abi.encode(result);
+  }
   function queryBalance(address token, address user) internal returns (DataResult memory) {
     return callToken(token, abi.encodeWithSignature("balanceOf(address)", user));
   }
