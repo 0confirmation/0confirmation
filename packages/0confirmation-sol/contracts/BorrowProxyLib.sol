@@ -26,6 +26,7 @@ library BorrowProxyLib {
     mapping (address => bool) isKeeper;
   }
   struct Module {
+    bool isPrecompiled;
     address assetSubmodule;
     address liquidationSubmodule;
     address repaymentSubmodule;
@@ -100,7 +101,6 @@ library BorrowProxyLib {
     if (!isDefined(module)) module = registry.modules[computeModuleKey(to, sig)];
     return module;
   }
-
   function getModuleExecution(ModuleRegistry storage registry, address to, bytes4 signature) internal view returns (ModuleExecution memory) {
     Module memory encapsulated = resolveModule(registry, to, signature);
     return ModuleExecution({

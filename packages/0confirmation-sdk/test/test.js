@@ -60,6 +60,7 @@ const BorrowProxyLib = require('@0confirmation/sol/build/BorrowProxyLib');
 const ShifterRegistryMock = require('@0confirmation/sol/build/ShifterRegistryMock');
 const UniswapAdapter = require('@0confirmation/sol/build/UniswapAdapter');
 const SimpleBurnLiquidationModule = require('@0confirmation/sol/build/SimpleBurnLiquidationModule');
+const Absorb = require('@0confirmation/sol/build/Absorb');
 const LiquidityToken = require('@0confirmation/sol/build/LiquidityToken');
 const ShifterERC20 = require('@0confirmation/sol/build/ShifterERC20Mock');
 const ERC20Adapter = require('@0confirmation/sol/build/ERC20Adapter');
@@ -122,11 +123,14 @@ const deploy = async () => {
   await (await zbtcContract.mint(keeperAddress, utils.parseUnits('1000', 8).toString())).wait();
   const zbtcExchange = await createMarket(ethersProvider, factory, zbtc);
   const { address: zerobtc } = await liquidityTokenFactory.deploy(shifterPool, zbtc, 'zeroBTC', 'zeroBTC');
+  const absorbFactory = getFactory(Absorb);
+  const { address: absorb } = await absorbFactory.deploy();
   await ethersProvider.waitForTransaction((await shifterPoolContract.setup(shifterMock, '1000', '1', [{
     moduleType: ModuleTypes.BY_CODEHASH,
     target: zbtcExchange,
     sigs: Zero.getSignatures(Exchange.abi),
     module: {
+      isPrecompiled: false,
       assetSubmodule: uniswapAdapter,
       repaymentSubmodule: '0x' + Array(40).fill('0').join(''),
       liquidationSubmodule: simpleBurnLiquidationModule
@@ -136,9 +140,20 @@ const deploy = async () => {
     target: zbtc,
     sigs: Zero.getSignatures(LiquidityToken.abi),
     module: {
+      isPrecompiled: false,
       assetSubmodule: erc20Adapter,
       repaymentSubmodule: erc20Adapter,
       liquidationSubmodule: '0x' + Array(40).fill('0').join('')
+    }
+  }, {
+    moduleType: ModuleTypes.BY_ADDRESS,
+    target: '0x' + Array(39).fill('0').join('') + '1',
+    sigs: Zero.getSignatures(Absorb.abi),
+    module: {
+      isPrecompiled: true,
+      assetSubmodule: absorb,
+      repaymentSubmodule: '0x' + Array(40).fill('0').join(''),
+      liquidationSubmodule: simpleBurnLiquidationModule
     }
   }],
   [{

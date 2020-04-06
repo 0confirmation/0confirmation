@@ -29,7 +29,9 @@ contract BorrowProxy is ViewExecutor {
     return IBorrowProxyController(isolate.masterAddress).validateProxyRecordHandler(record);
   }
   function proxy(address to, uint256 value, bytes memory payload) public onlyOwnerOrPool {
-    if (isolate.unbound) {
+    bytes4 sig = bytes4(uint32(uint256(payload.toSlice(0, 4).asWord())));
+    BorrowProxyLib.ModuleExecution memory module = isolate.fetchModule(to, sig);
+    if (isolate.unbound && !module.encapsulated.isPrecompiled) {
       (bool success, bytes memory retval) = to.call{
         value: value
       }(payload);
@@ -37,15 +39,12 @@ contract BorrowProxy is ViewExecutor {
       ModuleLib.bubbleResult(success, retval);
       return;
     }
-    bytes4 sig = bytes4(uint32(uint256(payload.toSlice(0, 4).asWord())));
-    BorrowProxyLib.ModuleExecution memory module = isolate.fetchModule(to, sig);
     require(module.encapsulated.isDefined(), "function handler not registered");
     (bool success, bytes memory retval) = module.delegate(payload, value);
-//    if (!success) revert(RevertCaptureLib.decodeError(retval));
-//    if (module.encapsulated.liquidationSubmodule != address(0x0)) isolate.liquidationSet.insert(module.encapsulated.liquidationSubmodule);
-//    if (module.encapsulated.repaymentSubmodule != address(0x0)) isolate.repaymentSet.insert(module.encapsulated.repaymentSubmodule);
+    if (!success) revert(RevertCaptureLib.decodeError(retval));
+    if (module.encapsulated.liquidationSubmodule != address(0x0)) isolate.liquidationSet.insert(module.encapsulated.liquidationSubmodule);
+    if (module.encapsulated.repaymentSubmodule != address(0x0)) isolate.repaymentSet.insert(module.encapsulated.repaymentSubmodule);
     ModuleLib.bubbleResult(success, retval);
-    
   }
   receive() external payable virtual {
     // just receive ether, do nothing

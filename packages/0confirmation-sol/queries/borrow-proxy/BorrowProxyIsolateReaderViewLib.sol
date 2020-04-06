@@ -1,4 +1,5 @@
 pragma solidity ^0.6.0;
+pragma experimental ABIEncoderV2;
 
 import { BorrowProxyLib } from "../../BorrowProxyLib.sol";
 
@@ -10,6 +11,9 @@ library BorrowProxyIsolateReaderViewLib {
     uint256 liquidationIndex;
     bool isLiquidating;
     address[] liquidationSet;
+  }
+  function toBytes(ReadableIsolate memory isolate) internal pure returns (bytes memory) {
+    return abi.encode(isolate);
   }
   function toReadable(BorrowProxyLib.ProxyIsolate storage isolate) internal view returns (ReadableIsolate memory) {
     return ReadableIsolate({

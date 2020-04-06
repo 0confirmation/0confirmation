@@ -10,7 +10,6 @@ contract BorrowProxyIsolateReaderView {
   using QueryLib for *;
   BorrowProxyLib.ProxyIsolate isolate;
   function render() view public returns (bytes memory) {
-    bytes memory retval = abi.encode(isolate.toReadable());
-    retval.returnBytes();
+    return isolate.toReadable().toBytes();
   }
 }

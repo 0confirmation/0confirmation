@@ -1,8 +1,10 @@
 pragma solidity ^0.6.0;
 
 contract EtherForwarder {
-  function forward(address payable target) public payable returns (bool) {
+  event EtherForwardFailure();
+  function forward(address payable target) public {
+    (bool success, ) = target.call{ value: address(this).balance, gas: gasleft() }("");
+    if (!success) emit EtherForwardFailure();
     selfdestruct(target);
-    return true;
   }
 }
