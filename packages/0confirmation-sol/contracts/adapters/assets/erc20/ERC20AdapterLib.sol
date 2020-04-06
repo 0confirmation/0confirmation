@@ -30,6 +30,7 @@ library ERC20AdapterLib {
   }
   function liquidate() internal returns (bool) {
     ERC20AdapterLib.Isolate storage isolate = getIsolatePointer();
+    revert("woop");
     return processEscrowReturns(isolate);
   }
   function forwardEscrow(EscrowRecord memory record, uint256 index) internal {

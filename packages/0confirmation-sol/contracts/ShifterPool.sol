@@ -27,9 +27,7 @@ contract ShifterPool is Ownable, ViewExecutor {
     isolate.poolFee = poolFee;
     for (uint256 i = 0; i < modules.length; i++) {
       BorrowProxyLib.ModuleRegistration memory registration = modules[i];
-      for (uint256 j = 0; j < registration.sigs.length; j++) {
-        isolate.registry.registryRegisterModule(registration);
-      }
+      isolate.registry.registryRegisterModule(registration);
     }
     for (uint256 i = 0; i < tokenLaunches.length; i++) {
       ShifterPoolLib.LiquidityTokenLaunch memory launch = tokenLaunches[i];

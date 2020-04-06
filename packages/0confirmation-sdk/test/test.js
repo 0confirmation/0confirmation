@@ -122,6 +122,7 @@ const deploy = async () => {
   await (await zbtcContract.mint(keeperAddress, utils.parseUnits('1000', 8).toString())).wait();
   const zbtcExchange = await createMarket(ethersProvider, factory, zbtc);
   const { address: zerobtc } = await liquidityTokenFactory.deploy(shifterPool, zbtc, 'zeroBTC', 'zeroBTC');
+  console.log('doop');
   await ethersProvider.waitForTransaction((await shifterPoolContract.setup(shifterMock, '1000', '1', [{
     moduleType: ModuleTypes.BY_CODEHASH,
     target: zbtcExchange,
@@ -256,7 +257,9 @@ describe('0confirmation sdk', () => {
     await startSignalingServer();
   });
   it('should execute a borrow', async () => {
+    console.log('woop');
     const contracts = await deploy();
+    console.log('woop');
     const borrower = await makeZero(contracts, borrowerProvider);
     const keeper = await makeZero(contracts, provider);
     const deferred = defer();
@@ -291,6 +294,7 @@ describe('0confirmation sdk', () => {
     const borrowedProvider = new Web3Provider(borrower.getProvider());
     const exchangeWrapped = new ethers.Contract(contracts.exchange, Exchange.abi, borrowedProvider.getSigner());
     await (await exchangeWrapped.tokenToEthTransferInput(utils.parseUnits('1', 8), utils.parseUnits('1', 8), String(Date.now() * 2), liquidityRequestParcel.proxyAddress, { gasLimit: ethers.utils.hexlify(6e6) })).wait();
+    console.log('shoop');
     await (await proxy.defaultLoan({ gasLimit: ethers.utils.hexlify(6e6) })).wait();
   });
 });
