@@ -99,6 +99,7 @@ const pAbiExpanded = Object.assign({}, pAbi, {
 class LiquidityRequest {
   constructor({
     zero,
+    borrower,
     actions,
     shifterPool,
     borrowProxyLib,
@@ -111,12 +112,26 @@ class LiquidityRequest {
       shifterPool,
       actions,
       borrowProxyLib,
+      borrower,
       token,
       nonce,
       amount,
       zero,
       gasRequested
     });
+    if (this.borrower) {
+      this.proxyAddress = utils.computeBorrowProxyAddress(this);
+      this.depositAddress = utils.computeGatewayAddress({
+        isTestnet: this.zero.network.isTestnet,
+        mpkh: this.zero.network.mpkh,
+        g: {
+          to: this.proxyAddress,
+          p: CONST_PHASH,
+          tokenAddress: this.token,
+          nonce: this.nonce
+        }
+      });
+    }
   }
   async sign(from) {
     const signature = await this.zero.driver.sendWrapped('personal_sign', [ utils.computeLiquidityRequestHash({
@@ -402,6 +417,9 @@ class Zero {
       isTestnet
     };
   }
+  async setBorrowProxy(address) {
+    return await this.driver.sendWrapped('0cf_setBorrowProxy', [ address ]);
+  }
   getProvider() {
     const wrappedEthProvider = getProvider(this.driver);
     const ethProvider = wrappedEthProvider.provider;
@@ -447,6 +465,7 @@ class Zero {
     token,
     amount,
     nonce,
+    borrower,
     gasRequested,
     actions
   }) {
@@ -459,6 +478,7 @@ class Zero {
       token,
       amount,
       nonce,
+      borrower,
       gasRequested
     });
   }
@@ -580,6 +600,9 @@ class Zero {
       }));
     });
   }
+  async stopListeningForLiquidityRequests() {
+    return await (this.driver.getBackend('zero'))._unsubscribeLiquidityRequests();
+  }
   async approvePool(token, overrides) {
     const contract = new Contract(token, LiquidityToken.abi, getProvider(this.driver).getSigner());
     return await contract.approve(this.network.shifterPool, '0x' + Array(64).fill('f').join(''), overrides || {});
@@ -622,7 +645,10 @@ class Zero {
         amount
       },
       gasRequested,
-      actions,
+      actions: (actions || []).map((v) => ({
+        to: v.to,
+        txData: v.calldata
+      })),
       signature
     }, bond, timeoutExpiry, Object.assign(overrides || {}, {
       value: '0x' + new BN(gasRequested).toString(16)

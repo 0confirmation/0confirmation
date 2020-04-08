@@ -7,6 +7,7 @@ import { IUniswapExchange } from "../../interfaces/IUniswapExchange.sol";
 import { IUniswapFactory } from "../../interfaces/IUniswapFactory.sol";
 import { IERC20 } from "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ModuleLib } from "../lib/ModuleLib.sol";
 import { SimpleBurnLiquidationModule } from "./SimpleBurnLiquidationModule.sol";
 
 library SimpleBurnLiquidationModuleLib {
@@ -23,21 +24,19 @@ library SimpleBurnLiquidationModuleLib {
   function computeIsolatePointer() public pure returns (uint256) {
     return uint256(keccak256(abi.encodePacked("isolate.simple-burn")));
   }
-  function cast(uint256 v) internal pure returns (uint256) {
-    return v;
-  }
-  function toIsolatePointer(uint256 key) internal returns (Isolate storage) {
-    function (uint256) internal returns (Isolate storage) swap;
-    function (uint256) internal returns (uint256) real = cast;
+  function getCastStorageType() internal pure returns (function (uint256) internal pure returns (Isolate storage) swap) {
+    function (uint256) internal returns (uint256) cast = ModuleLib.cast;
     assembly {
-      swap := real
+      swap := cast
     }
-    return swap(key);
   }
-  function getIsolatePointer() internal returns (Isolate storage) {
+  function toIsolatePointer(uint256 key) internal pure returns (Isolate storage) {
+    return getCastStorageType()(key);
+  }
+  function getIsolatePointer() internal pure returns (Isolate storage) {
     return toIsolatePointer(computeIsolatePointer());
   }
-  function getExternalIsolate(address moduleAddress) internal returns (ExternalIsolate memory) {
+  function getExternalIsolate(address moduleAddress) internal view returns (ExternalIsolate memory) {
     return SimpleBurnLiquidationModule(moduleAddress).getExternalIsolateHandler();
   }
 }

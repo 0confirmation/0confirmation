@@ -1,0 +1,1875 @@
+{
+  "contractName": "PortfolioQuery",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address payable",
+          "name": "borrowProxy",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "moduleAddress",
+          "type": "address"
+        },
+        {
+          "components": [
+            {
+              "internalType": "address payable",
+              "name": "token",
+              "type": "address"
+            },
+            {
+              "internalType": "address[]",
+              "name": "balanceQueries",
+              "type": "address[]"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address payable",
+                  "name": "sourceAddress",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address payable",
+                  "name": "targetAddress",
+                  "type": "address"
+                }
+              ],
+              "internalType": "struct TokenQueryLib.ApprovalQueryPayload[]",
+              "name": "approvalQueries",
+              "type": "tuple[]"
+            }
+          ],
+          "internalType": "struct TokenQueryLib.TokenQueryPayload",
+          "name": "query",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "address payable",
+              "name": "token",
+              "type": "address"
+            },
+            {
+              "components": [
+                {
+                  "components": [
+                    {
+                      "internalType": "bool",
+                      "name": "success",
+                      "type": "bool"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "value",
+                      "type": "bytes"
+                    }
+                  ],
+                  "internalType": "struct TokenQueryLib.DataResult",
+                  "name": "name",
+                  "type": "tuple"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "bool",
+                      "name": "success",
+                      "type": "bool"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "value",
+                      "type": "bytes"
+                    }
+                  ],
+                  "internalType": "struct TokenQueryLib.DataResult",
+                  "name": "symbol",
+                  "type": "tuple"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "bool",
+                      "name": "success",
+                      "type": "bool"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "value",
+                      "type": "bytes"
+                    }
+                  ],
+                  "internalType": "struct TokenQueryLib.DataResult",
+                  "name": "decimals",
+                  "type": "tuple"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "bool",
+                      "name": "success",
+                      "type": "bool"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "value",
+                      "type": "bytes"
+                    }
+                  ],
+                  "internalType": "struct TokenQueryLib.DataResult[]",
+                  "name": "balanceQueryResults",
+                  "type": "tuple[]"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "bool",
+                      "name": "success",
+                      "type": "bool"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "value",
+                      "type": "bytes"
+                    }
+                  ],
+                  "internalType": "struct TokenQueryLib.DataResult[]",
+                  "name": "approvalQueryResults",
+                  "type": "tuple[]"
+                }
+              ],
+              "internalType": "struct TokenQueryLib.TokenQueryResult",
+              "name": "data",
+              "type": "tuple"
+            }
+          ],
+          "indexed": false,
+          "internalType": "struct PortfolioReaderViewLib.PortfolioEntry[]",
+          "name": "exported",
+          "type": "tuple[]"
+        }
+      ],
+      "name": "PortfolioQueryExport",
+      "type": "event"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.6.5+commit.f956cc89\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address payable\",\"name\":\"borrowProxy\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"moduleAddress\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"address payable\",\"name\":\"token\",\"type\":\"address\"},{\"internalType\":\"address[]\",\"name\":\"balanceQueries\",\"type\":\"address[]\"},{\"components\":[{\"internalType\":\"address payable\",\"name\":\"sourceAddress\",\"type\":\"address\"},{\"internalType\":\"address payable\",\"name\":\"targetAddress\",\"type\":\"address\"}],\"internalType\":\"struct TokenQueryLib.ApprovalQueryPayload[]\",\"name\":\"approvalQueries\",\"type\":\"tuple[]\"}],\"internalType\":\"struct TokenQueryLib.TokenQueryPayload\",\"name\":\"query\",\"type\":\"tuple\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"components\":[{\"internalType\":\"address payable\",\"name\":\"token\",\"type\":\"address\"},{\"components\":[{\"components\":[{\"internalType\":\"bool\",\"name\":\"success\",\"type\":\"bool\"},{\"internalType\":\"bytes\",\"name\":\"value\",\"type\":\"bytes\"}],\"internalType\":\"struct TokenQueryLib.DataResult\",\"name\":\"name\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"bool\",\"name\":\"success\",\"type\":\"bool\"},{\"internalType\":\"bytes\",\"name\":\"value\",\"type\":\"bytes\"}],\"internalType\":\"struct TokenQueryLib.DataResult\",\"name\":\"symbol\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"bool\",\"name\":\"success\",\"type\":\"bool\"},{\"internalType\":\"bytes\",\"name\":\"value\",\"type\":\"bytes\"}],\"internalType\":\"struct TokenQueryLib.DataResult\",\"name\":\"decimals\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"bool\",\"name\":\"success\",\"type\":\"bool\"},{\"internalType\":\"bytes\",\"name\":\"value\",\"type\":\"bytes\"}],\"internalType\":\"struct TokenQueryLib.DataResult[]\",\"name\":\"balanceQueryResults\",\"type\":\"tuple[]\"},{\"components\":[{\"internalType\":\"bool\",\"name\":\"success\",\"type\":\"bool\"},{\"internalType\":\"bytes\",\"name\":\"value\",\"type\":\"bytes\"}],\"internalType\":\"struct TokenQueryLib.DataResult[]\",\"name\":\"approvalQueryResults\",\"type\":\"tuple[]\"}],\"internalType\":\"struct TokenQueryLib.TokenQueryResult\",\"name\":\"data\",\"type\":\"tuple\"}],\"indexed\":false,\"internalType\":\"struct PortfolioReaderViewLib.PortfolioEntry[]\",\"name\":\"exported\",\"type\":\"tuple[]\"}],\"name\":\"PortfolioQueryExport\",\"type\":\"event\"}],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/home/ray/0confirmation/packages/0confirmation-sol/contracts/queries/portfolio/PortfolioQuery.sol\":\"PortfolioQuery\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/ray/0confirmation/packages/0confirmation-sol/contracts/BorrowProxy.sol\":{\"keccak256\":\"0xd688621a57efc6d515ff6251a2408bae454c973c1ce1a45a5c8cfe516a7e583a\",\"urls\":[\"bzz-raw://b74c744e18320ec3d66ab549d6829390444a39a3049a5008c368abccb68fa94a\",\"dweb:/ipfs/QmVXAXLoECoud9et46DnfXWcc5AiFXitJ6voPNNpFf8MvV\"]},\"/home/ray/0confirmation/packages/0confirmation-sol/contracts/BorrowProxyLib.sol\":{\"keccak256\":\"0x1fc1d8148e8154819f88c58015b366780d04fbcea4fd3c1798d09908991b324c\",\"urls\":[\"bzz-raw://cedbbd8e37ee4e66d95eff82e25220cbf87efeb408726793ea5d0e862c31f86f\",\"dweb:/ipfs/QmWX8pC5PAaDH7B4mPAa4rdmyWBKsRfWDLs1anGE3HAyTP\"]},\"/home/ray/0confirmation/packages/0confirmation-sol/contracts/adapters/assets/erc20/ERC20AdapterLib.sol\":{\"keccak256\":\"0x76e677a06ba765b58e56dfdc6e051d3a81704bbdd3207dbfe37281975e3718ab\",\"urls\":[\"bzz-raw://02434667f3e6c8b50d697aa2fc023bc7e64f31d2b026cd634a8060a009df0c75\",\"dweb:/ipfs/QmRd4ggXjCShcno8mVV5b19w6PKaeZDpH4M6VFBN8HwtJ2\"]},\"/home/ray/0confirmation/packages/0confirmation-sol/contracts/adapters/assets/erc20/ERC20Forwarder.sol\":{\"keccak256\":\"0x8099ed21e50c8fc73a267adb6bbba796d55141d0d57246f20662e9d3e37048d3\",\"urls\":[\"bzz-raw://a7dbea8818dc7ae57f6e0ba515aec6afebcfec56b0bb3cb46fafecc52736e3c7\",\"dweb:/ipfs/Qme1mHXvAryyiCyaFhPbooTpBsdyPUe1kRtiqMUJrBus5v\"]},\"/home/ray/0confirmation/packages/0confirmation-sol/contracts/adapters/lib/ModuleLib.sol\":{\"keccak256\":\"0x1b373842c7a184a51fc7b3620429a805fa261fffd9a078dabddd0f68cbced9f0\",\"urls\":[\"bzz-raw://4fdac32e23ac473e1c31202a3fddab6558a351d0c71efec21f404d413c94b626\",\"dweb:/ipfs/QmXPoQV6TmER6TqDJzirLpLH8wBzVXXLU2B2snKiEbLfVS\"]},\"/home/ray/0confirmation/packages/0confirmation-sol/contracts/adapters/liquidity/SimpleBurnLiquidationModule.sol\":{\"keccak256\":\"0x7618ca51dd3461d6885442acf0ad0bd3d53f61e8c174a37763827147f09035da\",\"urls\":[\"bzz-raw://ea91335c5c650f83c8cd44649fa25bd0c96080d446dc5ae65e936e6f1834a22e\",\"dweb:/ipfs/Qma1wjLtU8KrAYveFD29KgUdk9cfY6jHPZU1sH6H1CpQcq\"]},\"/home/ray/0confirmation/packages/0confirmation-sol/contracts/adapters/liquidity/SimpleBurnLiquidationModuleLib.sol\":{\"keccak256\":\"0xa18128c0d71fbd17462636565a0073bdad618e34f66bc0110e7166006c691d77\",\"urls\":[\"bzz-raw://48cf189fc15002e3e2de95f9430f444ba202163f388dc249946d573f85dfac63\",\"dweb:/ipfs/QmPg5ncdT2fm2pViupYwW7DEAt43NADBjh1PX2QedW2XLt\"]},\"/home/ray/0confirmation/packages/0confirmation-sol/contracts/interfaces/IBorrowProxyController.sol\":{\"keccak256\":\"0xf836de5fcc8ee3d109b716c7375a20c12edaaa9f3af637981a4c1c282fc49972\",\"urls\":[\"bzz-raw://1603aa157f42fe8a1b53b967c9ad37c69ac4fb8fa2f2f106e728e3110de6aa8a\",\"dweb:/ipfs/QmP9gRaiEMbU5zCKt2TfSJg2Yq21255EbKbQWdLqpUogZ2\"]},\"/home/ray/0confirmation/packages/0confirmation-sol/contracts/interfaces/IModuleRegistryProvider.sol\":{\"keccak256\":\"0x9d6a8d1ba91e453cfce4563a556c85fd9438c0d7a6f572c7d15185a1070f3c40\",\"urls\":[\"bzz-raw://845207b73ca800e20be63031e1a388fe4e9ff9812b5045e0437451496cad56cd\",\"dweb:/ipfs/QmYsu7ASZPHeFKyhbJMJeFUUDGSfc5d6ZzZeBDRDijB72z\"]},\"/home/ray/0confirmation/packages/0confirmation-sol/contracts/interfaces/IShifter.sol\":{\"keccak256\":\"0x090018c3a7a1763c024d99957612ff2bddbfb548cf577b7a7796328321d3daed\",\"urls\":[\"bzz-raw://73239bac4b9f00afde4259c81762d89c1d1d26d805bb3301ea9bb943e62abc5e\",\"dweb:/ipfs/Qmb1ec1ze7Fz1WQJVRyjcKGCsV3Jp6fUW97VenEf9JJPEy\"]},\"/home/ray/0confirmation/packages/0confirmation-sol/contracts/interfaces/IUniswapExchange.sol\":{\"keccak256\":\"0x9ea0c405a16530b01c3019c0e60fb78b3f776027ee02cd82a095ac5f7d916e4a\",\"urls\":[\"bzz-raw://5dc17e81c7bd9f00b5d62a6ca99c7d5189ff432a7bfd04311d3492133bb5d39d\",\"dweb:/ipfs/QmdqDogtFp5socjqCo7U4oBTdQ8VMC5Qdgiv2ejPYNknte\"]},\"/home/ray/0confirmation/packages/0confirmation-sol/contracts/interfaces/IUniswapFactory.sol\":{\"keccak256\":\"0x8f5b23ac9d723999084981e080e8ce419a7a304e424ba37cfa23fb49cd2b648b\",\"urls\":[\"bzz-raw://bbaac12e100717449222e9978c5d270ce9b4a57ef83b16d3ce0b2dbdfdc12e0a\",\"dweb:/ipfs/QmYcQHLfZ91neuYptPnaTNGXwwTELdwnF4BdhhkJh1nifP\"]},\"/home/ray/0confirmation/packages/0confirmation-sol/contracts/queries/lib/QueryLib.sol\":{\"keccak256\":\"0x19b6b65e14181c495b1b91f0fbdc54dd4a8103536cd0de6c0f993764b54f5ba2\",\"urls\":[\"bzz-raw://36641117e82993f2863ac2c6baf28fb62af56cdca2760303b2014648271e0a70\",\"dweb:/ipfs/Qmd2QP1Mn4tFydSEUdVPPkYEeKriDnrFHDNqX7EfH68tWE\"]},\"/home/ray/0confirmation/packages/0confirmation-sol/contracts/queries/portfolio/PortfolioQuery.sol\":{\"keccak256\":\"0x20efde855d66c336cab8fc1fb7533238fbead36171d25a48d88b5ce201a39fb7\",\"urls\":[\"bzz-raw://6b5117b670b235f1634f37e9f12509aa054cebc1315bd47e34c215a842669873\",\"dweb:/ipfs/QmPucU3mMMbWkVsWaLZaar6GJ2dBK9hoH2RnBJmgn9L798\"]},\"/home/ray/0confirmation/packages/0confirmation-sol/contracts/queries/portfolio/PortfolioReaderView.sol\":{\"keccak256\":\"0x07ffe0a1c2c772b53565a28a11ce54deaa861dc3c5de68d3dd77386777af3a85\",\"urls\":[\"bzz-raw://39002fc81bf364afbff3211c22d009b8edd69da4cc4d7d9987158a4e5370a708\",\"dweb:/ipfs/QmaFZ7EQAqnNEnB7bDA39FMfvnWF7qvk8bpwUrbSyLNSfc\"]},\"/home/ray/0confirmation/packages/0confirmation-sol/contracts/queries/portfolio/PortfolioReaderViewLib.sol\":{\"keccak256\":\"0xbe27d4a8b9eb26193a1cde4cf71b623c1f5f6b15085f175c692041b836476e8b\",\"urls\":[\"bzz-raw://b0d6eb5f8f0caefcc44fed147e4cad8534f7a25680b235256bd6650c855b06a4\",\"dweb:/ipfs/Qmc9vxRT33646nEhGZnuP8mv3fSnRm8Hwsm2eoWsR4zNWb\"]},\"/home/ray/0confirmation/packages/0confirmation-sol/contracts/queries/token/TokenQueryLib.sol\":{\"keccak256\":\"0xd219258204ac0e8aac2e8e9d07b2f8814a7eebe0b27e6fbf5f43a4b1c0030ed2\",\"urls\":[\"bzz-raw://21da6c04e775381ed19369c5a0464745f56a9c8f198b7af6350aa764039b9fc5\",\"dweb:/ipfs/QmZ5MUtg2YMQjgrg64stgGipwHkP7BB6H9JEns7s7kMq7h\"]},\"/home/ray/0confirmation/packages/0confirmation-sol/contracts/utils/AddressSetLib.sol\":{\"keccak256\":\"0x2ff94da38b4de9cbf144e3554164d4468a6ad1f68c3f321257061fd90047f450\",\"urls\":[\"bzz-raw://092af8e003194ee1ff0ade6eb4c57fe1525bdc91362bb512b54fd9f5117e108a\",\"dweb:/ipfs/QmawSof9WUHcNZ6iZpJ3RubGR8VWzUkasrSXZrxr9C3puj\"]},\"/home/ray/0confirmation/packages/0confirmation-sol/contracts/utils/ExtLib.sol\":{\"keccak256\":\"0x0efb9574b1fefea0f9b3f1f10663f9ece1595102111903437c9c5be6268ac136\",\"urls\":[\"bzz-raw://c4040e404a16b0ff79a53a586b293328630c610cc8a5c6e7c1cd9e62d0b50cfa\",\"dweb:/ipfs/Qmbhn6ZpJ3PDxU2BkrJRpfG3nC1YhYKtqwnYsN5x9p7oRD\"]},\"/home/ray/0confirmation/packages/0confirmation-sol/contracts/utils/MemcpyLib.sol\":{\"keccak256\":\"0xe34b27a01d716516d045ad0bfca9bad332d732f8ff1defd7b4a0563df98d2a38\",\"urls\":[\"bzz-raw://ca35e768aacdbef94807419b549886f15f124292603d65110872cfc9d6c14b7c\",\"dweb:/ipfs/QmcBMwGiMS8KzjFxPFX8CErSLEHM3azw9sA7EGebPa9aW8\"]},\"/home/ray/0confirmation/packages/0confirmation-sol/contracts/utils/RevertCaptureLib.sol\":{\"keccak256\":\"0x92c3400fe9d89d017e3a3c5d8cd50cc39f488f78aad179ca3c4e29d312afbe7f\",\"urls\":[\"bzz-raw://e77387a52ac77a3d27bba2235f17af874d472a0df329b94ec680cd3043128381\",\"dweb:/ipfs/QmQeKk6a6k5iAXheQnSjpG7UG1Bi2CQbBshnjgbv2rMFHA\"]},\"/home/ray/0confirmation/packages/0confirmation-sol/contracts/utils/SliceLib.sol\":{\"keccak256\":\"0xa256acc9d42ff8f6915388594a7d1552f545e789d50d7fe741ff66ac0b3d9a05\",\"urls\":[\"bzz-raw://f2fdd5ab737b6ed2e66b800234efb03f4e93a77cda5c1420479d984b02b8baef\",\"dweb:/ipfs/QmYCCgArfekzVJuYD1EZrNSJHZasevZx6AMgLxX9UXs6iz\"]},\"/home/ray/0confirmation/packages/0confirmation-sol/contracts/utils/TokenUtils.sol\":{\"keccak256\":\"0xe07c7771330c67ba4599a5a532461cf69ddd72ad13f7ee5d5372aec1f9281e84\",\"urls\":[\"bzz-raw://e8a49152e2882d0fed757c5d19e8ce39d579c8001f1b963cb9aab3b230993d38\",\"dweb:/ipfs/QmWs1Ui59jDSXRo8QewBKGXzmSFJpoKPv6ahwR6dxCyNG4\"]},\"/home/ray/0confirmation/packages/0confirmation-sol/contracts/utils/ViewExecutor.sol\":{\"keccak256\":\"0xfff986a3b918aa6f98d7d7221d7d567598fd399eef07984bd69d94acf1242f52\",\"urls\":[\"bzz-raw://196835c2023cdc4e51d2916136ec163b0c4142ef29b17f2ceeb31f56a5208add\",\"dweb:/ipfs/QmcEfS9oVumLMoxMtBEaqCqzJGmcHnwwJtHc46Tyw9MbAh\"]},\"openzeppelin-solidity/contracts/token/ERC20/IERC20.sol\":{\"keccak256\":\"0x708ae901e214e044a5c922748462157b9be162b3620aa56d7c0e7258f66aee1d\",\"urls\":[\"bzz-raw://c287ed9989e5f16114553a30f4ba3794be657f90598f101f7b92ce5859f46978\",\"dweb:/ipfs/QmeFeDCzfhhBTaY9NE9wREmrBRETvn4k3mo2FejqskVMtg\"]},\"openzeppelin-solidity/contracts/utils/Create2.sol\":{\"keccak256\":\"0x5993cce579ec664f9dcf6254c511b906222ac5bdaea90ee19c9d018dc02cd221\",\"urls\":[\"bzz-raw://44f185e70782fabf2bb877f6f358b3af729c04904b8146d665a507b7ec602d69\",\"dweb:/ipfs/QmTuqsSxKhBUY1kbRUbzQMM3rBZKLaTTrVfmCKn77gWFsv\"]}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b5060405161111438038061111483398101604081905261002f91610280565b600060405161003d9061014a565b604051809103906000f080158015610059573d6000803e3d6000fd5b5090506060846001600160a01b031663fd00430c83639e2ba4e560e01b8787604051602401610089929190610442565b60408051601f198184030181529181526020820180516001600160e01b03166001600160e01b03199485161790525160e085901b90921682526100cf9291600401610400565b60006040518083038186803b1580156100e757600080fd5b505afa1580156100fb573d6000803e3d6000fd5b505050506040513d6000823e601f3d908101601f191682016040526101239190810190610349565b90506101388161014260201b6100091760201c565b5050505050610599565b805181602001f35b610b26806105ee83390190565b805161016281610581565b92915050565b600082601f830112610178578081fd5b815161018b61018682610529565b610503565b8181529150602080830190848101818402860182018710156101ac57600080fd5b60005b848110156101d45781516101c281610581565b845292820192908201906001016101af565b505050505092915050565b600082601f8301126101ef578081fd5b81516101fd61018682610529565b818152915060208083019084810160408085028701830188101561022057600080fd5b6000805b868110156102735782848b03121561023a578182fd5b61024383610503565b845161024e81610581565b81528486015161025d81610581565b8187015286529484019492820192600101610224565b5050505050505092915050565b600080600060608486031215610294578283fd5b835161029f81610581565b60208501519093506102b081610581565b60408501519092506001600160401b03808211156102cc578283fd5b818601606081890312156102de578384fd5b6102e86060610503565b92506102f48882610157565b8352602081015182811115610307578485fd5b61031389828401610168565b60208501525060408101518281111561032a578485fd5b610336898284016101df565b6040850152505050809150509250925092565b60006020828403121561035a578081fd5b81516001600160401b0380821115610370578283fd5b81840185601f820112610381578384fd5b8051925081831115610391578384fd5b6103a4601f8401601f1916602001610503565b91508282528560208483010111156103ba578384fd5b6103cb836020840160208401610551565b50949350505050565b6001600160a01b0316815260200190565b80516001600160a01b03908116835260209182015116910152565b600060018060a01b038416825260406020830152825180604084015261042d816060850160208701610551565b601f01601f1916919091016060019392505050565b6000604060018060a01b0380861684526020828186015260a08501828751168487015281870151925060608087015280835161047e8184610548565b87958501935091505b808510156104ac5761049a8284516103d4565b91508383019250600185019450610487565b5087850151878203603f19016080890152805180835287955091840192508301905b808510156104f5576104e18383516103e5565b6001949094019391850191908301906104ce565b509098975050505050505050565b6040518181016001600160401b038111828210171561052157600080fd5b604052919050565b60006001600160401b0382111561053e578081fd5b5060209081020190565b90815260200190565b60005b8381101561056c578181015183820152602001610554565b8381111561057b576000848401525b50505050565b6001600160a01b038116811461059657600080fd5b50565b6047806105a76000396000f3fe6080604052600080fd5b805181602001f3fea26469706673582212201aed0efbc0ebdaf0d7e93ff0ef677c5b6c5b58b4af2b3e10e1157fba6622354564736f6c63430006050033608060405234801561001057600080fd5b50610b06806100206000396000f3fe608060405234801561001057600080fd5b506004361061002b5760003560e01c80639e2ba4e514610030575b600080fd5b61004361003e36600461073f565b610059565b6040516100509190610944565b60405180910390f35b60606100648261006a565b92915050565b60606000610076610226565b90506060816003016001018054806020026020016040519081016040528092919081815260200182805480156100d557602002820191906000526020600020905b81546001600160a01b031681526001909101906020018083116100b7575b505050505090506060815160010167ffffffffffffffff811180156100f957600080fd5b5060405190808252806020026020018201604052801561013357816020015b61012061060d565b8152602001906001900390816101185790505b50905084600001518160008151811061014857fe5b60209081029190910101516001600160a01b0390911690526101698561023d565b8160008151811061017657fe5b602090810291909101810151015260005b825181101561021d5782818151811061019c57fe5b60200260200101518282600101815181106101b357fe5b60209081029190910101516001600160a01b03909116905282518390829081106101d957fe5b60209081029190910101516001600160a01b031686526101f88661023d565b82826001018151811061020757fe5b6020908102919091018101510152600101610187565b50949350505050565b60006102386102336103e1565b610410565b905090565b610245610635565b815161025090610426565b8152815161025d90610462565b6020820152815161026d9061049e565b604082015260208201515167ffffffffffffffff8111801561028e57600080fd5b506040519080825280602002602001820160405280156102c857816020015b6102b5610676565b8152602001906001900390816102ad5790505b50606082015260005b816060015151811015610326576103038360000151846020015183815181106102f657fe5b60200260200101516104da565b8260600151828151811061031357fe5b60209081029190910101526001016102d1565b5081604001515167ffffffffffffffff8111801561034357600080fd5b5060405190808252806020026020018201604052801561037d57816020015b61036a610676565b8152602001906001900390816103625790505b50608082015260005b8160800151518110156103db576103b8836040015182815181106103a657fe5b6020026020010151846000015161052d565b826080015182815181106103c857fe5b6020908102919091010152600101610386565b50919050565b60006040516020016103f2906108f7565b6040516020818303038152906040528051906020012060001c905090565b60006100648261041e610580565b63ffffffff16565b61042e610676565b6040805160048152602481019091526020810180516001600160e01b03166306fdde0360e01b179052610064908390610586565b61046a610676565b6040805160048152602481019091526020810180516001600160e01b03166395d89b4160e01b179052610064908390610586565b6104a6610676565b6040805160048152602481019091526020810180516001600160e01b031663313ce56760e01b179052610064908390610586565b6104e2610676565b61052683836040516024016104f79190610916565b60408051601f198184030181529190526020810180516001600160e01b03166370a0823160e01b179052610586565b9392505050565b610535610676565b825160208401516040516105269285926105519260240161092a565b60408051601f198184030181529190526020810180516001600160e01b031663f4b1604560e01b179052610586565b61060a90565b61058e610676565b60006060846001600160a01b0316846040516105aa91906108db565b6000604051808303816000865af19150503d80600081146105e7576040519150601f19603f3d011682016040523d82523d6000602084013e6105ec565b606091505b50604080518082019091529115158252602082015295945050505050565b90565b604051806040016040528060006001600160a01b03168152602001610630610635565b905290565b6040518060a00160405280610648610676565b8152602001610655610676565b8152602001610662610676565b815260200160608152602001606081525090565b60408051808201909152600081526060602082015290565b803561006481610ab8565b600082601f8301126106a9578081fd5b81356106bc6106b782610a68565b610a41565b81815291506020808301908481016040808502870183018810156106df57600080fd5b6000805b868110156107325782848b0312156106f9578182fd5b61070283610a41565b843561070d81610ab8565b81528486013561071c81610ab8565b81870152865294840194928201926001016106e3565b5050505050505092915050565b60006020808385031215610751578182fd5b823567ffffffffffffffff80821115610768578384fd5b8185016060818803121561077a578485fd5b6107846060610a41565b9250803561079181610ab8565b835280840135828111156107a3578586fd5b80820188601f8201126107b4578687fd5b803591506107c46106b783610a68565b82815286810190828801888502840189018c10156107e057898afd5b8993505b8484101561080a576107f68c8261068e565b8352600193909301929188019188016107e4565b508088880152505050506040810135935081841115610827578485fd5b61083387858301610699565b6040840152509095945050505050565b60008282518085526020808601955080818302840101818601855b8481101561088c57601f1986840301895261087a838351610899565b9884019892509083019060010161085e565b5090979650505050505050565b600081511515835260208201516040602085015280518060408601526108c6816060870160208501610a88565b601f01601f1916939093016060019392505050565b600082516108ed818460208701610a88565b9190910192915050565b7234b9b7b630ba329739b4b6b8363296b13ab93760691b815260130190565b6001600160a01b0391909116815260200190565b6001600160a01b0392831681529116602082015260400190565b60208082528251828201819052600091906040908185019080840286018301878501865b83811015610a3357603f1989840381018652825180516001600160a01b03168552880151888501889052805160a08987018190529091906109ac60e0880184610899565b8b830151935060608589830301818a01526109c78286610899565b8c850151955060809250868a820301838b01526109e48187610899565b828601519650878b820301858c01526109fd8188610843565b945050505080830151935050838782030160c0880152610a1d8184610843565b988b019896505050928801925050600101610968565b509098975050505050505050565b60405181810167ffffffffffffffff81118282101715610a6057600080fd5b604052919050565b600067ffffffffffffffff821115610a7e578081fd5b5060209081020190565b60005b83811015610aa3578181015183820152602001610a8b565b83811115610ab2576000848401525b50505050565b6001600160a01b0381168114610acd57600080fd5b5056fea2646970667358221220b6fec2a383b0ab9eb3111704d80894b59738eaf201d4e7440e51ab18d9f1fde764736f6c63430006050033",
+  "deployedBytecode": "0x6080604052600080fd5b805181602001f3fea26469706673582212201aed0efbc0ebdaf0d7e93ff0ef677c5b6c5b58b4af2b3e10e1157fba6622354564736f6c63430006050033",
+  "sourceMap": "357:494:34:-:0;;;489:360;5:9:-1;2:2;;;27:1;24;17:12;2:2;489:360:34;;;;;;;;;;;;;;;;;;;;;612:17;640:25;;;;;:::i;:::-;;;;;;;;;;;8:9:-1;5:2;;;45:16;42:1;39;24:38;77:16;74:1;67:27;5:2;640:25:34;612:54;;672:19;706:11;-1:-1:-1;;;;;694:30:34;;725:9;759:35;;;796:13;811:5;736:81;;;;;;;;;;;;;;-1:-1:-1;;26:21;;;22:32;6:49;;736:81:34;;;49:4:-1;25:18;;61:17;;-1:-1;;;;;182:15;-1:-1;;;;;;736:81:34;;;179:29:-1;160:49;;694:124:34;;;;;;;;;;;;;;;;;;;;;;;;;;;;;5:9:-1;2:2;;;27:1;24;17:12;2:2;694:124:34;;;;8:9:-1;5:2;;;45:16;42:1;39;24:38;77:16;74:1;67:27;5:2;694:124:34;;;;;;39:16:-1;36:1;17:17;2:54;101:4;694:124:34;80:15:-1;;;-1:-1;;76:31;65:43;;120:4;113:20;694:124:34;;;;;;;;;672:146;;824:20;:6;:18;;;;;:20;;:::i;:::-;489:360;;;;;357:494;;46:129:33;157:6;151:13;142:6;136:4;132:17;125:40;357:494:34;;;;;;;;:::o;146:150:-1:-;232:13;;250:41;232:13;250:41;;;217:79;;;;;321:722;;449:3;442:4;434:6;430:17;426:27;416:2;;-1:-1;;457:12;416:2;497:6;491:13;519:80;534:64;591:6;534:64;;;519:80;;;627:21;;;510:89;-1:-1;671:4;684:14;;;;659:17;;;773;;;764:27;;;;761:36;-1:-1;758:2;;;810:1;;800:12;758:2;835:1;820:217;845:6;842:1;839:13;820:217;;;89:6;83:13;101:33;128:5;101:33;;;913:61;;988:14;;;;1016;;;;867:1;860:9;820:217;;;824:14;;;;;409:634;;;;;1103:836;;1269:3;1262:4;1254:6;1250:17;1246:27;1236:2;;-1:-1;;1277:12;1236:2;1317:6;1311:13;1339:118;1354:102;1449:6;1354:102;;1339:118;1485:21;;;1330:127;-1:-1;1529:4;1542:14;;;;1517:17;;;1643:4;1631:17;;;1622:27;;;;1619:36;-1:-1;1616:2;;;1668:1;;1658:12;1616:2;1693:1;;1678:255;1703:6;1700:1;1697:13;1678:255;;;1643:4;2572:9;2567:3;2563:19;2559:30;2556:2;;;1693:1;;2592:12;2556:2;2620:20;1643:4;2620:20;;;238:6;232:13;250:41;285:5;250:41;;;2706:94;;2943:22;;;232:13;250:41;232:13;250:41;;;2885:16;;;2878:94;1771:99;;1884:14;;;;1912;;;;1725:1;1718:9;1678:255;;;1682:14;;;;;;;1229:710;;;;;3993:700;;;;4185:2;4173:9;4164:7;4160:23;4156:32;4153:2;;;-1:-1;;4191:12;4153:2;238:6;232:13;250:41;285:5;250:41;;;4362:2;4412:22;;83:13;4243:82;;-1:-1;101:33;83:13;101:33;;;4502:2;4487:18;;4481:25;4370:74;;-1:-1;;;;;;4515:30;;;4512:2;;;-1:-1;;4548:12;4512:2;4660:6;4649:9;4645:22;4185:2;3168:9;3163:3;3159:19;3155:30;3152:2;;;-1:-1;;3188:12;3152:2;3216:20;4185:2;3216:20;;;3207:29;;3319:68;3383:3;3359:22;3319:68;;;3301:16;3294:94;4362:2;3469:9;3465:18;3459:25;4526:18;3496:6;3493:30;3490:2;;;-1:-1;;3526:12;3490:2;3571:85;3652:3;3643:6;3632:9;3628:22;3571:85;;;4362:2;3557:5;3553:16;3546:111;;4502:2;3739:9;3735:18;3729:25;4526:18;3766:6;3763:30;3760:2;;;-1:-1;;3796:12;3760:2;3841:123;3960:3;3951:6;3940:9;3936:22;3841:123;;;4502:2;3827:5;3823:16;3816:149;;;;4568:109;;;;4147:546;;;;;;4700:360;;4824:2;4812:9;4803:7;4799:23;4795:32;4792:2;;;-1:-1;;4830:12;4792:2;4875:24;;-1:-1;;;;;4908:30;;;4905:2;;;-1:-1;;4941:12;4905:2;5027:6;5016:9;5012:22;2060:3;2053:4;2045:6;2041:17;2037:27;2027:2;;-1:-1;;2068:12;2027:2;2108:6;2102:13;2088:27;;4919:18;11810:6;11807:30;11804:2;;;-1:-1;;11840:12;11804:2;2130:64;11913:9;11894:17;;-1:-1;;11890:33;4824:2;11971:15;2130:64;;;2121:73;;2214:6;2207:5;2200:21;2318:3;4824:2;2309:6;2242;2300:16;;2297:25;2294:2;;;-1:-1;;2325:12;2294:2;2345:39;2377:6;4824:2;2276:5;2272:16;4824:2;2242:6;2238:17;2345:39;;;-1:-1;4961:83;4786:274;-1:-1;;;;4786:274;5068:173;-1:-1;;;;;13908:54;5660:45;;5230:4;5221:14;;5148:93;8180:542;8414:23;;-1:-1;;;;;13908:54;;;5660:45;;8610:4;8599:16;;;8593:23;13908:54;8686:14;;5660:45;8312:410;9818:408;;4526:18;;13919:42;;;13912:5;13908:54;5667:3;5660:45;9982:2;10100;10089:9;10085:18;10078:48;7879:5;12460:12;13200:6;9982:2;9971:9;9967:18;13188:19;7972:52;8017:6;13228:14;9971:9;13228:14;10100:2;7998:5;7994:16;7972:52;;;11913:9;14319:14;-1:-1;;14315:28;8036:39;;;;13228:14;8036:39;;9953:273;-1:-1;;;9953:273;10233:512;;10449:2;4526:18;;13919:42;;;;13912:5;13908:54;5667:3;5660:45;10567:2;10449;10567;10556:9;10552:18;10545:48;8978:14;10438:9;8978:14;13919:42;9060:16;9054:23;13908:54;10449:2;10438:9;10434:18;5660:45;10567:2;9244:5;9240:16;9234:23;9214:43;;8987:4;;10438:9;9277:14;9270:38;9323:103;6161:5;12460:12;6180:76;6249:6;6244:3;6180:76;;;-1:-1;;12118:14;;;-1:-1;6173:83;-1:-1;6366:260;6391:6;6388:1;6385:13;6366:260;;;6479:63;6538:3;6458:6;6452:13;6479:63;;;6472:70;;10567:2;6612:6;12900:14;6549:70;;6413:1;6410;6406:9;6401:14;;6366:260;;;-1:-1;9511:16;;;9505:23;9564:14;;;-1:-1;;9564:14;9548;;;9541:38;12460:12;;13188:19;;;-1:-1;;;13228:14;;;;-1:-1;12118:14;;;7333:374;7358:6;7355:1;7352:13;7333:374;;;5413:122;5531:3;7425:6;7419:13;5413:122;;;6413:1;7373:9;;;;;5555:14;;;;12900;;;;7333:374;;;-1:-1;10599:136;;10420:325;-1:-1;;;;;;;;10420:325;10752:256;10814:2;10808:9;10840:17;;;-1:-1;;;;;10900:34;;10936:22;;;10897:62;10894:2;;;10972:1;;10962:12;10894:2;10814;10981:22;10792:216;;-1:-1;10792:216;11015:304;;-1:-1;;;;;11163:30;;11160:2;;;-1:-1;;11196:12;11160:2;-1:-1;11241:4;11229:17;;;11294:15;;11097:222;13080:168;13188:19;;;13237:4;13228:14;;13181:67;13975:268;14040:1;14047:101;14061:6;14058:1;14055:13;14047:101;;;14128:11;;;14122:18;14109:11;;;14102:39;14083:2;14076:10;14047:101;;;14163:6;14160:1;14157:13;14154:2;;;14040:1;14219:6;14214:3;14210:16;14203:27;14154:2;;14024:219;;;;14356:117;-1:-1;;;;;13908:54;;14415:35;;14405:2;;14464:1;;14454:12;14405:2;14399:74;;;357:494:34;;;;;;",
+  "deployedSourceMap": "357:494:34:-:0;;;12:1:-1;9;2:12;46:129:33;157:6;151:13;142:6;136:4;132:17;125:40",
+  "source": "pragma solidity ^0.6.0;\npragma experimental ABIEncoderV2;\n\nimport { TokenQueryLib } from \"../token/TokenQueryLib.sol\";\nimport { BorrowProxy } from \"../../BorrowProxy.sol\";\nimport { PortfolioReaderView } from \"./PortfolioReaderView.sol\";\nimport { PortfolioReaderViewLib } from \"./PortfolioReaderViewLib.sol\";\nimport { QueryLib } from \"../lib/QueryLib.sol\";\n\ncontract PortfolioQuery {\n  using QueryLib for *;\n  event PortfolioQueryExport(PortfolioReaderViewLib.PortfolioEntry[] exported);\n  constructor(address payable borrowProxy, address moduleAddress, TokenQueryLib.TokenQueryPayload memory query) public {\n    address viewLayer = address(new PortfolioReaderView());\n    bytes memory result = BorrowProxy(borrowProxy).query(viewLayer, abi.encodeWithSelector(PortfolioReaderView.render.selector, moduleAddress, query));\n    result.returnBytes();\n  }\n}\n",
+  "sourcePath": "/home/ray/0confirmation/packages/0confirmation-sol/contracts/queries/portfolio/PortfolioQuery.sol",
+  "ast": {
+    "absolutePath": "/home/ray/0confirmation/packages/0confirmation-sol/contracts/queries/portfolio/PortfolioQuery.sol",
+    "exportedSymbols": {
+      "PortfolioQuery": [
+        6187
+      ]
+    },
+    "id": 6188,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 6127,
+        "literals": [
+          "solidity",
+          "^",
+          "0.6",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:34"
+      },
+      {
+        "id": 6128,
+        "literals": [
+          "experimental",
+          "ABIEncoderV2"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "24:33:34"
+      },
+      {
+        "absolutePath": "/home/ray/0confirmation/packages/0confirmation-sol/contracts/queries/token/TokenQueryLib.sol",
+        "file": "../token/TokenQueryLib.sol",
+        "id": 6130,
+        "nodeType": "ImportDirective",
+        "scope": 6188,
+        "sourceUnit": 6684,
+        "src": "59:59:34",
+        "symbolAliases": [
+          {
+            "foreign": {
+              "argumentTypes": null,
+              "id": 6129,
+              "name": "TokenQueryLib",
+              "nodeType": "Identifier",
+              "overloadedDeclarations": [],
+              "referencedDeclaration": null,
+              "src": "68:13:34",
+              "typeDescriptions": {
+                "typeIdentifier": null,
+                "typeString": null
+              }
+            },
+            "local": null
+          }
+        ],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "/home/ray/0confirmation/packages/0confirmation-sol/contracts/BorrowProxy.sol",
+        "file": "../../BorrowProxy.sol",
+        "id": 6132,
+        "nodeType": "ImportDirective",
+        "scope": 6188,
+        "sourceUnit": 259,
+        "src": "119:52:34",
+        "symbolAliases": [
+          {
+            "foreign": {
+              "argumentTypes": null,
+              "id": 6131,
+              "name": "BorrowProxy",
+              "nodeType": "Identifier",
+              "overloadedDeclarations": [],
+              "referencedDeclaration": null,
+              "src": "128:11:34",
+              "typeDescriptions": {
+                "typeIdentifier": null,
+                "typeString": null
+              }
+            },
+            "local": null
+          }
+        ],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "/home/ray/0confirmation/packages/0confirmation-sol/contracts/queries/portfolio/PortfolioReaderView.sol",
+        "file": "./PortfolioReaderView.sol",
+        "id": 6134,
+        "nodeType": "ImportDirective",
+        "scope": 6188,
+        "sourceUnit": 6211,
+        "src": "172:64:34",
+        "symbolAliases": [
+          {
+            "foreign": {
+              "argumentTypes": null,
+              "id": 6133,
+              "name": "PortfolioReaderView",
+              "nodeType": "Identifier",
+              "overloadedDeclarations": [],
+              "referencedDeclaration": null,
+              "src": "181:19:34",
+              "typeDescriptions": {
+                "typeIdentifier": null,
+                "typeString": null
+              }
+            },
+            "local": null
+          }
+        ],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "/home/ray/0confirmation/packages/0confirmation-sol/contracts/queries/portfolio/PortfolioReaderViewLib.sol",
+        "file": "./PortfolioReaderViewLib.sol",
+        "id": 6136,
+        "nodeType": "ImportDirective",
+        "scope": 6188,
+        "sourceUnit": 6339,
+        "src": "237:70:34",
+        "symbolAliases": [
+          {
+            "foreign": {
+              "argumentTypes": null,
+              "id": 6135,
+              "name": "PortfolioReaderViewLib",
+              "nodeType": "Identifier",
+              "overloadedDeclarations": [],
+              "referencedDeclaration": null,
+              "src": "246:22:34",
+              "typeDescriptions": {
+                "typeIdentifier": null,
+                "typeString": null
+              }
+            },
+            "local": null
+          }
+        ],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "/home/ray/0confirmation/packages/0confirmation-sol/contracts/queries/lib/QueryLib.sol",
+        "file": "../lib/QueryLib.sol",
+        "id": 6138,
+        "nodeType": "ImportDirective",
+        "scope": 6188,
+        "sourceUnit": 6126,
+        "src": "308:47:34",
+        "symbolAliases": [
+          {
+            "foreign": {
+              "argumentTypes": null,
+              "id": 6137,
+              "name": "QueryLib",
+              "nodeType": "Identifier",
+              "overloadedDeclarations": [],
+              "referencedDeclaration": null,
+              "src": "317:8:34",
+              "typeDescriptions": {
+                "typeIdentifier": null,
+                "typeString": null
+              }
+            },
+            "local": null
+          }
+        ],
+        "unitAlias": ""
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [
+          6210
+        ],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": true,
+        "id": 6187,
+        "linearizedBaseContracts": [
+          6187
+        ],
+        "name": "PortfolioQuery",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "id": 6140,
+            "libraryName": {
+              "contractScope": null,
+              "id": 6139,
+              "name": "QueryLib",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 6125,
+              "src": "391:8:34",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_QueryLib_$6125",
+                "typeString": "library QueryLib"
+              }
+            },
+            "nodeType": "UsingForDirective",
+            "src": "385:21:34",
+            "typeName": null
+          },
+          {
+            "anonymous": false,
+            "documentation": null,
+            "id": 6145,
+            "name": "PortfolioQueryExport",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 6144,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6143,
+                  "indexed": false,
+                  "name": "exported",
+                  "nodeType": "VariableDeclaration",
+                  "overrides": null,
+                  "scope": 6145,
+                  "src": "436:48:34",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_struct$_PortfolioEntry_$6222_memory_ptr_$dyn_memory_ptr",
+                    "typeString": "struct PortfolioReaderViewLib.PortfolioEntry[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "contractScope": null,
+                      "id": 6141,
+                      "name": "PortfolioReaderViewLib.PortfolioEntry",
+                      "nodeType": "UserDefinedTypeName",
+                      "referencedDeclaration": 6222,
+                      "src": "436:37:34",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_PortfolioEntry_$6222_storage_ptr",
+                        "typeString": "struct PortfolioReaderViewLib.PortfolioEntry"
+                      }
+                    },
+                    "id": 6142,
+                    "length": null,
+                    "nodeType": "ArrayTypeName",
+                    "src": "436:39:34",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_struct$_PortfolioEntry_$6222_storage_$dyn_storage_ptr",
+                      "typeString": "struct PortfolioReaderViewLib.PortfolioEntry[]"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "435:50:34"
+            },
+            "src": "409:77:34"
+          },
+          {
+            "body": {
+              "id": 6185,
+              "nodeType": "Block",
+              "src": "606:243:34",
+              "statements": [
+                {
+                  "assignments": [
+                    6155
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 6155,
+                      "name": "viewLayer",
+                      "nodeType": "VariableDeclaration",
+                      "overrides": null,
+                      "scope": 6185,
+                      "src": "612:17:34",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      },
+                      "typeName": {
+                        "id": 6154,
+                        "name": "address",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "612:7:34",
+                        "stateMutability": "nonpayable",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 6162,
+                  "initialValue": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "arguments": [],
+                        "expression": {
+                          "argumentTypes": [],
+                          "id": 6159,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "nodeType": "NewExpression",
+                          "src": "640:23:34",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_creation_nonpayable$__$returns$_t_contract$_PortfolioReaderView_$6210_$",
+                            "typeString": "function () returns (contract PortfolioReaderView)"
+                          },
+                          "typeName": {
+                            "contractScope": null,
+                            "id": 6158,
+                            "name": "PortfolioReaderView",
+                            "nodeType": "UserDefinedTypeName",
+                            "referencedDeclaration": 6210,
+                            "src": "644:19:34",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_contract$_PortfolioReaderView_$6210",
+                              "typeString": "contract PortfolioReaderView"
+                            }
+                          }
+                        },
+                        "id": 6160,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "640:25:34",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_PortfolioReaderView_$6210",
+                          "typeString": "contract PortfolioReaderView"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_contract$_PortfolioReaderView_$6210",
+                          "typeString": "contract PortfolioReaderView"
+                        }
+                      ],
+                      "id": 6157,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "lValueRequested": false,
+                      "nodeType": "ElementaryTypeNameExpression",
+                      "src": "632:7:34",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_type$_t_address_$",
+                        "typeString": "type(address)"
+                      },
+                      "typeName": {
+                        "id": 6156,
+                        "name": "address",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "632:7:34",
+                        "typeDescriptions": {
+                          "typeIdentifier": null,
+                          "typeString": null
+                        }
+                      }
+                    },
+                    "id": 6161,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "typeConversion",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "632:34:34",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "612:54:34"
+                },
+                {
+                  "assignments": [
+                    6164
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 6164,
+                      "name": "result",
+                      "nodeType": "VariableDeclaration",
+                      "overrides": null,
+                      "scope": 6185,
+                      "src": "672:19:34",
+                      "stateVariable": false,
+                      "storageLocation": "memory",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes_memory_ptr",
+                        "typeString": "bytes"
+                      },
+                      "typeName": {
+                        "id": 6163,
+                        "name": "bytes",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "672:5:34",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes_storage_ptr",
+                          "typeString": "bytes"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 6179,
+                  "initialValue": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 6169,
+                        "name": "viewLayer",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6155,
+                        "src": "725:9:34",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "arguments": [
+                          {
+                            "argumentTypes": null,
+                            "expression": {
+                              "argumentTypes": null,
+                              "expression": {
+                                "argumentTypes": null,
+                                "id": 6172,
+                                "name": "PortfolioReaderView",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 6210,
+                                "src": "759:19:34",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_type$_t_contract$_PortfolioReaderView_$6210_$",
+                                  "typeString": "type(contract PortfolioReaderView)"
+                                }
+                              },
+                              "id": 6173,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "lValueRequested": false,
+                              "memberName": "render",
+                              "nodeType": "MemberAccess",
+                              "referencedDeclaration": 6209,
+                              "src": "759:26:34",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_function_declaration_nonpayable$_t_struct$_TokenQueryPayload_$6425_memory_ptr_$returns$_t_array$_t_struct$_PortfolioEntry_$6222_memory_ptr_$dyn_memory_ptr_$",
+                                "typeString": "function PortfolioReaderView.render(struct TokenQueryLib.TokenQueryPayload memory) returns (struct PortfolioReaderViewLib.PortfolioEntry memory[] memory)"
+                              }
+                            },
+                            "id": 6174,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "lValueRequested": false,
+                            "memberName": "selector",
+                            "nodeType": "MemberAccess",
+                            "referencedDeclaration": null,
+                            "src": "759:35:34",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_bytes4",
+                              "typeString": "bytes4"
+                            }
+                          },
+                          {
+                            "argumentTypes": null,
+                            "id": 6175,
+                            "name": "moduleAddress",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 6149,
+                            "src": "796:13:34",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_address",
+                              "typeString": "address"
+                            }
+                          },
+                          {
+                            "argumentTypes": null,
+                            "id": 6176,
+                            "name": "query",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 6151,
+                            "src": "811:5:34",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_struct$_TokenQueryPayload_$6425_memory_ptr",
+                              "typeString": "struct TokenQueryLib.TokenQueryPayload memory"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_bytes4",
+                              "typeString": "bytes4"
+                            },
+                            {
+                              "typeIdentifier": "t_address",
+                              "typeString": "address"
+                            },
+                            {
+                              "typeIdentifier": "t_struct$_TokenQueryPayload_$6425_memory_ptr",
+                              "typeString": "struct TokenQueryLib.TokenQueryPayload memory"
+                            }
+                          ],
+                          "expression": {
+                            "argumentTypes": null,
+                            "id": 6170,
+                            "name": "abi",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": -1,
+                            "src": "736:3:34",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_magic_abi",
+                              "typeString": "abi"
+                            }
+                          },
+                          "id": 6171,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "lValueRequested": false,
+                          "memberName": "encodeWithSelector",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": null,
+                          "src": "736:22:34",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_abiencodewithselector_pure$_t_bytes4_$returns$_t_bytes_memory_ptr_$",
+                            "typeString": "function (bytes4) pure returns (bytes memory)"
+                          }
+                        },
+                        "id": 6177,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "736:81:34",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": null,
+                        "arguments": [
+                          {
+                            "argumentTypes": null,
+                            "id": 6166,
+                            "name": "borrowProxy",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 6147,
+                            "src": "706:11:34",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_address_payable",
+                              "typeString": "address payable"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_address_payable",
+                              "typeString": "address payable"
+                            }
+                          ],
+                          "id": 6165,
+                          "name": "BorrowProxy",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 258,
+                          "src": "694:11:34",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_type$_t_contract$_BorrowProxy_$258_$",
+                            "typeString": "type(contract BorrowProxy)"
+                          }
+                        },
+                        "id": 6167,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "typeConversion",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "694:24:34",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_BorrowProxy_$258",
+                          "typeString": "contract BorrowProxy"
+                        }
+                      },
+                      "id": 6168,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "query",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 7389,
+                      "src": "694:30:34",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_external_view$_t_address_$_t_bytes_memory_ptr_$returns$_t_bytes_memory_ptr_$",
+                        "typeString": "function (address,bytes memory) view external returns (bytes memory)"
+                      }
+                    },
+                    "id": 6178,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "694:124:34",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_memory_ptr",
+                      "typeString": "bytes memory"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "672:146:34"
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [],
+                    "expression": {
+                      "argumentTypes": [],
+                      "expression": {
+                        "argumentTypes": null,
+                        "id": 6180,
+                        "name": "result",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6164,
+                        "src": "824:6:34",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      },
+                      "id": 6182,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "returnBytes",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 6124,
+                      "src": "824:18:34",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$returns$__$bound_to$_t_bytes_memory_ptr_$",
+                        "typeString": "function (bytes memory) pure"
+                      }
+                    },
+                    "id": 6183,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "824:20:34",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 6184,
+                  "nodeType": "ExpressionStatement",
+                  "src": "824:20:34"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 6186,
+            "implemented": true,
+            "kind": "constructor",
+            "modifiers": [],
+            "name": "",
+            "nodeType": "FunctionDefinition",
+            "overrides": null,
+            "parameters": {
+              "id": 6152,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6147,
+                  "name": "borrowProxy",
+                  "nodeType": "VariableDeclaration",
+                  "overrides": null,
+                  "scope": 6186,
+                  "src": "501:27:34",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address_payable",
+                    "typeString": "address payable"
+                  },
+                  "typeName": {
+                    "id": 6146,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "501:15:34",
+                    "stateMutability": "payable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address_payable",
+                      "typeString": "address payable"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6149,
+                  "name": "moduleAddress",
+                  "nodeType": "VariableDeclaration",
+                  "overrides": null,
+                  "scope": 6186,
+                  "src": "530:21:34",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 6148,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "530:7:34",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6151,
+                  "name": "query",
+                  "nodeType": "VariableDeclaration",
+                  "overrides": null,
+                  "scope": 6186,
+                  "src": "553:44:34",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_TokenQueryPayload_$6425_memory_ptr",
+                    "typeString": "struct TokenQueryLib.TokenQueryPayload"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 6150,
+                    "name": "TokenQueryLib.TokenQueryPayload",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 6425,
+                    "src": "553:31:34",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_TokenQueryPayload_$6425_storage_ptr",
+                      "typeString": "struct TokenQueryLib.TokenQueryPayload"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "500:98:34"
+            },
+            "returnParameters": {
+              "id": 6153,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "606:0:34"
+            },
+            "scope": 6187,
+            "src": "489:360:34",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "public"
+          }
+        ],
+        "scope": 6188,
+        "src": "357:494:34"
+      }
+    ],
+    "src": "0:852:34"
+  },
+  "legacyAST": {
+    "absolutePath": "/home/ray/0confirmation/packages/0confirmation-sol/contracts/queries/portfolio/PortfolioQuery.sol",
+    "exportedSymbols": {
+      "PortfolioQuery": [
+        6187
+      ]
+    },
+    "id": 6188,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 6127,
+        "literals": [
+          "solidity",
+          "^",
+          "0.6",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:34"
+      },
+      {
+        "id": 6128,
+        "literals": [
+          "experimental",
+          "ABIEncoderV2"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "24:33:34"
+      },
+      {
+        "absolutePath": "/home/ray/0confirmation/packages/0confirmation-sol/contracts/queries/token/TokenQueryLib.sol",
+        "file": "../token/TokenQueryLib.sol",
+        "id": 6130,
+        "nodeType": "ImportDirective",
+        "scope": 6188,
+        "sourceUnit": 6684,
+        "src": "59:59:34",
+        "symbolAliases": [
+          {
+            "foreign": {
+              "argumentTypes": null,
+              "id": 6129,
+              "name": "TokenQueryLib",
+              "nodeType": "Identifier",
+              "overloadedDeclarations": [],
+              "referencedDeclaration": null,
+              "src": "68:13:34",
+              "typeDescriptions": {
+                "typeIdentifier": null,
+                "typeString": null
+              }
+            },
+            "local": null
+          }
+        ],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "/home/ray/0confirmation/packages/0confirmation-sol/contracts/BorrowProxy.sol",
+        "file": "../../BorrowProxy.sol",
+        "id": 6132,
+        "nodeType": "ImportDirective",
+        "scope": 6188,
+        "sourceUnit": 259,
+        "src": "119:52:34",
+        "symbolAliases": [
+          {
+            "foreign": {
+              "argumentTypes": null,
+              "id": 6131,
+              "name": "BorrowProxy",
+              "nodeType": "Identifier",
+              "overloadedDeclarations": [],
+              "referencedDeclaration": null,
+              "src": "128:11:34",
+              "typeDescriptions": {
+                "typeIdentifier": null,
+                "typeString": null
+              }
+            },
+            "local": null
+          }
+        ],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "/home/ray/0confirmation/packages/0confirmation-sol/contracts/queries/portfolio/PortfolioReaderView.sol",
+        "file": "./PortfolioReaderView.sol",
+        "id": 6134,
+        "nodeType": "ImportDirective",
+        "scope": 6188,
+        "sourceUnit": 6211,
+        "src": "172:64:34",
+        "symbolAliases": [
+          {
+            "foreign": {
+              "argumentTypes": null,
+              "id": 6133,
+              "name": "PortfolioReaderView",
+              "nodeType": "Identifier",
+              "overloadedDeclarations": [],
+              "referencedDeclaration": null,
+              "src": "181:19:34",
+              "typeDescriptions": {
+                "typeIdentifier": null,
+                "typeString": null
+              }
+            },
+            "local": null
+          }
+        ],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "/home/ray/0confirmation/packages/0confirmation-sol/contracts/queries/portfolio/PortfolioReaderViewLib.sol",
+        "file": "./PortfolioReaderViewLib.sol",
+        "id": 6136,
+        "nodeType": "ImportDirective",
+        "scope": 6188,
+        "sourceUnit": 6339,
+        "src": "237:70:34",
+        "symbolAliases": [
+          {
+            "foreign": {
+              "argumentTypes": null,
+              "id": 6135,
+              "name": "PortfolioReaderViewLib",
+              "nodeType": "Identifier",
+              "overloadedDeclarations": [],
+              "referencedDeclaration": null,
+              "src": "246:22:34",
+              "typeDescriptions": {
+                "typeIdentifier": null,
+                "typeString": null
+              }
+            },
+            "local": null
+          }
+        ],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "/home/ray/0confirmation/packages/0confirmation-sol/contracts/queries/lib/QueryLib.sol",
+        "file": "../lib/QueryLib.sol",
+        "id": 6138,
+        "nodeType": "ImportDirective",
+        "scope": 6188,
+        "sourceUnit": 6126,
+        "src": "308:47:34",
+        "symbolAliases": [
+          {
+            "foreign": {
+              "argumentTypes": null,
+              "id": 6137,
+              "name": "QueryLib",
+              "nodeType": "Identifier",
+              "overloadedDeclarations": [],
+              "referencedDeclaration": null,
+              "src": "317:8:34",
+              "typeDescriptions": {
+                "typeIdentifier": null,
+                "typeString": null
+              }
+            },
+            "local": null
+          }
+        ],
+        "unitAlias": ""
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [
+          6210
+        ],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": true,
+        "id": 6187,
+        "linearizedBaseContracts": [
+          6187
+        ],
+        "name": "PortfolioQuery",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "id": 6140,
+            "libraryName": {
+              "contractScope": null,
+              "id": 6139,
+              "name": "QueryLib",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 6125,
+              "src": "391:8:34",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_QueryLib_$6125",
+                "typeString": "library QueryLib"
+              }
+            },
+            "nodeType": "UsingForDirective",
+            "src": "385:21:34",
+            "typeName": null
+          },
+          {
+            "anonymous": false,
+            "documentation": null,
+            "id": 6145,
+            "name": "PortfolioQueryExport",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 6144,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6143,
+                  "indexed": false,
+                  "name": "exported",
+                  "nodeType": "VariableDeclaration",
+                  "overrides": null,
+                  "scope": 6145,
+                  "src": "436:48:34",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_struct$_PortfolioEntry_$6222_memory_ptr_$dyn_memory_ptr",
+                    "typeString": "struct PortfolioReaderViewLib.PortfolioEntry[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "contractScope": null,
+                      "id": 6141,
+                      "name": "PortfolioReaderViewLib.PortfolioEntry",
+                      "nodeType": "UserDefinedTypeName",
+                      "referencedDeclaration": 6222,
+                      "src": "436:37:34",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_PortfolioEntry_$6222_storage_ptr",
+                        "typeString": "struct PortfolioReaderViewLib.PortfolioEntry"
+                      }
+                    },
+                    "id": 6142,
+                    "length": null,
+                    "nodeType": "ArrayTypeName",
+                    "src": "436:39:34",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_struct$_PortfolioEntry_$6222_storage_$dyn_storage_ptr",
+                      "typeString": "struct PortfolioReaderViewLib.PortfolioEntry[]"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "435:50:34"
+            },
+            "src": "409:77:34"
+          },
+          {
+            "body": {
+              "id": 6185,
+              "nodeType": "Block",
+              "src": "606:243:34",
+              "statements": [
+                {
+                  "assignments": [
+                    6155
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 6155,
+                      "name": "viewLayer",
+                      "nodeType": "VariableDeclaration",
+                      "overrides": null,
+                      "scope": 6185,
+                      "src": "612:17:34",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      },
+                      "typeName": {
+                        "id": 6154,
+                        "name": "address",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "612:7:34",
+                        "stateMutability": "nonpayable",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 6162,
+                  "initialValue": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "arguments": [],
+                        "expression": {
+                          "argumentTypes": [],
+                          "id": 6159,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "nodeType": "NewExpression",
+                          "src": "640:23:34",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_creation_nonpayable$__$returns$_t_contract$_PortfolioReaderView_$6210_$",
+                            "typeString": "function () returns (contract PortfolioReaderView)"
+                          },
+                          "typeName": {
+                            "contractScope": null,
+                            "id": 6158,
+                            "name": "PortfolioReaderView",
+                            "nodeType": "UserDefinedTypeName",
+                            "referencedDeclaration": 6210,
+                            "src": "644:19:34",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_contract$_PortfolioReaderView_$6210",
+                              "typeString": "contract PortfolioReaderView"
+                            }
+                          }
+                        },
+                        "id": 6160,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "640:25:34",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_PortfolioReaderView_$6210",
+                          "typeString": "contract PortfolioReaderView"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_contract$_PortfolioReaderView_$6210",
+                          "typeString": "contract PortfolioReaderView"
+                        }
+                      ],
+                      "id": 6157,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "lValueRequested": false,
+                      "nodeType": "ElementaryTypeNameExpression",
+                      "src": "632:7:34",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_type$_t_address_$",
+                        "typeString": "type(address)"
+                      },
+                      "typeName": {
+                        "id": 6156,
+                        "name": "address",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "632:7:34",
+                        "typeDescriptions": {
+                          "typeIdentifier": null,
+                          "typeString": null
+                        }
+                      }
+                    },
+                    "id": 6161,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "typeConversion",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "632:34:34",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "612:54:34"
+                },
+                {
+                  "assignments": [
+                    6164
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 6164,
+                      "name": "result",
+                      "nodeType": "VariableDeclaration",
+                      "overrides": null,
+                      "scope": 6185,
+                      "src": "672:19:34",
+                      "stateVariable": false,
+                      "storageLocation": "memory",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes_memory_ptr",
+                        "typeString": "bytes"
+                      },
+                      "typeName": {
+                        "id": 6163,
+                        "name": "bytes",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "672:5:34",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes_storage_ptr",
+                          "typeString": "bytes"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 6179,
+                  "initialValue": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 6169,
+                        "name": "viewLayer",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6155,
+                        "src": "725:9:34",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "arguments": [
+                          {
+                            "argumentTypes": null,
+                            "expression": {
+                              "argumentTypes": null,
+                              "expression": {
+                                "argumentTypes": null,
+                                "id": 6172,
+                                "name": "PortfolioReaderView",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 6210,
+                                "src": "759:19:34",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_type$_t_contract$_PortfolioReaderView_$6210_$",
+                                  "typeString": "type(contract PortfolioReaderView)"
+                                }
+                              },
+                              "id": 6173,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "lValueRequested": false,
+                              "memberName": "render",
+                              "nodeType": "MemberAccess",
+                              "referencedDeclaration": 6209,
+                              "src": "759:26:34",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_function_declaration_nonpayable$_t_struct$_TokenQueryPayload_$6425_memory_ptr_$returns$_t_array$_t_struct$_PortfolioEntry_$6222_memory_ptr_$dyn_memory_ptr_$",
+                                "typeString": "function PortfolioReaderView.render(struct TokenQueryLib.TokenQueryPayload memory) returns (struct PortfolioReaderViewLib.PortfolioEntry memory[] memory)"
+                              }
+                            },
+                            "id": 6174,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "lValueRequested": false,
+                            "memberName": "selector",
+                            "nodeType": "MemberAccess",
+                            "referencedDeclaration": null,
+                            "src": "759:35:34",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_bytes4",
+                              "typeString": "bytes4"
+                            }
+                          },
+                          {
+                            "argumentTypes": null,
+                            "id": 6175,
+                            "name": "moduleAddress",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 6149,
+                            "src": "796:13:34",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_address",
+                              "typeString": "address"
+                            }
+                          },
+                          {
+                            "argumentTypes": null,
+                            "id": 6176,
+                            "name": "query",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 6151,
+                            "src": "811:5:34",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_struct$_TokenQueryPayload_$6425_memory_ptr",
+                              "typeString": "struct TokenQueryLib.TokenQueryPayload memory"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_bytes4",
+                              "typeString": "bytes4"
+                            },
+                            {
+                              "typeIdentifier": "t_address",
+                              "typeString": "address"
+                            },
+                            {
+                              "typeIdentifier": "t_struct$_TokenQueryPayload_$6425_memory_ptr",
+                              "typeString": "struct TokenQueryLib.TokenQueryPayload memory"
+                            }
+                          ],
+                          "expression": {
+                            "argumentTypes": null,
+                            "id": 6170,
+                            "name": "abi",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": -1,
+                            "src": "736:3:34",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_magic_abi",
+                              "typeString": "abi"
+                            }
+                          },
+                          "id": 6171,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "lValueRequested": false,
+                          "memberName": "encodeWithSelector",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": null,
+                          "src": "736:22:34",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_abiencodewithselector_pure$_t_bytes4_$returns$_t_bytes_memory_ptr_$",
+                            "typeString": "function (bytes4) pure returns (bytes memory)"
+                          }
+                        },
+                        "id": 6177,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "736:81:34",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": null,
+                        "arguments": [
+                          {
+                            "argumentTypes": null,
+                            "id": 6166,
+                            "name": "borrowProxy",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 6147,
+                            "src": "706:11:34",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_address_payable",
+                              "typeString": "address payable"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_address_payable",
+                              "typeString": "address payable"
+                            }
+                          ],
+                          "id": 6165,
+                          "name": "BorrowProxy",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 258,
+                          "src": "694:11:34",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_type$_t_contract$_BorrowProxy_$258_$",
+                            "typeString": "type(contract BorrowProxy)"
+                          }
+                        },
+                        "id": 6167,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "typeConversion",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "694:24:34",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_BorrowProxy_$258",
+                          "typeString": "contract BorrowProxy"
+                        }
+                      },
+                      "id": 6168,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "query",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 7389,
+                      "src": "694:30:34",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_external_view$_t_address_$_t_bytes_memory_ptr_$returns$_t_bytes_memory_ptr_$",
+                        "typeString": "function (address,bytes memory) view external returns (bytes memory)"
+                      }
+                    },
+                    "id": 6178,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "694:124:34",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_memory_ptr",
+                      "typeString": "bytes memory"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "672:146:34"
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [],
+                    "expression": {
+                      "argumentTypes": [],
+                      "expression": {
+                        "argumentTypes": null,
+                        "id": 6180,
+                        "name": "result",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6164,
+                        "src": "824:6:34",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      },
+                      "id": 6182,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "returnBytes",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 6124,
+                      "src": "824:18:34",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$returns$__$bound_to$_t_bytes_memory_ptr_$",
+                        "typeString": "function (bytes memory) pure"
+                      }
+                    },
+                    "id": 6183,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "824:20:34",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 6184,
+                  "nodeType": "ExpressionStatement",
+                  "src": "824:20:34"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 6186,
+            "implemented": true,
+            "kind": "constructor",
+            "modifiers": [],
+            "name": "",
+            "nodeType": "FunctionDefinition",
+            "overrides": null,
+            "parameters": {
+              "id": 6152,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6147,
+                  "name": "borrowProxy",
+                  "nodeType": "VariableDeclaration",
+                  "overrides": null,
+                  "scope": 6186,
+                  "src": "501:27:34",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address_payable",
+                    "typeString": "address payable"
+                  },
+                  "typeName": {
+                    "id": 6146,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "501:15:34",
+                    "stateMutability": "payable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address_payable",
+                      "typeString": "address payable"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6149,
+                  "name": "moduleAddress",
+                  "nodeType": "VariableDeclaration",
+                  "overrides": null,
+                  "scope": 6186,
+                  "src": "530:21:34",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 6148,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "530:7:34",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6151,
+                  "name": "query",
+                  "nodeType": "VariableDeclaration",
+                  "overrides": null,
+                  "scope": 6186,
+                  "src": "553:44:34",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_TokenQueryPayload_$6425_memory_ptr",
+                    "typeString": "struct TokenQueryLib.TokenQueryPayload"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 6150,
+                    "name": "TokenQueryLib.TokenQueryPayload",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 6425,
+                    "src": "553:31:34",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_TokenQueryPayload_$6425_storage_ptr",
+                      "typeString": "struct TokenQueryLib.TokenQueryPayload"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "500:98:34"
+            },
+            "returnParameters": {
+              "id": 6153,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "606:0:34"
+            },
+            "scope": 6187,
+            "src": "489:360:34",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "public"
+          }
+        ],
+        "scope": 6188,
+        "src": "357:494:34"
+      }
+    ],
+    "src": "0:852:34"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.6.5+commit.f956cc89.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.0.23",
+  "updatedAt": "2020-04-07T22:29:13.845Z",
+  "devdoc": {
+    "methods": {}
+  },
+  "userdoc": {
+    "methods": {}
+  }
+}

@@ -7,15 +7,12 @@ import { TokenUtils } from "../../../utils/TokenUtils.sol";
 
 contract ERC20Forwarder {
   using TokenUtils for *;
-  function forwardToken(ERC20AdapterLib.EscrowRecord memory record) public returns (bool) {
-    bool success = record.token.sendToken(record.recipient, IERC20(record.token).balanceOf(address(this)));
+  function forwardToken(ERC20AdapterLib.EscrowRecord memory record) public {
+    require(record.token.sendToken(record.recipient, IERC20(record.token).balanceOf(address(this))), "forwarding token failed");
     selfdestruct(msg.sender);
-    return success;
-  
   }
-  function returnToken(ERC20AdapterLib.EscrowRecord memory record) public returns (bool) {
-    bool success = record.token.sendToken(msg.sender, IERC20(record.token).balanceOf(address(this)));
+  function returnToken(ERC20AdapterLib.EscrowRecord memory record) public {
+    require(record.token.sendToken(msg.sender, IERC20(record.token).balanceOf(address(this))), "returning token failed");
     selfdestruct(msg.sender);
-    return success;
   }
 }

@@ -5,6 +5,7 @@ import { ECDSA } from "openzeppelin-solidity/contracts/cryptography/ECDSA.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { BorrowProxy } from "./BorrowProxy.sol";
 import { TokenUtils } from "./utils/TokenUtils.sol";
+import { RevertCaptureLib } from "./utils/RevertCaptureLib.sol";
 
 library ShifterBorrowProxyLib {
   using SafeMath for *;
@@ -50,7 +51,8 @@ library ShifterBorrowProxyLib {
     emit ShifterBorrowProxyRepaid(user, record);
   }
   function triggerAction(InitializationAction memory action, address proxyAddress) internal returns (bool) {
-    (bool success, ) = proxyAddress.call{ gas: gasleft() }(abi.encodeWithSelector(BorrowProxy.proxy.selector, action.to, 0, action.txData));
+    (bool success, bytes memory retval) = proxyAddress.call{ gas: gasleft() }(abi.encodeWithSelector(BorrowProxy.proxy.selector, action.to, 0, action.txData));
+    if (!success) revert(RevertCaptureLib.decodeError(retval));
     return success;
   }
   function triggerActions(InitializationAction[] memory actions, address proxyAddress) internal returns (bool) {

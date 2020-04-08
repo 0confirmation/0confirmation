@@ -55,15 +55,15 @@ library BorrowProxyLib {
   }
   function delegateLiquidate(address liquidationSubmodule) internal returns (bool) {
     (bool success, bytes memory retval) = liquidationSubmodule.delegatecall(abi.encodeWithSignature("liquidate(address)", liquidationSubmodule));
-    if (retval.length != 0x20) return false;
+    if (!success) revert(RevertCaptureLib.decodeError(retval));
     (bool decoded) = abi.decode(retval, (bool));
-    return success && decoded;
+    return decoded;
   }
   function delegateRepay(address repaymentSubmodule) internal returns (bool) {
     (bool success, bytes memory retval) = repaymentSubmodule.delegatecall(abi.encodeWithSignature("repay(address)", repaymentSubmodule));
-    if (retval.length != 0x20) return false;
+    if (!success) revert(RevertCaptureLib.decodeError(retval));
     (bool decoded) = abi.decode(retval, (bool));
-    return success && decoded;
+    return decoded;
   }
   function delegateNotify(address liquidationSubmodule, bytes memory payload) internal returns (bool) {
     (bool success,) = liquidationSubmodule.delegatecall(abi.encodeWithSignature("notify(address,bytes)", liquidationSubmodule, payload));

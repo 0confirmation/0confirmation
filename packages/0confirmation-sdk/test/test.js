@@ -118,14 +118,19 @@ const deploy = async () => {
   const { address: uniswapAdapter } = await uniswapAdapterFactory.deploy(factory);
   const { address: simpleBurnLiquidationModule } = await simpleBurnLiquidationModuleFactory.deploy(factory, zbtc);
   const liquidityTokenFactory = getFactory(LiquidityToken);
+  const daiFactory = getFactory(ShifterERC20);
+  const { address: dai } = await daiFactory.deploy();
   const zbtcContract = new ethers.Contract(zbtc, ShifterERC20.abi, ethersProvider.getSigner());
+  const daiContract = new ethers.Contract(dai, ShifterERC20.abi, ethersProvider.getSigner());
   const [ keeperAddress ] = await ethersProvider.send('eth_accounts', []);
   await (await zbtcContract.mint(keeperAddress, utils.parseUnits('1000', 8).toString())).wait();
+  await (await daiContract.mint(keeperAddress, utils.parseUnits('1000', 8).toString())).wait();
   const zbtcExchange = await createMarket(ethersProvider, factory, zbtc);
+  const daiExchange = await createMarket(ethersProvider, factory, dai);
   const { address: zerobtc } = await liquidityTokenFactory.deploy(shifterPool, zbtc, 'zeroBTC', 'zeroBTC');
   const absorbFactory = getFactory(Absorb);
   const { address: absorb } = await absorbFactory.deploy();
-  await ethersProvider.waitForTransaction((await shifterPoolContract.setup(shifterMock, '1000', '1', [{
+  await ethersProvider.waitForTransaction((await shifterPoolContract.setup(shifterMock, '1000', ethers.utils.parseEther('0.01'), [{
     moduleType: ModuleTypes.BY_CODEHASH,
     target: zbtcExchange,
     sigs: Zero.getSignatures(Exchange.abi),
@@ -147,6 +152,26 @@ const deploy = async () => {
     }
   }, {
     moduleType: ModuleTypes.BY_ADDRESS,
+    target: dai,
+    sigs: Zero.getSignatures(LiquidityToken.abi),
+    module: {
+      isPrecompiled: false,
+      assetSubmodule: erc20Adapter,
+      repaymentSubmodule: erc20Adapter,
+      liquidationSubmodule: '0x' + Array(40).fill('0').join('')
+    }
+  }, {
+    moduleType: ModuleTypes.BY_ADDRESS,
+    target: '0x' + Array(39).fill('0').join('') + '1',
+    sigs: Zero.getSignatures(Absorb.abi),
+    module: {
+      isPrecompiled: true,
+      assetSubmodule: absorb,
+      repaymentSubmodule: '0x' + Array(40).fill('0').join(''),
+      liquidationSubmodule: simpleBurnLiquidationModule
+    }
+  }, {
+    moduleType: ModuleTypes.BY_ADDRESS,
     target: '0x' + Array(39).fill('0').join('') + '1',
     sigs: Zero.getSignatures(Absorb.abi),
     module: {
@@ -165,6 +190,9 @@ const deploy = async () => {
     borrowProxyLib,
     shifterPool,
     zbtc,
+    dai,
+    daiExchange,
+    zerobtc,
     shifterMock,
     factory,
     exchange: zbtcExchange,
@@ -266,23 +294,63 @@ const nodeUtil = require('util');
 
 const ln = (v, desc) => ((console.log(desc + ': ')), (console.log(nodeUtil.inspect(v, { colors: true, depth: 3 }))), v);
 
+const chalk = require('chalk');
+
+const getTokenBalance = async (from, token, decimals) => {
+  const contract = new ethers.Contract(token, LiquidityToken.abi, ethersProvider.getSigner());
+  return ethers.utils.formatUnits(await contract.balanceOf(from), decimals);
+};
+
+const logSheet = async (from, name, contracts) => {
+  console.log(chalk.cyan('=== ' + chalk.bold(name)));
+  console.log(chalk.cyan('=== ' + chalk.magenta(from)));
+  console.log(chalk.cyan('=== balances:'));
+  console.log(chalk.cyan('=== ETH: ') + chalk.bold(chalk.yellow(ethers.utils.formatEther(await ethersProvider.send('eth_getBalance', [ from, 'latest' ])))));
+  console.log(chalk.cyan('=== renBTC: ') + chalk.bold(chalk.yellow(await getTokenBalance(from, contracts.zbtc, 8))));
+  if (name.match('target')) console.log(chalk.cyan('=== dai: ') + chalk.bold(chalk.yellow(await getTokenBalance(from, contracts.dai, 8))));
+  console.log(chalk.cyan('=============='));
+  console.log();
+};
+
+const logLiquidityRequest = (v) => {
+  console.log(chalk.yellow('=== liquidity request'));
+  console.log(chalk.yellow('=== token: ') + chalk.magenta(v.token));
+  console.log(chalk.yellow('=== amount: ' + utils.formatUnits(v.amount, 8)));
+  console.log(chalk.yellow('=== nonce: ' + v.nonce));
+  console.log(chalk.yellow('=== gas requested: ') + chalk.cyan(utils.formatEther(v.gasRequested)));
+};
+
 describe('0confirmation sdk', () => {
+  const fixtures = {};
   before(async () => {
     await startSignalingServer();
+    fixtures.contracts = await deploy();
+    const [ borrower, keeper ] = await Promise.all([
+      makeZero(fixtures.contracts, borrowerProvider),
+      makeZero(fixtures.contracts, provider)
+    ]);
+    Object.assign(fixtures, {
+      borrower,
+      keeper
+    });
+    await (await fixtures.keeper.approveLiquidityToken(fixtures.contracts.zbtc)).wait();
+    await (await fixtures.keeper.addLiquidity(fixtures.contracts.zbtc, utils.parseUnits('5', 8).toString())).wait();
+    await (await fixtures.keeper.approvePool(fixtures.contracts.zbtc)).wait();
   });
   it('should execute a borrow', async () => {
-    const contracts = await deploy();
-    const borrower = await makeZero(contracts, borrowerProvider);
-    const keeper = await makeZero(contracts, provider);
     const deferred = defer();
-    await (await keeper.approveLiquidityToken(contracts.zbtc)).wait();
-    const exchange = contracts.exchange;
-    await (await keeper.addLiquidity(contracts.zbtc, utils.parseUnits('5', 8).toString())).wait();
-    await (await keeper.approvePool(contracts.zbtc)).wait();
-    await keeper.listenForLiquidityRequests(async (v) => {
+    const exchange = fixtures.contracts.exchange;
+    const [ keeperAddress ] = await fixtures.keeper.driver.sendWrapped('eth_accounts', []);
+    const [ borrowerAddress ] = await fixtures.borrower.driver.sendWrapped('eth_accounts', []);
+    await fixtures.keeper.listenForLiquidityRequests(async (v) => {
       const deposited = await v.waitForDeposit();
       const result = await deposited.submitToRenVM();
       const sig = await deposited.waitForSignature();
+      console.log('broadcasted!');
+      await logSheet(borrowerAddress, 'borrower before borrow', fixtures.contracts);
+      await logSheet(keeperAddress, 'keeper before borrow', fixtures.contracts);
+      await logSheet(fixtures.contracts.shifterPool, 'shifter pool before borrow', fixtures.contracts);
+      await logSheet(fixtures.contracts.zerobtc, 'renBTC pool before borrow', fixtures.contracts);
       try {
         await deposited.executeBorrow(utils.parseUnits('1', 8).toString(), '100000');
         deferred.resolve(await deposited.getBorrowProxy());
@@ -290,24 +358,95 @@ describe('0confirmation sdk', () => {
         deferred.reject(e);
       }
     });
-//  const subscribeDeferred = defer();
-//  keeper.subscribeBorrows([], (v) => subscribeDeferred.resolve(v));
-    const liquidityRequest = borrower.createLiquidityRequest({
-      token: contracts.zbtc,
+    console.log('keeper address: ' + keeperAddress);
+    console.log('borrower address: ' + borrowerAddress);
+    const liquidityRequest = fixtures.borrower.createLiquidityRequest({
+      token: fixtures.contracts.zbtc,
       amount: utils.parseUnits('2', 8).toString(),
-      nonce: '0x68b7aed3299637f7ed8d02d40fb04a727d89bb3448ca439596bd42d65a6e16cd',
+      nonce: '0x68b7aed3299637f7ed8d02d40fb04a727d89bb3448ca439596bd42d65a6e16ce',
+      actions: [],
       gasRequested: utils.parseEther('0.01').toString()
     });
     const liquidityRequestParcel = await liquidityRequest.sign();
+    console.log('liquidity request signed by fixtures.borrower: ' + liquidityRequestParcel.signature);
     await timeout(2000);
     await liquidityRequestParcel.broadcast();
     const proxy = await deferred.promise;
-    await borrower.driver.sendWrapped('0cf_setBorrowProxy', [ (liquidityRequestParcel.proxyAddress) ]);
-    const borrowedProvider = new Web3Provider(borrower.getProvider());
-    const exchangeWrapped = new ethers.Contract(contracts.exchange, Exchange.abi, borrowedProvider.getSigner());
-    console.log('almost');
-    console.log(require('util').inspect(await (await exchangeWrapped.tokenToEthTransferInput(utils.parseUnits('1', 8), utils.parseUnits('1', 8), String(Date.now() * 2), liquidityRequestParcel.proxyAddress, { gasLimit: ethers.utils.hexlify(6e6) })).wait(), { colors: true, depth: 15 }));
-    console.log('done');
-    await (await proxy.defaultLoan({ gasLimit: ethers.utils.hexlify(6e6) })).wait();
+    await logSheet(borrowerAddress, 'fixtures.borrower after borrow', fixtures.contracts);
+    await logSheet(keeperAddress, 'keeper after borrow', fixtures.contracts);
+    await logSheet(fixtures.contracts.shifterPool, 'shifter pool after borrow', fixtures.contracts);
+    await logSheet(fixtures.contracts.zerobtc, 'renBTC pool after borrow', fixtures.contracts);
+    await logSheet(liquidityRequestParcel.proxyAddress, 'borrow proxy after borrow', fixtures.contracts);
+    await fixtures.borrower.setBorrowProxy(liquidityRequestParcel.proxyAddress);
+    const borrowedProvider = new Web3Provider(fixtures.borrower.getProvider());
+    const exchangeWrapped = new ethers.Contract(fixtures.contracts.exchange, Exchange.abi, borrowedProvider.getSigner());
+    console.log(chalk.bold('dumping loan on uniswap ...'));
+    await (await exchangeWrapped.tokenToEthSwapInput(utils.parseUnits('1', 8), utils.parseUnits('1', 8), String(Date.now() * 2), { gasLimit: ethers.utils.hexlify(6e6) })).wait();
+    await logSheet(liquidityRequestParcel.proxyAddress, 'borrow proxy after trade on uniswap', fixtures.contracts);
+    await (await proxy.repayLoan({ gasLimit: ethers.utils.hexlify(6e6) })).wait();
+    await logSheet(keeperAddress, 'keeper after repayment', fixtures.contracts);
+    await logSheet(fixtures.contracts.zerobtc, 'renBTC pool after repayment', fixtures.contracts);
+    await fixtures.keeper.stopListeningForLiquidityRequests();
+  });
+  it('should execute a payment', async () => {
+    const deferred = defer();
+    const exchange = fixtures.contracts.exchange;
+    const [ keeperAddress ] = await fixtures.keeper.driver.sendWrapped('eth_accounts', []);
+    const [ borrowerAddress ] = await fixtures.borrower.driver.sendWrapped('eth_accounts', []);
+    await fixtures.keeper.listenForLiquidityRequests(async (v) => {
+      const deposited = await v.waitForDeposit();
+      const result = await deposited.submitToRenVM();
+      const sig = await deposited.waitForSignature();
+      console.log('broadcasted!');
+      await logSheet(borrowerAddress, 'fixtures.borrower before borrow', fixtures.contracts);
+      await logSheet(keeperAddress, 'keeper before borrow', fixtures.contracts);
+      await logSheet(fixtures.contracts.shifterPool, 'shifter pool before borrow', fixtures.contracts);
+      await logSheet(fixtures.contracts.zerobtc, 'renBTC pool before borrow', fixtures.contracts);
+      try {
+        await deposited.executeBorrow(utils.parseUnits('1', 8).toString(), '100000');
+        deferred.resolve(await deposited.getBorrowProxy());
+      } catch (e) {
+        deferred.reject(e);
+      }
+    });
+    console.log('keeper address: ' + keeperAddress);
+    console.log('borrower address: ' + borrowerAddress);
+    const TRANSFER_TARGET = '0x' + Array(40).fill('1').join('');
+    const actions = [{
+      to: fixtures.contracts.exchange,
+      calldata: (new ethers.utils.Interface(Exchange.abi)).functions.tokenToTokenSwapInput.encode([ utils.parseUnits('1', 8), '1', '1', String(Date.now() * 2), fixtures.contracts.dai ])
+    }, {
+      to: fixtures.contracts.dai,
+      calldata: (new ethers.utils.Interface(ShifterERC20.abi)).functions.transfer.encode([ TRANSFER_TARGET, '100000' ]) 
+    }];
+    const liquidityRequest = fixtures.borrower.createLiquidityRequest({
+      token: fixtures.contracts.zbtc,
+      amount: utils.parseUnits('2', 8).toString(),
+      nonce: '0x68b7aed3299637f7ed8d02d40fb04a727d89bb3448ca439596bd42d65a6e16cf',
+      actions,
+      gasRequested: utils.parseEther('0.01').toString()
+    });
+    logLiquidityRequest(liquidityRequest);
+    const liquidityRequestParcel = await liquidityRequest.sign();
+    console.log('liquidity request signed by borrower: ' + liquidityRequestParcel.signature);
+    await timeout(2000);
+    await liquidityRequestParcel.broadcast();
+    const proxy = await deferred.promise;
+    console.log('executed');
+    await logSheet(borrowerAddress, 'borrower after borrow', fixtures.contracts);
+    await logSheet(keeperAddress, 'keeper after borrow', fixtures.contracts);
+    await logSheet(fixtures.contracts.shifterPool, 'shifter pool after borrow', fixtures.contracts);
+    await logSheet(fixtures.contracts.zerobtc, 'renBTC pool after borrow', fixtures.contracts);
+    await logSheet(liquidityRequestParcel.proxyAddress, 'borrow proxy after borrow', fixtures.contracts);
+    await fixtures.borrower.setBorrowProxy(liquidityRequestParcel.proxyAddress);
+    const borrowedProvider = new Web3Provider(fixtures.borrower.getProvider());
+    const exchangeWrapped = new ethers.Contract(fixtures.contracts.exchange, Exchange.abi, borrowedProvider.getSigner());
+    console.log(chalk.bold('repaying loan'));
+    await (await proxy.repayLoan({ gasLimit: ethers.utils.hexlify(6e6) })).wait();
+    await logSheet(liquidityRequestParcel.proxyAddress, 'borrow proxy after trade on uniswap', fixtures.contracts);
+    await logSheet(keeperAddress, 'keeper after repayment', fixtures.contracts);
+    await logSheet(fixtures.contracts.zerobtc, 'renBTC pool after repayment', fixtures.contracts);
+    await logSheet(TRANSFER_TARGET, 'target of transfer after repayment', fixtures.contracts);
+    await fixtures.keeper.stopListeningForLiquidityRequests();
   });
 });

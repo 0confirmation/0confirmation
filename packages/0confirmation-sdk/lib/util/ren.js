@@ -30,7 +30,6 @@ const initializeCodeHash = async () => {
 
 const Exports = require('@0confirmation/sol/build/Exports');
 const InitializationActionsABI = Exports.abi.find((v) => v.name === 'InitializationActionsExport').inputs[0];
- console.log(InitializationActionsABI);
 
 const encodeInitializationActions = (input) => abi.encode([ InitializationActionsABI ], [ input.map((v) => ({
   txData: v.calldata,

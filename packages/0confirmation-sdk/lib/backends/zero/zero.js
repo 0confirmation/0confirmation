@@ -33,6 +33,9 @@ class ZeroBackend extends RPCWrapper {
   async _filterLiquidityRequests(handler) {
      return await this.node.subscribe('/1.0.0/broadcastLiquidityRequest', handler);
   }
+  async _unsubscribeLiquidityRequests() {
+     return await this.node.unsubscribe('/1.0.0/broadcastLiquidityRequest');
+  }
   _nextFilterId(o) {
     return '0x' + (o._filterId = (o._filterId !== undefined ? o._filterId : -1) + 1).toString(16);
   }

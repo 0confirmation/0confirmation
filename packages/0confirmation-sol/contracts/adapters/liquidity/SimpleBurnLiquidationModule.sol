@@ -51,7 +51,7 @@ contract SimpleBurnLiquidationModule {
     require(success, "liquidated token transfer failed");
     return true;
   }
-  function getExternalIsolateHandler() external returns (SimpleBurnLiquidationModuleLib.ExternalIsolate memory) {
+  function getExternalIsolateHandler() external view returns (SimpleBurnLiquidationModuleLib.ExternalIsolate memory) {
     SimpleBurnLiquidationModuleLib.Isolate storage isolate = SimpleBurnLiquidationModuleLib.getIsolatePointer();
     return SimpleBurnLiquidationModuleLib.ExternalIsolate({
       factoryAddress: isolate.factoryAddress,

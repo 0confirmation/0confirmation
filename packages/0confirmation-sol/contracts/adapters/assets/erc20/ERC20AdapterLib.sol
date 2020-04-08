@@ -34,11 +34,11 @@ library ERC20AdapterLib {
   }
   function forwardEscrow(EscrowRecord memory record, uint256 index) internal {
     address forwarder = Create2.deploy(computeForwarderSalt(index), type(ERC20Forwarder).creationCode);
-    require(ERC20Forwarder(forwarder).forwardToken(record), "uh oh, escrowed token wouldn't transfer, try again"); // token is trusted to not have lock conditions, if it does, use another module (this should always succeed
+    ERC20Forwarder(forwarder).forwardToken(record);
   }
   function returnEscrow(EscrowRecord memory record, uint256 index) internal {
     address forwarder = Create2.deploy(computeForwarderSalt(index), type(ERC20Forwarder).creationCode);
-    require(ERC20Forwarder(forwarder).returnToken(record), "uh oh, escrowed token wouldn't return to borrow proxy, try again");
+    ERC20Forwarder(forwarder).returnToken(record);
   }
   uint256 constant MINIMUM_GAS_TO_PROCESS = 5e5;
   uint256 constant MAX_RECORDS = 100;
@@ -46,10 +46,10 @@ library ERC20AdapterLib {
     if (!isolate.isProcessing) isolate.isProcessing = true;
     for (uint256 i = isolate.processed; i < isolate.payments.length; i++) {
       if (gasleft() < MINIMUM_GAS_TO_PROCESS) {
-        forwardEscrow(isolate.payments[i], i);
-      } else {
         isolate.processed = i;
         return false;
+      } else {
+        forwardEscrow(isolate.payments[i], i);
       }
     }
     return true;
@@ -58,23 +58,24 @@ library ERC20AdapterLib {
     if (!isolate.isProcessing) isolate.isProcessing = true;
     for (uint256 i = isolate.processed; i < isolate.payments.length; i++) {
       if (gasleft() < MINIMUM_GAS_TO_PROCESS) {
-        returnEscrow(isolate.payments[i], i);
-      } else {
         isolate.processed = i;
         return false;
+      } else {
+        returnEscrow(isolate.payments[i], i);
       }
     }
     return true;
   }
-  function toIsolatePointer(uint256 key) internal returns (Isolate storage) {
-    function (uint256) internal returns (Isolate storage) swap;
-    function (uint256) internal returns (uint256) real = ModuleLib.cast;
+  function getCastStorageType() internal pure returns (function (uint256) internal pure returns (Isolate storage) swap) {
+    function (uint256) internal returns (uint256) cast = ModuleLib.cast;
     assembly {
-      swap := real
+      swap := cast
     }
-    return swap(key);
   }
-  function getIsolatePointer() internal returns (Isolate storage) {
+  function toIsolatePointer(uint256 key) internal pure returns (Isolate storage) {
+    return getCastStorageType()(key);
+  }
+  function getIsolatePointer() internal pure returns (Isolate storage) {
     return toIsolatePointer(computeIsolatePointer());
   }
 }
