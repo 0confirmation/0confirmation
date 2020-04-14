@@ -26,7 +26,7 @@ library ERC20AdapterLib {
     return keccak256(abi.encodePacked(index));
   }
   function computeForwarderAddress(uint256 index) internal view returns (address) {
-    return Create2.computeAddress(computeForwarderSalt(index), keccak256(type(ERC20Forwarder).creationCode));
+    return Create2.computeAddress(computeForwarderSalt(index), keccak256(type(AssetForwarder).creationCode));
   }
   function liquidate() internal returns (bool) {
     ERC20AdapterLib.Isolate storage isolate = getIsolatePointer();
@@ -44,12 +44,12 @@ library ERC20AdapterLib {
     });
   }
   function forwardEscrow(EscrowRecord memory record, uint256 index) internal {
-    address forwarder = Create2.deploy(computeForwarderSalt(index), type(ERC20Forwarder).creationCode);
+    address forwarder = Create2.deploy(computeForwarderSalt(index), type(AssetForwarder).creationCode);
     AssetForwarder(forwarder).forwardAsset(record.recipient, record.token);
   }
   function returnEscrow(EscrowRecord memory record, uint256 index) internal {
-    address forwarder = Create2.deploy(computeForwarderSalt(index), type(ERC20Forwarder).creationCode);
-    AssetForwarder(forwarder).forwardToken(address(this), record.token);
+    address forwarder = Create2.deploy(computeForwarderSalt(index), type(AssetForwarder).creationCode);
+    AssetForwarder(forwarder).forwardAsset(address(this), record.token);
   }
   uint256 constant MINIMUM_GAS_TO_PROCESS = 5e5;
   uint256 constant MAX_RECORDS = 100;

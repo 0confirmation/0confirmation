@@ -1,7 +1,7 @@
 pragma solidity ^0.6.0;
 
 import { IERC20 } from "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
 
 contract AssetForwarder {
   using TokenUtils for *;

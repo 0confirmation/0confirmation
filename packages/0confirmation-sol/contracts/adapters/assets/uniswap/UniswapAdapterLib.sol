@@ -1,7 +1,6 @@
 pragma solidity ^0.6.0;
 
 import { UniswapAdapter } from "./UniswapAdapter.sol";
-import { EtherForwarder } from "./EtherForwarder.sol";
 import { IUniswapFactory } from "../../../interfaces/IUniswapFactory.sol";
 import { IUniswapExchange } from "../../../interfaces/IUniswapExchange.sol";
 import { BorrowProxyLib } from "../../../BorrowProxyLib.sol";
@@ -173,7 +172,7 @@ library UniswapAdapterLib {
       max_tokens_sold: max_tokens_sold,
       max_eth_sold: max_eth_sold,
       deadline: deadline,
-      tokens_addr: tokens_addr
+      token_addr: token_addr
     });
   }
   struct TokenToTokenTransferOutputInputs {
@@ -203,7 +202,7 @@ library UniswapAdapterLib {
     address payable exchange_addr;
   }
   function decodeTokenToExchangeSwapInputInputs(bytes memory args) internal pure returns (TokenToExchangeSwapInputInputs memory) {
-    (uint256 tokens_sold, uint256 min_tokens_bought, uint256 min_eth_bought, uint256 deadline, address payable exchange_addr) = abi.decode(args, (uint256, uint256, uint256, uint256, address);
+    (uint256 tokens_sold, uint256 min_tokens_bought, uint256 min_eth_bought, uint256 deadline, address payable exchange_addr) = abi.decode(args, (uint256, uint256, uint256, uint256, address));
     return TokenToExchangeSwapInputInputs({
       tokens_sold: tokens_sold,
       min_tokens_bought: min_tokens_bought,
@@ -231,6 +230,12 @@ library UniswapAdapterLib {
       exchange_addr: exchange_addr
     });
   }
+  struct TokenToExchangeSwapOutputInputs {
+    uint256 tokens_bought;
+    uint256 max_tokens_sold;
+    uint256 max_eth_sold;
+    uint256 deadline;
+  }
   function decodeTokenToExchangeSwapOutputInputs(bytes memory args) internal pure returns (TokenToExchangeSwapOutputInputs memory) {
     (uint256 tokens_bought, uint256 max_tokens_sold, uint256 max_eth_sold, uint256 deadline, address payable exchange_addr) = abi.decode(args, (uint256, uint256, uint256, uint256, address));
     return TokenToExchangeSwapOutputInputs({
@@ -240,6 +245,14 @@ library UniswapAdapterLib {
       deadline: deadline,
       exchange_addr: exchange_addr
     });
+  }
+  struct TokenToExchangeTransferOutputInputs {
+    uint256 tokens_bought;
+    uint256 max_tokens_sold;
+    uint256 max_eth_sold;
+    uint256 deadline;
+    address payable recipient;
+    address payable exchange_addr;
   }
   function decodeTokenToExchangeTransferOutputInputs(bytes memory args) internal pure returns (TokenToExchangeTransferOutputInputs memory) {
     (uint256 tokens_bought, uint256 max_tokens_sold, uint256 max_eth_sold, uint256 deadline, address payable recipient, address payable exchange_addr) = abi.decode(args, (uint256, uint256, uint256, uint256, address, address));

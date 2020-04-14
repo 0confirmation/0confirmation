@@ -17,7 +17,6 @@ contract SimpleBurnLiquidationModule {
   constructor(address factoryAddress, address liquidateTo) public {
     SimpleBurnLiquidationModuleLib.Isolate storage isolate = SimpleBurnLiquidationModuleLib.getIsolatePointer();
     isolate.factoryAddress = factoryAddress;
-    isolate.liquidateTo = liquidateTo;
   }
   function notify(address /* moduleAddress */, bytes memory payload) public returns (bool) {
     (address token) = abi.decode(payload, (address));
@@ -30,7 +29,7 @@ contract SimpleBurnLiquidationModule {
     SimpleBurnLiquidationModuleLib.Isolate storage isolate = SimpleBurnLiquidationModuleLib.getIsolatePointer();
     SimpleBurnLiquidationModuleLib.ExternalIsolate memory externalIsolate = SimpleBurnLiquidationModule(moduleAddress).getExternalIsolateHandler();
     IUniswapFactory factory = IUniswapFactory(isolate.factoryAddress);
-    address liquidateTo = externalIsolate.liquidateTo;
+    address liquidateTo = address(uint160(proxyIsolate.token));
     uint256 i;
     uint256 received = 0;
     for (i = isolate.liquidated; i < isolate.toLiquidate.set.length; i++) {
@@ -54,8 +53,7 @@ contract SimpleBurnLiquidationModule {
   function getExternalIsolateHandler() external view returns (SimpleBurnLiquidationModuleLib.ExternalIsolate memory) {
     SimpleBurnLiquidationModuleLib.Isolate storage isolate = SimpleBurnLiquidationModuleLib.getIsolatePointer();
     return SimpleBurnLiquidationModuleLib.ExternalIsolate({
-      factoryAddress: isolate.factoryAddress,
-      liquidateTo: isolate.liquidateTo
+      factoryAddress: isolate.factoryAddress
     });
   }
 }

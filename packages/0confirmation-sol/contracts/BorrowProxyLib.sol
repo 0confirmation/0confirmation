@@ -71,7 +71,7 @@ library BorrowProxyLib {
     return success;
   }
   function delegate(ModuleExecution memory module, bytes memory payload, uint256 value) internal returns (bool, bytes memory) {
-    (bool success, bytes memory retval) = module.encapsulated.assetSubmodule.delegatecall{ gas: gasleft() }(abi.encode(module.encapsulated.assetSubmodule, module.encapsulated.liquidationSubmodule, module.encapsulated.repaymentSubmodule, tx.origin, module.to, value, payload));
+    (bool success, bytes memory retval) = module.encapsulated.assetSubmodule.delegatecall{ gas: gasleft() }(abi.encode(module.encapsulated.assetSubmodule, module.encapsulated.liquidationSubmodule, module.encapsulated.repaymentSubmodule, module.token, tx.origin, module.to, value, payload));
     return (success, retval);
   }
   function isDefined(Module memory module) internal pure returns (bool) {
@@ -106,6 +106,7 @@ library BorrowProxyLib {
     Module memory encapsulated = resolveModule(registry, to, signature);
     return ModuleExecution({
       encapsulated: encapsulated,
+      token: address(0x0), // fill in in the proxy call
       to: to
     });
   }

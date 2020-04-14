@@ -32,6 +32,7 @@ contract BorrowProxy is ViewExecutor {
   function proxy(address to, uint256 value, bytes memory payload) public onlyOwnerOrPool {
     bytes4 sig = bytes4(uint32(uint256(payload.toSlice(0, 4).asWord())));
     BorrowProxyLib.ModuleExecution memory module = isolate.fetchModule(to, sig);
+    module.token = isolate.token;
     if (isolate.unbound && !module.encapsulated.isPrecompiled) {
       (bool success, bytes memory retval) = to.call{
         value: value

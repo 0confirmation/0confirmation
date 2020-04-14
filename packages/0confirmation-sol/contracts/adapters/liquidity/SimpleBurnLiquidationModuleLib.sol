@@ -13,13 +13,11 @@ import { SimpleBurnLiquidationModule } from "./SimpleBurnLiquidationModule.sol";
 library SimpleBurnLiquidationModuleLib {
   struct Isolate {
     address factoryAddress;
-    address liquidateTo;
     uint256 liquidated;
     AddressSetLib.AddressSet toLiquidate;
   }
   struct ExternalIsolate {
     address factoryAddress;
-    address liquidateTo;
   }
   function computeIsolatePointer() public pure returns (uint256) {
     return uint256(keccak256(abi.encodePacked("isolate.simple-burn")));
