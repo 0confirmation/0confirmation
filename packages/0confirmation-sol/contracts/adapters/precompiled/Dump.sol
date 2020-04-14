@@ -7,14 +7,17 @@ import { ModuleLib } from "../lib/ModuleLib.sol";
 import { SimpleBurnLiquidationModuleLib } from "../liquidity/SimpleBurnLiquidationModuleLib.sol";
 import { IERC20 } from "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 
-contract Absorb {
+contract Dump {
+  using ModuleLib for *;
   using TokenUtils for *;
   BorrowProxyLib.ProxyIsolate isolate;
   receive() external payable {
     // no-op
   }
   fallback() external payable {
-    (/* address payable moduleAddress */, address liquidationSubmodule, /* address repaymentSubmodule */, address payable txOrigin, /* address to */, /* uint256 value */, /* bytes memory payload */) = abi.decode(msg.data, (address, address, address, address, address, uint256, bytes));
+    ModuleLib.AssetSubmodulePayload memory payload = msg.data.decodeAssetSubmodulePayload();
+    (bytes4 sig, bytes memory args) = payload.callData.splitPayload();
+    if (sig == bytes4(keccak256("dump(address,address)");
     SimpleBurnLiquidationModuleLib.Isolate storage burnIsolate = SimpleBurnLiquidationModuleLib.getIsolatePointer();
     address[] memory set = burnIsolate.toLiquidate.set;
     SimpleBurnLiquidationModuleLib.ExternalIsolate memory externalIsolate = SimpleBurnLiquidationModuleLib.getExternalIsolate(liquidationSubmodule);

@@ -19,10 +19,11 @@ contract BorrowProxy is ViewExecutor {
    require(msg.sender == isolate.owner || msg.sender == isolate.masterAddress, "borrow proxy can only be used by borrower");
     _;
   }
-  function setup(address owner) public returns (bool) {
+  function setup(address owner, address token) public returns (bool) {
     require(isolate.owner == address(0x0), "can't initialize twice");
     isolate.masterAddress = msg.sender;
     isolate.owner = owner;
+    isolate.token = token;
     return true;
   }
   function validateProxyRecord(bytes memory record) internal returns (bool) {

@@ -4,7 +4,7 @@ pragma experimental ABIEncoderV2;
 import { Create2 } from "openzeppelin-solidity/contracts/utils/Create2.sol";
 import { IERC20 } from "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import { ModuleLib } from "../../lib/ModuleLib.sol";
-import { ERC20Forwarder } from "./ERC20Forwarder.sol";
+import { AssetForwarder } from "../../lib/AssetForwarder.sol";
 
 library ERC20AdapterLib {
   struct EscrowRecord {
@@ -32,13 +32,24 @@ library ERC20AdapterLib {
     ERC20AdapterLib.Isolate storage isolate = getIsolatePointer();
     return processEscrowReturns(isolate);
   }
+  struct TransferInputs {
+    address recipient;
+    uint256 amount;
+  }
+  function decodeTransferInputs(bytes memory args) internal pure returns (TransferInputs memory) {
+    (address recipient, uint256 amount) = abi.decode(args, (address, uint256));
+    return TransferInputs({
+      recipient: recipient,
+      amount: amount
+    });
+  }
   function forwardEscrow(EscrowRecord memory record, uint256 index) internal {
     address forwarder = Create2.deploy(computeForwarderSalt(index), type(ERC20Forwarder).creationCode);
-    ERC20Forwarder(forwarder).forwardToken(record);
+    AssetForwarder(forwarder).forwardAsset(record.recipient, record.token);
   }
   function returnEscrow(EscrowRecord memory record, uint256 index) internal {
     address forwarder = Create2.deploy(computeForwarderSalt(index), type(ERC20Forwarder).creationCode);
-    ERC20Forwarder(forwarder).returnToken(record);
+    AssetForwarder(forwarder).forwardToken(address(this), record.token);
   }
   uint256 constant MINIMUM_GAS_TO_PROCESS = 5e5;
   uint256 constant MAX_RECORDS = 100;

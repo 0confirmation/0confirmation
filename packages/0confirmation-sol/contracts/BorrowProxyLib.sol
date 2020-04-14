@@ -12,6 +12,7 @@ library BorrowProxyLib {
     address masterAddress;
     bool unbound;
     address owner;
+    address token;
     uint256 actualizedShift;
     uint256 liquidationIndex;
     uint256 repaymentIndex;
@@ -116,6 +117,12 @@ library BorrowProxyLib {
   }
   function setProxyOwner(ControllerIsolate storage isolate, address proxyAddress, address identity) internal {
     isolate.ownerByProxy[proxyAddress] = identity;
+  }
+  function setProxyToken(ControllerIsolate storage isolate, address proxyAddress, address token) internal {
+    isolate.tokenByProxy[proxyAddress] = token;
+  }
+  function getProxyToken(ControllerIsolate storage isolate, address proxyAddress) internal view returns (address) {
+    return isolate.tokenByProxy[proxyAddress];
   }
   function getProxyOwner(ControllerIsolate storage isolate, address proxyAddress) internal view returns (address) {
     return isolate.ownerByProxy[proxyAddress];

@@ -8,6 +8,7 @@ import { BorrowProxyLib } from "../../../BorrowProxyLib.sol";
 import { ShifterBorrowProxyLib } from "../../../ShifterBorrowProxyLib.sol";
 import { Create2 } from "openzeppelin-solidity/contracts/utils/Create2.sol";
 import { ModuleLib } from "../../lib/ModuleLib.sol";
+import { AssetForwarder } from "../../lib/AssetForwarder.sol";
 
 library UniswapAdapterLib {
   using BorrowProxyLib for *;
@@ -102,15 +103,177 @@ library UniswapAdapterLib {
       recipient: recipient
     });
   }
+  struct TokenToEthSwapInputInputs {
+    uint256 tokens_sold;
+    uint256 min_eth;
+    uint256 deadline;
+  }
+  function decodeTokenToEthSwapInputInputs(bytes memory args) internal pure returns (TokenToEthSwapInputInputs memory) {
+    (uint256 tokens_sold, uint256 min_eth, uint256 deadline) = abi.decode(args, (uint256,uint256,uint256));
+    return TokenToEthSwapInputInputs({
+      tokens_sold: tokens_sold,
+      min_eth: min_eth,
+      deadline: deadline
+    });
+  }
+  struct TokenToEthSwapOutputInputs {
+    uint256 eth_bought;
+    uint256 max_tokens;
+    uint256 deadline;
+  }
+  function decodeTokenToEthSwapOutputInputs(bytes memory args) internal pure returns (TokenToEthSwapOutputInputs memory) {
+    (uint256 eth_bought, uint256 max_tokens, uint256 deadline) = abi.decode(args, (uint256,uint256,uint256));
+    return TokenToEthSwapOutputInputs({
+      eth_bought: eth_bought,
+      max_tokens: max_tokens,
+      deadline: deadline
+    });
+  }
+  struct TokenToEthTransferInputInputs {
+    uint256 tokens_sold;
+    uint256 min_eth;
+    uint256 deadline;
+    address payable recipient;
+  }
+  function decodeTokenToEthTransferInputInputs(bytes memory args) internal pure returns (TokenToEthTransferInputInputs memory) {
+    (uint256 tokens_sold, uint256 min_eth, uint256 deadline, address payable recipient) = abi.decode(args, (uint256,uint256,uint256,address));
+    return TokenToEthTransferInputInputs({
+      tokens_sold: tokens_sold,
+      min_eth: min_eth,
+      deadline: deadline,
+      recipient: recipient
+    });
+  }
+  struct TokenToEthTransferOutputInputs {
+    uint256 eth_bought;
+    uint256 max_tokens;
+    uint256 deadline;
+    address payable recipient;
+  }
+  function decodeTokenToEthTransferOutputInputs(bytes memory args) internal pure returns (TokenToEthTransferOutputInputs memory) {
+    (uint256 eth_bought, uint256 max_tokens, uint256 deadline, address payable recipient) = abi.decode(args, (uint256, uint256, uint256, address));
+    return TokenToEthTransferOutputInputs({
+      eth_bought: eth_bought,
+      max_tokens: max_tokens,
+      deadline: deadline,
+      recipient: recipient
+    });
+  }
+  struct TokenToTokenSwapOutputInputs {
+    uint256 tokens_bought;
+    uint256 max_tokens_sold;
+    uint256 max_eth_sold;
+    uint256 deadline;
+    address payable token_addr;
+  }
+  function decodeTokenToTokenSwapOutputInputs(bytes memory args) internal pure returns (TokenToTokenSwapOutputInputs memory) {
+    (uint256 tokens_bought, uint256 max_tokens_sold, uint256 max_eth_sold, uint256 deadline, address payable token_addr) = abi.decode(args, (uint256, uint256, uint256, uint256, address));
+    return TokenToTokenSwapOutputInputs({
+      tokens_bought: tokens_bought,
+      max_tokens_sold: max_tokens_sold,
+      max_eth_sold: max_eth_sold,
+      deadline: deadline,
+      tokens_addr: tokens_addr
+    });
+  }
+  struct TokenToTokenTransferOutputInputs {
+    uint256 tokens_bought;
+    uint256 max_tokens_sold;
+    uint256 max_eth_sold;
+    uint256 deadline;
+    address payable recipient;
+    address payable token_addr;
+  }
+  function decodeTokenToTokenTransferOutputInputs(bytes memory args) internal pure returns (TokenToTokenTransferOutputInputs memory) {
+    (uint256 tokens_bought, uint256 max_tokens_sold, uint256 max_eth_sold, uint256 deadline, address recipient, address payable token_addr) = abi.decode(args, (uint256, uint256, uint256, uint256, address, address));
+    return TokenToTokenTransferOutputInputs({
+      tokens_bought: tokens_bought,
+      max_tokens_sold: max_tokens_sold,
+      max_eth_sold: max_eth_sold,
+      deadline: deadline,
+      recipient: recipient,
+      token_addr: token_addr
+    });
+  }
+  struct TokenToExchangeSwapInputInputs {
+    uint256 tokens_sold;
+    uint256 min_tokens_bought;
+    uint256 min_eth_bought;
+    uint256 deadline;
+    address payable exchange_addr;
+  }
+  function decodeTokenToExchangeSwapInputInputs(bytes memory args) internal pure returns (TokenToExchangeSwapInputInputs memory) {
+    (uint256 tokens_sold, uint256 min_tokens_bought, uint256 min_eth_bought, uint256 deadline, address payable exchange_addr) = abi.decode(args, (uint256, uint256, uint256, uint256, address);
+    return TokenToExchangeSwapInputInputs({
+      tokens_sold: tokens_sold,
+      min_tokens_bought: min_tokens_bought,
+      min_eth_bought: min_eth_bought,
+      deadline: deadline,
+      exchange_addr: exchange_addr
+    });
+  }
+  struct TokenToExchangeTransferInputInputs {
+    uint256 tokens_sold;
+    uint256 min_tokens_bought;
+    uint256 min_eth_bought;
+    uint256 deadline;
+    address payable recipient;
+    address payable exchange_addr;
+  }
+  function decodeTokenToExchangeTransferInputInputs(bytes memory args) internal pure returns (TokenToExchangeTransferInputInputs memory) {
+    (uint256 tokens_sold, uint256 min_tokens_bought, uint256 min_eth_bought, uint256 deadline, address payable recipient, address payable exchange_addr) = abi.decode(args, (uint256, uint256, uint256, uint256, address, address));
+    return TokenToExchangeTransferInputInputs({
+      tokens_sold: tokens_sold,
+      min_tokens_bought: min_tokens_bought,
+      min_eth_bought: min_eth_bought,
+      deadline: deadline,
+      recipient: recipient,
+      exchange_addr: exchange_addr
+    });
+  }
+  function decodeTokenToExchangeSwapOutputInputs(bytes memory args) internal pure returns (TokenToExchangeSwapOutputInputs memory) {
+    (uint256 tokens_bought, uint256 max_tokens_sold, uint256 max_eth_sold, uint256 deadline, address payable exchange_addr) = abi.decode(args, (uint256, uint256, uint256, uint256, address));
+    return TokenToExchangeSwapOutputInputs({
+      tokens_bought: tokens_bought,
+      max_tokens_sold: max_tokens_sold,
+      max_eth_sold: max_eth_sold,
+      deadline: deadline,
+      exchange_addr: exchange_addr
+    });
+  }
+  function decodeTokenToExchangeTransferOutputInputs(bytes memory args) internal pure returns (TokenToExchangeTransferOutputInputs memory) {
+    (uint256 tokens_bought, uint256 max_tokens_sold, uint256 max_eth_sold, uint256 deadline, address payable recipient, address payable exchange_addr) = abi.decode(args, (uint256, uint256, uint256, uint256, address, address));
+    return TokenToExchangeTransferOutputInputs({
+      tokens_bought: tokens_bought,
+      max_tokens_sold: max_tokens_sold,
+      max_eth_sold: max_eth_sold,
+      deadline: deadline,
+      recipient: recipient,
+      exchange_addr: exchange_addr
+    });
+  }
+  struct AddLiquidityInputs {
+    uint256 min_liquidity;
+    uint256 max_tokens;
+    uint256 deadline;
+  }
+  function decodeAddLiquidityInputs(bytes memory args) internal pure returns (AddLiquidityInputs memory) {
+    (uint256 min_liquidity, uint256 max_tokens, uint256 deadline) = abi.decode(args, (uint256, uint256, uint256));
+    return AddLiquidityInputs({
+      min_liquidity: min_liquidity,
+      max_tokens: max_tokens,
+      deadline: deadline
+    });
+  }
   function computeIsolatePointer(address instance) public pure returns (uint256) {
     return uint256(keccak256(abi.encodePacked("isolate.uniswap-adapter", instance)));
   }
   function computeForwarderAddress() internal view returns (address) {
-    return Create2.computeAddress(ETHER_FORWARDER_SALT, keccak256(type(EtherForwarder).creationCode));
+    return Create2.computeAddress(ETHER_FORWARDER_SALT, keccak256(type(AssetForwarder).creationCode));
   }
   function callForwarder(address payable target, address token) internal {
-    address forwarder = Create2.deploy(ETHER_FORWARDER_SALT, type(EtherForwarder).creationCode);
-    EtherForwarder(forwarder).forward(target, token);
+    address forwarder = Create2.deploy(ETHER_FORWARDER_SALT, type(AssetForwarder).creationCode);
+    AssetForwarder(forwarder).forwardAsset(target, ModuleLib.GET_ETHER_ADDRESS());
   }
   function getCastStorageType() internal pure returns (function (uint256) internal pure returns (ExternalIsolate storage) swap) {
     function (uint256) internal returns (uint256) cast = ModuleLib.cast;

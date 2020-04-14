@@ -4,6 +4,10 @@ pragma experimental ABIEncoderV2;
 import { SliceLib } from "../../utils/SliceLib.sol";
 
 library ModuleLib {
+  address payable constant ETHER_ADDRESS = 0x0000000000000000000000000000000000000000;
+  function GET_ETHER_ADDRESS() internal pure returns (address payable) {
+    return ETHER_ADDRESS;
+  }
   function cast(uint256 v) internal pure returns (uint256) {
     return v;
   }

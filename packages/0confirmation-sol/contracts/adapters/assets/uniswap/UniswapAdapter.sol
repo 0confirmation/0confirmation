@@ -7,7 +7,7 @@ import { IUniswapFactory } from "../../../interfaces/IUniswapFactory.sol";
 import { IUniswapExchange } from "../../../interfaces/IUniswapExchange.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { ModuleLib } from "../../lib/ModuleLib.sol";
-import { EtherForwarder } from "./EtherForwarder.sol";
+import { AssetForwarder } from "../../lib/AssetForwarder.sol";
 import { BorrowProxyLib } from "../../../BorrowProxyLib.sol";
 
 contract UniswapAdapter {
@@ -31,17 +31,7 @@ contract UniswapAdapter {
     (bytes4 sig, bytes memory args) = payload.callData.splitPayload();
     address newToken;
     bool usedForwarder = false;
-    if (
-      sig == IUniswapExchange.getInputPrice.selector ||
-      sig == IUniswapExchange.getOutputPrice.selector ||
-      sig == IUniswapExchange.getEthToTokenInputPrice.selector ||
-      sig == IUniswapExchange.getEthToTokenOutputPrice.selector ||
-      sig == IUniswapExchange.getTokenToEthInputPrice.selector ||
-      sig == IUniswapExchange.getTokenToEthOutputPrice.selector || sig == IUniswapExchange.tokenAddress.selector ||
-      sig == IUniswapExchange.addLiquidity.selector ||
-      sig == IUniswapExchange.removeLiquidity.selector
-    ) {}
-    else if (sig == IUniswapExchange.ethToTokenSwapInput.selector) {
+    if (sig == IUniswapExchange.ethToTokenSwapInput.selector) {
       UniswapAdapterLib.EthToTokenSwapInputInputs memory inputs = args.decodeEthToTokenSwapInputInputs();
       if (inputs.min_tokens > 0) newToken = tokenAddress;
     } else if (sig == IUniswapExchange.ethToTokenTransferInput.selector) {
@@ -56,29 +46,27 @@ contract UniswapAdapter {
       require(inputs.recipient == address(this), "recipient must be borrow proxy");
       if (inputs.tokens_bought > 0) newToken = tokenAddress;
     } else if (sig == IUniswapExchange.tokenToEthSwapInput.selector) {
-      (uint256 tokens_sold, uint256 min_eth, uint256 deadline) = abi.decode(args, (uint256,uint256,uint256));
+      UniswapAdapterLib.TokenToEthSwapInputInputs memory inputs = args.decodeTokenToEthSwapInputInputs();
       require(tokenAddress.approveForMaxIfNeeded(payload.to), "approval of token failed");
-      payload.callData = abi.encodeWithSelector(IUniswapExchange.tokenToEthTransferInput.selector, tokens_sold, min_eth, deadline, UniswapAdapterLib.computeForwarderAddress());
+      payload.callData = abi.encodeWithSelector(IUniswapExchange.tokenToEthTransferInput.selector, inputs.tokens_sold, inputs.min_eth, inputs.deadline, UniswapAdapterLib.computeForwarderAddress());
       usedForwarder = true;
     } else if (sig == IUniswapExchange.tokenToEthSwapOutput.selector) {
-      (uint256 eth_bought, uint256 max_tokens, uint256 deadline) = abi.decode(args, (uint256,uint256,uint256));
+      UniswapAdapterLib.TokenToEthSwapOutputInputs memory inputs = args.decodeTokenToEthSwapOutputInputs();
       require(tokenAddress.approveForMaxIfNeeded(payload.to), "approval of token failed");
-      payload.callData = abi.encodeWithSelector(IUniswapExchange.tokenToEthTransferOutput.selector, eth_bought, max_tokens, deadline, UniswapAdapterLib.computeForwarderAddress());
+      payload.callData = abi.encodeWithSelector(IUniswapExchange.tokenToEthTransferOutput.selector, inputs.eth_bought, inputs.max_tokens, inputs.deadline, UniswapAdapterLib.computeForwarderAddress());
       usedForwarder = true;
-/*
     } else if (sig == IUniswapExchange.tokenToEthTransferInput.selector) {
-      (uint256 tokens_sold, uint256 min_eth, uint256 deadline, address recipient) = abi.decode(args, (uint256,uint256,uint256,address));
+      UniswapAdapterLib.TokenToEthTransferInputInputs memory inputs = args.decodeTokenToEthTransferInputInputs();
       require(recipient == address(this), "recipient must be borrow proxy");
       require(tokenAddress.approveForMaxIfNeeded(payload.to), "approval of token failed");
-      payload.callData = abi.encodeWithSelector(IUniswapExchange.tokenToEthTransferInput.selector, tokens_sold, min_eth, deadline, UniswapAdapterLib.computeForwarderAddress());
+      payload.callData = abi.encodeWithSelector(IUniswapExchange.tokenToEthTransferInput.selector, inputs.tokens_sold, inputs.min_eth, inputs.deadline, UniswapAdapterLib.computeForwarderAddress());
       usedForwarder = true;
     } else if (sig == IUniswapExchange.tokenToEthTransferOutput.selector) {
-      (uint256 eth_bought, uint256 max_tokens, uint256 deadline, address recipient) = abi.decode(args, (uint256, uint256, uint256, address));
+      UniswapAdapterLib.TokenToEthTransferOutputInputs memory inputs = args.decodeTokenToEthTransferOutputInputs();
       require(recipient == address(this), "recipient must be borrow proxy");
       require(tokenAddress.approveForMaxIfNeeded(payload.to), "approval of token failed");
-      payload.callData = abi.encodeWithSelector(IUniswapExchange.tokenToEthTransferOutput.selector, eth_bought, max_tokens, deadline, UniswapAdapterLib.computeForwarderAddress());
+      payload.callData = abi.encodeWithSelector(IUniswapExchange.tokenToEthTransferOutput.selector, inputs.eth_bought, inputs.max_tokens, inputs.deadline, UniswapAdapterLib.computeForwarderAddress());
       usedForwarder = true;
-*/
     } else if (sig == IUniswapExchange.tokenToTokenSwapInput.selector) {
       UniswapAdapterLib.TokenToTokenSwapInputInputs memory inputs = args.decodeTokenToTokenSwapInputInputs();
       if (inputs.tokens_sold > 0 || inputs.min_tokens_bought > 0 || inputs.min_eth_bought > 0) newToken = inputs.token_addr;
@@ -86,40 +74,45 @@ contract UniswapAdapter {
       newToken = address(uint160(inputs.token_addr));
       payload.callData = inputs.addRecipient(UniswapAdapterLib.computeForwarderAddress()).encodeTokenToTokenTransferInput();
       usedForwarder = true;
-/*
     } else if (sig == IUniswapExchange.tokenToTokenTransferInput.selector) {
-      (uint256 tokens_sold, uint256 min_tokens_bought, uint256 min_eth_bought, uint256 deadline, address recipient, address payable token_addr) = abi.decode(args, (uint256, uint256, uint256, uint256, address, address));
+      UniswapAdapterLib.TokenToTokenTransferInputInputs memory inputs = args.decodeTokenToTokenTransferInputInputs();
       if (tokens_sold > 0 || min_tokens_bought > 0 || min_eth_bought > 0) newToken = token_addr;
       require(recipient == address(this), "recipient must be borrow proxy");
       require(tokenAddress.approveForMaxIfNeeded(payload.to), "approval of token failed");
     } else if (sig == IUniswapExchange.tokenToTokenSwapOutput.selector) {
-      (uint256 tokens_bought, uint256 max_tokens_sold, uint256 max_eth_sold, uint256 deadline, address payable token_addr) = abi.decode(args, (uint256, uint256, uint256, uint256, address));
-      if (tokens_bought > 0 && (max_tokens_sold > 0 || max_eth_sold > 0)) newToken = token_addr;
+      UniswapAdapterLib.TokenToTokenSwapOutputInputs memory inputs = args.decodeTokenToTokenSwapOutputInputs();
+      if (inputs.tokens_bought > 0 && (inputs.max_tokens_sold > 0 || inputs.max_eth_sold > 0)) newToken = token_addr;
       require(tokenAddress.approveForMaxIfNeeded(payload.to), "approval of token failed");
     } else if (sig == IUniswapExchange.tokenToTokenTransferOutput.selector) {
-      (uint256 tokens_bought, uint256 max_tokens_sold, uint256 max_eth_sold, uint256 deadline, address recipient, address payable token_addr) = abi.decode(args, (uint256, uint256, uint256, uint256, address, address));
-      if (tokens_bought > 0 && (max_tokens_sold != 0 || max_eth_sold != 0)) newToken = token_addr;
-      require(recipient != address(this), "recipient must be borrow proxy");
+      UniswapAdapterLib.TokenToTokenTransferOutputInputs memory inputs = args.decodeTokenToTokenTransferOutputInputs();
+      if (inputs.tokens_bought > 0 && (inputs.max_tokens_sold != 0 || inputs.max_eth_sold != 0)) newToken = token_addr;
+      require(inputs.recipient != address(this), "recipient must be borrow proxy");
       require(tokenAddress.approveForMaxIfNeeded(payload.to), "approval of token failed");
     } else if (sig == IUniswapExchange.tokenToExchangeSwapInput.selector) {
-      (uint256 tokens_sold, uint256 min_tokens_bought, uint256 min_eth_bought, uint256 deadline, address payable exchange_addr) = abi.decode(args, (uint256, uint256, uint256, uint256, address));
-      if (tokens_sold > 0) newToken = IUniswapExchange(exchange_addr).tokenAddress();
+      UniswapAdapterLib.TokenToExchangeSwapInput memory inputs = args.decodeTokenToExchangeSwapInputInputs();
+      if (inputs.tokens_sold > 0) newToken = IUniswapExchange(inputs.exchange_addr).tokenAddress();
       require(tokenAddress.approveForMaxIfNeeded(payload.to), "approval of token failed");
     } else if (sig == IUniswapExchange.tokenToExchangeTransferInput.selector) {
-      (uint256 tokens_sold, uint256 min_tokens_bought, uint256 min_eth_bought, uint256 deadline, address recipient, address payable exchange_addr) = abi.decode(args, (uint256, uint256, uint256, uint256, address, address));
-      require(recipient == address(this), "recipient must be borrow proxy");
-      if (tokens_sold > 0) newToken = IUniswapExchange(exchange_addr).tokenAddress();
+      UniswapAdapterLib.TokenToExchangeTransferInputInputs memory inputs = args.decodeTokenToExchangeTransferInputInputs();
+      require(inputs.recipient == address(this), "recipient must be borrow proxy");
+      if (inputs.tokens_sold > 0) newToken = IUniswapExchange(inputs.exchange_addr).tokenAddress();
       require(tokenAddress.approveForMaxIfNeeded(payload.to), "approval of token failed");
     } else if (sig == IUniswapExchange.tokenToExchangeSwapOutput.selector) {
-      (uint256 tokens_bought, uint256 max_tokens_sold, uint256 max_eth_sold, uint256 deadline, address payable exchange_addr) = abi.decode(args, (uint256, uint256, uint256, uint256, address));
-      if (tokens_bought > 0) newToken = IUniswapExchange(exchange_addr).tokenAddress();
+      UniswapAdapterLib.TokenToExchangeSwapOutputInputs memory inputs = args.decodeTokenToExchangeSwapOutputInputs();
+      if (inputs.tokens_bought > 0) newToken = IUniswapExchange(inputs.exchange_addr).tokenAddress();
       require(tokenAddress.approveForMaxIfNeeded(payload.to), "approval of token failed");
     } else if (sig == IUniswapExchange.tokenToExchangeTransferOutput.selector) {
-      (uint256 tokens_bought, uint256 max_tokens_sold, uint256 max_eth_sold, uint256 deadline, address payable recipient, address payable exchange_addr) = abi.decode(args, (uint256, uint256, uint256, uint256, address, address));
-      require(recipient == address(this), "recipient must be borrow proxy");
-      if (tokens_bought > 0) newToken = IUniswapExchange(exchange_addr).tokenAddress();
+      UniswapAdapterLib.TokenToExchangeTransferOutputInputs memory inputs = args.decodeTokenToExchangeTransferOutputInputs();
+      require(inputs.recipient == address(this), "recipient must be borrow proxy");
+      if (inputs.tokens_bought > 0) newToken = IUniswapExchange(inputs.exchange_addr).tokenAddress();
       require(tokenAddress.approveForMaxIfNeeded(payload.to), "approval of token failed");
-*/
+    } else if (sig == IUniswapExchange.addLiquidity.selector) {
+      UniswapAdapterLib.AddLiquidityInputs memory inputs = args.decodeAddLiquidityInputs();
+      newToken = payload.to;
+      require(tokenAddress.approveForMaxIfNeeded(payload.to), "approval of token failed");
+    } else if (sig == IUniswapExchange.removeLiquidity.selector) {
+      // this stub exists but the transaction will always revert since removeLiquidity cannot send to contracts .. or can it?
+      newToken = IUniswapExchange(payload.to).tokenAddress();
     } else revert("unsupported contract call");
     if (newToken != address(0x0)) require(payload.liquidationSubmodule.delegateNotify(abi.encode(newToken)), "liquidation module notification failure");
     (bool success, bytes memory retval) = payload.to.call{ gas: gasleft(), value: payload.value }(payload.callData);
