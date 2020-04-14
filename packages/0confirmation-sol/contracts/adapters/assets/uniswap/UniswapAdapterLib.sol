@@ -31,6 +31,17 @@ library UniswapAdapterLib {
     address recipient;
     address payable token_addr;
   }
+  function decodeTokenToTokenTransferInputInputs(bytes memory args) internal pure returns (TokenToTokenTransferInputInputs memory) {
+    (uint256 tokens_sold, uint256 min_tokens_bought, uint256 min_eth_bought, uint256 deadline, address recipient, address payable token_addr) = abi.decode(args, (uint256, uint256, uint256, uint256, address, address));
+    return TokenToTokenTransferInputInputs({
+      tokens_sold: tokens_sold,
+      min_tokens_bought: min_tokens_bought,
+      min_eth_bought: min_eth_bought,
+      deadline: deadline,
+      recipient: recipient,
+      token_addr: token_addr
+    });
+  }
   function addRecipient(TokenToTokenSwapInputInputs memory input, address recipient) internal pure returns (TokenToTokenTransferInputInputs memory) {
     return TokenToTokenTransferInputInputs({
       tokens_sold: input.tokens_sold,
@@ -184,7 +195,7 @@ library UniswapAdapterLib {
     address payable token_addr;
   }
   function decodeTokenToTokenTransferOutputInputs(bytes memory args) internal pure returns (TokenToTokenTransferOutputInputs memory) {
-    (uint256 tokens_bought, uint256 max_tokens_sold, uint256 max_eth_sold, uint256 deadline, address recipient, address payable token_addr) = abi.decode(args, (uint256, uint256, uint256, uint256, address, address));
+    (uint256 tokens_bought, uint256 max_tokens_sold, uint256 max_eth_sold, uint256 deadline, address payable recipient, address payable token_addr) = abi.decode(args, (uint256, uint256, uint256, uint256, address, address));
     return TokenToTokenTransferOutputInputs({
       tokens_bought: tokens_bought,
       max_tokens_sold: max_tokens_sold,
@@ -235,6 +246,7 @@ library UniswapAdapterLib {
     uint256 max_tokens_sold;
     uint256 max_eth_sold;
     uint256 deadline;
+    address payable exchange_addr;
   }
   function decodeTokenToExchangeSwapOutputInputs(bytes memory args) internal pure returns (TokenToExchangeSwapOutputInputs memory) {
     (uint256 tokens_bought, uint256 max_tokens_sold, uint256 max_eth_sold, uint256 deadline, address payable exchange_addr) = abi.decode(args, (uint256, uint256, uint256, uint256, address));
@@ -284,9 +296,9 @@ library UniswapAdapterLib {
   function computeForwarderAddress() internal view returns (address) {
     return Create2.computeAddress(ETHER_FORWARDER_SALT, keccak256(type(AssetForwarder).creationCode));
   }
-  function callForwarder(address payable target, address token) internal {
+  function callForwarder(address payable target, address payable token) internal {
     address forwarder = Create2.deploy(ETHER_FORWARDER_SALT, type(AssetForwarder).creationCode);
-    AssetForwarder(forwarder).forwardAsset(target, ModuleLib.GET_ETHER_ADDRESS());
+    AssetForwarder(forwarder).forwardAsset(target, token);
   }
   function getCastStorageType() internal pure returns (function (uint256) internal pure returns (ExternalIsolate storage) swap) {
     function (uint256) internal returns (uint256) cast = ModuleLib.cast;

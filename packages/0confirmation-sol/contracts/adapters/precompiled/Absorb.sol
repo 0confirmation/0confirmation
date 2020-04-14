@@ -4,6 +4,7 @@ pragma experimental ABIEncoderV2;
 import { BorrowProxyLib } from "../../BorrowProxyLib.sol";
 import { ModuleLib } from "../lib/ModuleLib.sol";
 import { AbsorbLib } from "./AbsorbLib.sol";
+import { IAbsorb } from "./IAbsorb.sol";
 
 contract Absorb {
   using ModuleLib for *;
@@ -22,14 +23,14 @@ contract Absorb {
     });
   }
   function absorb(address payable target) public returns (bool) {
-    return target.absorbImpl();
+    return isolate.absorbImpl(target);
   }
   fallback() external payable {
     ModuleLib.AssetSubmodulePayload memory payload = msg.data.decodeAssetSubmodulePayload();
     (bytes4 sig, bytes memory args) = payload.callData.splitPayload();
-    if (sig == Absorb.absorb.selector) {
+    if (sig == IAbsorb.absorb.selector) {
       AbsorbInputs memory inputs = decodeAbsorbInputs(args);  
-      require(absorb(target), "absorb failed");
+      require(absorb(inputs.target), "absorb failed");
     } else revert("unsupported contract call");
   }
 }

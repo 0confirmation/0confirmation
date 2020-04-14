@@ -26,7 +26,7 @@ library ModuleLib {
     bytes callData;
   }
   function decodeAssetSubmodulePayload(bytes memory payload) internal pure returns (AssetSubmodulePayload memory) {
-    (address payable moduleAddress, address liquidationSubmodule, address repaymentSubmodule, address payable token, address payable txOrigin, address payable to, uint256 value, bytes memory callData) = abi.decode(payload, (address, address, address, address, address, uint256, bytes));
+    (address payable moduleAddress, address liquidationSubmodule, address repaymentSubmodule, address payable token, address payable txOrigin, address payable to, uint256 value, bytes memory callData) = abi.decode(payload, (address, address, address, address, address, address, uint256, bytes));
     return AssetSubmodulePayload({
       moduleAddress: moduleAddress,
       liquidationSubmodule: liquidationSubmodule,

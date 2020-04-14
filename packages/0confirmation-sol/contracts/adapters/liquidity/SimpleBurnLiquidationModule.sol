@@ -14,7 +14,7 @@ contract SimpleBurnLiquidationModule {
   using AddressSetLib for *;
   using TokenUtils for *;
   BorrowProxyLib.ProxyIsolate proxyIsolate;
-  constructor(address factoryAddress, address liquidateTo) public {
+  constructor(address factoryAddress) public {
     SimpleBurnLiquidationModuleLib.Isolate storage isolate = SimpleBurnLiquidationModuleLib.getIsolatePointer();
     isolate.factoryAddress = factoryAddress;
   }
@@ -24,10 +24,9 @@ contract SimpleBurnLiquidationModule {
     isolate.toLiquidate.insert(token);
     return true;
   }
-  function liquidate(address moduleAddress) public returns (bool) {
+  function liquidate() public returns (bool) {
     if (!ERC20AdapterLib.liquidate()) return false;
     SimpleBurnLiquidationModuleLib.Isolate storage isolate = SimpleBurnLiquidationModuleLib.getIsolatePointer();
-    SimpleBurnLiquidationModuleLib.ExternalIsolate memory externalIsolate = SimpleBurnLiquidationModule(moduleAddress).getExternalIsolateHandler();
     IUniswapFactory factory = IUniswapFactory(isolate.factoryAddress);
     address liquidateTo = address(uint160(proxyIsolate.token));
     uint256 i;

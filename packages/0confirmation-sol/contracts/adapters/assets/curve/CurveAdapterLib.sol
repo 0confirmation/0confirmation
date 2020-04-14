@@ -16,6 +16,9 @@ library CurveAdapterLib {
   function toIsolatePointer(uint256 key) internal pure returns (Isolate storage) {
     return getCastStorageType()(key);
   }
+  function computeIsolatePointer(address instance) internal pure returns (uint256) {
+    return uint256(keccak256(abi.encodePacked("isolate.curve-adapter", instance)));
+  }
   function getIsolatePointer(address instance) internal pure returns (Isolate storage) {
     return toIsolatePointer(computeIsolatePointer(instance));
   }

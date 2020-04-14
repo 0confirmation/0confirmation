@@ -3,6 +3,7 @@ pragma experimental ABIEncoderV2;
 
 import { ModuleLib } from "../lib/ModuleLib.sol";
 import { DumpLib } from "./DumpLib.sol";
+import { IDump } from "./IDump.sol";
 
 contract Dump {
   using ModuleLib for *;
@@ -16,7 +17,7 @@ contract Dump {
   fallback() external payable {
     ModuleLib.AssetSubmodulePayload memory payload = msg.data.decodeAssetSubmodulePayload();
     (bytes4 sig, bytes memory args) = payload.callData.splitPayload();
-    if (sig == Dump.dump.selector) {
+    if (sig == IDump.dump.selector) {
       DumpLib.DumpInputs memory inputs = args.decodeDumpInputs();
       require(dump(inputs.exchangeAddress, inputs.target), "dump on uniswap failed");
     } else revert("unsupported contract call");

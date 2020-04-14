@@ -1,6 +1,7 @@
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
+import { BorrowProxy } from "../../BorrowProxy.sol";
 import { IERC20 } from "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import { RevertCaptureLib } from "../../utils/RevertCaptureLib.sol";
 import { IUniswapExchange } from "../../interfaces/IUniswapExchange.sol";

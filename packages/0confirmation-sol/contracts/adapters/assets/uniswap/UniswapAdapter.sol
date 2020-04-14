@@ -63,7 +63,7 @@ contract UniswapAdapter {
       usedForwarder = true;
     } else if (sig == IUniswapExchange.tokenToEthTransferOutput.selector) {
       UniswapAdapterLib.TokenToEthTransferOutputInputs memory inputs = args.decodeTokenToEthTransferOutputInputs();
-      require(recipient == address(this), "recipient must be borrow proxy");
+      require(inputs.recipient == address(this), "recipient must be borrow proxy");
       require(tokenAddress.approveForMaxIfNeeded(payload.to), "approval of token failed");
       payload.callData = abi.encodeWithSelector(IUniswapExchange.tokenToEthTransferOutput.selector, inputs.eth_bought, inputs.max_tokens, inputs.deadline, UniswapAdapterLib.computeForwarderAddress());
       usedForwarder = true;
@@ -107,7 +107,6 @@ contract UniswapAdapter {
       if (inputs.tokens_bought > 0) newToken = IUniswapExchange(inputs.exchange_addr).tokenAddress();
       require(tokenAddress.approveForMaxIfNeeded(payload.to), "approval of token failed");
     } else if (sig == IUniswapExchange.addLiquidity.selector) {
-      UniswapAdapterLib.AddLiquidityInputs memory inputs = args.decodeAddLiquidityInputs();
       newToken = payload.to;
       require(tokenAddress.approveForMaxIfNeeded(payload.to), "approval of token failed");
     } else if (sig == IUniswapExchange.removeLiquidity.selector) {
@@ -116,7 +115,7 @@ contract UniswapAdapter {
     } else revert("unsupported contract call");
     if (newToken != address(0x0)) require(payload.liquidationSubmodule.delegateNotify(abi.encode(newToken)), "liquidation module notification failure");
     (bool success, bytes memory retval) = payload.to.call{ gas: gasleft(), value: payload.value }(payload.callData);
-    if (usedForwarder) UniswapAdapterLib.callForwarder(address(this), newToken);
+    if (usedForwarder) UniswapAdapterLib.callForwarder(address(this), address(uint160(newToken)));
     ModuleLib.bubbleResult(success, retval);
   }
 }

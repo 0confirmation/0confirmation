@@ -24,6 +24,7 @@ library BorrowProxyLib {
   struct ControllerIsolate {
     mapping (address => bytes32) proxyInitializerRecord;
     mapping (address => address) ownerByProxy;
+    mapping (address => address) tokenByProxy;
     mapping (address => bool) isKeeper;
   }
   struct Module {
@@ -45,6 +46,7 @@ library BorrowProxyLib {
   }
   struct ModuleExecution {
     address to;
+    address token;
     Module encapsulated;
   }
   function registryRegisterModule(ModuleRegistry storage registry, ModuleRegistration memory registration) internal {
@@ -137,6 +139,7 @@ library BorrowProxyLib {
   function fetchModule(ProxyIsolate storage isolate, address to, bytes4 signature) public returns (ModuleExecution memory) {
     return ModuleExecution({
       encapsulated: IModuleRegistryProvider(isolate.masterAddress).fetchModuleHandler(to, signature),
+      token: isolate.token,
       to: to
     });
   }

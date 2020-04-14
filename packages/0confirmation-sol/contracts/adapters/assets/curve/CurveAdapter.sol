@@ -1,9 +1,11 @@
 pragma solidity ^0.6.0;
+pragma experimental ABIEncoderV2;
 
 import { ModuleLib } from "../../lib/ModuleLib.sol";
 import { CurveAdapterLib } from "./CurveAdapterLib.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { BorrowProxyLib } from "../../../BorrowProxyLib.sol";
+import { ICurve } from "../../../interfaces/ICurve.sol";
 
 contract CurveAdapter {
   using ModuleLib for *;
@@ -14,7 +16,7 @@ contract CurveAdapter {
     CurveAdapterLib.Isolate storage isolate = CurveAdapterLib.getIsolatePointer(address(this));
     isolate.curveAddress = curveAddress;
   }
-  function getExternalIsolateHandler() external returns (Isolate memory isolate) {
+  function getExternalIsolateHandler() external view returns (CurveAdapterLib.Isolate memory isolate) {
     isolate = CurveAdapterLib.getIsolatePointer(address(this));
   }
   receive() external payable {
@@ -31,12 +33,12 @@ contract CurveAdapter {
     */
     if (sig == ICurve.exchange.selector) {
       CurveAdapterLib.ExchangeInputs memory inputs = args.decodeExchangeInputs();
-      require(ICurve(payload.to).coins(inputs.i).approveForMaxIfNeeded(payload.to), "token approval failed");
-      newToken = ICurve(payload.to).coins(inputs.j);
+      require(ICurve(payload.to).coins(uint256(uint128(inputs.i))).approveForMaxIfNeeded(payload.to), "token approval failed");
+      newToken = ICurve(payload.to).coins(uint256(uint128(inputs.j)));
     } else if (sig == ICurve.exchange_underlying.selector) {
       CurveAdapterLib.ExchangeInputs memory inputs = args.decodeExchangeInputs();
-      require(ICurve(payload.to).underlying_coins(inputs.i).approveForMaxIfNeeded(payload.to), "token approval failed");
-      newToken = ICurve(payload.to).underlying_coins(inputs.j);
+      require(ICurve(payload.to).underlying_coins(uint256(uint128(inputs.i))).approveForMaxIfNeeded(payload.to), "token approval failed");
+      newToken = ICurve(payload.to).underlying_coins(uint256(uint128(inputs.j)));
     } else revert("unsupported contract call");
     if (newToken != address(0x0)) require(payload.liquidationSubmodule.delegateNotify(abi.encode(newToken)), "failed to notify liquidation module");
     (bool success, bytes memory retval) = payload.to.call{ gas: gasleft(), value: payload.value }(payload.callData);
