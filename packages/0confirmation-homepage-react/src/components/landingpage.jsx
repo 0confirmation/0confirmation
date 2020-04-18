@@ -8,7 +8,7 @@ export default class LandingPage extends React.Component {
                 <div>
                     <Row className="justify-content-center align-content-center mx-5 px-5 py-5">
                         <Col md="12" lg="12" sm="12" className="justify-content-center align-content-center ">
-                            <img src={require("../images/home.svg")} alt=" " width="100%" className="img-fluid"/>
+                            <img src={require("../images/0cf_main-09.svg")} alt=" " width="100%" className="img-fluid"/>
                         </Col>
                     </Row>
                     <Row className="justify-content-center align-content-center mx-auto py-5">
