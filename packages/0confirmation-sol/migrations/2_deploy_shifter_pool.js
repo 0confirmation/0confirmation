@@ -1,10 +1,14 @@
+const kovan = require('../environments/kovan');
 const BorrowProxyLib = artifacts.require('BorrowProxyLib');
 const ShifterPool = artifacts.require('ShifterPool');
 const UniswapAdapter = artifacts.require('UniswapAdapter');
 const SimpleBurnLiquidationModule = artifacts.require('SimpleBurnLiquidationModule');
+const ERC20AdapterModule = artifacts.require('ERC20AdapterModule');
 const LiquidityToken = artifacts.require('LiquidityToken');
-
-const addresses = require('../deploy/kovan-addresses');
+const Dump = artifacts.require('Dump');
+const Absorb = artifacts.require('Absorb');
+const CurveAdapter = artifacts.require('CurveAdapter');
+const Zero = require('@0confirmation/sdk');
 
 const ModuleTypes = {
   BY_CODEHASH: 1,
@@ -15,50 +19,73 @@ module.exports = async function(deployer) {
   await deployer.deploy(BorrowProxyLib);
   await deployer.link(BorrowProxyLib, ShifterPool);
   await deployer.deploy(ShifterPool);
-  await deployer.deploy(UniswapAdapter, addresses.factory.toLowerCase());
-  await deployer.deploy(SimpleBurnLiquidationModule, addresses.factory.toLowerCase(), addresses.renbtc.toLowerCase());
-  await deployer.deploy(LiquidityToken, addresses.renbtc.toLowerCase(), 'zeroBTC', 'zeroBTC');
-  const liquidityTokenAddress = LiquidityToken.address;
-  const uniswapAdapterAddress = UniswapAdapter.address;
+  await deployer.deploy(CurveAdapter);
+  await deployer.deploy(UniswapAdapter, kovan.factory);
+  await deployer.deploy(SimpleBurnLiquidationModule, kovan.factory);
+  await deployer.deploy(LiquidityToken, kovan.renbtc, 'zeroBTC', 'zeroBTC');
+  await deployer.deploy(Dump);
+  await deployer.deploy(Absorb);
+  await deployer;
+  const liquidityToken = await LiquidityToken.deployed();
+  const absorb = await Absorb.deployed();
+  const dump = await Dump.deployed();
+  const uniswapAdapter = await UniswapAdapter.deployed();
   const shifterPool = await ShifterPool.deployed();
-  const simpleBurnAddress = SimpleBurnLiquidationModule.address;
-  await shifterPool.setup(addresses.shifterRegistry.toLowerCase(), '1000', [{
+  const erc20AdapterModule = await ERC20AdapterModule.deployed();
+  const simpleBurnLiquidationModule = await SimpleBurnLiquidationModule.deployed();
+  await shifterPool.setup(kovan.shifterRegistry, '1000', ethers.utils.parseEther('0.01'), [{
     moduleType: ModuleTypes.BY_CODEHASH,
-    target: addresses.template,
-    sigs: [
-      '0x89f2a871',
-      '0xfd11c223',
-      '0x95e3c50b',
-      '0x013efd8b',
-      '0xcd7724c3',
-      '0x59e94862',
-      '0x95b68fe7',
-      '0x2640f62c',
-      '0x9d76ea58',
-      '0x422f1043',
-      '0xf88bf15a',
-      '0xf39b5b9b',
-      '0xad65d76d',
-      '0x6b1d4db7',
-      '0x0b573638',
-      '0x7237e031',
-      '0xd4e4841d',
-      '0xddf7e1a7',
-      '0xf552d91b',
-      '0xb040d545',
-      '0xf3c0efe9',
-      '0xb1cb43bf',
-      '0xec384a3e',
-      '0xea650c7d',
-      '0x981a1327'
-    ],
+    target: kovan.renbtcExchange,
+    sigs: Zero.getSignatures(Exchange.abi),
     module: {
-      assetHandler: uniswapAdapterAddress,
-      liquidationModule: simpleBurnAddress
+      isPrecompiled: false,
+      assetSubmodule: uniswapAdapter.address,
+      repaymentSubmodule: '0x' + Array(40).fill('0').join(''),
+      liquidationSubmodule: simpleBurnLiquidationModule.address
+    }
+  }, {
+    moduleType: ModuleTypes.BY_ADDRESS,
+    target: kovan.renbtc,
+    sigs: Zero.getSignatures(LiquidityToken.abi),
+    module: {
+      isPrecompiled: false,
+      assetSubmodule: erc20Adapter.address,
+      repaymentSubmodule: erc20Adapter.address,
+      liquidationSubmodule: '0x' + Array(40).fill('0').join('')
+    }
+  }, {
+    moduleType: ModuleTypes.BY_ADDRESS,
+    target: kovan.dai,
+    sigs: Zero.getSignatures(LiquidityToken.abi),
+    module: {
+      isPrecompiled: false,
+      assetSubmodule: erc20Adapter.address,
+      repaymentSubmodule: erc20Adapter.address,
+      liquidationSubmodule: '0x' + Array(40).fill('0').join('')
+    }
+  }, {
+    moduleType: ModuleTypes.BY_ADDRESS,
+    target: '0x' + Array(39).fill('0').join('') + '1',
+    sigs: Zero.getSignatures(Absorb.abi),
+    module: {
+      isPrecompiled: true,
+      assetSubmodule: absorb.address,
+      repaymentSubmodule: '0x' + Array(40).fill('0').join(''),
+      liquidationSubmodule: simpleBurnLiquidationModule.address
+    }
+  }, {
+    moduleType: ModuleTypes.BY_ADDRESS,
+    target: absorb.address,
+    sigs: Zero.getSignatures(Absorb.abi),
+    module: {
+      isPrecompiled: true,
+      assetSubmodule: absorb.address,
+      repaymentSubmodule: '0x' + Array(40).fill('0').join(''),
+      liquidationSubmodule: simpleBurnLiquidationModule.address
     }
   }],
   [{
-    token: addresses.renbtc,
-    liqToken: liquidityTokenAddress
+    token: kovan.renbtc
+    liqToken: liquidityToken.address
   }]);
 };
