@@ -25,12 +25,13 @@ const ShifterPool = require('@0confirmation/sol/build/ShifterPool');
 const BorrowProxyLib = require('@0confirmation/sol/build/BorrowProxyLib');
 const ShifterBorrowProxy = require('@0confirmation/sol/build/ShifterBorrowProxy');
 const Exports = require('@0confirmation/sol/build/Exports');
-const shifterPoolInterface = new ethers.utils.Interface(ShifterPool.abi);
-const shifterBorrowProxyInterface = new ethers.utils.Interface(ShifterBorrowProxy.abi);
+const filterABI = (abi) => abi.filter((v) => v.type !== 'receive');
+const shifterPoolInterface = new ethers.utils.Interface(filterABI(ShifterPool.abi));
+const shifterBorrowProxyInterface = new ethers.utils.Interface(filterABI(ShifterBorrowProxy.abi));
 const uniq = require('lodash/uniq');
 
 const getSignatures = (abi) => {
-  const wrapped = new ethers.utils.Interface(abi);
+  const wrapped = new ethers.utils.Interface(filterABI(abi));
   return uniq(Object.keys(wrapped.functions).filter((v) => /^\w+$/.test(v)).map((v) => wrapped.functions[v].sighash));
 };
 
@@ -99,6 +100,7 @@ const pAbiExpanded = Object.assign({}, pAbi, {
 class LiquidityRequest {
   constructor({
     zero,
+    borrower,
     actions,
     shifterPool,
     borrowProxyLib,
@@ -111,12 +113,26 @@ class LiquidityRequest {
       shifterPool,
       actions,
       borrowProxyLib,
+      borrower,
       token,
       nonce,
       amount,
       zero,
       gasRequested
     });
+    if (this.borrower) {
+      this.proxyAddress = utils.computeBorrowProxyAddress(this);
+      this.depositAddress = utils.computeGatewayAddress({
+        isTestnet: this.zero.network.isTestnet,
+        mpkh: this.zero.network.mpkh,
+        g: {
+          to: this.proxyAddress,
+          p: CONST_PHASH,
+          tokenAddress: this.token,
+          nonce: this.nonce
+        }
+      });
+    }
   }
   async sign(from) {
     const signature = await this.zero.driver.sendWrapped('personal_sign', [ utils.computeLiquidityRequestHash({
@@ -337,7 +353,7 @@ class BorrowProxy {
     const deposited = await (this.getLiquidityRequestParcel()).waitForDeposit();
     const darknodeSignature = await deposited.waitForSignature();
     const record = this.decodedRecord;
-    const contract = new Contract(this.proxyAddress, ShifterBorrowProxy.abi, getProvider(this.zero.driver).getSigner());
+    const contract = new Contract(this.proxyAddress, filterABI(ShifterBorrowProxy.abi), getProvider(this.zero.driver).getSigner());
     return await contract.repayLoan(encodeTriggerParcel({
       record,
       pHash: CONST_PHASH,
@@ -347,7 +363,7 @@ class BorrowProxy {
     }), overrides || {});
   }
   async defaultLoan(overrides) {
-    const contract = new Contract(this.proxyAddress, ShifterBorrowProxy.abi, getProvider(this.zero.driver).getSigner());
+    const contract = new Contract(this.proxyAddress, filterABI(ShifterBorrowProxy.abi), getProvider(this.zero.driver).getSigner());
     return await contract.defaultLoan(this.record, overrides || {});
   }
   async waitForConfirmations(num = 6) {
@@ -402,6 +418,9 @@ class Zero {
       isTestnet
     };
   }
+  async setBorrowProxy(address) {
+    return await this.driver.sendWrapped('0cf_setBorrowProxy', [ address ]);
+  }
   getProvider() {
     const wrappedEthProvider = getProvider(this.driver);
     const ethProvider = wrappedEthProvider.provider;
@@ -447,6 +466,7 @@ class Zero {
     token,
     amount,
     nonce,
+    borrower,
     gasRequested,
     actions
   }) {
@@ -459,11 +479,12 @@ class Zero {
       token,
       amount,
       nonce,
+      borrower,
       gasRequested
     });
   }
   subscribeBorrows(filterArgs, callback) {
-    const contract = new Contract(this.network.shifterPool, BorrowProxyLib.abi, getProvider(this.driver).getSigner());
+    const contract = new Contract(this.network.shifterPool, filterABI(BorrowProxyLib.abi), getProvider(this.driver).getSigner());
     const filter = contract.filters.BorrowProxyMade(...filterArgs);
     contract.on(filter, (user, proxyAddress, data) => callback(new BorrowProxy({
       zero: this,
@@ -481,7 +502,7 @@ class Zero {
       borrower = (await this.send('eth_accounts', []))[0];
     }
     const provider = getProvider(this.driver);
-    const contract = new Contract(this.network.shifterPool, BorrowProxyLib.abi, provider.getSigner());
+    const contract = new Contract(this.network.shifterPool, filterABI(BorrowProxyLib.abi), provider.getSigner());
     const filter = contract.filters.BorrowProxyMade(...[ borrower ]);
     const logs = await provider.getLogs(Object.assign({
       fromBlock: fromBlock || this.network.genesis || 0
@@ -580,18 +601,21 @@ class Zero {
       }));
     });
   }
+  async stopListeningForLiquidityRequests() {
+    return await (this.driver.getBackend('zero'))._unsubscribeLiquidityRequests();
+  }
   async approvePool(token, overrides) {
-    const contract = new Contract(token, LiquidityToken.abi, getProvider(this.driver).getSigner());
+    const contract = new Contract(token, filterABI(LiquidityToken.abi), getProvider(this.driver).getSigner());
     return await contract.approve(this.network.shifterPool, '0x' + Array(64).fill('f').join(''), overrides || {});
   }
   async getLiquidityTokenFor(token) {
-    const contract = new Contract(this.network.shifterPool, ShifterPool.abi, getProvider(this.driver).getSigner());
-    const liquidityToken = new Contract(await contract.getLiquidityTokenHandler(token), LiquidityToken.abi, getProvider(this.driver).getSigner());
+    const contract = new Contract(this.network.shifterPool, filterABI(ShifterPool.abi), getProvider(this.driver).getSigner());
+    const liquidityToken = new Contract(await contract.getLiquidityTokenHandler(token), filterABI(LiquidityToken.abi), getProvider(this.driver).getSigner());
     return liquidityToken;
   }
   async approveLiquidityToken(token, overrides) {
     const liquidityToken = await this.getLiquidityTokenFor(token);
-    const contract = new Contract(token, LiquidityToken.abi, getProvider(this.driver).getSigner());
+    const contract = new Contract(token, filterABI(LiquidityToken.abi), getProvider(this.driver).getSigner());
     return await contract.approve(liquidityToken.address, '0x' + Array(64).fill('f').join(''), overrides || {});
   }
   async addLiquidity(token, value, overrides) {
@@ -613,7 +637,7 @@ class Zero {
       actions,
       borrower
     } = liquidityRequest;
-    const contract = new Contract(this.network.shifterPool, ShifterPool.abi, getProvider(this.driver).getSigner());
+    const contract = new Contract(this.network.shifterPool, filterABI(ShifterPool.abi), getProvider(this.driver).getSigner());
     const tx = await contract.executeBorrow({
       request: {
         borrower,
@@ -622,7 +646,10 @@ class Zero {
         amount
       },
       gasRequested,
-      actions,
+      actions: (actions || []).map((v) => ({
+        to: v.to,
+        txData: v.calldata
+      })),
       signature
     }, bond, timeoutExpiry, Object.assign(overrides || {}, {
       value: '0x' + new BN(gasRequested).toString(16)
@@ -630,7 +657,7 @@ class Zero {
     return tx;
   }
   async loadBorrowProxyCreationCode() {
-    this.network.borrowProxyCreationCode = await (new Contract(this.network.shifterPool, ShifterPool.abi, getProvider(this.driver).getSigner())).getBorrowProxyCreationCode();
+    this.network.borrowProxyCreationCode = await (new Contract(this.network.shifterPool, filterABI(ShifterPool.abi), getProvider(this.driver).getSigner())).getBorrowProxyCreationCode();
   }
   async initializeDriver() {
     await utils.initializeCodeHash();

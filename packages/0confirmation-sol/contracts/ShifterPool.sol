@@ -52,17 +52,21 @@ contract ShifterPool is Ownable, ViewExecutor {
     bytes memory data = proxyRecord.encodeProxyRecord();
     require(LiquidityToken(isolate.getLiquidityToken(liquidityRequest.token)).loan(proxyAddress, proxyRecord.computePostFee()), "insufficient funds in liquidity pool");
     isolate.borrowProxyController.mapProxyRecord(proxyAddress, data);
+    isolate.borrowProxyController.setProxyToken(proxyAddress, liquidityRequest.token);
     isolate.borrowProxyController.setProxyOwner(proxyAddress, liquidityRequest.borrower);
     liquidityRequest.borrower.transfer(msg.value);
     require(liquidityRequest.token.transferTokenFrom(msg.sender, address(this), bond), "bond submission failed");
     require(borrowerSalt.deployBorrowProxy() == proxyAddress, "proxy deployment failed");
-    require(BorrowProxy(proxyAddress).setup(liquidityRequest.borrower), "setup phase failure");
+    require(BorrowProxy(proxyAddress).setup(liquidityRequest.borrower, liquidityRequest.token), "setup phase failure");
     require(liquidityRequestParcel.actions.triggerActions(proxyAddress), "iniialization actions fail");
     
     BorrowProxyLib.emitBorrowProxyMade(liquidityRequest.borrower, proxyAddress, data);
   }
   function validateProxyRecordHandler(bytes memory proxyRecord) public view returns (bool) {
     return isolate.borrowProxyController.validateProxyRecord(msg.sender, proxyRecord);
+  }
+  function getProxyTokenHandler(address proxyAddress) public view returns (address) {
+    return isolate.borrowProxyController.getProxyToken(proxyAddress);
   }
   function getProxyOwnerHandler(address user) public view returns (address) {
     return isolate.borrowProxyController.getProxyOwner(user);

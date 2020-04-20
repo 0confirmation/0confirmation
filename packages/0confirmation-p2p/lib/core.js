@@ -109,6 +109,9 @@ const createNode = async (options, wrtc) => {
     async publish(topic, data) {
       return this.socket.pubsub.publish(topic, jsonBuffer(data));
     },
+    async unsubscribe(topic) {
+      return await this.socket.pubsub.unsubscribe(topic);
+    },
     async handleProtocol(name, fn) {
       return this.socket.handle(name, async ({
         stream,

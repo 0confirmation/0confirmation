@@ -12,6 +12,7 @@ library BorrowProxyLib {
     address masterAddress;
     bool unbound;
     address owner;
+    address token;
     uint256 actualizedShift;
     uint256 liquidationIndex;
     uint256 repaymentIndex;
@@ -23,6 +24,7 @@ library BorrowProxyLib {
   struct ControllerIsolate {
     mapping (address => bytes32) proxyInitializerRecord;
     mapping (address => address) ownerByProxy;
+    mapping (address => address) tokenByProxy;
     mapping (address => bool) isKeeper;
   }
   struct Module {
@@ -44,6 +46,7 @@ library BorrowProxyLib {
   }
   struct ModuleExecution {
     address to;
+    address token;
     Module encapsulated;
   }
   function registryRegisterModule(ModuleRegistry storage registry, ModuleRegistration memory registration) internal {
@@ -55,22 +58,22 @@ library BorrowProxyLib {
   }
   function delegateLiquidate(address liquidationSubmodule) internal returns (bool) {
     (bool success, bytes memory retval) = liquidationSubmodule.delegatecall(abi.encodeWithSignature("liquidate(address)", liquidationSubmodule));
-    if (retval.length != 0x20) return false;
+    if (!success) revert(RevertCaptureLib.decodeError(retval));
     (bool decoded) = abi.decode(retval, (bool));
-    return success && decoded;
+    return decoded;
   }
   function delegateRepay(address repaymentSubmodule) internal returns (bool) {
     (bool success, bytes memory retval) = repaymentSubmodule.delegatecall(abi.encodeWithSignature("repay(address)", repaymentSubmodule));
-    if (retval.length != 0x20) return false;
+    if (!success) revert(RevertCaptureLib.decodeError(retval));
     (bool decoded) = abi.decode(retval, (bool));
-    return success && decoded;
+    return decoded;
   }
   function delegateNotify(address liquidationSubmodule, bytes memory payload) internal returns (bool) {
     (bool success,) = liquidationSubmodule.delegatecall(abi.encodeWithSignature("notify(address,bytes)", liquidationSubmodule, payload));
     return success;
   }
   function delegate(ModuleExecution memory module, bytes memory payload, uint256 value) internal returns (bool, bytes memory) {
-    (bool success, bytes memory retval) = module.encapsulated.assetSubmodule.delegatecall{ gas: gasleft() }(abi.encode(module.encapsulated.assetSubmodule, module.encapsulated.liquidationSubmodule, module.encapsulated.repaymentSubmodule, tx.origin, module.to, value, payload));
+    (bool success, bytes memory retval) = module.encapsulated.assetSubmodule.delegatecall{ gas: gasleft() }(abi.encode(module.encapsulated.assetSubmodule, module.encapsulated.liquidationSubmodule, module.encapsulated.repaymentSubmodule, module.token, tx.origin, module.to, value, payload));
     return (success, retval);
   }
   function isDefined(Module memory module) internal pure returns (bool) {
@@ -105,6 +108,7 @@ library BorrowProxyLib {
     Module memory encapsulated = resolveModule(registry, to, signature);
     return ModuleExecution({
       encapsulated: encapsulated,
+      token: address(0x0), // fill in in the proxy call
       to: to
     });
   }
@@ -116,6 +120,12 @@ library BorrowProxyLib {
   }
   function setProxyOwner(ControllerIsolate storage isolate, address proxyAddress, address identity) internal {
     isolate.ownerByProxy[proxyAddress] = identity;
+  }
+  function setProxyToken(ControllerIsolate storage isolate, address proxyAddress, address token) internal {
+    isolate.tokenByProxy[proxyAddress] = token;
+  }
+  function getProxyToken(ControllerIsolate storage isolate, address proxyAddress) internal view returns (address) {
+    return isolate.tokenByProxy[proxyAddress];
   }
   function getProxyOwner(ControllerIsolate storage isolate, address proxyAddress) internal view returns (address) {
     return isolate.ownerByProxy[proxyAddress];
@@ -129,6 +139,7 @@ library BorrowProxyLib {
   function fetchModule(ProxyIsolate storage isolate, address to, bytes4 signature) public returns (ModuleExecution memory) {
     return ModuleExecution({
       encapsulated: IModuleRegistryProvider(isolate.masterAddress).fetchModuleHandler(to, signature),
+      token: isolate.token,
       to: to
     });
   }

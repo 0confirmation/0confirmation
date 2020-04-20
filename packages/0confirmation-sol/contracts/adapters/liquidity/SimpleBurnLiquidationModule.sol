@@ -14,10 +14,9 @@ contract SimpleBurnLiquidationModule {
   using AddressSetLib for *;
   using TokenUtils for *;
   BorrowProxyLib.ProxyIsolate proxyIsolate;
-  constructor(address factoryAddress, address liquidateTo) public {
+  constructor(address factoryAddress) public {
     SimpleBurnLiquidationModuleLib.Isolate storage isolate = SimpleBurnLiquidationModuleLib.getIsolatePointer();
     isolate.factoryAddress = factoryAddress;
-    isolate.liquidateTo = liquidateTo;
   }
   function notify(address /* moduleAddress */, bytes memory payload) public returns (bool) {
     (address token) = abi.decode(payload, (address));
@@ -25,12 +24,11 @@ contract SimpleBurnLiquidationModule {
     isolate.toLiquidate.insert(token);
     return true;
   }
-  function liquidate(address moduleAddress) public returns (bool) {
+  function liquidate() public returns (bool) {
     if (!ERC20AdapterLib.liquidate()) return false;
     SimpleBurnLiquidationModuleLib.Isolate storage isolate = SimpleBurnLiquidationModuleLib.getIsolatePointer();
-    SimpleBurnLiquidationModuleLib.ExternalIsolate memory externalIsolate = SimpleBurnLiquidationModule(moduleAddress).getExternalIsolateHandler();
     IUniswapFactory factory = IUniswapFactory(isolate.factoryAddress);
-    address liquidateTo = externalIsolate.liquidateTo;
+    address liquidateTo = address(uint160(proxyIsolate.token));
     uint256 i;
     uint256 received = 0;
     for (i = isolate.liquidated; i < isolate.toLiquidate.set.length; i++) {
@@ -51,11 +49,10 @@ contract SimpleBurnLiquidationModule {
     require(success, "liquidated token transfer failed");
     return true;
   }
-  function getExternalIsolateHandler() external returns (SimpleBurnLiquidationModuleLib.ExternalIsolate memory) {
+  function getExternalIsolateHandler() external view returns (SimpleBurnLiquidationModuleLib.ExternalIsolate memory) {
     SimpleBurnLiquidationModuleLib.Isolate storage isolate = SimpleBurnLiquidationModuleLib.getIsolatePointer();
     return SimpleBurnLiquidationModuleLib.ExternalIsolate({
-      factoryAddress: isolate.factoryAddress,
-      liquidateTo: isolate.liquidateTo
+      factoryAddress: isolate.factoryAddress
     });
   }
 }

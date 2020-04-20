@@ -18,17 +18,17 @@ contract ERC20Adapter {
     // no op
   }
   fallback() external {
-    (/* address payable moduleAddress */, /* address liquidationSubmodule */, /* address repaymentSubmodule */, /* address txOrigin */, address to, /* uint256 value */, bytes memory payload) = abi.decode(msg.data, (address, address, address, address, address, uint256, bytes));
+    ModuleLib.AssetSubmodulePayload memory payload = msg.data.decodeAssetSubmodulePayload();
     ERC20AdapterLib.Isolate storage isolate = ERC20AdapterLib.getIsolatePointer();
-    (bytes4 sig, bytes memory args) = payload.splitPayload();
+    (bytes4 sig, bytes memory args) = payload.callData.splitPayload();
     if (sig == IERC20.transfer.selector) {
-       (address recipient, uint256 amount) = abi.decode(args, (address, uint256));
+       ERC20AdapterLib.TransferInputs memory inputs = args.decodeTransferInputs();
        address escrowWallet = ERC20AdapterLib.computeForwarderAddress(isolate.payments.length);
        isolate.payments.push(ERC20AdapterLib.EscrowRecord({
-         recipient: recipient,
-         token: to
+         recipient: inputs.recipient,
+         token: payload.to
        }));
-       require(to.sendToken(escrowWallet, amount), "token transfer to escrow wallet failed");
+       require(payload.to.sendToken(escrowWallet, inputs.amount), "token transfer to escrow wallet failed");
     } else if (sig == IERC20.approve.selector) {
       // do nothing
     } else revert("unsupported token call");
