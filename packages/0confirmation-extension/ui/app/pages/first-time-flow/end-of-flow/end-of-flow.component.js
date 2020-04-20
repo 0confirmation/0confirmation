@@ -45,51 +45,29 @@ export default class EndOfFlowScreen extends PureComponent {
     const { onboardingInitiator } = this.props
 
     return (
-      <div className="end-of-flow">
-        <MetaFoxLogo />
-        <div className="end-of-flow__emoji">🎉</div>
+      <div className="end-of-flow" style={{width: "700px", marginLeft: "auto", marginRight: "auto"}}>
+        <img 
+            style={ { width: '120px', height: '120px' } }
+            src = "images/logo/0cf-mascot-replacement.svg"
+        />
         <div className="first-time-flow__header">
-          { t('congratulations') }
+               Welcome to 0confirmation
         </div>
         <div className="first-time-flow__text-block end-of-flow__text-1">
-          { t('endOfFlowMessage1') }
+           0confirmation allows you to liquidate btc with minimal slippage 
         </div>
-        <div className="first-time-flow__text-block end-of-flow__text-2">
-          { t('endOfFlowMessage2') }
+        <div className="first-time-flow__text-block end-of-flow__text-1">
+          on the Ethereum protocol  in as little as 20 seconds 
         </div>
-        <div className="end-of-flow__text-3">
-          { '• ' + t('endOfFlowMessage3') }
-        </div>
-        <div className="end-of-flow__text-3">
-          { '• ' + t('endOfFlowMessage4') }
-        </div>
-        <div className="end-of-flow__text-3">
-          { '• ' + t('endOfFlowMessage5') }
-        </div>
-        <div className="end-of-flow__text-3">
-          { '• ' + t('endOfFlowMessage6') }
-        </div>
-        <div className="end-of-flow__text-3">
-          { '• ' + t('endOfFlowMessage7') }
-        </div>
-        <div className="first-time-flow__text-block end-of-flow__text-4">
-          { '*' + t('endOfFlowMessage8') }&nbsp;
-          <a
-            href="https://metamask.zendesk.com/hc/en-us/articles/360015489591-Basic-Safety-Tips"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <span className="first-time-flow__link-text">
-              {t('endOfFlowMessage9')}
-            </span>
-          </a>
+        <div className="first-time-flow__text-block end-of-flow__text-1">
+          using a borrow proxy contract
         </div>
         <Button
-          type="primary"
+          type="default"
           className="first-time-flow__button"
           onClick={this.onComplete}
         >
-          { t('endOfFlowMessage10') }
+          Get Started
         </Button>
         {
           onboardingInitiator ? (

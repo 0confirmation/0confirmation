@@ -177,7 +177,7 @@ class RestoreVaultPage extends Component {
               largeLabel
             />
             <Button
-              type="first-time"
+              type="default"
               className="first-time-flow__button"
               onClick={() => !disabled && this.onClick()}
               disabled={disabled}

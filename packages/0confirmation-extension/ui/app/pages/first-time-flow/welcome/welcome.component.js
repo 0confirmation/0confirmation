@@ -3,7 +3,7 @@ import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
 import MetaFoxLogo from '../../../components/ui/metafox-logo'
 import Button from '../../../components/ui/button'
-import { INITIALIZE_CREATE_PASSWORD_ROUTE, INITIALIZE_SELECT_ACTION_ROUTE } from '../../../helpers/constants/routes'
+import { INITIALIZE_CREATE_PASSWORD_ROUTE, UNLOCK_ROUTE, DEFAULT_ROUTE, INITIALIZE_UNLOCK_ROUTE, INITIALIZE_SELECT_ACTION_ROUTE, INITIALIZE_END_OF_FLOW_ROUTE } from '../../../helpers/constants/routes'
 
 export default class Welcome extends PureComponent {
   static propTypes = {
@@ -25,11 +25,13 @@ export default class Welcome extends PureComponent {
   componentDidMount () {
     const { history, participateInMetaMetrics, welcomeScreenSeen } = this.props
 
-    if (welcomeScreenSeen && participateInMetaMetrics !== null) {
-      history.push(INITIALIZE_CREATE_PASSWORD_ROUTE)
-    } else if (welcomeScreenSeen) {
-      history.push(INITIALIZE_SELECT_ACTION_ROUTE)
-    }
+   // if (welcomeScreenSeen && participateInMetaMetrics !== null) {
+      //history.push(INITIALIZE_CREATE_PASSWORD_ROUTE)
+      history.push(INITIALIZE_END_OF_FLOW_ROUTE)
+      // preiously INITIALIXE_UNLOCK_ROUTE ^^
+         // } else if (welcomeScreenSeen) {
+     // history.push(INITIALIZE_SELECT_ACTION_ROUTE)
+    //}
   }
 
   handleContinue = () => {

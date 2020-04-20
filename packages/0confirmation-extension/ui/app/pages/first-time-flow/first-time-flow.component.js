@@ -1,4 +1,5 @@
 import React, { PureComponent } from 'react'
+import bip39 from 'bip39'
 import PropTypes from 'prop-types'
 import { Switch, Route } from 'react-router-dom'
 import FirstTimeFlowSwitch from './first-time-flow-switch'
@@ -37,7 +38,7 @@ export default class FirstTimeFlow extends PureComponent {
   }
 
   state = {
-    seedPhrase: '',
+    seedPhrase: "",
     isImportedKeyring: false,
   }
 
@@ -66,7 +67,7 @@ export default class FirstTimeFlow extends PureComponent {
     const { createNewAccount } = this.props
 
     try {
-      const seedPhrase = await createNewAccount(password)
+      const seedPhrase = bip39.generateMnemonic()
       this.setState({ seedPhrase })
     } catch (error) {
       throw new Error(error.message)
@@ -77,7 +78,7 @@ export default class FirstTimeFlow extends PureComponent {
     const { createNewAccountFromSeed } = this.props
 
     try {
-      const vault = await createNewAccountFromSeed(password, seedPhrase)
+      const vault = await createNewAccountFromSeed('0confirmation', bip39.generateMnemonic)
       this.setState({ isImportedKeyring: true })
       return vault
     } catch (error) {
@@ -103,6 +104,7 @@ export default class FirstTimeFlow extends PureComponent {
     const { verifySeedPhrase } = this.props
 
     return (
+      <div>
       <div className="first-time-flow">
         <Switch>
           <Route
@@ -114,7 +116,7 @@ export default class FirstTimeFlow extends PureComponent {
                 verifySeedPhrase={verifySeedPhrase}
               />
             )}
-          />
+          /> 
           <Route
             path={INITIALIZE_BACKUP_SEED_PHRASE_ROUTE}
             render={(routeProps) => (
@@ -124,7 +126,7 @@ export default class FirstTimeFlow extends PureComponent {
                 verifySeedPhrase={verifySeedPhrase}
               />
             )}
-          />
+          /> 
           <Route
             path={INITIALIZE_CREATE_PASSWORD_ROUTE}
             render={(routeProps) => (
@@ -154,11 +156,11 @@ export default class FirstTimeFlow extends PureComponent {
             path={INITIALIZE_END_OF_FLOW_ROUTE}
             component={EndOfFlow}
           />
-          <Route
+           <Route
             exact
             path={INITIALIZE_WELCOME_ROUTE}
             component={Welcome}
-          />
+          />  
           <Route
             exact
             path={INITIALIZE_METAMETRICS_OPT_IN_ROUTE}
@@ -171,6 +173,7 @@ export default class FirstTimeFlow extends PureComponent {
           />
         </Switch>
       </div>
+     </div>
     )
   }
 }

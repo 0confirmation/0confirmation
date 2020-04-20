@@ -171,15 +171,9 @@ export default class UnlockPage extends Component {
           <div className="unlock-page__links">
             <div
               className="unlock-page__link"
-              onClick={() => onRestore()}
-            >
-              { t('restoreFromSeed') }
-            </div>
-            <div
-              className="unlock-page__link unlock-page__link--import"
               onClick={() => onImport()}
             >
-              { t('importUsingSeed') }
+                 Import account from seed phrase
             </div>
           </div>
         </div>
