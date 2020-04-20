@@ -7,7 +7,7 @@ contract ShifterMock {
   constructor() public {
     token = address(new ShifterERC20Mock());
   }
-  function shiftIn(bytes32 /* pHash */, uint256 amount , bytes32 /* nHash */, bytes memory /* darknode signature */) public returns (uint256) {
+  function mint(bytes32 /* pHash */, uint256 amount , bytes32 /* nHash */, bytes memory /* darknode signature */) public returns (uint256) {
     ShifterERC20Mock(token).mint(msg.sender, amount);
     return amount;
   }
