@@ -1,18 +1,21 @@
+const path = require('path');
+
 module.exports = {
+  contracts_directory: path.join(, 'contracts'),
+  contracts_build_directory: path.join(__dirname, 'build'),
   networks: {
-    development: {
-      host: "localhost",
+    ganache: {
+      host: 'localhost',
       port: 8545,
-      network_id: "*", // Match any network id
-      gas: 5000000
+      network_id: '*'
     }
   },
   compilers: {
     solc: {
       settings: {
         optimizer: {
-          enabled: true, // Default: false
-          runs: 200      // Default: 200
+          enabled: true,
+          runs: 200
         },
       }
     }
