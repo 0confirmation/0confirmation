@@ -3,7 +3,7 @@ pragma solidity ^0.6.0;
 import { Create2 } from "openzeppelin-solidity/contracts/utils/Create2.sol";
 
 interface ISafeView {
-  function execute(bytes calldata) external;
+  function execute(address payable, bytes calldata) external;
   function destroy() public;
   function _executeSafeView(bytes calldata, address payable, bytes calldata) external;
 }
