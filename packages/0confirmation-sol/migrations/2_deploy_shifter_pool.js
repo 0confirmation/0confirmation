@@ -19,7 +19,7 @@ module.exports = async function(deployer) {
   await deployer.deploy(BorrowProxyLib);
   await deployer.link(BorrowProxyLib, ShifterPool);
   await deployer.deploy(ShifterPool);
-  await deployer.deploy(CurveAdapter);
+  await deployer.deploy(CurveAdapter, Curvefi.networks[42].address);
   await deployer.deploy(UniswapAdapter, kovan.factory);
   await deployer.deploy(SimpleBurnLiquidationModule, kovan.factory);
   await deployer.deploy(LiquidityToken, kovan.renbtc, 'zeroBTC', 'zeroBTC');

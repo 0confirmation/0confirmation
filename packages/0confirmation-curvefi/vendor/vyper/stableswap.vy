@@ -18,12 +18,9 @@ ZERO256: constant(uint256) = 0  # This hack is really bad XXX
 ZEROS: constant(uint256[N_COINS]) = ___N_ZEROS___  # <- change
 
 USE_LENDING: constant(bool[N_COINS]) = ___USE_LENDING___
-
-# Flag "ERC20s" which don't return from transfer() and transferFrom()
 TETHERED: constant(bool[N_COINS]) = ___TETHERED___
 
 FEE_DENOMINATOR: constant(uint256) = 10 ** 10
-LENDING_PRECISION: constant(uint256) = 10 ** 18
 PRECISION: constant(uint256) = 10 ** 18  # The precision to convert to
 PRECISION_MUL: constant(uint256[N_COINS]) = ___PRECISION_MUL___
 # PRECISION_MUL: constant(uint256[N_COINS]) = [
@@ -51,10 +48,7 @@ balances: public(uint256[N_COINS])
 A: public(uint256)  # 2 x amplification coefficient
 fee: public(uint256)  # fee * 1e10
 admin_fee: public(uint256)  # admin_fee * 1e10
-
 max_admin_fee: constant(uint256) = 5 * 10 ** 9
-max_fee: constant(uint256) = 5 * 10 ** 9
-max_A: constant(uint256) = 10 ** 6
 
 owner: public(address)
 token: ERC20m
@@ -104,12 +98,12 @@ def _stored_rates() -> uint256[N_COINS]:
     result: uint256[N_COINS] = PRECISION_MUL
     use_lending: bool[N_COINS] = USE_LENDING
     for i in range(N_COINS):
-        rate: uint256 = LENDING_PRECISION  # Used with no lending
+        rate: uint256 = PRECISION  # Used with no lending
         if use_lending[i]:
             rate = cERC20(self.coins[i]).exchangeRateStored()
             supply_rate: uint256 = cERC20(self.coins[i]).supplyRatePerBlock()
             old_block: uint256 = cERC20(self.coins[i]).accrualBlockNumber()
-            rate += rate * supply_rate * (block.number - old_block) / LENDING_PRECISION
+            rate += rate * supply_rate * (block.number - old_block) / PRECISION
         result[i] *= rate
     return result
 
@@ -119,7 +113,7 @@ def _current_rates() -> uint256[N_COINS]:
     result: uint256[N_COINS] = PRECISION_MUL
     use_lending: bool[N_COINS] = USE_LENDING
     for i in range(N_COINS):
-        rate: uint256 = LENDING_PRECISION  # Used with no lending
+        rate: uint256 = PRECISION  # Used with no lending
         if use_lending[i]:
             rate = cERC20(self.coins[i]).exchangeRateCurrent()
         result[i] *= rate
@@ -263,7 +257,7 @@ def add_liquidity(amounts: uint256[N_COINS], min_mint_amount: uint256):
             else:
                 difference = new_balances[i] - ideal_balance
             fees[i] = _fee * difference / FEE_DENOMINATOR
-            self.balances[i] = new_balances[i] - (fees[i] * _admin_fee / FEE_DENOMINATOR)
+            self.balances[i] = new_balances[i] - fees[i] * _admin_fee / FEE_DENOMINATOR
             new_balances[i] -= fees[i]
         D2 = self.get_D_mem(rates, new_balances)
     else:
@@ -338,7 +332,7 @@ def get_dy(i: int128, j: int128, dx: uint256) -> uint256:
     rates: uint256[N_COINS] = self._stored_rates()
     xp: uint256[N_COINS] = self._xp(rates)
 
-    x: uint256 = xp[i] + (dx * rates[i] / PRECISION)
+    x: uint256 = xp[i] + dx * rates[i] / PRECISION
     y: uint256 = self.get_y(i, j, x, xp)
     dy: uint256 = (xp[j] - y) * PRECISION / rates[j]
     _fee: uint256 = self.fee * dy / FEE_DENOMINATOR
@@ -521,7 +515,7 @@ def remove_liquidity_imbalance(amounts: uint256[N_COINS], max_burn_amount: uint2
         else:
             difference = new_balances[i] - ideal_balance
         fees[i] = _fee * difference / FEE_DENOMINATOR
-        self.balances[i] = new_balances[i] - (fees[i] * _admin_fee / FEE_DENOMINATOR)
+        self.balances[i] = new_balances[i] - fees[i] * _admin_fee / FEE_DENOMINATOR
         new_balances[i] -= fees[i]
     D2: uint256 = self.get_D_mem(rates, new_balances)
 
@@ -547,8 +541,6 @@ def commit_new_parameters(amplification: uint256,
     assert msg.sender == self.owner
     assert self.admin_actions_deadline == 0
     assert new_admin_fee <= max_admin_fee
-    assert new_fee <= max_fee
-    assert amplification <= max_A
 
     _deadline: timestamp = block.timestamp + admin_actions_delay
     self.admin_actions_deadline = _deadline

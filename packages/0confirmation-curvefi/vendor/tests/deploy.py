@@ -1,11 +1,13 @@
 from os.path import realpath, dirname, join, splitext
 from vyper import compile_code
+import json
 
 CONTRACT_PATH = join(dirname(dirname(realpath(__file__))), 'vyper')
 compiled_contracts = {}
 
 
-def deploy_contract(w3, filename, account, *args, replacements=None):
+def deploy_contract(w3, name, filename, replacements=None):
+    save_name = name
     if isinstance(filename, list):
         interface_files = filename[1:]
         filename = filename[0]
@@ -30,8 +32,5 @@ def deploy_contract(w3, filename, account, *args, replacements=None):
     else:
         code = compile_code(source, ['bytecode', 'abi'],
                             interface_codes=interface_codes or None)
-        code_size = len(code['bytecode']) // 2
-        assert code_size <= 2 ** 14 + 2 ** 13  # EIP170
-        print("Code size:", code_size)
-        compiled_contracts[filename] = code
-        print(json.dumps(code))
+    code['contractName'] = save_name
+    print(json.dumps(code))

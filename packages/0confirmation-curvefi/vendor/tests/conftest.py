@@ -1,16 +1,17 @@
 import pytest
+import json
 from eth_tester import EthereumTester, PyEVMBackend
 from web3 import Web3
 from os.path import realpath, dirname, join
 from .deploy import deploy_contract
 
 CONTRACT_PATH = join(dirname(dirname(realpath(__file__))), 'vyper')
-N_COINS = 2
-UP = [18, 6]
+N_COINS = 3
+UP = [18, 6, 6]
 UU = [10 ** p for p in UP]
-c_rates = [5 * UU[0], UU[1]]
-use_lending = [True, True]
-tethered = [False, False]
+c_rates = [5 * UU[0], UU[1], 20 * UU[2]]
+use_lending = [True, True, False]
+tethered = [False, False, True]
 PRECISIONS = [10 ** 18 // u for u in UU]
 MAX_UINT = 2 ** 256 - 1
 
@@ -40,13 +41,7 @@ def coins(w3):
 
 
 @pytest.fixture
-def pool_token_1(w3):
-    return deploy_contract(w3, 'ERC20.vy', w3.eth.accounts[0],
-                           b'Stableswap', b'STBL', 18, 0)
-
-
-@pytest.fixture
-def pool_token_2(w3):
+def pool_token(w3):
     return deploy_contract(w3, 'ERC20.vy', w3.eth.accounts[0],
                            b'Stableswap', b'STBL', 18, 0)
 
@@ -67,9 +62,10 @@ def cerc20s(w3, coins):
     return ccoins
 
 
-def swap_raw(w3, coins, cerc20s, pool_token, filename):
+@pytest.fixture(scope='function')
+def swap(w3, coins, cerc20s, pool_token):
     swap_contract = deploy_contract(
-            w3, [filename, 'ERC20m.vy', 'cERC20.vy'], w3.eth.accounts[1],
+            w3, ['stableswap.vy', 'ERC20m.vy', 'cERC20.vy'], w3.eth.accounts[1],
             [c.address for c in cerc20s], [c.address for c in coins],
             pool_token.address, 360 * 2, 10 ** 7,
             replacements={
@@ -83,30 +79,9 @@ def swap_raw(w3, coins, cerc20s, pool_token, filename):
                         str(i) for i in tethered) + ']',
             })
     pool_token.functions.set_minter(swap_contract.address).transact()
+    with open(join(CONTRACT_PATH, 'stableswap.abi'), 'w') as f:
+        json.dump(swap_contract.abi, f, indent=True)
     return swap_contract
-
-
-@pytest.fixture(scope='function')
-def swap_v1(w3, coins, cerc20s, pool_token_1):
-    return swap_raw(w3, coins, cerc20s, pool_token_1, 'stableswap-v1.vy')
-
-
-@pytest.fixture(scope='function')
-def swap_v2(w3, coins, cerc20s, pool_token_2):
-    return swap_raw(w3, coins, cerc20s, pool_token_2, 'stableswap-v2.vy')
-
-
-@pytest.fixture(scope='function')
-def migration(w3, swap_v1, swap_v2, cerc20s, pool_token_1, pool_token_2):
-    return deploy_contract(
-            w3, 'migration.vy', w3.eth.accounts[1],
-            swap_v1.address, pool_token_1.address,
-            swap_v2.address, pool_token_2.address,
-            [c.address for c in cerc20s],
-            replacements={
-                '___N_COINS___': str(N_COINS),
-                '___N_ZEROS___': '[' + ', '.join(['ZERO256'] * N_COINS) + ']',
-            })
 
 
 def approx(a, b, precision=1e-10):
