@@ -8,7 +8,13 @@ services:
       - /root/nginx.conf:/etc/nginx/nginx.conf
       - /etc/letsencrypt:/etc/letsencrypt
   desktop:
-    image: x11vnc/desktop
+    image: 0confirmation/extdev
+    build:
+      dockerfile: Dockerfile
+      context: ./
+    cap_add:
+      - "SYS_ADMIN"
+    volumes:
+      - /root/persistence:/persistence
     ports:
-      - "5900:5900"
-      - "6080:6080"
+      - "2222:22"
