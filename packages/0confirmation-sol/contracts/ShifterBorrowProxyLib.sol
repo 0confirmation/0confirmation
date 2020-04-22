@@ -61,7 +61,7 @@ library ShifterBorrowProxyLib {
     return abi.encode(actions);
   }
   function computeLiquidityRequestParcelMessage(LiquidityRequestParcel memory parcel) internal view returns (bytes memory) {
-    return abi.encodePacked(address(this), parcel.request.token, parcel.request.nonce, parcel.request.amount, parcel.gasRequested, parcel.forbidLoan, encodeParcelActions(parcel.actions));
+    return abi.encodePacked(address(this), parcel.request.token, parcel.request.nonce, parcel.request.amount, parcel.gasRequested, parcel.request.forbidLoan, encodeParcelActions(parcel.request.actions));
   }
   function computeLiquidityRequestHash(LiquidityRequestParcel memory parcel) internal view returns (bytes32) {
     return keccak256(computeLiquidityRequestParcelMessage(parcel));

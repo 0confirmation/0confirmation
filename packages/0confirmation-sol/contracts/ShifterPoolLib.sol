@@ -46,7 +46,7 @@ library ShifterPoolLib {
   }
   function launchLiquidityToken(Isolate storage isolate, address token, string memory name, string memory symbol, uint8 decimals) internal returns (address) {
     require(isolate.tokenToLiquidityToken[token] == address(0x0), "already deployed liquidity token for target token");
-    address liquidityToken = address(new LiquidityToken(address(this), token, name, symbol, 8));
+    address liquidityToken = address(new LiquidityToken(address(this), token, name, symbol, decimals));
     isolate.tokenToLiquidityToken[token] = liquidityToken;
     return liquidityToken;
   }
@@ -54,16 +54,6 @@ library ShifterPoolLib {
     address retval = isolate.tokenToLiquidityToken[token];
     require(retval != address(0x0), "not a registered liquidity token");
     return retval;
-  }
-  function deriveProvisionHash(LiquidityProvisionMessage memory provision, bytes32 salt) internal pure returns (bytes32) {
-    return keccak256(abi.encodePacked(provision.amount, provision.timeoutExpiry, provision.nonce, salt));
-  }
-  function recoverAddressFromHash(bytes32 provisionHash, bytes memory signature) internal pure returns (address) {
-    return ECDSA.recover(provisionHash, signature);
-  }
-  function recoverAddress(LiquidityProvisionMessage memory provision, bytes32 salt) internal pure returns (address) {
-    bytes32 provisionHash = deriveProvisionHash(provision, salt);
-    return recoverAddressFromHash(provisionHash, provision.signature);
   }
   function lendLiquidity(Isolate storage isolate, address provider, address token, address target, uint256 amount) internal returns (bool) {
     if (!isolate.isKeeper[provider]) return false;

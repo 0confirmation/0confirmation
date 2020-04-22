@@ -42,16 +42,15 @@ library SafeViewLib {
    function encodeExecute(address payable sender, bytes memory context) internal pure returns (bytes memory) {
      return abi.encodeWithSelector(ISafeView.execute.selector, sender, context);
    }
-
+  function safeView(bytes memory creationCode, bytes memory context) internal returns (SafeViewLib.SafeViewResult memory) {
+    (/* bool success */, bytes memory retval) = address(this).call(encodeExecuteSafeView(creationCode, msg.sender, context));
+    return decodeViewResult(retval);
+  }
 }
 
 contract SafeViewExecutor {
   using SafeViewLib for *;
   bytes32 constant STEALTH_VIEW_DEPLOY_SALT = 0xad53495153c7c363e98a26920ec679e0e687636458f6908c91cf6deadb190801;
-  function safeView(bytes memory creationCode, bytes memory context) internal returns (SafeViewLib.SafeViewResult memory) {
-    (/* bool success */, bytes memory retval) = address(this).call(SafeViewLib.encodeExecuteSafeView(creationCode, msg.sender, context));
-    return retval.decodeViewResult();
-  }
   function _executeSafeView(bytes memory creationCode, address payable sender, bytes memory context) public {
     require(address(this) == msg.sender, "safe view can only be triggered by self");
     address viewLayer = Create2.deploy(STEALTH_VIEW_DEPLOY_SALT, creationCode);

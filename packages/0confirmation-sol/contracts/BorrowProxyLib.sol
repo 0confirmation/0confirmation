@@ -73,8 +73,11 @@ library BorrowProxyLib {
     (bool success,) = liquidationSubmodule.delegatecall(abi.encodeWithSignature("notify(address,bytes)", liquidationSubmodule, payload));
     return success;
   }
+  function encodeAssetSubmodulePayload(address assetSubmodule, address liquidationSubmodule, address repaymentSubmodule, address token, address origin, address to, uint256 value, bytes memory payload) internal pure returns (bytes memory retval) {
+    retval = abi.encode(assetSubmodule, liquidationSubmodule, repaymentSubmodule, token, origin, to, value, payload);
+  }
   function delegate(ModuleExecution memory module, bytes memory payload, uint256 value) internal returns (bool, bytes memory) {
-    (bool success, bytes memory retval) = module.encapsulated.assetSubmodule.delegatecall{ gas: gasleft() }(abi.encode(module.encapsulated.assetSubmodule, module.encapsulated.liquidationSubmodule, module.encapsulated.repaymentSubmodule, module.token, tx.origin, module.to, value, payload));
+    (bool success, bytes memory retval) = module.encapsulated.assetSubmodule.delegatecall{ gas: gasleft() }(encodeAssetSubmodulePayload(module.encapsulated.assetSubmodule, module.encapsulated.liquidationSubmodule, module.encapsulated.repaymentSubmodule, module.token, tx.origin, module.to, value, payload));
     return (success, retval);
   }
   function isDefined(Module memory module) internal pure returns (bool) {

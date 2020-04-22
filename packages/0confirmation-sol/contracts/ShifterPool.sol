@@ -15,6 +15,7 @@ import { LiquidityToken } from "./LiquidityToken.sol";
 import { SandboxLib } from "./SandboxLib.sol";
 
 contract ShifterPool is Ownable, ViewExecutor {
+  using SandboxLib for *;
   using ShifterPoolLib for *;
   using TokenUtils for *;
   using ShifterBorrowProxyLib for *;

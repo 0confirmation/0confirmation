@@ -1,8 +1,11 @@
 pragma solidity ^0.6.0;
 
 contract ViewExecutor {
+  function encodeExecuteQuery(address viewLogic, bytes memory payload) internal pure returns (bytes memory retval) {
+    retval = abi.encodeWithSignature("_executeQuery(address,bytes)", viewLogic, payload);
+  }
   function query(address viewLogic, bytes memory payload) public view returns (bytes memory) {
-    (bool success, bytes memory response) = viewLogic.staticcall(abi.encodeWithSignature("_executeQuery(address,bytes)", viewLogic, payload));
+    (bool success, bytes memory response) = viewLogic.staticcall(encodeExecuteQuery(viewLogic, payload));
     require(success, string(response));
     return response;
   }
