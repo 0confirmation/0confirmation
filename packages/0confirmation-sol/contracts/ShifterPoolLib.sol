@@ -44,9 +44,9 @@ library ShifterPoolLib {
     address token;
     address liqToken;
   }
-  function launchLiquidityToken(Isolate storage isolate, address token, string memory name, string memory symbol) internal returns (address) {
+  function launchLiquidityToken(Isolate storage isolate, address token, string memory name, string memory symbol, uint8 decimals) internal returns (address) {
     require(isolate.tokenToLiquidityToken[token] == address(0x0), "already deployed liquidity token for target token");
-    address liquidityToken = address(new LiquidityToken(address(this), token, name, symbol));
+    address liquidityToken = address(new LiquidityToken(address(this), token, name, symbol, 8));
     isolate.tokenToLiquidityToken[token] = liquidityToken;
     return liquidityToken;
   }

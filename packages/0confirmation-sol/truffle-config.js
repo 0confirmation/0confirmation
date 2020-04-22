@@ -21,6 +21,11 @@ module.exports = {
     kovan: {
       provider,
       network_id: '42'
+    },
+    ganache: {
+      host: 'localhost',
+      port: 8545,
+      network_id: '*'
     }
   }
 };

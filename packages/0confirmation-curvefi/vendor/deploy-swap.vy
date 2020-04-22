@@ -6,10 +6,10 @@ from web3.middleware import geth_poa_middleware
 from tests.deploy import deploy_contract
 import json
 
-USE_LENDING = [True, True]
+USE_LENDING = [False, False]
 TETHERED = [False, False]
 C_COINS = ['0x6D7F0754FFeb405d23C51CE938289d4835bE3b14', '0x5B281A6DdA0B271e91ae35DE655Ad301C976edb1']
-PRECISIONS = [10 ** 18, 10 ** 6]
+PRECISIONS = [10 ** 8, 10 ** 8]
 N_COINS = 2
 # Deployment parameters
 provider = Web3.HTTPProvider('https://mainnet.infura.io/v3/7d0d81d0919f4f05b9ab6634be01ee73')
