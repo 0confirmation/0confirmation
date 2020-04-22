@@ -107,6 +107,7 @@ class LiquidityRequest {
     token,
     nonce,
     amount,
+    forbidLoan,
     gasRequested
   }) {
     Object.assign(this, {
@@ -118,6 +119,7 @@ class LiquidityRequest {
       nonce,
       amount,
       zero,
+      forbidLoan,
       gasRequested
     });
     if (this.borrower) {
@@ -141,6 +143,7 @@ class LiquidityRequest {
       token: this.token,
       nonce: this.nonce,
       amount: this.amount,
+      forbidLoan: this.forbidLoan,
       actions: this.actions || [],
       gasRequested: this.gasRequested
     }), from || (await this.zero.driver.sendWrapped('eth_accounts', []))[0] ]);
@@ -162,6 +165,7 @@ class LiquidityRequestParcel extends LiquidityRequest {
     amount,
     gasRequested,
     borrower,
+    forbidLoan,
     proxyAddress,
     depositAddress,
     signature
@@ -175,6 +179,7 @@ class LiquidityRequestParcel extends LiquidityRequest {
       token,
       nonce,
       amount,
+      forbidLoan,
       gasRequested
     });
     this.signature = this.signature || signature;
@@ -202,6 +207,7 @@ class LiquidityRequestParcel extends LiquidityRequest {
       actions: this.actions,
       nonce: this.nonce,
       amount: this.amount,
+      forbidLoan: this.forbidLoan || false,
       gasRequested: this.gasRequested,
       signature: this.signature
     };
@@ -245,6 +251,7 @@ class DepositedLiquidityRequestParcel extends LiquidityRequestParcel {
     borrower,
     proxyAddress,
     depositAddress,
+    forbidLoan,
     signature,
     utxo
   }) {
@@ -261,6 +268,7 @@ class DepositedLiquidityRequestParcel extends LiquidityRequestParcel {
       borrower,
       proxyAddress,
       depositAddress,
+      forbidLoan,
       signature
     });
     this.utxo = utxo;
@@ -467,6 +475,7 @@ class Zero {
     amount,
     nonce,
     borrower,
+    forbidLoan,
     gasRequested,
     actions
   }) {
@@ -480,6 +489,7 @@ class Zero {
       amount,
       nonce,
       borrower,
+      forbidLoan,
       gasRequested
     });
   }
@@ -521,12 +531,14 @@ class Zero {
     amount,
     nonce,
     actions,
+    forbidLoan,
     gasRequested
   }) {
     const liquidityRequest = this.createLiquidityRequest({
       token,
       amount,
       nonce,
+      forbidLoan,
       actions: actions || [],
       gasRequested
     });
@@ -583,6 +595,7 @@ class Zero {
         amount,
         nonce,
         actions,
+        forbidLoan,
         gasRequested,
         signature
       }] = msg.data.params;
@@ -594,6 +607,7 @@ class Zero {
         shifterPool,
         actions,
         token,
+        forbidLoan,
         nonce,
         amount,
         gasRequested,
@@ -635,6 +649,7 @@ class Zero {
       gasRequested,
       signature,
       actions,
+      forbidLoan,
       borrower
     } = liquidityRequest;
     const contract = new Contract(this.network.shifterPool, filterABI(ShifterPool.abi), getProvider(this.driver).getSigner());
@@ -643,13 +658,14 @@ class Zero {
         borrower,
         token,
         nonce,
-        amount
+        amount,
+        forbidLoan,
+        actions: (actions || []).map((v) => ({
+          to: v.to,
+          txData: v.calldata
+        })),
       },
       gasRequested,
-      actions: (actions || []).map((v) => ({
-        to: v.to,
-        txData: v.calldata
-      })),
       signature
     }, bond, timeoutExpiry, Object.assign(overrides || {}, {
       value: '0x' + new BN(gasRequested).toString(16)
@@ -660,7 +676,6 @@ class Zero {
     this.network.borrowProxyCreationCode = await (new Contract(this.network.shifterPool, filterABI(ShifterPool.abi), getProvider(this.driver).getSigner())).getBorrowProxyCreationCode();
   }
   async initializeDriver() {
-    await utils.initializeCodeHash();
     await this.driver.initialize();
   }
 }
@@ -671,4 +686,4 @@ module.exports = Object.assign(Zero, {
   LiquidityRequestParcel,
   LiquidityRequest,
   DepositedLiquidityRequestParcel
-});
+}, utils);

@@ -42,6 +42,7 @@ const computeLiquidityRequestHash = ({
   nonce,
   amount,
   gasRequested,
+  forbidLoan = false,
   actions = []
 }) => solidityKeccak256([
   'address',
@@ -49,6 +50,7 @@ const computeLiquidityRequestHash = ({
   'bytes32',
   'uint256',
   'uint256',
+  'bool',
   'bytes'
 ], [
   shifterPool,
@@ -56,6 +58,7 @@ const computeLiquidityRequestHash = ({
   nonce,
   amount,
   gasRequested,
+  forbidLoan,
   encodeInitializationActions(actions)
 ]);
 
@@ -65,18 +68,24 @@ const computeBorrowProxyAddress = ({
   borrower,
   token,
   nonce,
-  amount
+  amount,
+  forbidLoan,
+  actions
 }) => {
   const salt = solidityKeccak256([
     'address',
     'address',
     'bytes32',
-    'uint256'
+    'uint256',
+    'bool',
+    'bytes'
   ], [
     borrower,
     token,
     nonce,
-    amount
+    amount,
+    forbidLoan,
+    encodeInitializationActions(actions)
   ]);
   const shifterBorrowProxyBytecode = link(ShifterBorrowProxy.bytecode, {
     BorrowProxyLib: borrowProxyLib || BorrowProxyLib.networks[42].address

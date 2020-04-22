@@ -40,17 +40,16 @@ library SandboxLib {
       mstore(trace, newSize)
     }
   }
-  function restrict(Context memory context) internal pure {
+  function _restrict(Context memory context) internal pure {
     _write(context.trace, 0);
   }
   function _grow(Context memory context) internal pure {
     ProtectedExecution[] memory trace = context.trace;
     uint256 newSize = trace.length;
-    _write(trace, newSize);
+    _write(trace, newSize + 1);
   }
   function toContext(bytes memory input) internal pure returns (Context memory context) {
     (context) = abi.decode(input, (Context));
-    restrict(context);
   }
   function toInitializationAction(bytes memory input) internal pure returns (ShifterBorrowProxyLib.InitializationAction memory action) {
     (action) = abi.decode(input, (ShifterBorrowProxyLib.InitializationAction));
@@ -69,12 +68,12 @@ library SandboxLib {
       }
     }
   }
-  function _shrink(ProtectedExecution[] memory trace) internal pure {
-    _write(trace, trace.length - 1);
+  function _shrink(Context memory context) internal pure {
+    _write(context.trace, context.trace.length - 1);
   }
   function computeAction(Context memory context) internal returns (bool) {
     ProtectedExecution memory execution = getCurrentExecution(context);
-    _shrink(context.trace);
+    _shrink(context);
     SafeViewLib.SafeViewResult memory result = execution.input.txData.safeView(encodeContext(context));
     _grow(context);
     execution.input.txData = new bytes(0);
@@ -91,6 +90,7 @@ library SandboxLib {
   }
   function processActions(address payable proxyAddress, ShifterBorrowProxyLib.InitializationAction[] memory actions) internal returns (Context memory) {
     Context memory context = toContext(actions);
+    _restrict(context);
     for (; context.pc < actions.length; context.pc++) {
       _grow(context);
       ProtectedExecution memory execution = getCurrentExecution(context);

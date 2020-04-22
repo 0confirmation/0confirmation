@@ -23,7 +23,7 @@ contract ShifterBorrowProxy is BorrowProxy {
     uint256 amount;
     if (!isolate.isRepaying) {
       isolate.isRepaying = true;
-      isolate.actualizedShift = amount = ShifterPool(isolate.masterAddress).getShifterHandler(parcel.record.request.token).shiftIn(parcel.pHash, parcel.record.request.amount, parcel.computeNHash(), parcel.darknodeSignature);
+      isolate.actualizedShift = amount = ShifterPool(isolate.masterAddress).getShifterHandler(parcel.record.request.token).mint(parcel.pHash, parcel.record.request.amount, parcel.computeNHash(), parcel.darknodeSignature);
       require(parcel.record.request.token.sendToken(address(liquidityToken), amount - fee), "token transfer failed");
     } else amount = isolate.actualizedShift;
     address[] memory set = isolate.repaymentSet.set;

@@ -116,7 +116,7 @@ const deploy = async () => {
   const erc20AdapterFactory = getFactory(ERC20Adapter);
   const { address: erc20Adapter } = await erc20AdapterFactory.deploy();
   const { address: uniswapAdapter } = await uniswapAdapterFactory.deploy(factory);
-  const { address: simpleBurnLiquidationModule } = await simpleBurnLiquidationModuleFactory.deploy(factory, zbtc);
+  const { address: simpleBurnLiquidationModule } = await simpleBurnLiquidationModuleFactory.deploy(factory);
   const liquidityTokenFactory = getFactory(LiquidityToken);
   const daiFactory = getFactory(ShifterERC20);
   const { address: dai } = await daiFactory.deploy();
@@ -127,7 +127,7 @@ const deploy = async () => {
   await (await daiContract.mint(keeperAddress, utils.parseUnits('100000', 8).toString())).wait();
   const zbtcExchange = await createMarket(ethersProvider, factory, zbtc);
   const daiExchange = await createMarket(ethersProvider, factory, dai, '73549.42');
-  const { address: zerobtc } = await liquidityTokenFactory.deploy(shifterPool, zbtc, 'zeroBTC', 'zeroBTC');
+  const { address: zerobtc } = await liquidityTokenFactory.deploy(shifterPool, zbtc, 'zeroBTC', 'zeroBTC', 8);
   const absorbFactory = getFactory(Absorb);
   const { address: absorb } = await absorbFactory.deploy();
   await ethersProvider.waitForTransaction((await shifterPoolContract.setup(shifterMock, '1000', ethers.utils.parseEther('0.01'), [{
@@ -413,7 +413,7 @@ describe('0confirmation sdk', () => {
       const sig = await deposited.waitForSignature();
       await logSheet(fixtures.contracts.zerobtc, 'renBTC pool before borrow', fixtures.contracts);
       try {
-        await deposited.executeBorrow(utils.parseUnits('1', 8).toString(), '100000');
+        console.log(await (await deposited.executeBorrow(utils.parseUnits('1', 8).toString(), '100000')).wait());
         deferred.resolve(await deposited.getBorrowProxy());
       } catch (e) {
         deferred.reject(e);

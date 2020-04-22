@@ -63,6 +63,7 @@ class ZeroBackend extends RPCWrapper {
           amount,
           nonce,
           actions,
+          forbidLoan,
           gasRequested,
           signature
         } = {}] = (params || []);
@@ -73,6 +74,7 @@ class ZeroBackend extends RPCWrapper {
             token,
             amount,
             actions,
+            forbidLoan,
             nonce,
             gasRequested,
             signature
