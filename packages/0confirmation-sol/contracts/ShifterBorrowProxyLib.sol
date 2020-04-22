@@ -19,6 +19,8 @@ library ShifterBorrowProxyLib {
     address token;
     bytes32 nonce;
     uint256 amount;
+    bool forbidLoan;
+    InitializationAction[] actions;
   }
   struct InitializationAction {
     address to;
@@ -33,7 +35,6 @@ library ShifterBorrowProxyLib {
   struct LiquidityRequestParcel {
     LiquidityRequest request;
     uint256 gasRequested;
-    InitializationAction[] actions;
     bytes signature;
   }
   struct LenderParams {
@@ -50,25 +51,20 @@ library ShifterBorrowProxyLib {
   function emitShifterBorrowProxyRepaid(address user, ProxyRecord memory record) internal {
     emit ShifterBorrowProxyRepaid(user, record);
   }
-  function triggerAction(InitializationAction memory action, address proxyAddress) internal returns (bool) {
-    (bool success, bytes memory retval) = proxyAddress.call{ gas: gasleft() }(abi.encodeWithSelector(BorrowProxy.proxy.selector, action.to, 0, action.txData));
-    if (!success) revert(RevertCaptureLib.decodeError(retval));
-    return success;
-  }
-  function triggerActions(InitializationAction[] memory actions, address proxyAddress) internal returns (bool) {
-    for (uint256 i = 0; i < actions.length; i++) {
-      if (!triggerAction(actions[i], proxyAddress)) return false;
-    }
-    return true;
+  function encodeBorrowerMessage(LiquidityRequest memory params) internal pure returns (bytes memory) {
+    return abi.encodePacked(params.borrower, params.token, params.nonce, params.amount, params.forbidLoan, encodeParcelActions(params.actions));
   }
   function computeBorrowerSalt(LiquidityRequest memory params) internal pure returns (bytes32) {
-    return keccak256(abi.encodePacked(params.borrower, params.token, params.nonce, params.amount));
+    return keccak256(encodeBorrowerMessage(params));
   }
   function encodeParcelActions(InitializationAction[] memory actions) internal pure returns (bytes memory) {
     return abi.encode(actions);
   }
+  function computeLiquidityRequestParcelMessage(LiquidityRequestParcel memory parcel) internal view returns (bytes memory) {
+    return abi.encodePacked(address(this), parcel.request.token, parcel.request.nonce, parcel.request.amount, parcel.gasRequested, parcel.forbidLoan, encodeParcelActions(parcel.actions));
+  }
   function computeLiquidityRequestHash(LiquidityRequestParcel memory parcel) internal view returns (bytes32) {
-    return keccak256(abi.encodePacked(address(this), parcel.request.token, parcel.request.nonce, parcel.request.amount, parcel.gasRequested, encodeParcelActions(parcel.actions)));
+    return keccak256(computeLiquidityRequestParcelMessage(parcel));
   }
   function validateSignature(LiquidityRequestParcel memory parcel, bytes32 hash) internal pure returns (bool) {
     return parcel.request.borrower == ECDSA.recover(ECDSA.toEthSignedMessageHash(hash), parcel.signature);

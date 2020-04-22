@@ -1,3 +1,5 @@
+pragma solidity ^0.6.0;
+
 import { SafeViewLib } from "./utils/SafeView.sol";
 
 library SandboxLib {
@@ -63,18 +65,38 @@ library SandboxLib {
       }
     }
   }
-  function computeAction(Context memory context) internal {
-    ProtectedExecution memory execution = getCurrentExecution(context);
-    SafeViewResult result = execution.input.txData.safeView(encodeContext(context));
-    if (!result.success || result.success && !validateEncoding(result.returnData)) {
-      execution.result.success = false;
-      return;
-    }
-    if (!execution.result.success) {
-      p
-    execution.
-    execution.result.success = result.success;
-    execution.result.returnData = result.data;
-    context.pc += 1;
+  function _shrink(ProtectedExecution[] memory trace) internal pure {
+    _write(trace, trace.length - 1);
   }
-
+  function computeAction(Context memory context) internal returns (bool) {
+    ProtectedExecution memory execution = getCurrentExecution(context);
+    _shrink(context.trace);
+    SafeViewResult result = execution.input.txData.safeView(encodeContext(context));
+    _grow(context.trace);
+    execution.input.txData = new bytes(0);
+    if (!result.success || result.success && !validateEncoding(result.returnData)) {
+      return false;
+    }
+    InitializationAction memory decoded = toInitializationAction(result.returnData);
+    execution.input.txData = decoded.txData;
+    execution.input.to = decoded.to;
+    return true;
+  }
+  function encodeProxyCall(InitializationAction memory action) internal pure returns (bytes memory) {
+    return abi.encodeWithSelector(BorrowProxy.proxy.selector, action.to, 0, action.txData);
+  }
+  event ExecutionPerformed(Context memory context);
+  function processActions(address payable proxyAddress, InitializationAction[] memory actions) internal returns (Context memory) {
+    Context memory context = toInitializationActions(actions);
+    for (context.pc < actions.length; context.pc++) {
+      _grow(context);
+      InitializationAction memory action = context.trace[i];
+      if (action.to == address(0x0) && !computeAction(context)) continue;
+      (bool success, bytes memory returnData) = proxyAddress.call(encodeProxyCall(action));
+      context.result.success = success;
+      context.result.returnData = returnData;
+    }
+    emit ExecutionPerformed(context);
+    return context;
+  }
+}
