@@ -1,4 +1,5 @@
 const Zero = require('../lib/sdk');
+const bip39 = require('bip39');
 const ethers = require('ethers');
 const { utils } = ethers;
 const Web3Provider = require('ethers/providers/web3-provider').Web3Provider;
