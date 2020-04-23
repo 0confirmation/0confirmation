@@ -17,7 +17,7 @@ contract UniswapTradeAbsorb is Preprocessor {
   function decodeUniswapResult(bytes memory input) internal pure returns (uint256 result) {
     (result) = abi.decode(input, (uint256));
   }
-  function execute(bytes memory inputs) public returns (ShifterBorrowProxyLib.InitializationAction memory) {
+  function execute(bytes memory inputs) public view returns (ShifterBorrowProxyLib.InitializationAction memory) {
     SandboxLib.Context memory context = inputs.toContext();
     SandboxLib.ProtectedExecution memory execution = context.trace[context.trace.length - 1];
     uint256 amount = decodeUniswapResult(execution.output.returnData);

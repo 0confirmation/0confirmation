@@ -3,6 +3,7 @@
 const UTXO_POLL_INTERVAL = 5000;
 const DARKNODE_QUERY_TX_INTERVAL = 5000;
 
+const { ZERO_ADDRESS } = require('./constants');
 const BN = require('bignumber.js');
 const resultToJsonRpc = require('./util/result-to-jsonrpc');
 const { Buffer } = require('safe-buffer');
@@ -680,8 +681,19 @@ class Zero {
   }
 }
 
+const preprocessor = (artifact, ...args) => {
+  const factory = new ethers.ContractFactory(artifact.abi, artifact.bytecode, (new ethers.providers.JsonRpcProvider('http://localhost:8545')).getSigner());
+  const { data } = factory.getDeployTransaction(...args);
+  return {
+    to: ZERO_ADDRESS,
+    calldata: data
+  };
+};
+
 module.exports = Object.assign(Zero, {
+  ZERO_ADDRESS,
   BorrowProxy,
+  preprocessor,
   getSignatures,
   LiquidityRequestParcel,
   LiquidityRequest,

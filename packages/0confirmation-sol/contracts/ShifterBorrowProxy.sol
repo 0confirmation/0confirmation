@@ -8,9 +8,12 @@ import { ILiquidationModule } from "./interfaces/ILiquidationModule.sol";
 import { TokenUtils } from "./utils/TokenUtils.sol";
 import { LiquidityToken } from "./LiquidityToken.sol";
 import { IERC20 } from "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
+import { SafeViewExecutor } from "./utils/SafeView.sol";
+import { SandboxLib } from "./SandboxLib.sol";
 
-contract ShifterBorrowProxy is BorrowProxy {
+contract ShifterBorrowProxy is BorrowProxy, SafeViewExecutor {
   using ShifterBorrowProxyLib for *;
+  using SandboxLib for *;
   using TokenUtils for *;
   constructor() BorrowProxy() public {}
   uint256 constant MINIMUM_GAS_CONTINUE = 5e5;
@@ -70,6 +73,10 @@ contract ShifterBorrowProxy is BorrowProxy {
       return true;
     }
     return false;
+  }
+  function receiveInitializationActions(ShifterBorrowProxyLib.InitializationAction[] memory actions) public returns (SandboxLib.Context memory context) {
+    require(msg.sender == address(isolate.masterAddress), "must be called from shifter pool");
+    context = actions.processActions();
   }
   fallback() external payable override {}
   receive() external payable override {}

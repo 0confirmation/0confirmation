@@ -7,8 +7,10 @@ import { AddressSetLib } from "./utils/AddressSetLib.sol";
 import { ExtLib } from "./utils/ExtLib.sol";
 import { RevertCaptureLib } from "./utils/RevertCaptureLib.sol";
 import { SandboxLib } from "./SandboxLib.sol";
+import { ModuleLib } from "./adapters/lib/ModuleLib.sol";
 
 library BorrowProxyLib {
+  using ModuleLib for *;
   struct ProxyIsolate {
     address masterAddress;
     bool unbound;
@@ -57,27 +59,43 @@ library BorrowProxyLib {
       registerModuleByAddress(registry, registration.target, registration.sigs[i], registration.module);
     }
   }
+  function encodeLiquidate(address liquidationSubmodule) internal pure returns (bytes memory retval) {
+    retval = abi.encodeWithSignature("liquidate(address)", liquidationSubmodule);
+  }
+  function decodeBool(bytes memory input) internal pure returns (bool retval) {
+    (retval) = abi.decode(input, (bool));
+  }
   function delegateLiquidate(address liquidationSubmodule) internal returns (bool) {
-    (bool success, bytes memory retval) = liquidationSubmodule.delegatecall(abi.encodeWithSignature("liquidate(address)", liquidationSubmodule));
+    (bool success, bytes memory retval) = liquidationSubmodule.delegatecall(encodeLiquidate(liquidationSubmodule));
     if (!success) revert(RevertCaptureLib.decodeError(retval));
-    (bool decoded) = abi.decode(retval, (bool));
-    return decoded;
+    return decodeBool(retval);
+  }
+  function encodeRepay(address repaymentSubmodule) internal pure returns (bytes memory retval) {
+    retval = abi.encodeWithSignature("repay(address)", repaymentSubmodule);
   }
   function delegateRepay(address repaymentSubmodule) internal returns (bool) {
-    (bool success, bytes memory retval) = repaymentSubmodule.delegatecall(abi.encodeWithSignature("repay(address)", repaymentSubmodule));
+    (bool success, bytes memory retval) = repaymentSubmodule.delegatecall(encodeRepay(repaymentSubmodule));
     if (!success) revert(RevertCaptureLib.decodeError(retval));
-    (bool decoded) = abi.decode(retval, (bool));
-    return decoded;
+    return decodeBool(retval);
+  }
+  function encodeNotify(address liquidationSubmodule, bytes memory payload) internal pure returns (bytes memory retval) {
+    retval = abi.encodeWithSignature("notify(address,bytes)", liquidationSubmodule, payload);
   }
   function delegateNotify(address liquidationSubmodule, bytes memory payload) internal returns (bool) {
-    (bool success,) = liquidationSubmodule.delegatecall(abi.encodeWithSignature("notify(address,bytes)", liquidationSubmodule, payload));
+    (bool success,) = liquidationSubmodule.delegatecall(encodeNotify(liquidationSubmodule, payload));
     return success;
   }
-  function encodeAssetSubmodulePayload(address assetSubmodule, address liquidationSubmodule, address repaymentSubmodule, address token, address origin, address to, uint256 value, bytes memory payload) internal pure returns (bytes memory retval) {
-    retval = abi.encode(assetSubmodule, liquidationSubmodule, repaymentSubmodule, token, origin, to, value, payload);
-  }
   function delegate(ModuleExecution memory module, bytes memory payload, uint256 value) internal returns (bool, bytes memory) {
-    (bool success, bytes memory retval) = module.encapsulated.assetSubmodule.delegatecall{ gas: gasleft() }(encodeAssetSubmodulePayload(module.encapsulated.assetSubmodule, module.encapsulated.liquidationSubmodule, module.encapsulated.repaymentSubmodule, module.token, tx.origin, module.to, value, payload));
+    (bool success, bytes memory retval) = module.encapsulated.assetSubmodule.delegatecall{ gas: gasleft() }(ModuleLib.AssetSubmodulePayload({
+      moduleAddress: address(uint160(module.encapsulated.assetSubmodule)),
+      liquidationSubmodule: module.encapsulated.liquidationSubmodule,
+      repaymentSubmodule: module.encapsulated.repaymentSubmodule,
+      token: address(uint160(module.token)),
+      txOrigin: tx.origin,
+      to: address(uint160(module.to)),
+      value: value,
+      callData: payload
+    }).encodeWithSelector());
     return (success, retval);
   }
   function isDefined(Module memory module) internal pure returns (bool) {
@@ -96,12 +114,18 @@ library BorrowProxyLib {
   function emitBorrowProxyMade(address user, address proxyAddress, bytes memory record, SandboxLib.Context memory context) internal {
     emit BorrowProxyMade(user, proxyAddress, record, context);
   }
+  function computeModuleKeyPreimage(address to, bytes4 signature) internal pure returns (bytes memory result) {
+    result = abi.encodePacked(to, signature);
+  }
   function computeModuleKey(address to, bytes4 signature) internal pure returns (bytes32) {
-    return keccak256(abi.encodePacked(to, signature));
+    return keccak256(computeModuleKeyPreimage(to, signature));
+  }
+  function computeCodeResolverKeyPreimage(bytes32 codehash, bytes4 signature) internal pure returns (bytes memory result) {
+    result = abi.encodePacked(codehash, signature);
   }
   function computeCodeResolverKey(address to, bytes4 signature) internal view returns (bytes32) {
     bytes32 exthash = ExtLib.getExtCodeHash(to);
-    return keccak256(abi.encodePacked(exthash, signature));
+    return keccak256(computeCodeResolverKeyPreimage(exthash, signature));
   }
   function resolveModule(ModuleRegistry storage registry, address to, bytes4 sig) internal view returns (Module memory) {
     Module memory module = registry.modules[computeCodeResolverKey(to, sig)];

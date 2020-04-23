@@ -77,7 +77,7 @@ library SandboxLib {
     SafeViewLib.SafeViewResult memory result = execution.input.txData.safeView(encodeContext(context));
     _grow(context);
     execution.input.txData = new bytes(0);
-    if (!result.success || result.success && !validateEncoding(result.data)) {
+    if (!result.success || result.success) { //&& !validateEncoding(result.data)) {
       return false;
     }
     ShifterBorrowProxyLib.InitializationAction memory decoded = toInitializationAction(result.data);
@@ -85,10 +85,10 @@ library SandboxLib {
     execution.input.to = decoded.to;
     return true;
   }
-  function encodeProxyCall(ShifterBorrowProxyLib.InitializationAction memory action) internal pure returns (bytes memory) {
-    return abi.encodeWithSelector(BorrowProxy.proxy.selector, action.to, 0, action.txData);
+  function encodeProxyCall(ShifterBorrowProxyLib.InitializationAction memory action) internal pure returns (bytes memory retval) {
+    retval = abi.encodeWithSelector(BorrowProxy.proxy.selector, action.to, 0, action.txData);
   }
-  function processActions(address payable proxyAddress, ShifterBorrowProxyLib.InitializationAction[] memory actions) internal returns (Context memory) {
+  function processActions(ShifterBorrowProxyLib.InitializationAction[] memory actions) internal returns (Context memory) {
     Context memory context = toContext(actions);
     _restrict(context);
     for (; context.pc < actions.length; context.pc++) {
@@ -96,7 +96,7 @@ library SandboxLib {
       ProtectedExecution memory execution = getCurrentExecution(context);
       ShifterBorrowProxyLib.InitializationAction memory action = execution.input;
       if (action.to == address(0x0) && !computeAction(context)) continue;
-      (bool success, bytes memory returnData) = proxyAddress.call(encodeProxyCall(action));
+      (bool success, bytes memory returnData) = address(this).call(encodeProxyCall(action));
       execution.output.success = success;
       execution.output.returnData = returnData;
     }

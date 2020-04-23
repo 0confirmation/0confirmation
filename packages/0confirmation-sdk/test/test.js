@@ -57,10 +57,11 @@ const fs = require('fs-extra');
 
 const ShifterPool = require('@0confirmation/sol/build/ShifterPool');
 const BorrowProxyLib = require('@0confirmation/sol/build/BorrowProxyLib');
+const shifterPoolInterface = new ethers.utils.Interface(ShifterPool.abi.concat(BorrowProxyLib.abi));
 const ShifterRegistryMock = require('@0confirmation/sol/build/ShifterRegistryMock');
 const UniswapAdapter = require('@0confirmation/sol/build/UniswapAdapter');
+const UniswapTradeAbsorb = require('@0confirmation/sol/build/UniswapTradeAbsorb');
 const SimpleBurnLiquidationModule = require('@0confirmation/sol/build/SimpleBurnLiquidationModule');
-const Absorb = require('@0confirmation/sol/build/Absorb');
 const LiquidityToken = require('@0confirmation/sol/build/LiquidityToken');
 const ShifterERC20 = require('@0confirmation/sol/build/ShifterERC20Mock');
 const ERC20Adapter = require('@0confirmation/sol/build/ERC20Adapter');
@@ -128,8 +129,6 @@ const deploy = async () => {
   const zbtcExchange = await createMarket(ethersProvider, factory, zbtc);
   const daiExchange = await createMarket(ethersProvider, factory, dai, '73549.42');
   const { address: zerobtc } = await liquidityTokenFactory.deploy(shifterPool, zbtc, 'zeroBTC', 'zeroBTC', 8);
-  const absorbFactory = getFactory(Absorb);
-  const { address: absorb } = await absorbFactory.deploy();
   await ethersProvider.waitForTransaction((await shifterPoolContract.setup(shifterMock, '1000', ethers.utils.parseEther('0.01'), [{
     moduleType: ModuleTypes.BY_CODEHASH,
     target: zbtcExchange,
@@ -159,26 +158,6 @@ const deploy = async () => {
       assetSubmodule: erc20Adapter,
       repaymentSubmodule: erc20Adapter,
       liquidationSubmodule: '0x' + Array(40).fill('0').join('')
-    }
-  }, {
-    moduleType: ModuleTypes.BY_ADDRESS,
-    target: '0x' + Array(39).fill('0').join('') + '1',
-    sigs: Zero.getSignatures(Absorb.abi),
-    module: {
-      isPrecompiled: true,
-      assetSubmodule: absorb,
-      repaymentSubmodule: '0x' + Array(40).fill('0').join(''),
-      liquidationSubmodule: simpleBurnLiquidationModule
-    }
-  }, {
-    moduleType: ModuleTypes.BY_ADDRESS,
-    target: '0x' + Array(39).fill('0').join('') + '1',
-    sigs: Zero.getSignatures(Absorb.abi),
-    module: {
-      isPrecompiled: true,
-      assetSubmodule: absorb,
-      repaymentSubmodule: '0x' + Array(40).fill('0').join(''),
-      liquidationSubmodule: simpleBurnLiquidationModule
     }
   }],
   [{
@@ -413,7 +392,8 @@ describe('0confirmation sdk', () => {
       const sig = await deposited.waitForSignature();
       await logSheet(fixtures.contracts.zerobtc, 'renBTC pool before borrow', fixtures.contracts);
       try {
-        console.log(await (await deposited.executeBorrow(utils.parseUnits('1', 8).toString(), '100000')).wait());
+        const receipt = await (await deposited.executeBorrow(utils.parseUnits('1', 8).toString(), '100000')).wait();
+        console.log(require('util').inspect(receipt.logs.map((v) => shifterPoolInterface.parseLog(v)), { colors: true, depth: 150 }));;
         deferred.resolve(await deposited.getBorrowProxy());
       } catch (e) {
         deferred.reject(e);
@@ -426,10 +406,7 @@ describe('0confirmation sdk', () => {
     const actions = [{
       to: fixtures.contracts.exchange,
       calldata: (new ethers.utils.Interface(filterABI(Exchange.abi))).functions.tokenToTokenSwapInput.encode([ utils.parseUnits('1.97', 8), '1', '1', String(Date.now() * 2), fixtures.contracts.dai ])
-    }, {
-      to: fixtures.contracts.dai,
-      calldata: (new ethers.utils.Interface(filterABI(ShifterERC20.abi))).functions.transfer.encode([ TRANSFER_TARGET, utils.parseUnits('7349.42', 8) ]) 
-    }];
+    }, Zero.preprocessor(UniswapTradeAbsorb, borrowerAddress)];
     const liquidityRequest = fixtures.borrower.createLiquidityRequest({
       token: fixtures.contracts.zbtc,
       amount: utils.parseUnits('2', 8).toString(),
@@ -461,6 +438,7 @@ describe('0confirmation sdk', () => {
     await (await proxy.repayLoan({ gasLimit: ethers.utils.hexlify(6e6) })).wait();
     await logSheet(fixtures.contracts.zerobtc, 'renBTC pool after repayment', fixtures.contracts);
     await logSheet(TRANSFER_TARGET, 'target of transfer after repayment', fixtures.contracts);
+    await logSheet(liquidityRequestParcel.proxyAddress, 'proxy address after repayment', fixtures.contracts);
     await fixtures.keeper.stopListeningForLiquidityRequests();
   });
 });

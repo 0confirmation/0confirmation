@@ -1,6 +1,7 @@
 pragma solidity ^0.6.0;
 
 import { ECDSA } from "openzeppelin-solidity/contracts/cryptography/ECDSA.sol";
+import { TokenUtils } from "./utils/TokenUtils.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { BorrowProxyLib } from "./BorrowProxyLib.sol";
 import { IShifter } from "./interfaces/IShifter.sol";
@@ -10,6 +11,7 @@ import { ShifterBorrowProxyLib } from "./ShifterBorrowProxyLib.sol";
 
 library ShifterPoolLib {
   using BorrowProxyLib for *;
+  using TokenUtils for *;
   using SafeMath for *;
   struct Isolate {
     address shifterRegistry;
@@ -57,8 +59,7 @@ library ShifterPoolLib {
   }
   function lendLiquidity(Isolate storage isolate, address provider, address token, address target, uint256 amount) internal returns (bool) {
     if (!isolate.isKeeper[provider]) return false;
-    (bool success,) = token.call(abi.encodeWithSignature("transferFrom(address,address,uint256)", provider, target, amount));
-    return success;
+    return token.transferTokenFrom(provider, target, amount);
   }
   function getShifter(Isolate storage isolate, address token) internal view returns (IShifter) {
     return IShifterRegistry(isolate.shifterRegistry).getShifterByToken(token);

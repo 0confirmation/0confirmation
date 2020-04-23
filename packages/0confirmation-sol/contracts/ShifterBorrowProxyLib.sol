@@ -26,8 +26,8 @@ library ShifterBorrowProxyLib {
     address to;
     bytes txData;
   }
-  function encodeProxyRecord(ProxyRecord memory record) internal pure returns (bytes memory) {
-    return abi.encode(record);
+  function encodeProxyRecord(ProxyRecord memory record) internal pure returns (bytes memory result) {
+    result = abi.encode(record);
   }
   function decodeProxyRecord(bytes memory record) internal pure returns (ProxyRecord memory result) {
     (result) = abi.decode(record, (ProxyRecord));
@@ -51,20 +51,28 @@ library ShifterBorrowProxyLib {
   function emitShifterBorrowProxyRepaid(address user, ProxyRecord memory record) internal {
     emit ShifterBorrowProxyRepaid(user, record);
   }
-  function encodeBorrowerMessage(LiquidityRequest memory params) internal pure returns (bytes memory) {
-    return abi.encodePacked(params.borrower, params.token, params.nonce, params.amount, params.forbidLoan, encodeParcelActions(params.actions));
+  function encodeBorrowerMessage(LiquidityRequest memory params, bytes memory parcelActionsEncoded) internal pure returns (bytes memory result) {
+    result = abi.encodePacked(params.borrower, params.token, params.nonce, params.amount, params.forbidLoan, parcelActionsEncoded);
   }
-  function computeBorrowerSalt(LiquidityRequest memory params) internal pure returns (bytes32) {
-    return keccak256(encodeBorrowerMessage(params));
+  function computeBorrowerSalt(LiquidityRequest memory params) internal pure returns (bytes32 result) {
+    result = keccak256(computeBorrowerSaltPreimage(params));
   }
-  function encodeParcelActions(InitializationAction[] memory actions) internal pure returns (bytes memory) {
-    return abi.encode(actions);
+  function computeBorrowerSaltPreimage(LiquidityRequest memory params) internal pure returns (bytes memory result) {
+    bytes memory parcelActionsEncoded = encodeParcelActions(params.actions);
+    result = encodeBorrowerMessage(params, parcelActionsEncoded);
   }
-  function computeLiquidityRequestParcelMessage(LiquidityRequestParcel memory parcel) internal view returns (bytes memory) {
-    return abi.encodePacked(address(this), parcel.request.token, parcel.request.nonce, parcel.request.amount, parcel.gasRequested, parcel.request.forbidLoan, encodeParcelActions(parcel.request.actions));
+  function encodeParcelActions(InitializationAction[] memory actions) internal pure returns (bytes memory retval) {
+    retval = abi.encode(actions);
   }
-  function computeLiquidityRequestHash(LiquidityRequestParcel memory parcel) internal view returns (bytes32) {
-    return keccak256(computeLiquidityRequestParcelMessage(parcel));
+  function computeLiquidityRequestParcelMessage(LiquidityRequestParcel memory parcel, bytes memory parcelActionsEncoded) internal view returns (bytes memory retval) {
+    retval = abi.encodePacked(address(this), parcel.request.token, parcel.request.nonce, parcel.request.amount, parcel.gasRequested, parcel.request.forbidLoan, parcelActionsEncoded);
+  }
+  function computeLiquidityRequestPreimage(LiquidityRequestParcel memory parcel) internal view returns (bytes memory result) {
+    bytes memory parcelActionsEncoded = encodeParcelActions(parcel.request.actions);
+    result = computeLiquidityRequestParcelMessage(parcel, parcelActionsEncoded);
+  }
+  function computeLiquidityRequestHash(LiquidityRequestParcel memory parcel) internal view returns (bytes32 result) {
+    result = keccak256(computeLiquidityRequestPreimage(parcel));
   }
   function validateSignature(LiquidityRequestParcel memory parcel, bytes32 hash) internal pure returns (bool) {
     return parcel.request.borrower == ECDSA.recover(ECDSA.toEthSignedMessageHash(hash), parcel.signature);
@@ -79,8 +87,11 @@ library ShifterBorrowProxyLib {
   function decodeTriggerParcel(bytes memory parcel) internal pure returns (TriggerParcel memory result) {
     (result) = abi.decode(parcel, (TriggerParcel));
   }
+  function encodeNPreimage(TriggerParcel memory parcel) internal pure returns (bytes memory result) {
+    result = abi.encodePacked(parcel.record.request.nonce, parcel.txhash, parcel.vout);
+  }
   function computeNHash(TriggerParcel memory parcel) internal pure returns (bytes32) {
-    return keccak256(abi.encodePacked(parcel.record.request.nonce, parcel.txhash, parcel.vout));
+    return keccak256(encodeNPreimage(parcel));
   }
   function computePostFee(ProxyRecord memory record) internal pure returns (uint256) {
     return record.request.amount.sub(computePoolFee(record).add(computeKeeperFee(record)));

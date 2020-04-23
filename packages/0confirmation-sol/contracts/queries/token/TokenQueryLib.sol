@@ -1,6 +1,13 @@
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
+import { ERC20Detailed } from "openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol";
+import { IERC20 } from "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
+
+interface MissingERC20 {
+  function allowance(address, address) external view returns (uint256);
+}
+
 library TokenQueryLib {
   struct DataResult {
     bool success;
@@ -29,8 +36,11 @@ library TokenQueryLib {
       value: value
     });
   }
+  function encodeDecimals() internal pure returns (bytes memory retval) {
+    retval = abi.encodePacked(ERC20Detailed.decimals.selector);
+  }
   function queryDecimals(address payable token) internal returns (DataResult memory) {
-    return callToken(token, abi.encodeWithSignature("decimals()"));
+    return callToken(token, encodeDecimals());
   }
   function executeQuery(TokenQueryPayload memory payload) internal returns (TokenQueryResult memory result) {
     result.name = queryName(payload.token);
@@ -45,19 +55,31 @@ library TokenQueryLib {
       result.approvalQueryResults[i] = queryApproval(payload.approvalQueries[i], payload.token);
     }
   }
-  function encodeResult(TokenQueryResult[] memory result) internal pure returns (bytes memory) {
-    return abi.encode(result);
+  function encodeResult(TokenQueryResult[] memory input) internal pure returns (bytes memory result) {
+    result = abi.encode(input);
+  }
+  function encodeBalanceOf(address user) internal pure returns (bytes memory retval) {
+    retval = abi.encodeWithSelector(IERC20.balanceOf.selector, user);
   }
   function queryBalance(address token, address user) internal returns (DataResult memory) {
-    return callToken(token, abi.encodeWithSignature("balanceOf(address)", user));
+    return callToken(token, encodeBalanceOf(user));
+  }
+  function encodeSymbol() internal pure returns (bytes memory retval) {
+    retval = abi.encodePacked(ERC20Detailed.symbol.selector);
   }
   function querySymbol(address token) internal returns (DataResult memory) {
-    return callToken(token, abi.encodeWithSignature("symbol()"));
+    return callToken(token, encodeSymbol());
+  }
+  function encodeName() internal pure returns (bytes memory retval) {
+    retval = abi.encodePacked(ERC20Detailed.symbol.selector);
   }
   function queryName(address token) internal returns (DataResult memory) {
-    return callToken(token, abi.encodeWithSignature("name()"));
+    return callToken(token, encodeName());
+  }
+  function encodeApproval(address source, address target) internal pure returns (bytes memory retval) {
+    retval = abi.encodeWithSelector(MissingERC20.allowance.selector, source, target);
   }
   function queryApproval(ApprovalQueryPayload memory query, address token) internal returns (DataResult memory) {
-    return callToken(token, abi.encodeWithSignature("approved(address,address)", query.sourceAddress, query.targetAddress));
+    return callToken(token, encodeApproval(query.sourceAddress, query.targetAddress));
   }
 }

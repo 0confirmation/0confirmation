@@ -3,6 +3,10 @@ pragma experimental ABIEncoderV2;
 
 import { SliceLib } from "../../utils/SliceLib.sol";
 
+interface IModule {
+  function handle(ModuleLib.AssetSubmodulePayload calldata) external payable;
+}
+
 library ModuleLib {
   address payable constant ETHER_ADDRESS = 0x0000000000000000000000000000000000000000;
   function GET_ETHER_ADDRESS() internal pure returns (address payable) {
@@ -25,18 +29,8 @@ library ModuleLib {
     uint256 value;
     bytes callData;
   }
-  function decodeAssetSubmodulePayload(bytes memory payload) internal pure returns (AssetSubmodulePayload memory) {
-    (address payable moduleAddress, address liquidationSubmodule, address repaymentSubmodule, address payable token, address payable txOrigin, address payable to, uint256 value, bytes memory callData) = abi.decode(payload, (address, address, address, address, address, address, uint256, bytes));
-    return AssetSubmodulePayload({
-      moduleAddress: moduleAddress,
-      liquidationSubmodule: liquidationSubmodule,
-      repaymentSubmodule: repaymentSubmodule,
-      token: token,
-      txOrigin: txOrigin,
-      to: to,
-      value: value,
-      callData: callData
-    });
+  function encodeWithSelector(AssetSubmodulePayload memory input) internal pure returns (bytes memory result) {
+    result = abi.encodeWithSelector(IModule.handle.selector, input);
   }
   function bubbleResult(bool success, bytes memory retval) internal pure {
     assembly {

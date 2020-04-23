@@ -22,11 +22,9 @@ contract UniswapAdapter {
   function getExternalIsolateHandler() external payable returns (UniswapAdapterLib.ExternalIsolate memory) {
     return UniswapAdapterLib.getIsolatePointer(address(this));
   }
-  receive() payable external {
-    // no impl
-  }
-  fallback() payable external {
-    ModuleLib.AssetSubmodulePayload memory payload = msg.data.decodeAssetSubmodulePayload();
+  fallback() external payable {}
+  receive() external payable {}
+  function handle(ModuleLib.AssetSubmodulePayload memory payload) public payable {
     (/* IUniswapFactory factory */, address tokenAddress) = UniswapAdapterLib.validateExchange(payload.moduleAddress, payload.to);
     (bytes4 sig, bytes memory args) = payload.callData.splitPayload();
     address newToken;
@@ -48,24 +46,26 @@ contract UniswapAdapter {
     } else if (sig == IUniswapExchange.tokenToEthSwapInput.selector) {
       UniswapAdapterLib.TokenToEthSwapInputInputs memory inputs = args.decodeTokenToEthSwapInputInputs();
       require(tokenAddress.approveForMaxIfNeeded(payload.to), "approval of token failed");
-      payload.callData = abi.encodeWithSelector(IUniswapExchange.tokenToEthTransferInput.selector, inputs.tokens_sold, inputs.min_eth, inputs.deadline, UniswapAdapterLib.computeForwarderAddress());
+      payload.callData = inputs.addRecipient(UniswapAdapterLib.computeForwarderAddress()).encodeWithSelector();
       usedForwarder = true;
     } else if (sig == IUniswapExchange.tokenToEthSwapOutput.selector) {
       UniswapAdapterLib.TokenToEthSwapOutputInputs memory inputs = args.decodeTokenToEthSwapOutputInputs();
       require(tokenAddress.approveForMaxIfNeeded(payload.to), "approval of token failed");
-      payload.callData = abi.encodeWithSelector(IUniswapExchange.tokenToEthTransferOutput.selector, inputs.eth_bought, inputs.max_tokens, inputs.deadline, UniswapAdapterLib.computeForwarderAddress());
+      payload.callData = inputs.addRecipient(UniswapAdapterLib.computeForwarderAddress()).encodeWithSelector();
       usedForwarder = true;
     } else if (sig == IUniswapExchange.tokenToEthTransferInput.selector) {
       UniswapAdapterLib.TokenToEthTransferInputInputs memory inputs = args.decodeTokenToEthTransferInputInputs();
       require(inputs.recipient == address(this), "recipient must be borrow proxy");
       require(tokenAddress.approveForMaxIfNeeded(payload.to), "approval of token failed");
-      payload.callData = abi.encodeWithSelector(IUniswapExchange.tokenToEthTransferInput.selector, inputs.tokens_sold, inputs.min_eth, inputs.deadline, UniswapAdapterLib.computeForwarderAddress());
+      inputs.recipient = UniswapAdapterLib.computeForwarderAddress();
+      payload.callData = inputs.encodeWithSelector();
       usedForwarder = true;
     } else if (sig == IUniswapExchange.tokenToEthTransferOutput.selector) {
       UniswapAdapterLib.TokenToEthTransferOutputInputs memory inputs = args.decodeTokenToEthTransferOutputInputs();
       require(inputs.recipient == address(this), "recipient must be borrow proxy");
       require(tokenAddress.approveForMaxIfNeeded(payload.to), "approval of token failed");
-      payload.callData = abi.encodeWithSelector(IUniswapExchange.tokenToEthTransferOutput.selector, inputs.eth_bought, inputs.max_tokens, inputs.deadline, UniswapAdapterLib.computeForwarderAddress());
+      inputs.recipient = UniswapAdapterLib.computeForwarderAddress();
+      payload.callData = inputs.encodeWithSelector();
       usedForwarder = true;
     } else if (sig == IUniswapExchange.tokenToTokenSwapInput.selector) {
       UniswapAdapterLib.TokenToTokenSwapInputInputs memory inputs = args.decodeTokenToTokenSwapInputInputs();
@@ -113,7 +113,7 @@ contract UniswapAdapter {
       // this stub exists but the transaction will always revert since removeLiquidity cannot send to contracts .. or can it?
       newToken = IUniswapExchange(payload.to).tokenAddress();
     } else revert("unsupported contract call");
-    if (newToken != address(0x0)) require(payload.liquidationSubmodule.delegateNotify(abi.encode(newToken)), "liquidation module notification failure");
+    if (newToken != address(0x0)) require(payload.liquidationSubmodule.delegateNotify(newToken.encodeLiquidationNotify()), "liquidation module notification failure");
     (bool success, bytes memory retval) = payload.to.call{ gas: gasleft(), value: payload.value }(payload.callData);
     if (usedForwarder) UniswapAdapterLib.callForwarder(address(this), address(uint160(newToken)));
     ModuleLib.bubbleResult(success, retval);

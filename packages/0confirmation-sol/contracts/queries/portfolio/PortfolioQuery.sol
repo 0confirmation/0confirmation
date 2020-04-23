@@ -10,9 +10,9 @@ import { QueryLib } from "../lib/QueryLib.sol";
 contract PortfolioQuery {
   using QueryLib for *;
   event PortfolioQueryExport(PortfolioReaderViewLib.PortfolioEntry[] exported);
-  constructor(address payable borrowProxy, address moduleAddress, TokenQueryLib.TokenQueryPayload memory query) public {
+  constructor(address payable borrowProxy, bytes memory query) public {
     address viewLayer = address(new PortfolioReaderView());
-    bytes memory result = BorrowProxy(borrowProxy).query(viewLayer, abi.encodeWithSelector(PortfolioReaderView.render.selector, moduleAddress, query));
+    bytes memory result = BorrowProxy(borrowProxy).query(viewLayer, abi.encodePacked(PortfolioReaderView.render.selector, query));
     result.returnBytes();
   }
 }

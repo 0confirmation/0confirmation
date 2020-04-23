@@ -41,7 +41,6 @@ library TokenUtils {
   function getApproved(address token, address source, address target) internal returns (uint256) {
     (bool success, bytes memory retval) = token.call(encodeAllowance(source, target));
     if (!success || retval.length != 0x20) return 0x1;
-    (uint256 result) = abi.decode(retval, (uint256));
-    return result;
+    return decodeUint(retval);
   }
 }

@@ -7,6 +7,7 @@ import { IShifter } from "./interfaces/IShifter.sol";
 import { ShifterPoolLib } from "./ShifterPoolLib.sol";
 import { ShifterBorrowProxyLib } from "./ShifterBorrowProxyLib.sol";
 import { ShifterBorrowProxyFactoryLib } from "./ShifterBorrowProxyFactoryLib.sol";
+import { ShifterBorrowProxy } from "./ShifterBorrowProxy.sol";
 import { BorrowProxy } from "./BorrowProxy.sol";
 import { BorrowProxyLib } from "./BorrowProxyLib.sol";
 import { TokenUtils } from "./utils/TokenUtils.sol";
@@ -60,7 +61,7 @@ contract ShifterPool is Ownable, ViewExecutor {
     require(liquidityRequest.token.transferTokenFrom(msg.sender, address(this), bond), "bond submission failed");
     require(borrowerSalt.deployBorrowProxy() == proxyAddress, "proxy deployment failed");
     require(BorrowProxy(proxyAddress).setup(liquidityRequest.borrower, liquidityRequest.token), "setup phase failure");
-    SandboxLib.Context memory context = proxyAddress.processActions(liquidityRequest.actions);
+    SandboxLib.Context memory context = ShifterBorrowProxy(proxyAddress).receiveInitializationActions(liquidityRequest.actions);
     BorrowProxyLib.emitBorrowProxyMade(liquidityRequest.borrower, proxyAddress, data, context);
   }
   function validateProxyRecordHandler(bytes memory proxyRecord) public view returns (bool) {
