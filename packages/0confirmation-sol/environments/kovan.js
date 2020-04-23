@@ -4,6 +4,11 @@ const RenJS = require('@renproject/ren').default;
 delete global._bitcore;
 delete global._bitcoreCash;
 const testnet = new RenJS('testnet');
+const BorrowProxyLib = require('@0confirmation/sol/build/BorrowProxyLib');
+const ShifterPool = require('@0confirmation/sol/build/ShifterPool');
+const ZeroBTC = require('@0confirmation/sol/build/LiquidityToken');
+
+const getAddress = (artifact) => artifact.networks[42].address;
 
 module.exports = {
   factory: "0xD3E51Ef092B2845f10401a0159B2B96e8B6c3D30",
@@ -13,8 +18,8 @@ module.exports = {
   shifterRegistry: testnet.network.contracts.addresses.shifter.ShifterRegistry.address,
   mpkh: testnet.network.contracts.renVM.mpkh,
   linkReferences: {
-    BorrowProxyLib: '0xB386FDe324aDc8cE143D2314FecA316a0686331F'
+    BorrowProxyLib: getAddress(BorrowProxyLib)
   },
-  shifterPool: '0xbC309534196bC6874414E6f3b9D12D6c82f7111a',
-  zeroBTC: '0xad980C650213672389998865C79f30255794Dd37'
+  shifterPool: getAddress(ShifterPool),
+  zeroBTC: getAddress(ZeroBTC)
 };
