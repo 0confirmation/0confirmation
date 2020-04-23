@@ -47,6 +47,9 @@ const { linkBytecode: link } = require('solc/linker');
 const filterABI = (abi) => abi.filter((v) => v.type !== 'receive');
 const getFactory = (artifact, linkReferences) => new ethers.ContractFactory(filterABI(artifact.abi), linkReferences ? link(artifact.bytecode, linkReferences) : artifact.bytecode, ethersProvider.getSigner());
 
+const resultToJsonRpc = require('../lib/util/result-to-jsonrpc');
+
+
 const Factory = {
   abi: require('contracts-vyper/abi/uniswap_factory'),
   bytecode: fs.readFileSync(require.resolve('contracts-vyper/bytecode/factory.txt'), 'utf8').trim()
@@ -156,6 +159,50 @@ const deploy = async () => {
   };
 };
       
+const RPCWrapper = require('../lib/util/rpc-wrapper');
+
+const mockBtcBackend = {
+  name: 'btc',
+  prefixes: ['btc'],
+  async send({
+    method,
+    params,
+    id
+  }) {
+    return await resultToJsonRpc(id, () => [{
+      output_no: 1,
+      txid: crypto.randomBytes(32).toString('hex')
+    }]);
+  }
+};
+
+mockBtcBackend.__proto__ = RPCWrapper.prototype;
+
+const mockRenVMBackend = {
+  name: 'renvm',
+  prefixes: ['ren'],
+  async send({
+    method,
+    params,
+    id
+  }) {
+    if (method === 'ren_submitTx') return resultToJsonRpc(id, () => ({}));
+    else if (method === 'ren_queryTx') return resultToJsonRpc(id, () => ({
+      tx: {
+        out: [{
+          value: '0x' + crypto.randomBytes(32).toString('hex')
+        }, {
+          value: '0x' + crypto.randomBytes(32).toString('hex')
+        }, {
+          value: 27
+        }]
+      }
+    }));
+    return {};
+  }
+};
+
+mockRenVMBackend.__proto__ = RPCWrapper.prototype;
 
 
 const makeZero = async (contracts, provider) => {
