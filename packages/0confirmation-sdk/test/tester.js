@@ -9,6 +9,7 @@ const hdkey = require('ethereumjs-wallet/hdkey');
 const hdwallet = hdkey.fromMasterSeed(seed);
 const { promisify } = require('bluebird');
 const privateKeys = Array(10).fill(null).map((_, i) => hdwallet.derivePath("m/44'/60'/0'/0/" + String(i)).getWallet().getPrivateKeyString());
+const fs = require('fs-extra');
 
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 const ganache = require('ganache-cli');
