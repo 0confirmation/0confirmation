@@ -7,6 +7,7 @@ const { utils } = ethers;
 const Web3Provider = require('ethers/providers/web3-provider').Web3Provider;
 const seed = bip39.mnemonicToSeed(mnemonic);
 const hdkey = require('ethereumjs-wallet/hdkey');
+const timeout = (n) => new Promise((resolve) => setTimeout(resolve, n));
 const hdwallet = hdkey.fromMasterSeed(seed);
 const ModuleTypes = {
   BY_CODEHASH: 1,
