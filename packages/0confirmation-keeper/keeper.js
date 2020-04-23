@@ -48,7 +48,7 @@ const getEnvironment = (network) => {
             network: 'testnet'
           },
           zero: {
-            network,
+            multiaddr: 'lendnet',
             dht: true
           }
         },
@@ -77,11 +77,9 @@ console.logKeeper = (v) => console.logBold(chalk.magenta('keeper: ') + v);
 (async () => {
   const network = process.env.NETWORK;
   const env = getEnvironment(network);
-  const zero = await makeZero(process.env.NETWORK);
-  const [ from ] = await zero.sendWrapped('eth_accounts', []);
-  console.log('using address: ' + from);
+  const zero = await makeZero(env);
   console.log('approving shifter pool for bonds');
-  await (await zero.approvePool(env.renbtc)).wait();
+//  await (await zero.approvePool(env.renbtc)).wait();
   console.log('approved!');
   zero.listenForLiquidityRequests(async (v) => {
     console.logBold('received liquidity request over libp2p!');
