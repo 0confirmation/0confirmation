@@ -24,7 +24,9 @@ const ganacheInstance = process.env.EXTERNAL_GANACHE ? 'http://localhost:8545' :
   gasLimit: '100000000'
 });
 const provider = new HDWalletProvider(key, ganacheInstance);
-
+provider._key = key;
+const borrowerProvider = new HDWalletProvider(require('crypto').randomBytes(32).toString('hex'), ganacheInstance)
+borrowerProvider._key = privateKeys[1].substr(2);
 
 
 const ethersProvider = new Web3Provider(provider);
