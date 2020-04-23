@@ -2,6 +2,20 @@ const Zero = require('../lib/sdk');
 const ethers = require('ethers');
 const { utils } = ethers;
 const Web3Provider = require('ethers/providers/web3-provider').Web3Provider;
+const seed = bip39.mnemonicToSeed(mnemonic);
+const hdkey = require('ethereumjs-wallet/hdkey');
+const hdwallet = hdkey.fromMasterSeed(seed);
+const { promisify } = require('bluebird');
+const privateKeys = Array(10).fill(null).map((_, i) => hdwallet.derivePath("m/44'/60'/0'/0/" + String(i)).getWallet().getPrivateKeyString());
+
+const HDWalletProvider = require('@truffle/hdwallet-provider');
+const ganache = require('ganache-cli');
+const key = privateKeys[0].substr(2);
+const ganacheInstance = process.env.EXTERNAL_GANACHE ? 'http://localhost:8545' : ganache.provider({
+  mnemonic,
+  gasLimit: '100000000'
+});
+const provider = new HDWalletProvider(key, ganacheInstance);
 
 
 
