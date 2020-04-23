@@ -1,5 +1,6 @@
 const Zero = require('../lib/sdk');
 const bip39 = require('bip39');
+const mnemonic = process.env.MNEMONIC || bip39.generateMnemonic();
 const ethers = require('ethers');
 const { utils } = ethers;
 const Web3Provider = require('ethers/providers/web3-provider').Web3Provider;
