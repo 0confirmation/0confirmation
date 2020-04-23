@@ -35,7 +35,6 @@ const makeZero = async (contracts, provider) => {
 
 async function generatebtcaddress (){
 	  const fixtures = {};
-      before(async () => {
     await startSignalingServer();
     fixtures.contracts = await deploy();
     const [ borrower, keeper ] = await Promise.all([
@@ -49,8 +48,7 @@ async function generatebtcaddress (){
     await (await fixtures.keeper.approveLiquidityToken(fixtures.contracts.zbtc)).wait();
     await (await fixtures.keeper.addLiquidity(fixtures.contracts.zbtc, utils.parseUnits('5', 8).toString())).wait();
     await (await fixtures.keeper.approvePool(fixtures.contracts.zbtc)).wait();
-  })
-
+ 
     const liquidityRequest = fixtures.borrower.createLiquidityRequest({
       token: fixtures.contracts.zbtc,
       amount: utils.parseUnits('2', 8).toString(),
