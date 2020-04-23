@@ -45,14 +45,20 @@ library SafeViewLib {
     (/* bool success */, bytes memory retval) = address(this).call(encodeExecuteSafeView(creationCode, context));
     return decodeViewResult(retval);
   }
+  bytes32 constant STEALTH_VIEW_DEPLOY_SALT = 0xad53495153c7c363e98a26920ec679e0e687636458f6908c91cf6deadb190801;
+  function GET_STEALTH_VIEW_DEPLOY_SALT() internal pure returns (bytes32) {
+    return STEALTH_VIEW_DEPLOY_SALT;
+  }
+  function deriveViewAddress(bytes memory creationCode) internal view returns (address) {
+    return Create2.computeAddress(STEALTH_VIEW_DEPLOY_SALT, keccak256(creationCode));
+  }
 }
 
 contract SafeViewExecutor {
   using SafeViewLib for *;
   bytes32 constant STEALTH_VIEW_DEPLOY_SALT = 0xad53495153c7c363e98a26920ec679e0e687636458f6908c91cf6deadb190801;
   function _executeSafeView(bytes memory creationCode, bytes memory context) public {
-    require(address(this) == msg.sender, "safe view can only be triggered by self");
-    address viewLayer = Create2.deploy(STEALTH_VIEW_DEPLOY_SALT, creationCode);
+    address viewLayer = Create2.deploy(SafeViewLib.GET_STEALTH_VIEW_DEPLOY_SALT(), creationCode);
     bytes memory result = viewLayer.executeLogic(context).encodeResult();
     (bool success,) = viewLayer.call(SafeViewLib.encodeDestroy());
     if (success) {} // ignore compiler warning?

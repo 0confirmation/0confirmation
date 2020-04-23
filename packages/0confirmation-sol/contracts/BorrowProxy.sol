@@ -10,13 +10,13 @@ import { IBorrowProxyController } from "./interfaces/IBorrowProxyController.sol"
 import { AddressSetLib } from "./utils/AddressSetLib.sol";
 import { ModuleLib } from "./adapters/lib/ModuleLib.sol";
 
-contract BorrowProxy is ViewExecutor {
+contract BorrowProxy {
   using SliceLib for *;
   using BorrowProxyLib for *;
   using AddressSetLib for *;
   BorrowProxyLib.ProxyIsolate isolate;
   modifier onlyOwnerOrPool {
-   require(msg.sender == isolate.owner || msg.sender == isolate.masterAddress, "borrow proxy can only be used by borrower");
+   require(msg.sender == isolate.owner || msg.sender == isolate.masterAddress || msg.sender == address(this), "borrow proxy can only be used by borrower");
     _;
   }
   function setup(address owner, address token) public returns (bool) {

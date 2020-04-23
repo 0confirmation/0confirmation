@@ -14,7 +14,7 @@ contract ERC20Adapter {
     ERC20AdapterLib.Isolate storage isolate = ERC20AdapterLib.getIsolatePointer();
     return isolate.processEscrowForwards();
   }
-  function handle(ModuleLib.AssetSubmodulePayload memory payload) public payable {
+  function handle(ModuleLib.AssetSubmodulePayload memory payload) public payable returns (bool) {
     ERC20AdapterLib.Isolate storage isolate = ERC20AdapterLib.getIsolatePointer();
     (bytes4 sig, bytes memory args) = payload.callData.splitPayload();
     if (sig == IERC20.transfer.selector) {
@@ -28,5 +28,6 @@ contract ERC20Adapter {
     } else if (sig == IERC20.approve.selector) {
       // do nothing
     } else revert("unsupported token call");
+    return true;
   }
 }

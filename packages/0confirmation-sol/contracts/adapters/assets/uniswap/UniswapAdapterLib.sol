@@ -53,7 +53,7 @@ library UniswapAdapterLib {
     });
   }
   function encodeTokenToTokenTransferInput(TokenToTokenTransferInputInputs memory input) internal pure returns (bytes memory result) {
-    result =  abi.encodeWithSelector(IUniswapExchange.tokenToTokenTransferInput.selector, input.tokens_sold, input.min_tokens_bought, input.min_eth_bought, input.deadline, input.recipient, input.token_addr);
+    result = abi.encodeWithSelector(IUniswapExchange.tokenToTokenTransferInput.selector, input.tokens_sold, input.min_tokens_bought, input.min_eth_bought, input.deadline, input.recipient, input.token_addr);
   }
   function decodeTokenToTokenSwapInputInputs(bytes memory args) internal pure returns (TokenToTokenSwapInputInputs memory) {
     (uint256 tokens_sold, uint256 min_tokens_bought, uint256 min_eth_bought, uint256 deadline, address payable token_addr) = abi.decode(args, (uint256, uint256, uint256, uint256, address));

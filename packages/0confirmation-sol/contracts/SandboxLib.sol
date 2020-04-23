@@ -7,30 +7,22 @@ import { ShifterBorrowProxyLib } from "./ShifterBorrowProxyLib.sol";
 
 library SandboxLib {
   using SafeViewLib for *;
-  struct Result {
+  struct ProtectedExecution {
+    address to;
+    bytes txData;
     bool success;
     bytes returnData;
   }
-  struct ProtectedExecution {
-    ShifterBorrowProxyLib.InitializationAction input;
-    Result output;
+  function applyExecutionResult(ProtectedExecution memory execution, ShifterBorrowProxyLib.InitializationAction memory preprocessed) internal pure {
+    execution.txData = preprocessed.txData;
+    execution.to = preprocessed.to;
   }
   struct Context {
+    address preprocessorAddress;
     ProtectedExecution[] trace;
-    uint256 pc;
   }
-  function toContext(ShifterBorrowProxyLib.InitializationAction[] memory actions) internal pure returns (Context memory) {
-    ProtectedExecution[] memory trace = new ProtectedExecution[](actions.length);
-    for (uint256 i = 0; i < actions.length; i++) {
-      trace[i].input = actions[i];
-    }
-    return Context({
-      pc: 0,
-      trace: trace
-    });
-  }
-  function getCurrentExecution(Context memory context) internal pure returns (ProtectedExecution memory) {
-    return context.trace[context.pc];
+  function toContext(bytes memory input) internal pure returns (Context memory context) {
+    (context) = abi.decode(input, (Context));
   }
   function encodeContext(Context memory context) internal pure returns (bytes memory data) {
     data = abi.encode(context);
@@ -47,9 +39,6 @@ library SandboxLib {
     ProtectedExecution[] memory trace = context.trace;
     uint256 newSize = trace.length;
     _write(trace, newSize + 1);
-  }
-  function toContext(bytes memory input) internal pure returns (Context memory context) {
-    (context) = abi.decode(input, (Context));
   }
   function toInitializationAction(bytes memory input) internal pure returns (ShifterBorrowProxyLib.InitializationAction memory action) {
     (action) = abi.decode(input, (ShifterBorrowProxyLib.InitializationAction));
@@ -71,34 +60,41 @@ library SandboxLib {
   function _shrink(Context memory context) internal pure {
     _write(context.trace, context.trace.length - 1);
   }
-  function computeAction(Context memory context) internal returns (bool) {
-    ProtectedExecution memory execution = getCurrentExecution(context);
-    _shrink(context);
-    SafeViewLib.SafeViewResult memory result = execution.input.txData.safeView(encodeContext(context));
-    _grow(context);
-    execution.input.txData = new bytes(0);
-    if (!result.success || result.success) { //&& !validateEncoding(result.data)) {
-      return false;
-    }
-    ShifterBorrowProxyLib.InitializationAction memory decoded = toInitializationAction(result.data);
-    execution.input.txData = decoded.txData;
-    execution.input.to = decoded.to;
-    return true;
-  }
-  function encodeProxyCall(ShifterBorrowProxyLib.InitializationAction memory action) internal pure returns (bytes memory retval) {
-    retval = abi.encodeWithSelector(BorrowProxy.proxy.selector, action.to, 0, action.txData);
+  function encodeProxyCall(ProtectedExecution memory execution) internal pure returns (bytes memory retval) {
+    retval = abi.encodeWithSelector(BorrowProxy.proxy.selector, execution.to, 0, execution.txData);
   }
   function processActions(ShifterBorrowProxyLib.InitializationAction[] memory actions) internal returns (Context memory) {
-    Context memory context = toContext(actions);
+    ProtectedExecution[] memory trace = new ProtectedExecution[](actions.length);
+    for (uint256 i = 0; i < actions.length; i++) {
+      trace[i].to = actions[i].to;
+      trace[i].txData = actions[i].txData;
+    }
+    Context memory context = Context({
+      trace: trace,
+      preprocessorAddress: address(0)
+    });
     _restrict(context);
-    for (; context.pc < actions.length; context.pc++) {
+    for (uint256 i = 0; i < actions.length; i++) {
       _grow(context);
-      ProtectedExecution memory execution = getCurrentExecution(context);
-      ShifterBorrowProxyLib.InitializationAction memory action = execution.input;
-      if (action.to == address(0x0) && !computeAction(context)) continue;
-      (bool success, bytes memory returnData) = address(this).call(encodeProxyCall(action));
-      execution.output.success = success;
-      execution.output.returnData = returnData;
+      ProtectedExecution memory execution = context.trace[context.trace.length - 1];
+      if (execution.to == address(0x0)) {
+        _shrink(context);
+        context.preprocessorAddress = execution.txData.deriveViewAddress();
+        SafeViewLib.SafeViewResult memory safeViewResult = execution.txData.safeView(encodeContext(context));
+        _grow(context);
+        execution.txData = new bytes(0x0);
+        if (safeViewResult.success) {
+          ShifterBorrowProxyLib.InitializationAction memory newAction = toInitializationAction(safeViewResult.data);
+          applyExecutionResult(execution, newAction);
+        } else {
+          execution.returnData = safeViewResult.data;
+          execution.success = safeViewResult.success;
+          continue;
+        }
+      }
+      (bool success, bytes memory returnData) = address(this).call(encodeProxyCall(execution));
+      execution.success = success;
+      execution.returnData = returnData;
     }
     return context;
   }

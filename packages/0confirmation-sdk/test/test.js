@@ -291,7 +291,7 @@ const logSheet = async (from, name, contracts) => {
   console.log(chalk.cyan('=== balances:'));
   if (eth) console.log(chalk.cyan('=== ETH: ') + chalk.bold(chalk.yellow(ethers.utils.formatEther(await ethersProvider.send('eth_getBalance', [ from, 'latest' ])))));
   if (token) console.log(chalk.cyan('=== renBTC: ') + chalk.bold(chalk.yellow(await getTokenBalance(from, contracts.zbtc, 8))));
-  if (name.match('target')) console.log(chalk.cyan('=== dai: ') + chalk.bold(chalk.yellow(await getTokenBalance(from, contracts.dai, 8))));
+  if (dai) console.log(chalk.cyan('=== dai: ') + chalk.bold(chalk.yellow(await getTokenBalance(from, contracts.dai, 8))));
   console.log(chalk.cyan('=============='));
   console.log();
 };
@@ -437,8 +437,7 @@ describe('0confirmation sdk', () => {
     console.logBold('repaying loan via a RenVM shift message!');
     await (await proxy.repayLoan({ gasLimit: ethers.utils.hexlify(6e6) })).wait();
     await logSheet(fixtures.contracts.zerobtc, 'renBTC pool after repayment', fixtures.contracts);
-    await logSheet(TRANSFER_TARGET, 'target of transfer after repayment', fixtures.contracts);
-    await logSheet(liquidityRequestParcel.proxyAddress, 'proxy address after repayment', fixtures.contracts);
+    await logSheet(borrowerAddress, 'borrower address after repayment', fixtures.contracts);
     await fixtures.keeper.stopListeningForLiquidityRequests();
   });
 });

@@ -20,7 +20,8 @@ const ModuleTypes = {
   BY_ADDRESS: 2
 };
 
-const getAddress = (artifact) => {
+const getAddress = (artifact, network_id) => {
+  if (network_id) return artifact.networks[network_id].address;
   const highest = Math.max(...Object.keys(artifact.networks).map((v) => Number(v)));
   return artifact.networks[highest].address;
 };
@@ -50,7 +51,8 @@ module.exports = async function(deployer) {
     renbtc = { address: kovan.renbtc };
     shifterRegistry = { address: kovan.shifterRegistry };
     factory = { address: kovan.factory };
-    renbtcExchange = { address: kovan.renbtcExchange };
+    const uniswapContract = new ethers.Contract(factory.address, Factory.abi, new ethers.providers.InfuraProvider('kovan'));
+    renbtcExchange = { address: await uniswapContract.getExchange(renbtc.address) };
   } 
   const shifterPool = await ShifterPool.deployed();
   await deployer.deploy(CurveAdapter, getAddress(Curvefi, deployer.network_id));

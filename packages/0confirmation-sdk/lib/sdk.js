@@ -11,6 +11,8 @@ const networks = require('./networks');
 const { RenVMType } = require('@renproject/ren-js-common');
 const { NULL_PHASH, toHex, toBase64 } = require('./util');
 const RenJS = require('@renproject/ren');
+delete global._bitcore;
+delete global._bitcoreCash;
 const ethersUtil = require('ethers/utils');
 const { joinSignature, solidityKeccak256 } = ethersUtil;
 const ethers = require('ethers');
