@@ -319,7 +319,7 @@ library UniswapAdapterLib {
     return address(uint160(Create2.computeAddress(ETHER_FORWARDER_SALT, keccak256(type(AssetForwarder).creationCode))));
   }
   function callForwarder(address payable target, address payable token) internal {
-    address forwarder = Create2.deploy(ETHER_FORWARDER_SALT, type(AssetForwarder).creationCode);
+    address forwarder = Create2.deploy(0, ETHER_FORWARDER_SALT, type(AssetForwarder).creationCode);
     AssetForwarder(forwarder).forwardAsset(target, token);
   }
   function getCastStorageType() internal pure returns (function (uint256) internal pure returns (ExternalIsolate storage) swap) {

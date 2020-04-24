@@ -22,7 +22,9 @@ class ZeroDriver extends RPCWrapper {
     const backendNames = Object.keys(backends);
     const addons = difference(backendNames, Object.keys(builtInBackends));
     Object.keys(builtInBackends).forEach((v) => {
-      if (backends[v]) this.registerBackend(new (builtInBackends[v])(Object.assign({
+      if (backends[v]) this.registerBackend(backends[v].send && Object.assign(backends[v], {
+        driver: this
+      }) || new (builtInBackends[v])(Object.assign({
         driver: this
       }, backends[v])));
     });

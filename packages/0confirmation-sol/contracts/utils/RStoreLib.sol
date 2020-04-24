@@ -17,6 +17,6 @@ library RStoreLib {
       src := add(data, 0x20)
     }
     MemcpyLib.memcpy(dest, src, length);
-    return Create2.deploy(ZERO_SALT, segment);
+    return Create2.deploy(0, ZERO_SALT, segment);
   }
 }

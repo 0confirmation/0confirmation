@@ -3,11 +3,11 @@
 const UTXO_POLL_INTERVAL = 5000;
 const DARKNODE_QUERY_TX_INTERVAL = 5000;
 
+const environment = require('./environments');
 const { ZERO_ADDRESS } = require('./constants');
 const BN = require('bignumber.js');
 const resultToJsonRpc = require('./util/result-to-jsonrpc');
 const { Buffer } = require('safe-buffer');
-const networks = require('./networks');
 const { RenVMType } = require('@renproject/ren-js-common');
 const { NULL_PHASH, toHex, toBase64 } = require('./util');
 const RenJS = require('@renproject/ren');
@@ -406,13 +406,20 @@ class Zero {
       })
     }, networks.contracts));
   }
-  constructor({
-    backends,
-    shifterPool,
-    borrowProxyLib,
-    borrowProxyCreationCode,
-    mpkh
-  }) {
+  constructor(o, ...args) {
+    if (o.send) {
+      if (args.length && args[0]) {
+        if (args[0] === 'mock') o = environment.getMockEnvironment(o);
+        else o = environment.getEnvironment(o, ...args);
+      }
+    }
+    const {
+      backends,
+      shifterPool,
+      borrowProxyLib,
+      borrowProxyCreationCode,
+      mpkh
+    } = o;
     this.options = {
       shifterPool,
       borrowProxyLib,
@@ -422,7 +429,7 @@ class Zero {
     this.driver = new Driver(backends);
     const isTestnet = this.driver.getBackend('btc').testnet;
     this.network = {
-      mpkh: mpkh || this.driver.backends.renvm.ren.network.contracts.renVM.mpkh,
+      mpkh: mpkh,
       borrowProxyLib,
       borrowProxyCreationCode,
       shifterPool: shifterPool,
@@ -692,8 +699,20 @@ const preprocessor = (artifact, ...args) => {
   };
 };
 
+class ZeroMock extends Zero {
+  connectMock(otherZero) {
+    const zeroBackend = this.driver.getBackend('zero');
+    const otherZeroBackend = otherZero.driver.getBackend('zero');
+    zeroBackend.connectMock(otherZeroBackend);
+  }
+  constructor(provider) {
+    super(provider, 'mock');
+  }
+}
+
 module.exports = Object.assign(Zero, {
   ZERO_ADDRESS,
+  ZeroMock,
   BorrowProxy,
   preprocessor,
   getSignatures,

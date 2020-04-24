@@ -10,7 +10,7 @@ module.exports = class RPCWrapper {
       params,
       jsonrpc: '2.0'
     });
-    if (response.error) throw Error(response.error);
+    if (response.error) throw response.error;
     return response.result;
   }
 };

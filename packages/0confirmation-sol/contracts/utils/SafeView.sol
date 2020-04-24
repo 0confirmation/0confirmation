@@ -58,7 +58,7 @@ contract SafeViewExecutor {
   using SafeViewLib for *;
   bytes32 constant STEALTH_VIEW_DEPLOY_SALT = 0xad53495153c7c363e98a26920ec679e0e687636458f6908c91cf6deadb190801;
   function _executeSafeView(bytes memory creationCode, bytes memory context) public {
-    address viewLayer = Create2.deploy(SafeViewLib.GET_STEALTH_VIEW_DEPLOY_SALT(), creationCode);
+    address viewLayer = Create2.deploy(0, SafeViewLib.GET_STEALTH_VIEW_DEPLOY_SALT(), creationCode);
     bytes memory result = viewLayer.executeLogic(context).encodeResult();
     (bool success,) = viewLayer.call(SafeViewLib.encodeDestroy());
     if (success) {} // ignore compiler warning?

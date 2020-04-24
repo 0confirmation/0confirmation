@@ -2,9 +2,11 @@ const Curvefi = artifacts.require('Curvefi');
 const CurveToken = artifacts.require('CurveToken');
 const WBTC = artifacts.require('WBTC');
 
-const kovan = require('@0confirmation/sol/environments/kovan');
-
 const ethers = require('ethers');
+
+const env = require('@0confirmation/sdk/environments');
+
+const kovan = env.getAddresses('kovan');
 
 module.exports = async function(deployer) {
   await deployer.deploy(CurveToken, 'Curve.fi wBTC/renBTC', 'wBTC+renBTC', 8, 0)

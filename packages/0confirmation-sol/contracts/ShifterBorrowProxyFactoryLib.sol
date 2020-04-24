@@ -5,7 +5,7 @@ import { ShifterBorrowProxy } from "./ShifterBorrowProxy.sol";
 
 library ShifterBorrowProxyFactoryLib {
   function deployBorrowProxy(bytes32 salt) internal returns (address output) {
-    return Create2.deploy(salt, type(ShifterBorrowProxy).creationCode);
+    return Create2.deploy(0, salt, type(ShifterBorrowProxy).creationCode);
   }
   function deriveBorrowerAddress(bytes32 salt) internal view returns (address) {
     return Create2.computeAddress(salt, keccak256(type(ShifterBorrowProxy).creationCode));

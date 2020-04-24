@@ -4,6 +4,7 @@
   "metadata": "{\"compiler\":{\"version\":\"0.6.6+commit.6c089d02\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/home/ray/0confirmation/packages/0confirmation-sol/contracts/adapters/assets/curve/CurveAdapterLib.sol\":\"CurveAdapterLib\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/ray/0confirmation/packages/0confirmation-sol/contracts/adapters/assets/curve/CurveAdapterLib.sol\":{\"keccak256\":\"0x862d0283f937756dd5118796b619768fc6f5b9ba7d3df0611489a76e407c4d58\",\"urls\":[\"bzz-raw://0bbbe1ad37ff61a509843d0943e618ee086f084de8b28f01605b36d7edf73c68\",\"dweb:/ipfs/QmPC67h1y7KM4ocwAdigZWQFd2vaCyUcqNr23UwtvMW1Dz\"]},\"/home/ray/0confirmation/packages/0confirmation-sol/contracts/adapters/lib/ModuleLib.sol\":{\"keccak256\":\"0xc935cfeb1a419c02b983a7d848349421d6389bfe8f16ccb86f26cdb5a8b4f17d\",\"urls\":[\"bzz-raw://65d7d48d6be1829d8e29af8f6cae310a498e1307232c7e63b593217e536f7b78\",\"dweb:/ipfs/QmSv6ZxFJonYjPjMGxerE9raDjDurq9gDLQ4eUy5uKFpsZ\"]},\"/home/ray/0confirmation/packages/0confirmation-sol/contracts/utils/MemcpyLib.sol\":{\"keccak256\":\"0xe34b27a01d716516d045ad0bfca9bad332d732f8ff1defd7b4a0563df98d2a38\",\"urls\":[\"bzz-raw://ca35e768aacdbef94807419b549886f15f124292603d65110872cfc9d6c14b7c\",\"dweb:/ipfs/QmcBMwGiMS8KzjFxPFX8CErSLEHM3azw9sA7EGebPa9aW8\"]},\"/home/ray/0confirmation/packages/0confirmation-sol/contracts/utils/SliceLib.sol\":{\"keccak256\":\"0xa256acc9d42ff8f6915388594a7d1552f545e789d50d7fe741ff66ac0b3d9a05\",\"urls\":[\"bzz-raw://f2fdd5ab737b6ed2e66b800234efb03f4e93a77cda5c1420479d984b02b8baef\",\"dweb:/ipfs/QmYCCgArfekzVJuYD1EZrNSJHZasevZx6AMgLxX9UXs6iz\"]}},\"version\":1}",
   "bytecode": "0x60566023600b82828239805160001a607314601657fe5b30600052607381538281f3fe73000000000000000000000000000000000000000030146080604052600080fdfea2646970667358221220ed2faf3c763f24ae094b47769e105e05bfa1a2a7573aff4787bbef39356d64f864736f6c63430006060033",
   "deployedBytecode": "0x73000000000000000000000000000000000000000030146080604052600080fdfea2646970667358221220ed2faf3c763f24ae094b47769e105e05bfa1a2a7573aff4787bbef39356d64f864736f6c63430006060033",
+  "immutableReferences": {},
   "sourceMap": "113:1169:12:-:0;;132:2:-1;166:7;155:9;146:7;137:37;255:7;249:14;246:1;241:23;235:4;232:33;222:2;;269:9;222:2;293:9;290:1;283:20;323:4;314:7;306:22;347:7;338;331:24",
   "deployedSourceMap": "113:1169:12:-:0;;;;;;12:1:-1;9;2:12",
   "source": "pragma solidity ^0.6.0;\npragma experimental ABIEncoderV2;\n\nimport { ModuleLib } from \"../../lib/ModuleLib.sol\";\n\nlibrary CurveAdapterLib {\n  struct Isolate {\n    address curveAddress;\n  }\n  function getCastStorageType() internal pure returns (function (uint256) internal pure returns (Isolate storage) swap) {\n    function (uint256) internal returns (uint256) cast = ModuleLib.cast;\n    assembly {\n      swap := cast\n    }\n  }\n  function toIsolatePointer(uint256 key) internal pure returns (Isolate storage) {\n    return getCastStorageType()(key);\n  }\n  function computeIsolatePointer(address instance) internal pure returns (uint256) {\n    return uint256(keccak256(abi.encodePacked(\"isolate.curve-adapter\", instance)));\n  }\n  function getIsolatePointer(address instance) internal pure returns (Isolate storage) {\n    return toIsolatePointer(computeIsolatePointer(instance));\n  }\n  struct ExchangeInputs {\n    int128 i;\n    int128 j;\n    uint256 dx;\n    uint256 min_dy;\n  }\n  function decodeExchangeInputs(bytes memory args) internal pure returns (ExchangeInputs memory) {\n    (int128 i, int128 j, uint256 dx, uint256 min_dy) = abi.decode(args, (int128, int128, uint256, uint256));\n    return ExchangeInputs({\n      i: i,\n      j: j,\n      dx: dx,\n      min_dy: min_dy\n    });\n  }\n}\n",
@@ -12,14 +13,14 @@
     "absolutePath": "/home/ray/0confirmation/packages/0confirmation-sol/contracts/adapters/assets/curve/CurveAdapterLib.sol",
     "exportedSymbols": {
       "CurveAdapterLib": [
-        4044
+        4051
       ]
     },
-    "id": 4045,
+    "id": 4052,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3921,
+        "id": 3928,
         "literals": [
           "solidity",
           "^",
@@ -30,7 +31,7 @@
         "src": "0:23:12"
       },
       {
-        "id": 3922,
+        "id": 3929,
         "literals": [
           "experimental",
           "ABIEncoderV2"
@@ -41,16 +42,16 @@
       {
         "absolutePath": "/home/ray/0confirmation/packages/0confirmation-sol/contracts/adapters/lib/ModuleLib.sol",
         "file": "../../lib/ModuleLib.sol",
-        "id": 3924,
+        "id": 3931,
         "nodeType": "ImportDirective",
-        "scope": 4045,
-        "sourceUnit": 6847,
+        "scope": 4052,
+        "sourceUnit": 6857,
         "src": "59:52:12",
         "symbolAliases": [
           {
             "foreign": {
               "argumentTypes": null,
-              "id": 3923,
+              "id": 3930,
               "name": "ModuleLib",
               "nodeType": "Identifier",
               "overloadedDeclarations": [],
@@ -73,25 +74,25 @@
         "contractKind": "library",
         "documentation": null,
         "fullyImplemented": true,
-        "id": 4044,
+        "id": 4051,
         "linearizedBaseContracts": [
-          4044
+          4051
         ],
         "name": "CurveAdapterLib",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "canonicalName": "CurveAdapterLib.Isolate",
-            "id": 3927,
+            "id": 3934,
             "members": [
               {
                 "constant": false,
-                "id": 3926,
+                "id": 3933,
                 "mutability": "mutable",
                 "name": "curveAddress",
                 "nodeType": "VariableDeclaration",
                 "overrides": null,
-                "scope": 3927,
+                "scope": 3934,
                 "src": "162:20:12",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -100,7 +101,7 @@
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 3925,
+                  "id": 3932,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "162:7:12",
@@ -116,29 +117,29 @@
             ],
             "name": "Isolate",
             "nodeType": "StructDefinition",
-            "scope": 4044,
+            "scope": 4051,
             "src": "141:46:12",
             "visibility": "public"
           },
           {
             "body": {
-              "id": 3950,
+              "id": 3957,
               "nodeType": "Block",
               "src": "308:118:12",
               "statements": [
                 {
                   "assignments": [
-                    3945
+                    3952
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 3945,
+                      "id": 3952,
                       "mutability": "mutable",
                       "name": "cast",
                       "nodeType": "VariableDeclaration",
                       "overrides": null,
-                      "scope": 3950,
+                      "scope": 3957,
                       "src": "314:50:12",
                       "stateVariable": false,
                       "storageLocation": "default",
@@ -147,20 +148,20 @@
                         "typeString": "function (uint256) returns (uint256)"
                       },
                       "typeName": {
-                        "id": 3944,
+                        "id": 3951,
                         "nodeType": "FunctionTypeName",
                         "parameterTypes": {
-                          "id": 3940,
+                          "id": 3947,
                           "nodeType": "ParameterList",
                           "parameters": [
                             {
                               "constant": false,
-                              "id": 3939,
+                              "id": 3946,
                               "mutability": "mutable",
                               "name": "",
                               "nodeType": "VariableDeclaration",
                               "overrides": null,
-                              "scope": 3944,
+                              "scope": 3951,
                               "src": "324:7:12",
                               "stateVariable": false,
                               "storageLocation": "default",
@@ -169,7 +170,7 @@
                                 "typeString": "uint256"
                               },
                               "typeName": {
-                                "id": 3938,
+                                "id": 3945,
                                 "name": "uint256",
                                 "nodeType": "ElementaryTypeName",
                                 "src": "324:7:12",
@@ -185,17 +186,17 @@
                           "src": "323:9:12"
                         },
                         "returnParameterTypes": {
-                          "id": 3943,
+                          "id": 3950,
                           "nodeType": "ParameterList",
                           "parameters": [
                             {
                               "constant": false,
-                              "id": 3942,
+                              "id": 3949,
                               "mutability": "mutable",
                               "name": "",
                               "nodeType": "VariableDeclaration",
                               "overrides": null,
-                              "scope": 3944,
+                              "scope": 3951,
                               "src": "351:7:12",
                               "stateVariable": false,
                               "storageLocation": "default",
@@ -204,7 +205,7 @@
                                 "typeString": "uint256"
                               },
                               "typeName": {
-                                "id": 3941,
+                                "id": 3948,
                                 "name": "uint256",
                                 "nodeType": "ElementaryTypeName",
                                 "src": "351:7:12",
@@ -231,30 +232,30 @@
                       "visibility": "internal"
                     }
                   ],
-                  "id": 3948,
+                  "id": 3955,
                   "initialValue": {
                     "argumentTypes": null,
                     "expression": {
                       "argumentTypes": null,
-                      "id": 3946,
+                      "id": 3953,
                       "name": "ModuleLib",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 6846,
+                      "referencedDeclaration": 6856,
                       "src": "367:9:12",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_type$_t_contract$_ModuleLib_$6846_$",
+                        "typeIdentifier": "t_type$_t_contract$_ModuleLib_$6856_$",
                         "typeString": "type(library ModuleLib)"
                       }
                     },
-                    "id": 3947,
+                    "id": 3954,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "memberName": "cast",
                     "nodeType": "MemberAccess",
-                    "referencedDeclaration": 6759,
+                    "referencedDeclaration": 6769,
                     "src": "367:14:12",
                     "typeDescriptions": {
                       "typeIdentifier": "t_function_internal_pure$_t_uint256_$returns$_t_uint256_$",
@@ -290,28 +291,28 @@
                   "evmVersion": "istanbul",
                   "externalReferences": [
                     {
-                      "declaration": 3945,
+                      "declaration": 3952,
                       "isOffset": false,
                       "isSlot": false,
                       "src": "412:4:12",
                       "valueSize": 1
                     },
                     {
-                      "declaration": 3936,
+                      "declaration": 3943,
                       "isOffset": false,
                       "isSlot": false,
                       "src": "404:4:12",
                       "valueSize": 1
                     }
                   ],
-                  "id": 3949,
+                  "id": 3956,
                   "nodeType": "InlineAssembly",
                   "src": "387:35:12"
                 }
               ]
             },
             "documentation": null,
-            "id": 3951,
+            "id": 3958,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
@@ -319,45 +320,45 @@
             "nodeType": "FunctionDefinition",
             "overrides": null,
             "parameters": {
-              "id": 3928,
+              "id": 3935,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "217:2:12"
             },
             "returnParameters": {
-              "id": 3937,
+              "id": 3944,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3936,
+                  "id": 3943,
                   "mutability": "mutable",
                   "name": "swap",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 3951,
+                  "scope": 3958,
                   "src": "243:63:12",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_function_internal_pure$_t_uint256_$returns$_t_struct$_Isolate_$3927_storage_ptr_$",
+                    "typeIdentifier": "t_function_internal_pure$_t_uint256_$returns$_t_struct$_Isolate_$3934_storage_ptr_$",
                     "typeString": "function (uint256) pure returns (struct CurveAdapterLib.Isolate)"
                   },
                   "typeName": {
-                    "id": 3935,
+                    "id": 3942,
                     "nodeType": "FunctionTypeName",
                     "parameterTypes": {
-                      "id": 3931,
+                      "id": 3938,
                       "nodeType": "ParameterList",
                       "parameters": [
                         {
                           "constant": false,
-                          "id": 3930,
+                          "id": 3937,
                           "mutability": "mutable",
                           "name": "",
                           "nodeType": "VariableDeclaration",
                           "overrides": null,
-                          "scope": 3935,
+                          "scope": 3942,
                           "src": "253:7:12",
                           "stateVariable": false,
                           "storageLocation": "default",
@@ -366,7 +367,7 @@
                             "typeString": "uint256"
                           },
                           "typeName": {
-                            "id": 3929,
+                            "id": 3936,
                             "name": "uint256",
                             "nodeType": "ElementaryTypeName",
                             "src": "253:7:12",
@@ -382,33 +383,33 @@
                       "src": "252:9:12"
                     },
                     "returnParameterTypes": {
-                      "id": 3934,
+                      "id": 3941,
                       "nodeType": "ParameterList",
                       "parameters": [
                         {
                           "constant": false,
-                          "id": 3933,
+                          "id": 3940,
                           "mutability": "mutable",
                           "name": "",
                           "nodeType": "VariableDeclaration",
                           "overrides": null,
-                          "scope": 3935,
+                          "scope": 3942,
                           "src": "285:15:12",
                           "stateVariable": false,
                           "storageLocation": "storage",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_struct$_Isolate_$3927_storage_ptr",
+                            "typeIdentifier": "t_struct$_Isolate_$3934_storage_ptr",
                             "typeString": "struct CurveAdapterLib.Isolate"
                           },
                           "typeName": {
                             "contractScope": null,
-                            "id": 3932,
+                            "id": 3939,
                             "name": "Isolate",
                             "nodeType": "UserDefinedTypeName",
-                            "referencedDeclaration": 3927,
+                            "referencedDeclaration": 3934,
                             "src": "285:7:12",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_struct$_Isolate_$3927_storage_ptr",
+                              "typeIdentifier": "t_struct$_Isolate_$3934_storage_ptr",
                               "typeString": "struct CurveAdapterLib.Isolate"
                             }
                           },
@@ -421,7 +422,7 @@
                     "src": "243:63:12",
                     "stateMutability": "pure",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_function_internal_pure$_t_uint256_$returns$_t_struct$_Isolate_$3927_storage_ptr_$",
+                      "typeIdentifier": "t_function_internal_pure$_t_uint256_$returns$_t_struct$_Isolate_$3934_storage_ptr_$",
                       "typeString": "function (uint256) pure returns (struct CurveAdapterLib.Isolate)"
                     },
                     "visibility": "internal"
@@ -432,7 +433,7 @@
               ],
               "src": "242:65:12"
             },
-            "scope": 4044,
+            "scope": 4051,
             "src": "190:236:12",
             "stateMutability": "pure",
             "virtual": false,
@@ -440,7 +441,7 @@
           },
           {
             "body": {
-              "id": 3963,
+              "id": 3970,
               "nodeType": "Block",
               "src": "508:43:12",
               "statements": [
@@ -450,11 +451,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 3960,
+                        "id": 3967,
                         "name": "key",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3953,
+                        "referencedDeclaration": 3960,
                         "src": "542:3:12",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -472,18 +473,18 @@
                       "arguments": [],
                       "expression": {
                         "argumentTypes": [],
-                        "id": 3958,
+                        "id": 3965,
                         "name": "getCastStorageType",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3951,
+                        "referencedDeclaration": 3958,
                         "src": "521:18:12",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_function_internal_pure$__$returns$_t_function_internal_pure$_t_uint256_$returns$_t_struct$_Isolate_$3927_storage_ptr_$_$",
+                          "typeIdentifier": "t_function_internal_pure$__$returns$_t_function_internal_pure$_t_uint256_$returns$_t_struct$_Isolate_$3934_storage_ptr_$_$",
                           "typeString": "function () pure returns (function (uint256) pure returns (struct CurveAdapterLib.Isolate storage pointer))"
                         }
                       },
-                      "id": 3959,
+                      "id": 3966,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -494,11 +495,11 @@
                       "src": "521:20:12",
                       "tryCall": false,
                       "typeDescriptions": {
-                        "typeIdentifier": "t_function_internal_pure$_t_uint256_$returns$_t_struct$_Isolate_$3927_storage_ptr_$",
+                        "typeIdentifier": "t_function_internal_pure$_t_uint256_$returns$_t_struct$_Isolate_$3934_storage_ptr_$",
                         "typeString": "function (uint256) pure returns (struct CurveAdapterLib.Isolate storage pointer)"
                       }
                     },
-                    "id": 3961,
+                    "id": 3968,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -509,19 +510,19 @@
                     "src": "521:25:12",
                     "tryCall": false,
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Isolate_$3927_storage_ptr",
+                      "typeIdentifier": "t_struct$_Isolate_$3934_storage_ptr",
                       "typeString": "struct CurveAdapterLib.Isolate storage pointer"
                     }
                   },
-                  "functionReturnParameters": 3957,
-                  "id": 3962,
+                  "functionReturnParameters": 3964,
+                  "id": 3969,
                   "nodeType": "Return",
                   "src": "514:32:12"
                 }
               ]
             },
             "documentation": null,
-            "id": 3964,
+            "id": 3971,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
@@ -529,17 +530,17 @@
             "nodeType": "FunctionDefinition",
             "overrides": null,
             "parameters": {
-              "id": 3954,
+              "id": 3961,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3953,
+                  "id": 3960,
                   "mutability": "mutable",
                   "name": "key",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 3964,
+                  "scope": 3971,
                   "src": "455:11:12",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -548,7 +549,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3952,
+                    "id": 3959,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "455:7:12",
@@ -564,33 +565,33 @@
               "src": "454:13:12"
             },
             "returnParameters": {
-              "id": 3957,
+              "id": 3964,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3956,
+                  "id": 3963,
                   "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 3964,
+                  "scope": 3971,
                   "src": "491:15:12",
                   "stateVariable": false,
                   "storageLocation": "storage",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Isolate_$3927_storage_ptr",
+                    "typeIdentifier": "t_struct$_Isolate_$3934_storage_ptr",
                     "typeString": "struct CurveAdapterLib.Isolate"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 3955,
+                    "id": 3962,
                     "name": "Isolate",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 3927,
+                    "referencedDeclaration": 3934,
                     "src": "491:7:12",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Isolate_$3927_storage_ptr",
+                      "typeIdentifier": "t_struct$_Isolate_$3934_storage_ptr",
                       "typeString": "struct CurveAdapterLib.Isolate"
                     }
                   },
@@ -600,7 +601,7 @@
               ],
               "src": "490:17:12"
             },
-            "scope": 4044,
+            "scope": 4051,
             "src": "429:122:12",
             "stateMutability": "pure",
             "virtual": false,
@@ -608,7 +609,7 @@
           },
           {
             "body": {
-              "id": 3982,
+              "id": 3989,
               "nodeType": "Block",
               "src": "635:89:12",
               "statements": [
@@ -625,7 +626,7 @@
                               {
                                 "argumentTypes": null,
                                 "hexValue": "69736f6c6174652e63757276652d61646170746572",
-                                "id": 3976,
+                                "id": 3983,
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": true,
@@ -642,11 +643,11 @@
                               },
                               {
                                 "argumentTypes": null,
-                                "id": 3977,
+                                "id": 3984,
                                 "name": "instance",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 3966,
+                                "referencedDeclaration": 3973,
                                 "src": "708:8:12",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_address",
@@ -667,7 +668,7 @@
                               ],
                               "expression": {
                                 "argumentTypes": null,
-                                "id": 3974,
+                                "id": 3981,
                                 "name": "abi",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
@@ -678,7 +679,7 @@
                                   "typeString": "abi"
                                 }
                               },
-                              "id": 3975,
+                              "id": 3982,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
@@ -692,7 +693,7 @@
                                 "typeString": "function () pure returns (bytes memory)"
                               }
                             },
-                            "id": 3978,
+                            "id": 3985,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -715,7 +716,7 @@
                               "typeString": "bytes memory"
                             }
                           ],
-                          "id": 3973,
+                          "id": 3980,
                           "name": "keccak256",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
@@ -726,7 +727,7 @@
                             "typeString": "function (bytes memory) pure returns (bytes32)"
                           }
                         },
-                        "id": 3979,
+                        "id": 3986,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -749,7 +750,7 @@
                           "typeString": "bytes32"
                         }
                       ],
-                      "id": 3972,
+                      "id": 3979,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -761,7 +762,7 @@
                         "typeString": "type(uint256)"
                       },
                       "typeName": {
-                        "id": 3971,
+                        "id": 3978,
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
                         "src": "648:7:12",
@@ -771,7 +772,7 @@
                         }
                       }
                     },
-                    "id": 3980,
+                    "id": 3987,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -786,15 +787,15 @@
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 3970,
-                  "id": 3981,
+                  "functionReturnParameters": 3977,
+                  "id": 3988,
                   "nodeType": "Return",
                   "src": "641:78:12"
                 }
               ]
             },
             "documentation": null,
-            "id": 3983,
+            "id": 3990,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
@@ -802,17 +803,17 @@
             "nodeType": "FunctionDefinition",
             "overrides": null,
             "parameters": {
-              "id": 3967,
+              "id": 3974,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3966,
+                  "id": 3973,
                   "mutability": "mutable",
                   "name": "instance",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 3983,
+                  "scope": 3990,
                   "src": "585:16:12",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -821,7 +822,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3965,
+                    "id": 3972,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "585:7:12",
@@ -838,17 +839,17 @@
               "src": "584:18:12"
             },
             "returnParameters": {
-              "id": 3970,
+              "id": 3977,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3969,
+                  "id": 3976,
                   "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 3983,
+                  "scope": 3990,
                   "src": "626:7:12",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -857,7 +858,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3968,
+                    "id": 3975,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "626:7:12",
@@ -872,7 +873,7 @@
               ],
               "src": "625:9:12"
             },
-            "scope": 4044,
+            "scope": 4051,
             "src": "554:170:12",
             "stateMutability": "pure",
             "virtual": false,
@@ -880,7 +881,7 @@
           },
           {
             "body": {
-              "id": 3996,
+              "id": 4003,
               "nodeType": "Block",
               "src": "812:67:12",
               "statements": [
@@ -893,11 +894,11 @@
                         "arguments": [
                           {
                             "argumentTypes": null,
-                            "id": 3992,
+                            "id": 3999,
                             "name": "instance",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3985,
+                            "referencedDeclaration": 3992,
                             "src": "864:8:12",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
@@ -912,18 +913,18 @@
                               "typeString": "address"
                             }
                           ],
-                          "id": 3991,
+                          "id": 3998,
                           "name": "computeIsolatePointer",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3983,
+                          "referencedDeclaration": 3990,
                           "src": "842:21:12",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$_t_address_$returns$_t_uint256_$",
                             "typeString": "function (address) pure returns (uint256)"
                           }
                         },
-                        "id": 3993,
+                        "id": 4000,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -946,18 +947,18 @@
                           "typeString": "uint256"
                         }
                       ],
-                      "id": 3990,
+                      "id": 3997,
                       "name": "toIsolatePointer",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3964,
+                      "referencedDeclaration": 3971,
                       "src": "825:16:12",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_function_internal_pure$_t_uint256_$returns$_t_struct$_Isolate_$3927_storage_ptr_$",
+                        "typeIdentifier": "t_function_internal_pure$_t_uint256_$returns$_t_struct$_Isolate_$3934_storage_ptr_$",
                         "typeString": "function (uint256) pure returns (struct CurveAdapterLib.Isolate storage pointer)"
                       }
                     },
-                    "id": 3994,
+                    "id": 4001,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -968,19 +969,19 @@
                     "src": "825:49:12",
                     "tryCall": false,
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Isolate_$3927_storage_ptr",
+                      "typeIdentifier": "t_struct$_Isolate_$3934_storage_ptr",
                       "typeString": "struct CurveAdapterLib.Isolate storage pointer"
                     }
                   },
-                  "functionReturnParameters": 3989,
-                  "id": 3995,
+                  "functionReturnParameters": 3996,
+                  "id": 4002,
                   "nodeType": "Return",
                   "src": "818:56:12"
                 }
               ]
             },
             "documentation": null,
-            "id": 3997,
+            "id": 4004,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
@@ -988,17 +989,17 @@
             "nodeType": "FunctionDefinition",
             "overrides": null,
             "parameters": {
-              "id": 3986,
+              "id": 3993,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3985,
+                  "id": 3992,
                   "mutability": "mutable",
                   "name": "instance",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 3997,
+                  "scope": 4004,
                   "src": "754:16:12",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1007,7 +1008,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3984,
+                    "id": 3991,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "754:7:12",
@@ -1024,33 +1025,33 @@
               "src": "753:18:12"
             },
             "returnParameters": {
-              "id": 3989,
+              "id": 3996,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3988,
+                  "id": 3995,
                   "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 3997,
+                  "scope": 4004,
                   "src": "795:15:12",
                   "stateVariable": false,
                   "storageLocation": "storage",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Isolate_$3927_storage_ptr",
+                    "typeIdentifier": "t_struct$_Isolate_$3934_storage_ptr",
                     "typeString": "struct CurveAdapterLib.Isolate"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 3987,
+                    "id": 3994,
                     "name": "Isolate",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 3927,
+                    "referencedDeclaration": 3934,
                     "src": "795:7:12",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Isolate_$3927_storage_ptr",
+                      "typeIdentifier": "t_struct$_Isolate_$3934_storage_ptr",
                       "typeString": "struct CurveAdapterLib.Isolate"
                     }
                   },
@@ -1060,7 +1061,7 @@
               ],
               "src": "794:17:12"
             },
-            "scope": 4044,
+            "scope": 4051,
             "src": "727:152:12",
             "stateMutability": "pure",
             "virtual": false,
@@ -1068,16 +1069,16 @@
           },
           {
             "canonicalName": "CurveAdapterLib.ExchangeInputs",
-            "id": 4006,
+            "id": 4013,
             "members": [
               {
                 "constant": false,
-                "id": 3999,
+                "id": 4006,
                 "mutability": "mutable",
                 "name": "i",
                 "nodeType": "VariableDeclaration",
                 "overrides": null,
-                "scope": 4006,
+                "scope": 4013,
                 "src": "910:8:12",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -1086,7 +1087,7 @@
                   "typeString": "int128"
                 },
                 "typeName": {
-                  "id": 3998,
+                  "id": 4005,
                   "name": "int128",
                   "nodeType": "ElementaryTypeName",
                   "src": "910:6:12",
@@ -1100,12 +1101,12 @@
               },
               {
                 "constant": false,
-                "id": 4001,
+                "id": 4008,
                 "mutability": "mutable",
                 "name": "j",
                 "nodeType": "VariableDeclaration",
                 "overrides": null,
-                "scope": 4006,
+                "scope": 4013,
                 "src": "924:8:12",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -1114,7 +1115,7 @@
                   "typeString": "int128"
                 },
                 "typeName": {
-                  "id": 4000,
+                  "id": 4007,
                   "name": "int128",
                   "nodeType": "ElementaryTypeName",
                   "src": "924:6:12",
@@ -1128,12 +1129,12 @@
               },
               {
                 "constant": false,
-                "id": 4003,
+                "id": 4010,
                 "mutability": "mutable",
                 "name": "dx",
                 "nodeType": "VariableDeclaration",
                 "overrides": null,
-                "scope": 4006,
+                "scope": 4013,
                 "src": "938:10:12",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -1142,7 +1143,7 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 4002,
+                  "id": 4009,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
                   "src": "938:7:12",
@@ -1156,12 +1157,12 @@
               },
               {
                 "constant": false,
-                "id": 4005,
+                "id": 4012,
                 "mutability": "mutable",
                 "name": "min_dy",
                 "nodeType": "VariableDeclaration",
                 "overrides": null,
-                "scope": 4006,
+                "scope": 4013,
                 "src": "954:14:12",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -1170,7 +1171,7 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 4004,
+                  "id": 4011,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
                   "src": "954:7:12",
@@ -1185,32 +1186,32 @@
             ],
             "name": "ExchangeInputs",
             "nodeType": "StructDefinition",
-            "scope": 4044,
+            "scope": 4051,
             "src": "882:91:12",
             "visibility": "public"
           },
           {
             "body": {
-              "id": 4042,
+              "id": 4049,
               "nodeType": "Block",
               "src": "1071:209:12",
               "statements": [
                 {
                   "assignments": [
-                    4014,
-                    4016,
-                    4018,
-                    4020
+                    4021,
+                    4023,
+                    4025,
+                    4027
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 4014,
+                      "id": 4021,
                       "mutability": "mutable",
                       "name": "i",
                       "nodeType": "VariableDeclaration",
                       "overrides": null,
-                      "scope": 4042,
+                      "scope": 4049,
                       "src": "1078:8:12",
                       "stateVariable": false,
                       "storageLocation": "default",
@@ -1219,7 +1220,7 @@
                         "typeString": "int128"
                       },
                       "typeName": {
-                        "id": 4013,
+                        "id": 4020,
                         "name": "int128",
                         "nodeType": "ElementaryTypeName",
                         "src": "1078:6:12",
@@ -1233,12 +1234,12 @@
                     },
                     {
                       "constant": false,
-                      "id": 4016,
+                      "id": 4023,
                       "mutability": "mutable",
                       "name": "j",
                       "nodeType": "VariableDeclaration",
                       "overrides": null,
-                      "scope": 4042,
+                      "scope": 4049,
                       "src": "1088:8:12",
                       "stateVariable": false,
                       "storageLocation": "default",
@@ -1247,7 +1248,7 @@
                         "typeString": "int128"
                       },
                       "typeName": {
-                        "id": 4015,
+                        "id": 4022,
                         "name": "int128",
                         "nodeType": "ElementaryTypeName",
                         "src": "1088:6:12",
@@ -1261,12 +1262,12 @@
                     },
                     {
                       "constant": false,
-                      "id": 4018,
+                      "id": 4025,
                       "mutability": "mutable",
                       "name": "dx",
                       "nodeType": "VariableDeclaration",
                       "overrides": null,
-                      "scope": 4042,
+                      "scope": 4049,
                       "src": "1098:10:12",
                       "stateVariable": false,
                       "storageLocation": "default",
@@ -1275,7 +1276,7 @@
                         "typeString": "uint256"
                       },
                       "typeName": {
-                        "id": 4017,
+                        "id": 4024,
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
                         "src": "1098:7:12",
@@ -1289,12 +1290,12 @@
                     },
                     {
                       "constant": false,
-                      "id": 4020,
+                      "id": 4027,
                       "mutability": "mutable",
                       "name": "min_dy",
                       "nodeType": "VariableDeclaration",
                       "overrides": null,
-                      "scope": 4042,
+                      "scope": 4049,
                       "src": "1110:14:12",
                       "stateVariable": false,
                       "storageLocation": "default",
@@ -1303,7 +1304,7 @@
                         "typeString": "uint256"
                       },
                       "typeName": {
-                        "id": 4019,
+                        "id": 4026,
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
                         "src": "1110:7:12",
@@ -1316,17 +1317,17 @@
                       "visibility": "internal"
                     }
                   ],
-                  "id": 4034,
+                  "id": 4041,
                   "initialValue": {
                     "argumentTypes": null,
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 4023,
+                        "id": 4030,
                         "name": "args",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 4008,
+                        "referencedDeclaration": 4015,
                         "src": "1139:4:12",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes_memory_ptr",
@@ -1338,7 +1339,7 @@
                         "components": [
                           {
                             "argumentTypes": null,
-                            "id": 4025,
+                            "id": 4032,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": true,
@@ -1350,7 +1351,7 @@
                               "typeString": "type(int128)"
                             },
                             "typeName": {
-                              "id": 4024,
+                              "id": 4031,
                               "name": "int128",
                               "nodeType": "ElementaryTypeName",
                               "src": "1146:6:12",
@@ -1362,7 +1363,7 @@
                           },
                           {
                             "argumentTypes": null,
-                            "id": 4027,
+                            "id": 4034,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": true,
@@ -1374,7 +1375,7 @@
                               "typeString": "type(int128)"
                             },
                             "typeName": {
-                              "id": 4026,
+                              "id": 4033,
                               "name": "int128",
                               "nodeType": "ElementaryTypeName",
                               "src": "1154:6:12",
@@ -1386,7 +1387,7 @@
                           },
                           {
                             "argumentTypes": null,
-                            "id": 4029,
+                            "id": 4036,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": true,
@@ -1398,7 +1399,7 @@
                               "typeString": "type(uint256)"
                             },
                             "typeName": {
-                              "id": 4028,
+                              "id": 4035,
                               "name": "uint256",
                               "nodeType": "ElementaryTypeName",
                               "src": "1162:7:12",
@@ -1410,7 +1411,7 @@
                           },
                           {
                             "argumentTypes": null,
-                            "id": 4031,
+                            "id": 4038,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": true,
@@ -1422,7 +1423,7 @@
                               "typeString": "type(uint256)"
                             },
                             "typeName": {
-                              "id": 4030,
+                              "id": 4037,
                               "name": "uint256",
                               "nodeType": "ElementaryTypeName",
                               "src": "1171:7:12",
@@ -1433,7 +1434,7 @@
                             }
                           }
                         ],
-                        "id": 4032,
+                        "id": 4039,
                         "isConstant": false,
                         "isInlineArray": false,
                         "isLValue": false,
@@ -1460,7 +1461,7 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 4021,
+                        "id": 4028,
                         "name": "abi",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
@@ -1471,7 +1472,7 @@
                           "typeString": "abi"
                         }
                       },
-                      "id": 4022,
+                      "id": 4029,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -1485,7 +1486,7 @@
                         "typeString": "function () pure"
                       }
                     },
-                    "id": 4033,
+                    "id": 4040,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1509,11 +1510,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 4036,
+                        "id": 4043,
                         "name": "i",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 4014,
+                        "referencedDeclaration": 4021,
                         "src": "1219:1:12",
                         "typeDescriptions": {
                           "typeIdentifier": "t_int128",
@@ -1522,11 +1523,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 4037,
+                        "id": 4044,
                         "name": "j",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 4016,
+                        "referencedDeclaration": 4023,
                         "src": "1231:1:12",
                         "typeDescriptions": {
                           "typeIdentifier": "t_int128",
@@ -1535,11 +1536,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 4038,
+                        "id": 4045,
                         "name": "dx",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 4018,
+                        "referencedDeclaration": 4025,
                         "src": "1244:2:12",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -1548,11 +1549,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 4039,
+                        "id": 4046,
                         "name": "min_dy",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 4020,
+                        "referencedDeclaration": 4027,
                         "src": "1262:6:12",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -1579,18 +1580,18 @@
                           "typeString": "uint256"
                         }
                       ],
-                      "id": 4035,
+                      "id": 4042,
                       "name": "ExchangeInputs",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 4006,
+                      "referencedDeclaration": 4013,
                       "src": "1193:14:12",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_type$_t_struct$_ExchangeInputs_$4006_storage_ptr_$",
+                        "typeIdentifier": "t_type$_t_struct$_ExchangeInputs_$4013_storage_ptr_$",
                         "typeString": "type(struct CurveAdapterLib.ExchangeInputs storage pointer)"
                       }
                     },
-                    "id": 4040,
+                    "id": 4047,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1606,19 +1607,19 @@
                     "src": "1193:82:12",
                     "tryCall": false,
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_ExchangeInputs_$4006_memory_ptr",
+                      "typeIdentifier": "t_struct$_ExchangeInputs_$4013_memory_ptr",
                       "typeString": "struct CurveAdapterLib.ExchangeInputs memory"
                     }
                   },
-                  "functionReturnParameters": 4012,
-                  "id": 4041,
+                  "functionReturnParameters": 4019,
+                  "id": 4048,
                   "nodeType": "Return",
                   "src": "1186:89:12"
                 }
               ]
             },
             "documentation": null,
-            "id": 4043,
+            "id": 4050,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
@@ -1626,17 +1627,17 @@
             "nodeType": "FunctionDefinition",
             "overrides": null,
             "parameters": {
-              "id": 4009,
+              "id": 4016,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4008,
+                  "id": 4015,
                   "mutability": "mutable",
                   "name": "args",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 4043,
+                  "scope": 4050,
                   "src": "1006:17:12",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -1645,7 +1646,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 4007,
+                    "id": 4014,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "1006:5:12",
@@ -1661,33 +1662,33 @@
               "src": "1005:19:12"
             },
             "returnParameters": {
-              "id": 4012,
+              "id": 4019,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4011,
+                  "id": 4018,
                   "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 4043,
+                  "scope": 4050,
                   "src": "1048:21:12",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_ExchangeInputs_$4006_memory_ptr",
+                    "typeIdentifier": "t_struct$_ExchangeInputs_$4013_memory_ptr",
                     "typeString": "struct CurveAdapterLib.ExchangeInputs"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 4010,
+                    "id": 4017,
                     "name": "ExchangeInputs",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 4006,
+                    "referencedDeclaration": 4013,
                     "src": "1048:14:12",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_ExchangeInputs_$4006_storage_ptr",
+                      "typeIdentifier": "t_struct$_ExchangeInputs_$4013_storage_ptr",
                       "typeString": "struct CurveAdapterLib.ExchangeInputs"
                     }
                   },
@@ -1697,14 +1698,14 @@
               ],
               "src": "1047:23:12"
             },
-            "scope": 4044,
+            "scope": 4051,
             "src": "976:304:12",
             "stateMutability": "pure",
             "virtual": false,
             "visibility": "internal"
           }
         ],
-        "scope": 4045,
+        "scope": 4052,
         "src": "113:1169:12"
       }
     ],
@@ -1714,14 +1715,14 @@
     "absolutePath": "/home/ray/0confirmation/packages/0confirmation-sol/contracts/adapters/assets/curve/CurveAdapterLib.sol",
     "exportedSymbols": {
       "CurveAdapterLib": [
-        4044
+        4051
       ]
     },
-    "id": 4045,
+    "id": 4052,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3921,
+        "id": 3928,
         "literals": [
           "solidity",
           "^",
@@ -1732,7 +1733,7 @@
         "src": "0:23:12"
       },
       {
-        "id": 3922,
+        "id": 3929,
         "literals": [
           "experimental",
           "ABIEncoderV2"
@@ -1743,16 +1744,16 @@
       {
         "absolutePath": "/home/ray/0confirmation/packages/0confirmation-sol/contracts/adapters/lib/ModuleLib.sol",
         "file": "../../lib/ModuleLib.sol",
-        "id": 3924,
+        "id": 3931,
         "nodeType": "ImportDirective",
-        "scope": 4045,
-        "sourceUnit": 6847,
+        "scope": 4052,
+        "sourceUnit": 6857,
         "src": "59:52:12",
         "symbolAliases": [
           {
             "foreign": {
               "argumentTypes": null,
-              "id": 3923,
+              "id": 3930,
               "name": "ModuleLib",
               "nodeType": "Identifier",
               "overloadedDeclarations": [],
@@ -1775,25 +1776,25 @@
         "contractKind": "library",
         "documentation": null,
         "fullyImplemented": true,
-        "id": 4044,
+        "id": 4051,
         "linearizedBaseContracts": [
-          4044
+          4051
         ],
         "name": "CurveAdapterLib",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "canonicalName": "CurveAdapterLib.Isolate",
-            "id": 3927,
+            "id": 3934,
             "members": [
               {
                 "constant": false,
-                "id": 3926,
+                "id": 3933,
                 "mutability": "mutable",
                 "name": "curveAddress",
                 "nodeType": "VariableDeclaration",
                 "overrides": null,
-                "scope": 3927,
+                "scope": 3934,
                 "src": "162:20:12",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -1802,7 +1803,7 @@
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 3925,
+                  "id": 3932,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "162:7:12",
@@ -1818,29 +1819,29 @@
             ],
             "name": "Isolate",
             "nodeType": "StructDefinition",
-            "scope": 4044,
+            "scope": 4051,
             "src": "141:46:12",
             "visibility": "public"
           },
           {
             "body": {
-              "id": 3950,
+              "id": 3957,
               "nodeType": "Block",
               "src": "308:118:12",
               "statements": [
                 {
                   "assignments": [
-                    3945
+                    3952
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 3945,
+                      "id": 3952,
                       "mutability": "mutable",
                       "name": "cast",
                       "nodeType": "VariableDeclaration",
                       "overrides": null,
-                      "scope": 3950,
+                      "scope": 3957,
                       "src": "314:50:12",
                       "stateVariable": false,
                       "storageLocation": "default",
@@ -1849,20 +1850,20 @@
                         "typeString": "function (uint256) returns (uint256)"
                       },
                       "typeName": {
-                        "id": 3944,
+                        "id": 3951,
                         "nodeType": "FunctionTypeName",
                         "parameterTypes": {
-                          "id": 3940,
+                          "id": 3947,
                           "nodeType": "ParameterList",
                           "parameters": [
                             {
                               "constant": false,
-                              "id": 3939,
+                              "id": 3946,
                               "mutability": "mutable",
                               "name": "",
                               "nodeType": "VariableDeclaration",
                               "overrides": null,
-                              "scope": 3944,
+                              "scope": 3951,
                               "src": "324:7:12",
                               "stateVariable": false,
                               "storageLocation": "default",
@@ -1871,7 +1872,7 @@
                                 "typeString": "uint256"
                               },
                               "typeName": {
-                                "id": 3938,
+                                "id": 3945,
                                 "name": "uint256",
                                 "nodeType": "ElementaryTypeName",
                                 "src": "324:7:12",
@@ -1887,17 +1888,17 @@
                           "src": "323:9:12"
                         },
                         "returnParameterTypes": {
-                          "id": 3943,
+                          "id": 3950,
                           "nodeType": "ParameterList",
                           "parameters": [
                             {
                               "constant": false,
-                              "id": 3942,
+                              "id": 3949,
                               "mutability": "mutable",
                               "name": "",
                               "nodeType": "VariableDeclaration",
                               "overrides": null,
-                              "scope": 3944,
+                              "scope": 3951,
                               "src": "351:7:12",
                               "stateVariable": false,
                               "storageLocation": "default",
@@ -1906,7 +1907,7 @@
                                 "typeString": "uint256"
                               },
                               "typeName": {
-                                "id": 3941,
+                                "id": 3948,
                                 "name": "uint256",
                                 "nodeType": "ElementaryTypeName",
                                 "src": "351:7:12",
@@ -1933,30 +1934,30 @@
                       "visibility": "internal"
                     }
                   ],
-                  "id": 3948,
+                  "id": 3955,
                   "initialValue": {
                     "argumentTypes": null,
                     "expression": {
                       "argumentTypes": null,
-                      "id": 3946,
+                      "id": 3953,
                       "name": "ModuleLib",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 6846,
+                      "referencedDeclaration": 6856,
                       "src": "367:9:12",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_type$_t_contract$_ModuleLib_$6846_$",
+                        "typeIdentifier": "t_type$_t_contract$_ModuleLib_$6856_$",
                         "typeString": "type(library ModuleLib)"
                       }
                     },
-                    "id": 3947,
+                    "id": 3954,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "memberName": "cast",
                     "nodeType": "MemberAccess",
-                    "referencedDeclaration": 6759,
+                    "referencedDeclaration": 6769,
                     "src": "367:14:12",
                     "typeDescriptions": {
                       "typeIdentifier": "t_function_internal_pure$_t_uint256_$returns$_t_uint256_$",
@@ -1992,28 +1993,28 @@
                   "evmVersion": "istanbul",
                   "externalReferences": [
                     {
-                      "declaration": 3945,
+                      "declaration": 3952,
                       "isOffset": false,
                       "isSlot": false,
                       "src": "412:4:12",
                       "valueSize": 1
                     },
                     {
-                      "declaration": 3936,
+                      "declaration": 3943,
                       "isOffset": false,
                       "isSlot": false,
                       "src": "404:4:12",
                       "valueSize": 1
                     }
                   ],
-                  "id": 3949,
+                  "id": 3956,
                   "nodeType": "InlineAssembly",
                   "src": "387:35:12"
                 }
               ]
             },
             "documentation": null,
-            "id": 3951,
+            "id": 3958,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
@@ -2021,45 +2022,45 @@
             "nodeType": "FunctionDefinition",
             "overrides": null,
             "parameters": {
-              "id": 3928,
+              "id": 3935,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "217:2:12"
             },
             "returnParameters": {
-              "id": 3937,
+              "id": 3944,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3936,
+                  "id": 3943,
                   "mutability": "mutable",
                   "name": "swap",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 3951,
+                  "scope": 3958,
                   "src": "243:63:12",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_function_internal_pure$_t_uint256_$returns$_t_struct$_Isolate_$3927_storage_ptr_$",
+                    "typeIdentifier": "t_function_internal_pure$_t_uint256_$returns$_t_struct$_Isolate_$3934_storage_ptr_$",
                     "typeString": "function (uint256) pure returns (struct CurveAdapterLib.Isolate)"
                   },
                   "typeName": {
-                    "id": 3935,
+                    "id": 3942,
                     "nodeType": "FunctionTypeName",
                     "parameterTypes": {
-                      "id": 3931,
+                      "id": 3938,
                       "nodeType": "ParameterList",
                       "parameters": [
                         {
                           "constant": false,
-                          "id": 3930,
+                          "id": 3937,
                           "mutability": "mutable",
                           "name": "",
                           "nodeType": "VariableDeclaration",
                           "overrides": null,
-                          "scope": 3935,
+                          "scope": 3942,
                           "src": "253:7:12",
                           "stateVariable": false,
                           "storageLocation": "default",
@@ -2068,7 +2069,7 @@
                             "typeString": "uint256"
                           },
                           "typeName": {
-                            "id": 3929,
+                            "id": 3936,
                             "name": "uint256",
                             "nodeType": "ElementaryTypeName",
                             "src": "253:7:12",
@@ -2084,33 +2085,33 @@
                       "src": "252:9:12"
                     },
                     "returnParameterTypes": {
-                      "id": 3934,
+                      "id": 3941,
                       "nodeType": "ParameterList",
                       "parameters": [
                         {
                           "constant": false,
-                          "id": 3933,
+                          "id": 3940,
                           "mutability": "mutable",
                           "name": "",
                           "nodeType": "VariableDeclaration",
                           "overrides": null,
-                          "scope": 3935,
+                          "scope": 3942,
                           "src": "285:15:12",
                           "stateVariable": false,
                           "storageLocation": "storage",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_struct$_Isolate_$3927_storage_ptr",
+                            "typeIdentifier": "t_struct$_Isolate_$3934_storage_ptr",
                             "typeString": "struct CurveAdapterLib.Isolate"
                           },
                           "typeName": {
                             "contractScope": null,
-                            "id": 3932,
+                            "id": 3939,
                             "name": "Isolate",
                             "nodeType": "UserDefinedTypeName",
-                            "referencedDeclaration": 3927,
+                            "referencedDeclaration": 3934,
                             "src": "285:7:12",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_struct$_Isolate_$3927_storage_ptr",
+                              "typeIdentifier": "t_struct$_Isolate_$3934_storage_ptr",
                               "typeString": "struct CurveAdapterLib.Isolate"
                             }
                           },
@@ -2123,7 +2124,7 @@
                     "src": "243:63:12",
                     "stateMutability": "pure",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_function_internal_pure$_t_uint256_$returns$_t_struct$_Isolate_$3927_storage_ptr_$",
+                      "typeIdentifier": "t_function_internal_pure$_t_uint256_$returns$_t_struct$_Isolate_$3934_storage_ptr_$",
                       "typeString": "function (uint256) pure returns (struct CurveAdapterLib.Isolate)"
                     },
                     "visibility": "internal"
@@ -2134,7 +2135,7 @@
               ],
               "src": "242:65:12"
             },
-            "scope": 4044,
+            "scope": 4051,
             "src": "190:236:12",
             "stateMutability": "pure",
             "virtual": false,
@@ -2142,7 +2143,7 @@
           },
           {
             "body": {
-              "id": 3963,
+              "id": 3970,
               "nodeType": "Block",
               "src": "508:43:12",
               "statements": [
@@ -2152,11 +2153,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 3960,
+                        "id": 3967,
                         "name": "key",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3953,
+                        "referencedDeclaration": 3960,
                         "src": "542:3:12",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -2174,18 +2175,18 @@
                       "arguments": [],
                       "expression": {
                         "argumentTypes": [],
-                        "id": 3958,
+                        "id": 3965,
                         "name": "getCastStorageType",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3951,
+                        "referencedDeclaration": 3958,
                         "src": "521:18:12",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_function_internal_pure$__$returns$_t_function_internal_pure$_t_uint256_$returns$_t_struct$_Isolate_$3927_storage_ptr_$_$",
+                          "typeIdentifier": "t_function_internal_pure$__$returns$_t_function_internal_pure$_t_uint256_$returns$_t_struct$_Isolate_$3934_storage_ptr_$_$",
                           "typeString": "function () pure returns (function (uint256) pure returns (struct CurveAdapterLib.Isolate storage pointer))"
                         }
                       },
-                      "id": 3959,
+                      "id": 3966,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -2196,11 +2197,11 @@
                       "src": "521:20:12",
                       "tryCall": false,
                       "typeDescriptions": {
-                        "typeIdentifier": "t_function_internal_pure$_t_uint256_$returns$_t_struct$_Isolate_$3927_storage_ptr_$",
+                        "typeIdentifier": "t_function_internal_pure$_t_uint256_$returns$_t_struct$_Isolate_$3934_storage_ptr_$",
                         "typeString": "function (uint256) pure returns (struct CurveAdapterLib.Isolate storage pointer)"
                       }
                     },
-                    "id": 3961,
+                    "id": 3968,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2211,19 +2212,19 @@
                     "src": "521:25:12",
                     "tryCall": false,
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Isolate_$3927_storage_ptr",
+                      "typeIdentifier": "t_struct$_Isolate_$3934_storage_ptr",
                       "typeString": "struct CurveAdapterLib.Isolate storage pointer"
                     }
                   },
-                  "functionReturnParameters": 3957,
-                  "id": 3962,
+                  "functionReturnParameters": 3964,
+                  "id": 3969,
                   "nodeType": "Return",
                   "src": "514:32:12"
                 }
               ]
             },
             "documentation": null,
-            "id": 3964,
+            "id": 3971,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
@@ -2231,17 +2232,17 @@
             "nodeType": "FunctionDefinition",
             "overrides": null,
             "parameters": {
-              "id": 3954,
+              "id": 3961,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3953,
+                  "id": 3960,
                   "mutability": "mutable",
                   "name": "key",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 3964,
+                  "scope": 3971,
                   "src": "455:11:12",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2250,7 +2251,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3952,
+                    "id": 3959,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "455:7:12",
@@ -2266,33 +2267,33 @@
               "src": "454:13:12"
             },
             "returnParameters": {
-              "id": 3957,
+              "id": 3964,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3956,
+                  "id": 3963,
                   "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 3964,
+                  "scope": 3971,
                   "src": "491:15:12",
                   "stateVariable": false,
                   "storageLocation": "storage",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Isolate_$3927_storage_ptr",
+                    "typeIdentifier": "t_struct$_Isolate_$3934_storage_ptr",
                     "typeString": "struct CurveAdapterLib.Isolate"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 3955,
+                    "id": 3962,
                     "name": "Isolate",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 3927,
+                    "referencedDeclaration": 3934,
                     "src": "491:7:12",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Isolate_$3927_storage_ptr",
+                      "typeIdentifier": "t_struct$_Isolate_$3934_storage_ptr",
                       "typeString": "struct CurveAdapterLib.Isolate"
                     }
                   },
@@ -2302,7 +2303,7 @@
               ],
               "src": "490:17:12"
             },
-            "scope": 4044,
+            "scope": 4051,
             "src": "429:122:12",
             "stateMutability": "pure",
             "virtual": false,
@@ -2310,7 +2311,7 @@
           },
           {
             "body": {
-              "id": 3982,
+              "id": 3989,
               "nodeType": "Block",
               "src": "635:89:12",
               "statements": [
@@ -2327,7 +2328,7 @@
                               {
                                 "argumentTypes": null,
                                 "hexValue": "69736f6c6174652e63757276652d61646170746572",
-                                "id": 3976,
+                                "id": 3983,
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": true,
@@ -2344,11 +2345,11 @@
                               },
                               {
                                 "argumentTypes": null,
-                                "id": 3977,
+                                "id": 3984,
                                 "name": "instance",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 3966,
+                                "referencedDeclaration": 3973,
                                 "src": "708:8:12",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_address",
@@ -2369,7 +2370,7 @@
                               ],
                               "expression": {
                                 "argumentTypes": null,
-                                "id": 3974,
+                                "id": 3981,
                                 "name": "abi",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
@@ -2380,7 +2381,7 @@
                                   "typeString": "abi"
                                 }
                               },
-                              "id": 3975,
+                              "id": 3982,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
@@ -2394,7 +2395,7 @@
                                 "typeString": "function () pure returns (bytes memory)"
                               }
                             },
-                            "id": 3978,
+                            "id": 3985,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -2417,7 +2418,7 @@
                               "typeString": "bytes memory"
                             }
                           ],
-                          "id": 3973,
+                          "id": 3980,
                           "name": "keccak256",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
@@ -2428,7 +2429,7 @@
                             "typeString": "function (bytes memory) pure returns (bytes32)"
                           }
                         },
-                        "id": 3979,
+                        "id": 3986,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -2451,7 +2452,7 @@
                           "typeString": "bytes32"
                         }
                       ],
-                      "id": 3972,
+                      "id": 3979,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -2463,7 +2464,7 @@
                         "typeString": "type(uint256)"
                       },
                       "typeName": {
-                        "id": 3971,
+                        "id": 3978,
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
                         "src": "648:7:12",
@@ -2473,7 +2474,7 @@
                         }
                       }
                     },
-                    "id": 3980,
+                    "id": 3987,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2488,15 +2489,15 @@
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 3970,
-                  "id": 3981,
+                  "functionReturnParameters": 3977,
+                  "id": 3988,
                   "nodeType": "Return",
                   "src": "641:78:12"
                 }
               ]
             },
             "documentation": null,
-            "id": 3983,
+            "id": 3990,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
@@ -2504,17 +2505,17 @@
             "nodeType": "FunctionDefinition",
             "overrides": null,
             "parameters": {
-              "id": 3967,
+              "id": 3974,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3966,
+                  "id": 3973,
                   "mutability": "mutable",
                   "name": "instance",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 3983,
+                  "scope": 3990,
                   "src": "585:16:12",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2523,7 +2524,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3965,
+                    "id": 3972,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "585:7:12",
@@ -2540,17 +2541,17 @@
               "src": "584:18:12"
             },
             "returnParameters": {
-              "id": 3970,
+              "id": 3977,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3969,
+                  "id": 3976,
                   "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 3983,
+                  "scope": 3990,
                   "src": "626:7:12",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2559,7 +2560,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3968,
+                    "id": 3975,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "626:7:12",
@@ -2574,7 +2575,7 @@
               ],
               "src": "625:9:12"
             },
-            "scope": 4044,
+            "scope": 4051,
             "src": "554:170:12",
             "stateMutability": "pure",
             "virtual": false,
@@ -2582,7 +2583,7 @@
           },
           {
             "body": {
-              "id": 3996,
+              "id": 4003,
               "nodeType": "Block",
               "src": "812:67:12",
               "statements": [
@@ -2595,11 +2596,11 @@
                         "arguments": [
                           {
                             "argumentTypes": null,
-                            "id": 3992,
+                            "id": 3999,
                             "name": "instance",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3985,
+                            "referencedDeclaration": 3992,
                             "src": "864:8:12",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
@@ -2614,18 +2615,18 @@
                               "typeString": "address"
                             }
                           ],
-                          "id": 3991,
+                          "id": 3998,
                           "name": "computeIsolatePointer",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3983,
+                          "referencedDeclaration": 3990,
                           "src": "842:21:12",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$_t_address_$returns$_t_uint256_$",
                             "typeString": "function (address) pure returns (uint256)"
                           }
                         },
-                        "id": 3993,
+                        "id": 4000,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -2648,18 +2649,18 @@
                           "typeString": "uint256"
                         }
                       ],
-                      "id": 3990,
+                      "id": 3997,
                       "name": "toIsolatePointer",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3964,
+                      "referencedDeclaration": 3971,
                       "src": "825:16:12",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_function_internal_pure$_t_uint256_$returns$_t_struct$_Isolate_$3927_storage_ptr_$",
+                        "typeIdentifier": "t_function_internal_pure$_t_uint256_$returns$_t_struct$_Isolate_$3934_storage_ptr_$",
                         "typeString": "function (uint256) pure returns (struct CurveAdapterLib.Isolate storage pointer)"
                       }
                     },
-                    "id": 3994,
+                    "id": 4001,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2670,19 +2671,19 @@
                     "src": "825:49:12",
                     "tryCall": false,
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Isolate_$3927_storage_ptr",
+                      "typeIdentifier": "t_struct$_Isolate_$3934_storage_ptr",
                       "typeString": "struct CurveAdapterLib.Isolate storage pointer"
                     }
                   },
-                  "functionReturnParameters": 3989,
-                  "id": 3995,
+                  "functionReturnParameters": 3996,
+                  "id": 4002,
                   "nodeType": "Return",
                   "src": "818:56:12"
                 }
               ]
             },
             "documentation": null,
-            "id": 3997,
+            "id": 4004,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
@@ -2690,17 +2691,17 @@
             "nodeType": "FunctionDefinition",
             "overrides": null,
             "parameters": {
-              "id": 3986,
+              "id": 3993,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3985,
+                  "id": 3992,
                   "mutability": "mutable",
                   "name": "instance",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 3997,
+                  "scope": 4004,
                   "src": "754:16:12",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2709,7 +2710,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3984,
+                    "id": 3991,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "754:7:12",
@@ -2726,33 +2727,33 @@
               "src": "753:18:12"
             },
             "returnParameters": {
-              "id": 3989,
+              "id": 3996,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3988,
+                  "id": 3995,
                   "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 3997,
+                  "scope": 4004,
                   "src": "795:15:12",
                   "stateVariable": false,
                   "storageLocation": "storage",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Isolate_$3927_storage_ptr",
+                    "typeIdentifier": "t_struct$_Isolate_$3934_storage_ptr",
                     "typeString": "struct CurveAdapterLib.Isolate"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 3987,
+                    "id": 3994,
                     "name": "Isolate",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 3927,
+                    "referencedDeclaration": 3934,
                     "src": "795:7:12",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Isolate_$3927_storage_ptr",
+                      "typeIdentifier": "t_struct$_Isolate_$3934_storage_ptr",
                       "typeString": "struct CurveAdapterLib.Isolate"
                     }
                   },
@@ -2762,7 +2763,7 @@
               ],
               "src": "794:17:12"
             },
-            "scope": 4044,
+            "scope": 4051,
             "src": "727:152:12",
             "stateMutability": "pure",
             "virtual": false,
@@ -2770,16 +2771,16 @@
           },
           {
             "canonicalName": "CurveAdapterLib.ExchangeInputs",
-            "id": 4006,
+            "id": 4013,
             "members": [
               {
                 "constant": false,
-                "id": 3999,
+                "id": 4006,
                 "mutability": "mutable",
                 "name": "i",
                 "nodeType": "VariableDeclaration",
                 "overrides": null,
-                "scope": 4006,
+                "scope": 4013,
                 "src": "910:8:12",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -2788,7 +2789,7 @@
                   "typeString": "int128"
                 },
                 "typeName": {
-                  "id": 3998,
+                  "id": 4005,
                   "name": "int128",
                   "nodeType": "ElementaryTypeName",
                   "src": "910:6:12",
@@ -2802,12 +2803,12 @@
               },
               {
                 "constant": false,
-                "id": 4001,
+                "id": 4008,
                 "mutability": "mutable",
                 "name": "j",
                 "nodeType": "VariableDeclaration",
                 "overrides": null,
-                "scope": 4006,
+                "scope": 4013,
                 "src": "924:8:12",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -2816,7 +2817,7 @@
                   "typeString": "int128"
                 },
                 "typeName": {
-                  "id": 4000,
+                  "id": 4007,
                   "name": "int128",
                   "nodeType": "ElementaryTypeName",
                   "src": "924:6:12",
@@ -2830,12 +2831,12 @@
               },
               {
                 "constant": false,
-                "id": 4003,
+                "id": 4010,
                 "mutability": "mutable",
                 "name": "dx",
                 "nodeType": "VariableDeclaration",
                 "overrides": null,
-                "scope": 4006,
+                "scope": 4013,
                 "src": "938:10:12",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -2844,7 +2845,7 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 4002,
+                  "id": 4009,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
                   "src": "938:7:12",
@@ -2858,12 +2859,12 @@
               },
               {
                 "constant": false,
-                "id": 4005,
+                "id": 4012,
                 "mutability": "mutable",
                 "name": "min_dy",
                 "nodeType": "VariableDeclaration",
                 "overrides": null,
-                "scope": 4006,
+                "scope": 4013,
                 "src": "954:14:12",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -2872,7 +2873,7 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 4004,
+                  "id": 4011,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
                   "src": "954:7:12",
@@ -2887,32 +2888,32 @@
             ],
             "name": "ExchangeInputs",
             "nodeType": "StructDefinition",
-            "scope": 4044,
+            "scope": 4051,
             "src": "882:91:12",
             "visibility": "public"
           },
           {
             "body": {
-              "id": 4042,
+              "id": 4049,
               "nodeType": "Block",
               "src": "1071:209:12",
               "statements": [
                 {
                   "assignments": [
-                    4014,
-                    4016,
-                    4018,
-                    4020
+                    4021,
+                    4023,
+                    4025,
+                    4027
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 4014,
+                      "id": 4021,
                       "mutability": "mutable",
                       "name": "i",
                       "nodeType": "VariableDeclaration",
                       "overrides": null,
-                      "scope": 4042,
+                      "scope": 4049,
                       "src": "1078:8:12",
                       "stateVariable": false,
                       "storageLocation": "default",
@@ -2921,7 +2922,7 @@
                         "typeString": "int128"
                       },
                       "typeName": {
-                        "id": 4013,
+                        "id": 4020,
                         "name": "int128",
                         "nodeType": "ElementaryTypeName",
                         "src": "1078:6:12",
@@ -2935,12 +2936,12 @@
                     },
                     {
                       "constant": false,
-                      "id": 4016,
+                      "id": 4023,
                       "mutability": "mutable",
                       "name": "j",
                       "nodeType": "VariableDeclaration",
                       "overrides": null,
-                      "scope": 4042,
+                      "scope": 4049,
                       "src": "1088:8:12",
                       "stateVariable": false,
                       "storageLocation": "default",
@@ -2949,7 +2950,7 @@
                         "typeString": "int128"
                       },
                       "typeName": {
-                        "id": 4015,
+                        "id": 4022,
                         "name": "int128",
                         "nodeType": "ElementaryTypeName",
                         "src": "1088:6:12",
@@ -2963,12 +2964,12 @@
                     },
                     {
                       "constant": false,
-                      "id": 4018,
+                      "id": 4025,
                       "mutability": "mutable",
                       "name": "dx",
                       "nodeType": "VariableDeclaration",
                       "overrides": null,
-                      "scope": 4042,
+                      "scope": 4049,
                       "src": "1098:10:12",
                       "stateVariable": false,
                       "storageLocation": "default",
@@ -2977,7 +2978,7 @@
                         "typeString": "uint256"
                       },
                       "typeName": {
-                        "id": 4017,
+                        "id": 4024,
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
                         "src": "1098:7:12",
@@ -2991,12 +2992,12 @@
                     },
                     {
                       "constant": false,
-                      "id": 4020,
+                      "id": 4027,
                       "mutability": "mutable",
                       "name": "min_dy",
                       "nodeType": "VariableDeclaration",
                       "overrides": null,
-                      "scope": 4042,
+                      "scope": 4049,
                       "src": "1110:14:12",
                       "stateVariable": false,
                       "storageLocation": "default",
@@ -3005,7 +3006,7 @@
                         "typeString": "uint256"
                       },
                       "typeName": {
-                        "id": 4019,
+                        "id": 4026,
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
                         "src": "1110:7:12",
@@ -3018,17 +3019,17 @@
                       "visibility": "internal"
                     }
                   ],
-                  "id": 4034,
+                  "id": 4041,
                   "initialValue": {
                     "argumentTypes": null,
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 4023,
+                        "id": 4030,
                         "name": "args",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 4008,
+                        "referencedDeclaration": 4015,
                         "src": "1139:4:12",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes_memory_ptr",
@@ -3040,7 +3041,7 @@
                         "components": [
                           {
                             "argumentTypes": null,
-                            "id": 4025,
+                            "id": 4032,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": true,
@@ -3052,7 +3053,7 @@
                               "typeString": "type(int128)"
                             },
                             "typeName": {
-                              "id": 4024,
+                              "id": 4031,
                               "name": "int128",
                               "nodeType": "ElementaryTypeName",
                               "src": "1146:6:12",
@@ -3064,7 +3065,7 @@
                           },
                           {
                             "argumentTypes": null,
-                            "id": 4027,
+                            "id": 4034,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": true,
@@ -3076,7 +3077,7 @@
                               "typeString": "type(int128)"
                             },
                             "typeName": {
-                              "id": 4026,
+                              "id": 4033,
                               "name": "int128",
                               "nodeType": "ElementaryTypeName",
                               "src": "1154:6:12",
@@ -3088,7 +3089,7 @@
                           },
                           {
                             "argumentTypes": null,
-                            "id": 4029,
+                            "id": 4036,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": true,
@@ -3100,7 +3101,7 @@
                               "typeString": "type(uint256)"
                             },
                             "typeName": {
-                              "id": 4028,
+                              "id": 4035,
                               "name": "uint256",
                               "nodeType": "ElementaryTypeName",
                               "src": "1162:7:12",
@@ -3112,7 +3113,7 @@
                           },
                           {
                             "argumentTypes": null,
-                            "id": 4031,
+                            "id": 4038,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": true,
@@ -3124,7 +3125,7 @@
                               "typeString": "type(uint256)"
                             },
                             "typeName": {
-                              "id": 4030,
+                              "id": 4037,
                               "name": "uint256",
                               "nodeType": "ElementaryTypeName",
                               "src": "1171:7:12",
@@ -3135,7 +3136,7 @@
                             }
                           }
                         ],
-                        "id": 4032,
+                        "id": 4039,
                         "isConstant": false,
                         "isInlineArray": false,
                         "isLValue": false,
@@ -3162,7 +3163,7 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 4021,
+                        "id": 4028,
                         "name": "abi",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
@@ -3173,7 +3174,7 @@
                           "typeString": "abi"
                         }
                       },
-                      "id": 4022,
+                      "id": 4029,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -3187,7 +3188,7 @@
                         "typeString": "function () pure"
                       }
                     },
-                    "id": 4033,
+                    "id": 4040,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -3211,11 +3212,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 4036,
+                        "id": 4043,
                         "name": "i",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 4014,
+                        "referencedDeclaration": 4021,
                         "src": "1219:1:12",
                         "typeDescriptions": {
                           "typeIdentifier": "t_int128",
@@ -3224,11 +3225,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 4037,
+                        "id": 4044,
                         "name": "j",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 4016,
+                        "referencedDeclaration": 4023,
                         "src": "1231:1:12",
                         "typeDescriptions": {
                           "typeIdentifier": "t_int128",
@@ -3237,11 +3238,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 4038,
+                        "id": 4045,
                         "name": "dx",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 4018,
+                        "referencedDeclaration": 4025,
                         "src": "1244:2:12",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -3250,11 +3251,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 4039,
+                        "id": 4046,
                         "name": "min_dy",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 4020,
+                        "referencedDeclaration": 4027,
                         "src": "1262:6:12",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -3281,18 +3282,18 @@
                           "typeString": "uint256"
                         }
                       ],
-                      "id": 4035,
+                      "id": 4042,
                       "name": "ExchangeInputs",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 4006,
+                      "referencedDeclaration": 4013,
                       "src": "1193:14:12",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_type$_t_struct$_ExchangeInputs_$4006_storage_ptr_$",
+                        "typeIdentifier": "t_type$_t_struct$_ExchangeInputs_$4013_storage_ptr_$",
                         "typeString": "type(struct CurveAdapterLib.ExchangeInputs storage pointer)"
                       }
                     },
-                    "id": 4040,
+                    "id": 4047,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -3308,19 +3309,19 @@
                     "src": "1193:82:12",
                     "tryCall": false,
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_ExchangeInputs_$4006_memory_ptr",
+                      "typeIdentifier": "t_struct$_ExchangeInputs_$4013_memory_ptr",
                       "typeString": "struct CurveAdapterLib.ExchangeInputs memory"
                     }
                   },
-                  "functionReturnParameters": 4012,
-                  "id": 4041,
+                  "functionReturnParameters": 4019,
+                  "id": 4048,
                   "nodeType": "Return",
                   "src": "1186:89:12"
                 }
               ]
             },
             "documentation": null,
-            "id": 4043,
+            "id": 4050,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
@@ -3328,17 +3329,17 @@
             "nodeType": "FunctionDefinition",
             "overrides": null,
             "parameters": {
-              "id": 4009,
+              "id": 4016,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4008,
+                  "id": 4015,
                   "mutability": "mutable",
                   "name": "args",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 4043,
+                  "scope": 4050,
                   "src": "1006:17:12",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -3347,7 +3348,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 4007,
+                    "id": 4014,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "1006:5:12",
@@ -3363,33 +3364,33 @@
               "src": "1005:19:12"
             },
             "returnParameters": {
-              "id": 4012,
+              "id": 4019,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4011,
+                  "id": 4018,
                   "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 4043,
+                  "scope": 4050,
                   "src": "1048:21:12",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_ExchangeInputs_$4006_memory_ptr",
+                    "typeIdentifier": "t_struct$_ExchangeInputs_$4013_memory_ptr",
                     "typeString": "struct CurveAdapterLib.ExchangeInputs"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 4010,
+                    "id": 4017,
                     "name": "ExchangeInputs",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 4006,
+                    "referencedDeclaration": 4013,
                     "src": "1048:14:12",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_ExchangeInputs_$4006_storage_ptr",
+                      "typeIdentifier": "t_struct$_ExchangeInputs_$4013_storage_ptr",
                       "typeString": "struct CurveAdapterLib.ExchangeInputs"
                     }
                   },
@@ -3399,14 +3400,14 @@
               ],
               "src": "1047:23:12"
             },
-            "scope": 4044,
+            "scope": 4051,
             "src": "976:304:12",
             "stateMutability": "pure",
             "virtual": false,
             "visibility": "internal"
           }
         ],
-        "scope": 4045,
+        "scope": 4052,
         "src": "113:1169:12"
       }
     ],
@@ -3417,8 +3418,8 @@
     "version": "0.6.6+commit.6c089d02.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "3.0.23",
-  "updatedAt": "2020-04-23T08:17:53.917Z",
+  "schemaVersion": "3.1.0",
+  "updatedAt": "2020-04-24T21:00:31.137Z",
   "devdoc": {
     "methods": {}
   },

@@ -1,19 +1,21 @@
 pragma solidity ^0.6.0;
 
 import { ERC20 } from "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
-import { ERC20Detailed } from "openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol";
 import { IERC20 } from "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
+import { ERC20Detailed } from "openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol";
+import { ERC20Burnable } from "openzeppelin-solidity/contracts/token/ERC20/ERC20Burnable.sol";
 import { TokenUtils } from "./utils/TokenUtils.sol";
 
-contract LiquidityToken is ERC20Detailed, ERC20 {
+contract LiquidityToken is ERC20, ERC20Burnable {
   using TokenUtils for *;
   address public pool;
   address public asset;
   uint256 public offset;
   mapping (address => uint256) public outstandingLoans;
-  constructor(address shifterPool, address underlyingAsset, string memory name, string memory symbol, uint8 decimals) ERC20Detailed(name, symbol, decimals) public {
+  constructor(address shifterPool, address underlyingAsset, string memory name, string memory symbol, uint8 decimals) ERC20(name, symbol) public override {
     pool = shifterPool;
     asset = underlyingAsset;
+    _setupDecimals(decimals);
   }
   modifier onlyPool {
     require(msg.sender == pool, "must be called by pool manager");

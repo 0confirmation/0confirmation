@@ -1,4 +1,4 @@
-const kovan = require('../environments/kovan');
+const environments = require('@0confirmation/sdk/environments');
 const BorrowProxyLib = artifacts.require('BorrowProxyLib');
 const ShifterPool = artifacts.require('ShifterPool');
 const UniswapAdapter = artifacts.require('UniswapAdapter');
@@ -7,13 +7,16 @@ const ERC20Adapter = artifacts.require('ERC20Adapter');
 const LiquidityToken = artifacts.require('LiquidityToken');
 const CurveAdapter = artifacts.require('CurveAdapter');
 const ShifterRegistryMock = artifacts.require('ShifterRegistryMock');
-const Zero = require('@0confirmation/sdk');
-const Curvefi = require('@0confirmation/curvefi/build/Curvefi');
+const Curvefi = artifacts.require('Curvefi');
+const CurveToken = artifacts.require('CurveToken');
 const DAI = artifacts.require('DAI');
+const WBTC = artifacts.require('WBTC');
 const Exchange = artifacts.require('Exchange');
 const Factory = artifacts.require('Factory');
 const ethers = require('ethers');
 const fs = require('fs');
+
+const Zero = require('@0confirmation/sdk');
 
 const ModuleTypes = {
   BY_CODEHASH: 1,
@@ -54,6 +57,13 @@ module.exports = async function(deployer) {
     const uniswapContract = new ethers.Contract(factory.address, Factory.abi, new ethers.providers.InfuraProvider('kovan'));
     renbtcExchange = { address: await uniswapContract.getExchange(renbtc.address) };
   } 
+  await deployer.deploy(CurveToken, 'Curve.fi wBTC/renBTC', 'wBTC+renBTC', 8, 0)
+  await deployer.deploy(WBTC);
+  const wbtc = await WBTC.deployed();
+  const curveToken = await CurveToken.deployed();
+  await deployer.deploy(Curvefi, [ wbtc.address, renbtc.address ], [ wbtc.address, renbtc.address ], curveToken.address, '100', ethers.utils.parseEther('0').toString())
+  const curve = await Curvefi.deployed();
+  await curveToken.set_minter(curve.address);
   const shifterPool = await ShifterPool.deployed();
   await deployer.deploy(CurveAdapter, getAddress(Curvefi, deployer.network_id));
   await deployer.deploy(UniswapAdapter, factory.address);

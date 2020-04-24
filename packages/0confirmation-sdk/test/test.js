@@ -15,7 +15,7 @@ const startSignalingServer = require('@0confirmation/webrtc-star');
 
 const timeout = (n) => new Promise((resolve) => setTimeout(resolve, n));
 
-const resultToJsonRpc = require('../lib/util/result-to-jsonrpc');
+const resultToJsonRpc = require('../util/result-to-jsonrpc');
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 const ganache = require('ganache-cli');
 const key = privateKeys[0].substr(2);
@@ -49,9 +49,13 @@ const ModuleTypes = {
   };
 });
 
+
+const logGas = (receipt) => console.log(chalk.bold('gas used: ') + chalk.yellow(receipt.gasUsed));
+
 const ethersProvider = new Web3Provider(provider);
 
-const Zero = require('../lib/sdk');
+const Zero = require('../sdk');
+const { ZeroMock } = Zero;
 
 const fs = require('fs-extra');
 
@@ -179,80 +183,12 @@ const deploy = async () => {
   };
 };
 
-const RPCWrapper = require('../lib/util/rpc-wrapper');
-
-const mockBtcBackend = {
-  name: 'btc',
-  prefixes: ['btc'],
-  async send({
-    method,
-    params,
-    id
-  }) {
-    return await resultToJsonRpc(id, () => [{
-      output_no: 1,
-      txid: crypto.randomBytes(32).toString('hex')
-    }]);
-  }
-};
-
-mockBtcBackend.__proto__ = RPCWrapper.prototype;
-
-const mockRenVMBackend = {
-  name: 'renvm',
-  prefixes: ['ren'],
-  async send({
-    method,
-    params,
-    id
-  }) {
-    if (method === 'ren_submitTx') return resultToJsonRpc(id, () => ({}));
-    else if (method === 'ren_queryTx') return resultToJsonRpc(id, () => ({
-      tx: {
-        out: [{
-          value: '0x' + crypto.randomBytes(32).toString('hex')
-        }, {
-          value: '0x' + crypto.randomBytes(32).toString('hex')
-        }, {
-          value: 27
-        }]
-      }
-    }));
-    return {};
-  }
-};
-
-mockRenVMBackend.__proto__ = RPCWrapper.prototype;
+const makeMockBtcBackend = require('../mock/btc');
+const makeMockRenVMBackend = require('../mock/renvm');
 
 const makeZero = async (contracts, provider) => {
-  const zero = new Zero({
-    backends: {
-      ethereum: {
-        provider
-      },
-      btc: {
-        network: 'testnet'
-      },
-      renvm: {
-        network: 'testnet'
-      },
-      zero: {
-        multiaddr: '/ip4/127.0.0.1/tcp/9090/ws/p2p-webrtc-star/',
-        dht: true
-      }
-    },
-    shifterPool: contracts.shifterPool,
-    mpkh: contracts.mpkh,
-    borrowProxyLib: contracts.borrowProxyLib
-  });
-  zero.driver.registerBackend(Object.assign(Object.create(mockBtcBackend), {
-    driver: zero.driver
-  }));
-  zero.driver.registerBackend(Object.assign(Object.create(mockRenVMBackend), {
-    driver: zero.driver
-  }));
-  await zero.initializeDriver();
-  await timeout(5000);
+  const zero = new ZeroMock(provider);
+  Object.assign(zero.network, contracts);
   return zero;
 };
 
@@ -308,12 +244,12 @@ const logLiquidityRequest = (v) => {
 describe('0confirmation sdk', () => {
   const fixtures = {};
   before(async () => {
-    await startSignalingServer();
     fixtures.contracts = await deploy();
     const [ borrower, keeper ] = await Promise.all([
       makeZero(fixtures.contracts, borrowerProvider),
       makeZero(fixtures.contracts, provider)
     ]);
+    borrower.connectMock(keeper);
     Object.assign(fixtures, {
       borrower,
       keeper
@@ -322,59 +258,6 @@ describe('0confirmation sdk', () => {
     await (await fixtures.keeper.addLiquidity(fixtures.contracts.zbtc, utils.parseUnits('5', 8).toString())).wait();
     await (await fixtures.keeper.approvePool(fixtures.contracts.zbtc)).wait();
   });
-/*
-  it('should execute a borrow', async () => {
-    const deferred = defer();
-    const exchange = fixtures.contracts.exchange;
-    const [ keeperAddress ] = await fixtures.keeper.driver.sendWrapped('eth_accounts', []);
-    const [ borrowerAddress ] = await fixtures.borrower.driver.sendWrapped('eth_accounts', []);
-    await fixtures.keeper.listenForLiquidityRequests(async (v) => {
-      const deposited = await v.waitForDeposit();
-      const result = await deposited.submitToRenVM();
-      const sig = await deposited.waitForSignature();
-      console.log('broadcasted!');
-      await logSheet(borrowerAddress, 'borrower before borrow', fixtures.contracts);
-      await logSheet(keeperAddress, 'keeper before borrow', fixtures.contracts);
-      await logSheet(fixtures.contracts.shifterPool, 'shifter pool before borrow', fixtures.contracts);
-      await logSheet(fixtures.contracts.zerobtc, 'renBTC pool before borrow', fixtures.contracts);
-      try {
-        await deposited.executeBorrow(utils.parseUnits('1', 8).toString(), '100000');
-        deferred.resolve(await deposited.getBorrowProxy());
-      } catch (e) {
-        deferred.reject(e);
-      }
-    });
-    console.log('keeper address: ' + keeperAddress);
-    console.log('borrower address: ' + borrowerAddress);
-    const liquidityRequest = fixtures.borrower.createLiquidityRequest({
-      token: fixtures.contracts.zbtc,
-      amount: utils.parseUnits('2', 8).toString(),
-      nonce: '0x68b7aed3299637f7ed8d02d40fb04a727d89bb3448ca439596bd42d65a6e16ce',
-      actions: [],
-      gasRequested: utils.parseEther('0.01').toString()
-    });
-    const liquidityRequestParcel = await liquidityRequest.sign();
-    console.log('liquidity request signed by fixtures.borrower: ' + liquidityRequestParcel.signature);
-    await timeout(2000);
-    await liquidityRequestParcel.broadcast();
-    const proxy = await deferred.promise;
-    await logSheet(borrowerAddress, 'fixtures.borrower after borrow', fixtures.contracts);
-    await logSheet(keeperAddress, 'keeper after borrow', fixtures.contracts);
-    await logSheet(fixtures.contracts.shifterPool, 'shifter pool after borrow', fixtures.contracts);
-    await logSheet(fixtures.contracts.zerobtc, 'renBTC pool after borrow', fixtures.contracts);
-    await logSheet(liquidityRequestParcel.proxyAddress, 'borrow proxy after borrow', fixtures.contracts);
-    await fixtures.borrower.setBorrowProxy(liquidityRequestParcel.proxyAddress);
-    const borrowedProvider = new Web3Provider(fixtures.borrower.getProvider());
-    const exchangeWrapped = new ethers.Contract(fixtures.contracts.exchange, Exchange.abi, borrowedProvider.getSigner());
-    console.log(chalk.bold('dumping loan on uniswap ...'));
-    await (await exchangeWrapped.tokenToEthSwapInput(utils.parseUnits('1', 8), utils.parseUnits('1', 8), String(Date.now() * 2), { gasLimit: ethers.utils.hexlify(6e6) })).wait();
-    await logSheet(liquidityRequestParcel.proxyAddress, 'borrow proxy after trade on uniswap', fixtures.contracts);
-    await (await proxy.repayLoan({ gasLimit: ethers.utils.hexlify(6e6) })).wait();
-    await logSheet(keeperAddress, 'keeper after repayment', fixtures.contracts);
-    await logSheet(fixtures.contracts.zerobtc, 'renBTC pool after repayment', fixtures.contracts);
-    await fixtures.keeper.stopListeningForLiquidityRequests();
-  });
-*/
   it('should execute a payment', async () => {
     const deferred = defer();
     console.logKeeper = (v) => console.logBold(chalk.magenta('keeper: ') + v);
@@ -393,7 +276,7 @@ describe('0confirmation sdk', () => {
       await logSheet(fixtures.contracts.zerobtc, 'renBTC pool before borrow', fixtures.contracts);
       try {
         const receipt = await (await deposited.executeBorrow(utils.parseUnits('1', 8).toString(), '100000')).wait();
-        console.log(require('util').inspect(receipt.logs.map((v) => shifterPoolInterface.parseLog(v)), { colors: true, depth: 150 }));;
+        logGas(receipt);
         deferred.resolve(await deposited.getBorrowProxy());
       } catch (e) {
         deferred.reject(e);
@@ -406,7 +289,7 @@ describe('0confirmation sdk', () => {
     const actions = [{
       to: fixtures.contracts.exchange,
       calldata: (new ethers.utils.Interface(filterABI(Exchange.abi))).functions.tokenToTokenSwapInput.encode([ utils.parseUnits('1.97', 8), '1', '1', String(Date.now() * 2), fixtures.contracts.dai ])
-    }, Zero.preprocessor(UniswapTradeAbsorb, borrowerAddress)];
+    }];//, Zero.preprocessor(UniswapTradeAbsorb, borrowerAddress)];
     const liquidityRequest = fixtures.borrower.createLiquidityRequest({
       token: fixtures.contracts.zbtc,
       amount: utils.parseUnits('2', 8).toString(),
@@ -423,9 +306,8 @@ describe('0confirmation sdk', () => {
     console.log();
     console.logBold('borrow proxy init transactions signed with message: ');
     console.logBold(' 1) sell on uniswap for DAI (Exhange#tokenToTokenSwapInput): ' + chalk.cyan(liquidityRequest.actions[0].calldata));
-    console.logBold(' 2) transfer DAI to final destination (' + chalk.cyan(TRANSFER_TARGET) + '), delayed until repayment event from RenVM (ERC20#transfer): ' + chalk.cyan(liquidityRequest.actions[1].calldata));
+//    console.logBold(' 2) transfer DAI to final destination (' + chalk.cyan(TRANSFER_TARGET) + '), delayed until repayment event from RenVM (ERC20#transfer): ' + chalk.cyan(liquidityRequest.actions[1].calldata));
     console.log();
-    await timeout(2000);
     await liquidityRequestParcel.broadcast();
     const proxy = await deferred.promise;
     console.logBold('- borrow proxy created with ' + chalk.yellow('1.97 renBTC') + ' and initialization actions processed -- 0 remaining!');
@@ -435,7 +317,8 @@ describe('0confirmation sdk', () => {
     const borrowedProvider = new Web3Provider(fixtures.borrower.getProvider());
     const exchangeWrapped = new ethers.Contract(fixtures.contracts.exchange, filterABI(Exchange.abi), borrowedProvider.getSigner());
     console.logBold('repaying loan via a RenVM shift message!');
-    await (await proxy.repayLoan({ gasLimit: ethers.utils.hexlify(6e6) })).wait();
+    logGas(await (await proxy.repayLoan({ gasLimit: ethers.utils.hexlify(6e6) })).wait());
+    
     await logSheet(fixtures.contracts.zerobtc, 'renBTC pool after repayment', fixtures.contracts);
     await logSheet(borrowerAddress, 'borrower address after repayment', fixtures.contracts);
     await fixtures.keeper.stopListeningForLiquidityRequests();
