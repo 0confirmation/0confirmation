@@ -289,7 +289,7 @@ describe('0confirmation sdk', () => {
     const actions = [{
       to: fixtures.contracts.exchange,
       calldata: (new ethers.utils.Interface(filterABI(Exchange.abi))).functions.tokenToTokenSwapInput.encode([ utils.parseUnits('1.97', 8), '1', '1', String(Date.now() * 2), fixtures.contracts.dai ])
-    }];//, Zero.preprocessor(UniswapTradeAbsorb, borrowerAddress)];
+    }, Zero.preprocessor(UniswapTradeAbsorb, borrowerAddress)];
     const liquidityRequest = fixtures.borrower.createLiquidityRequest({
       token: fixtures.contracts.zbtc,
       amount: utils.parseUnits('2', 8).toString(),
@@ -306,7 +306,7 @@ describe('0confirmation sdk', () => {
     console.log();
     console.logBold('borrow proxy init transactions signed with message: ');
     console.logBold(' 1) sell on uniswap for DAI (Exhange#tokenToTokenSwapInput): ' + chalk.cyan(liquidityRequest.actions[0].calldata));
-//    console.logBold(' 2) transfer DAI to final destination (' + chalk.cyan(TRANSFER_TARGET) + '), delayed until repayment event from RenVM (ERC20#transfer): ' + chalk.cyan(liquidityRequest.actions[1].calldata));
+    console.logBold(' 2) transfer DAI to final destination (' + chalk.cyan(TRANSFER_TARGET) + '), delayed until repayment event from RenVM (ERC20#transfer): ' + chalk.cyan(liquidityRequest.actions[1].calldata));
     console.log();
     await liquidityRequestParcel.broadcast();
     const proxy = await deferred.promise;

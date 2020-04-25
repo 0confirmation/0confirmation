@@ -5,7 +5,6 @@ import { Create2 } from "openzeppelin-solidity/contracts/utils/Create2.sol";
 
 interface ISafeView {
   function execute(bytes calldata) external;
-  function destroy() external;
   function _executeSafeView(bytes calldata, bytes calldata) external;
 }
 
@@ -35,9 +34,6 @@ library SafeViewLib {
    function encodeExecuteSafeView(bytes memory creationCode, bytes memory context) internal pure returns (bytes memory retval) {
      retval = abi.encodeWithSelector(ISafeView._executeSafeView.selector, creationCode, context);
    }
-   function encodeDestroy() internal pure returns (bytes memory retval) {
-     retval = abi.encodeWithSelector(ISafeView.destroy.selector);
-   }
    function encodeExecute(bytes memory context) internal pure returns (bytes memory retval) {
      retval = abi.encodeWithSelector(ISafeView.execute.selector, context);
    }
@@ -60,8 +56,6 @@ contract SafeViewExecutor {
   function _executeSafeView(bytes memory creationCode, bytes memory context) public {
     address viewLayer = Create2.deploy(0, SafeViewLib.GET_STEALTH_VIEW_DEPLOY_SALT(), creationCode);
     bytes memory result = viewLayer.executeLogic(context).encodeResult();
-    (bool success,) = viewLayer.call(SafeViewLib.encodeDestroy());
-    if (success) {} // ignore compiler warning?
     result.revertWithData();
   }
   function safeQuery(bytes memory creationCode, bytes memory context) public returns (SafeViewLib.SafeViewResult memory) {
