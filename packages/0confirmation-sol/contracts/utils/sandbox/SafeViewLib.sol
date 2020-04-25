@@ -1,12 +1,8 @@
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
+import { ISafeView } from "./ISafeView.sol";
 import { Create2 } from "openzeppelin-solidity/contracts/utils/Create2.sol";
-
-interface ISafeView {
-  function execute(bytes calldata) external;
-  function _executeSafeView(bytes calldata, bytes calldata) external;
-}
 
 library SafeViewLib {
   struct SafeViewResult {
@@ -47,18 +43,5 @@ library SafeViewLib {
   }
   function deriveViewAddress(bytes memory creationCode) internal view returns (address) {
     return Create2.computeAddress(STEALTH_VIEW_DEPLOY_SALT, keccak256(creationCode));
-  }
-}
-
-contract SafeViewExecutor {
-  using SafeViewLib for *;
-  bytes32 constant STEALTH_VIEW_DEPLOY_SALT = 0xad53495153c7c363e98a26920ec679e0e687636458f6908c91cf6deadb190801;
-  function _executeSafeView(bytes memory creationCode, bytes memory context) public {
-    address viewLayer = Create2.deploy(0, SafeViewLib.GET_STEALTH_VIEW_DEPLOY_SALT(), creationCode);
-    bytes memory result = viewLayer.executeLogic(context).encodeResult();
-    result.revertWithData();
-  }
-  function safeQuery(bytes memory creationCode, bytes memory context) public returns (SafeViewLib.SafeViewResult memory) {
-    return creationCode.safeView(context);
   }
 }

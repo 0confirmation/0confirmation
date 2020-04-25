@@ -8,8 +8,8 @@ import { ILiquidationModule } from "./interfaces/ILiquidationModule.sol";
 import { TokenUtils } from "./utils/TokenUtils.sol";
 import { LiquidityToken } from "./LiquidityToken.sol";
 import { IERC20 } from "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
-import { SafeViewExecutor } from "./utils/SafeView.sol";
-import { SandboxLib } from "./SandboxLib.sol";
+import { SafeViewExecutor } from "./utils/sandbox/SafeViewExecutor.sol";
+import { SandboxLib } from "./utils/sandbox/SandboxLib.sol";
 
 contract ShifterBorrowProxy is BorrowProxy, SafeViewExecutor {
   using ShifterBorrowProxyLib for *;
@@ -74,9 +74,10 @@ contract ShifterBorrowProxy is BorrowProxy, SafeViewExecutor {
     }
     return false;
   }
-  function receiveInitializationActions(ShifterBorrowProxyLib.InitializationAction[] memory actions) public returns (SandboxLib.Context memory context) {
+  function receiveInitializationActions(ShifterBorrowProxyLib.InitializationAction[] memory actions) public {
     require(msg.sender == address(isolate.masterAddress), "must be called from shifter pool");
-    context = actions.processActions();
+    actions.processActions();
+//    ShifterBorrowProxyLib.emitBorrowProxyInitialization(address(this), isolate.owner, context);
   }
   fallback() external payable override {}
   receive() external payable override {}

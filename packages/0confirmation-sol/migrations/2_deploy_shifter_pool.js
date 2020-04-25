@@ -1,6 +1,7 @@
 const environments = require('@0confirmation/sdk/environments');
 const BorrowProxyLib = artifacts.require('BorrowProxyLib');
 const ShifterPool = artifacts.require('ShifterPool');
+const SandboxLib = artifacts.require('SandboxLib');
 const UniswapAdapter = artifacts.require('UniswapAdapter');
 const SimpleBurnLiquidationModule = artifacts.require('SimpleBurnLiquidationModule');
 const ERC20Adapter = artifacts.require('ERC20Adapter');
@@ -32,8 +33,11 @@ const getAddress = (artifact, network_id) => {
 const NO_SUBMODULE = '0x' + Array(40).fill('0').join('');
 
 module.exports = async function(deployer) {
+  console.log(SandboxLib);
+  await deployer.link([ BorrowProxyLib ], ShifterPool);
+  await deployer.link([ SandboxLib ], ShifterPool);
   await deployer.deploy(BorrowProxyLib);
-  await deployer.link(BorrowProxyLib, ShifterPool);
+  await deployer.deploy(SandboxLib);
   await deployer.deploy(ShifterPool);
   await deployer.deploy(ERC20Adapter);
   let shifterRegistry, renbtc, factory, renbtcExchange;

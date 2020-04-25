@@ -1,11 +1,14 @@
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
+import { IInitializationActionsReceiver } from "./interfaces/IInitializationActionsReceiver.sol";
 import { ECDSA } from "openzeppelin-solidity/contracts/cryptography/ECDSA.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { BorrowProxy } from "./BorrowProxy.sol";
+import { BorrowProxyLib } from "./BorrowProxyLib.sol";
 import { TokenUtils } from "./utils/TokenUtils.sol";
 import { RevertCaptureLib } from "./utils/RevertCaptureLib.sol";
+import { SandboxLib } from "./utils/sandbox/SandboxLib.sol";
 
 library ShifterBorrowProxyLib {
   using SafeMath for *;
@@ -25,6 +28,13 @@ library ShifterBorrowProxyLib {
   struct InitializationAction {
     address to;
     bytes txData;
+  }
+  event BorrowProxyInitialization(address indexed proxyAddress, address indexed borrower, SandboxLib.Context context);
+  function emitBorrowProxyInitialization(address proxyAddress, address borrower, SandboxLib.Context memory context) internal {
+    emit BorrowProxyInitialization(proxyAddress, borrower, context);
+  }
+  function sendInitializationActions(address proxyAddress, InitializationAction[] memory actions) internal {
+    IInitializationActionsReceiver(proxyAddress).receiveInitializationActions(actions);
   }
   function encodeProxyRecord(ProxyRecord memory record) internal pure returns (bytes memory result) {
     result = abi.encode(record);

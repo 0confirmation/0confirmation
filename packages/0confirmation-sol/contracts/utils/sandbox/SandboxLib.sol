@@ -1,10 +1,10 @@
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
-import { SliceLib } from "./utils/SliceLib.sol";
-import { SafeViewLib } from "./utils/SafeView.sol";
-import { BorrowProxy } from "./BorrowProxy.sol";
-import { ShifterBorrowProxyLib } from "./ShifterBorrowProxyLib.sol";
+import { SliceLib } from "../SliceLib.sol";
+import { SafeViewLib } from "./SafeViewLib.sol";
+import { BorrowProxy } from "../../BorrowProxy.sol";
+import { ShifterBorrowProxyLib } from "../../ShifterBorrowProxyLib.sol";
 
 library SandboxLib {
   using SafeViewLib for *;
@@ -26,28 +26,11 @@ library SandboxLib {
     address preprocessorAddress;
     ProtectedExecution[][] trace;
   }
-  function extractPreprocessorAddress(bytes memory input) internal pure returns (address preprocessorAddress) {
-    assembly {
-      preprocessorAddress := mload(add(input, 0x20))
-    }
-  }
-  function encodeProtectedExecution(ProtectedExecution[][] memory trace) internal pure returns (bytes memory result) {
-/*
-    result = abi.encode(trace);
-*/
+  function encodeContext(Context memory input) internal pure returns (bytes memory context) {
+    context = abi.encode(input);
   }
   function toContext(bytes memory input) internal pure returns (Context memory context) {
-    context.preprocessorAddress = extractPreprocessorAddress(input);
-    context.trace = decodeProtectedExecution(input.toSlice(0x20).copy());
-  }
-  function decodeProtectedExecution(bytes memory input) internal pure returns (ProtectedExecution[][] memory trace) {
-    (trace) = abi.decode(input, (ProtectedExecution[][]));
-  }
-  function encodeContext(Context memory context) internal pure returns (bytes memory data) {
-    data = encodeContextHelper(context.preprocessorAddress, encodeProtectedExecution(context.trace));
-  }
-  function encodeContextHelper(address preprocessorAddress, bytes memory trace) internal pure returns (bytes memory result) {
-    result = abi.encodePacked(preprocessorAddress, trace);
+    (context) = abi.decode(input, (Context));
   }
   function _write(ProtectedExecution[][] memory trace, uint256 newSize) internal pure {
     assembly {
@@ -64,6 +47,9 @@ library SandboxLib {
   }
   function toInitializationActions(bytes memory input) internal pure returns (ShifterBorrowProxyLib.InitializationAction[] memory action) {
     (action) = abi.decode(input, (ShifterBorrowProxyLib.InitializationAction[]));
+  }
+  function encodeInitializationActions(ShifterBorrowProxyLib.InitializationAction[] memory input) internal pure returns (bytes memory result) {
+    result = abi.encode(input);
   }
   function _shrink(Context memory context) internal pure {
     _write(context.trace, context.trace.length - 1);

@@ -6,7 +6,7 @@ import { IModuleRegistryProvider } from "./interfaces/IModuleRegistryProvider.so
 import { AddressSetLib } from "./utils/AddressSetLib.sol";
 import { ExtLib } from "./utils/ExtLib.sol";
 import { RevertCaptureLib } from "./utils/RevertCaptureLib.sol";
-import { SandboxLib } from "./SandboxLib.sol";
+import { SandboxLib } from "./utils/sandbox/SandboxLib.sol";
 import { ModuleLib } from "./adapters/lib/ModuleLib.sol";
 
 library BorrowProxyLib {
@@ -110,9 +110,9 @@ library BorrowProxyLib {
   function isDisbursing(ProxyIsolate storage isolate) internal view returns (bool) {
     return isolate.isLiquidating && isolate.liquidationIndex != isolate.liquidationSet.set.length;
   }
-  event BorrowProxyMade(address indexed user, address indexed proxyAddress, bytes record, SandboxLib.Context context);
-  function emitBorrowProxyMade(address user, address proxyAddress, bytes memory record, SandboxLib.Context memory context) internal {
-    emit BorrowProxyMade(user, proxyAddress, record, context);
+  event BorrowProxyMade(address indexed user, address indexed proxyAddress, bytes record);
+  function emitBorrowProxyMade(address user, address proxyAddress, bytes memory record) internal {
+    emit BorrowProxyMade(user, proxyAddress, record);
   }
   function computeModuleKeyPreimage(address to, bytes4 signature) internal pure returns (bytes memory result) {
     result = abi.encodePacked(to, signature);

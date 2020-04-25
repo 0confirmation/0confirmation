@@ -3,7 +3,7 @@ pragma experimental ABIEncoderV2;
 
 import { Preprocessor } from "./lib/Preprocessor.sol";
 import { ShifterBorrowProxyLib } from "../ShifterBorrowProxyLib.sol";
-import { SandboxLib } from "../SandboxLib.sol";
+import { SandboxLib } from "../utils/sandbox/SandboxLib.sol";
 import { IUniswapExchange } from "../interfaces/IUniswapExchange.sol";
 import { TokenUtils } from "../utils/TokenUtils.sol";
 import { SliceLib } from "../utils/SliceLib.sol";

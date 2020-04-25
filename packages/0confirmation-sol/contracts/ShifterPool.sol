@@ -13,7 +13,7 @@ import { BorrowProxyLib } from "./BorrowProxyLib.sol";
 import { TokenUtils } from "./utils/TokenUtils.sol";
 import { ViewExecutor } from "./utils/ViewExecutor.sol";
 import { LiquidityToken } from "./LiquidityToken.sol";
-import { SandboxLib } from "./SandboxLib.sol";
+import { SandboxLib } from "./utils/sandbox/SandboxLib.sol";
 
 contract ShifterPool is Ownable, ViewExecutor {
   using SandboxLib for *;
@@ -61,8 +61,8 @@ contract ShifterPool is Ownable, ViewExecutor {
     require(liquidityRequest.token.transferTokenFrom(msg.sender, address(this), bond), "bond submission failed");
     require(borrowerSalt.deployBorrowProxy() == proxyAddress, "proxy deployment failed");
     require(BorrowProxy(proxyAddress).setup(liquidityRequest.borrower, liquidityRequest.token), "setup phase failure");
-    SandboxLib.Context memory context = ShifterBorrowProxy(proxyAddress).receiveInitializationActions(liquidityRequest.actions);
-    BorrowProxyLib.emitBorrowProxyMade(liquidityRequest.borrower, proxyAddress, data, context);
+    proxyAddress.sendInitializationActions(liquidityRequest.actions);
+    BorrowProxyLib.emitBorrowProxyMade(liquidityRequest.borrower, proxyAddress, data);
   }
   function validateProxyRecordHandler(bytes memory proxyRecord) public view returns (bool) {
     return isolate.borrowProxyController.validateProxyRecord(msg.sender, proxyRecord);

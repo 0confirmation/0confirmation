@@ -1,6 +1,6 @@
 pragma solidity ^0.6.0;
 
-import { SandboxLib } from "../../SandboxLib.sol";
+import { SandboxLib } from "../../utils/sandbox/SandboxLib.sol";
 import { ShifterBorrowProxyLib } from "../../ShifterBorrowProxyLib.sol";
 
 library PreprocessorLib {
