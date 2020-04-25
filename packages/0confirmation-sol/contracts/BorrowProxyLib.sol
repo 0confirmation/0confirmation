@@ -164,17 +164,11 @@ library BorrowProxyLib {
   function registerModuleByCodeHash(ModuleRegistry storage registry, address to, bytes4 signature, Module memory module) internal {
     registry.modules[computeCodeResolverKey(to, signature)] = module;
   }
-  function fetchModule(ProxyIsolate storage isolate, address to, bytes4 signature) public returns (ModuleExecution memory) {
+  function fetchModule(ProxyIsolate storage isolate, address to, bytes4 signature) internal returns (ModuleExecution memory) {
     return ModuleExecution({
       encapsulated: IModuleRegistryProvider(isolate.masterAddress).fetchModuleHandler(to, signature),
       token: isolate.token,
       to: to
     });
-  }
-  function registerKeeper(ControllerIsolate storage isolate, address provider) internal {
-    isolate.isKeeper[provider] = true;
-  }
-  function unregisterKeeper(ControllerIsolate storage isolate, address provider) internal {
-    isolate.isKeeper[provider] = false;
   }
 }

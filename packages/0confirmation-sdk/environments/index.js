@@ -28,7 +28,7 @@ const chainIdFromNetwork = (network) => {
   }
 };
 
-const fromArtifact = (network, artifact) => (artifact.networks[chainIdFromNetwork(network)] || {}).address;
+const fromArtifact = (network, artifact) => ((artifact.networks || {})[chainIdFromNetwork(network)] || {}).address;
 
 const renNetworkFromNetwork = (network) => {
   switch (network) {

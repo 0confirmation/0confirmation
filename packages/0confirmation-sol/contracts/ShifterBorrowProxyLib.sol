@@ -29,12 +29,9 @@ library ShifterBorrowProxyLib {
     address to;
     bytes txData;
   }
-  event BorrowProxyInitialization(address indexed proxyAddress, address indexed borrower, SandboxLib.Context context);
-  function emitBorrowProxyInitialization(address proxyAddress, address borrower, SandboxLib.Context memory context) internal {
-    emit BorrowProxyInitialization(proxyAddress, borrower, context);
-  }
-  function sendInitializationActions(address proxyAddress, InitializationAction[] memory actions) internal {
-    IInitializationActionsReceiver(proxyAddress).receiveInitializationActions(actions);
+  event BorrowProxyInitialization(address indexed proxyAddress, SandboxLib.ProtectedExecution[]);
+  function emitBorrowProxyInitialization(address proxyAddress, SandboxLib.ProtectedExecution[] memory trace) internal {
+    emit BorrowProxyInitialization(proxyAddress, trace);
   }
   function encodeProxyRecord(ProxyRecord memory record) internal pure returns (bytes memory result) {
     result = abi.encode(record);

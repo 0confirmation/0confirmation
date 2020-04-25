@@ -1,4 +1,5 @@
 pragma solidity ^0.6.0;
+pragma experimental ABIEncoderV2;
 
 import { ECDSA } from "openzeppelin-solidity/contracts/cryptography/ECDSA.sol";
 import { TokenUtils } from "./utils/TokenUtils.sol";
@@ -7,11 +8,15 @@ import { BorrowProxyLib } from "./BorrowProxyLib.sol";
 import { IShifter } from "./interfaces/IShifter.sol";
 import { IShifterRegistry } from "./interfaces/IShifterRegistry.sol";
 import { LiquidityToken } from "./LiquidityToken.sol";
+import { ShifterBorrowProxy } from "./ShifterBorrowProxy.sol";
 import { ShifterBorrowProxyLib } from "./ShifterBorrowProxyLib.sol";
+import { ShifterBorrowProxyFactoryLib } from "./ShifterBorrowProxyFactoryLib.sol";
 
 library ShifterPoolLib {
   using BorrowProxyLib for *;
   using TokenUtils for *;
+  using ShifterBorrowProxyLib for *;
+  using ShifterBorrowProxyFactoryLib for *;
   using SafeMath for *;
   struct Isolate {
     address shifterRegistry;
@@ -22,6 +27,18 @@ library ShifterPoolLib {
     mapping (address => address) tokenToLiquidityToken;
     BorrowProxyLib.ControllerIsolate borrowProxyController;
     BorrowProxyLib.ModuleRegistry registry;
+  }
+  function makeBorrowProxy(bytes32 salt) internal returns (address payable proxyAddress) {
+    proxyAddress = address(uint160(salt.deployBorrowProxy()));
+  }
+  function issueLoan(Isolate storage isolate, address token, address payable proxyAddress, uint256 fee) internal {
+    require(LiquidityToken(getLiquidityToken(isolate, token)).loan(proxyAddress, fee), "insufficient funds in liquidity pool");
+  }
+  function setupBorrowProxy(address payable proxyAddress, address borrower, address token) internal {
+    require(ShifterBorrowProxy(proxyAddress).setup(borrower, token), "setup phase failure");
+  }
+  function sendInitializationActions(address payable proxyAddress, ShifterBorrowProxyLib.InitializationAction[] memory actions) internal {
+    ShifterBorrowProxy(proxyAddress).receiveInitializationActions(actions);
   }
   function computeLoanParams(Isolate storage isolate, uint256 amount, uint256 bond, uint256 timeoutExpiry) internal view returns (ShifterBorrowProxyLib.LenderParams memory) {
     require(timeoutExpiry >= isolate.minTimeout, "timeout insufficient");
@@ -71,4 +88,12 @@ library ShifterPoolLib {
     isolate.provisionExecuted[provisionHash] = true;
     return true;
   }
-}
+  function mapBorrowProxy(Isolate storage isolate, address proxyAddress, ShifterBorrowProxyLib.ProxyRecord memory record) internal {
+    bytes memory data = record.encodeProxyRecord();
+    isolate.borrowProxyController.setProxyToken(proxyAddress, record.request.token);
+    isolate.borrowProxyController.setProxyOwner(proxyAddress, record.request.borrower);
+    record.request.borrower.transfer(msg.value);
+    isolate.borrowProxyController.mapProxyRecord(proxyAddress, data);
+    BorrowProxyLib.emitBorrowProxyMade(record.request.borrower, proxyAddress, data);
+  }
+}   

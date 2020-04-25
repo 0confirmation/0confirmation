@@ -5,11 +5,13 @@ const Web3Provider = require('ethers/providers/web3-provider').Web3Provider;
 const bip39 = require('bip39');
 const mnemonic = process.env.MNEMONIC || bip39.generateMnemonic();
 const ShifterBorrowProxy = require('@0confirmation/sol/build/ShifterBorrowProxy');
+const ShifterBorrowProxyFactoryLib = require('@0confirmation/sol/build/ShifterBorrowProxyFactoryLib');
 const seed = bip39.mnemonicToSeed(mnemonic);
 const hdkey = require('ethereumjs-wallet/hdkey');
 const hdwallet = hdkey.fromMasterSeed(seed);
 const { promisify } = require('bluebird');
 const privateKeys = Array(10).fill(null).map((_, i) => hdwallet.derivePath("m/44'/60'/0'/0/" + String(i)).getWallet().getPrivateKeyString());
+const TransferAll = require('@0confirmation/sol/build/TransferAll');
 
 const startSignalingServer = require('@0confirmation/webrtc-star');
 
@@ -64,7 +66,6 @@ const BorrowProxyLib = require('@0confirmation/sol/build/BorrowProxyLib');
 const shifterPoolInterface = new ethers.utils.Interface(ShifterPool.abi.concat(BorrowProxyLib.abi));
 const ShifterRegistryMock = require('@0confirmation/sol/build/ShifterRegistryMock');
 const UniswapAdapter = require('@0confirmation/sol/build/UniswapAdapter');
-const UniswapTradeAbsorb = require('@0confirmation/sol/build/UniswapTradeAbsorb');
 const SimpleBurnLiquidationModule = require('@0confirmation/sol/build/SimpleBurnLiquidationModule');
 const LiquidityToken = require('@0confirmation/sol/build/LiquidityToken');
 const ShifterERC20 = require('@0confirmation/sol/build/ShifterERC20Mock');
@@ -101,9 +102,9 @@ const createMarket = async (provider, factory, token, tokens = '10') => {
 const uniq = require('lodash/uniq');
 
 const deploy = async () => {
-  const borrowProxyLibFactory = getFactory(BorrowProxyLib);
+  const borrowProxyLibFactory = getFactory(ShifterBorrowProxyFactoryLib);
   const { address: borrowProxyLib } = await borrowProxyLibFactory.deploy();
-  const shifterPoolFactory = getFactory(ShifterPool, { BorrowProxyLib: borrowProxyLib });
+  const shifterPoolFactory = getFactory(ShifterPool, { ShifterBorrowProxyFactoryLib: borrowProxyLib });
   const shifterPoolContract = await shifterPoolFactory.deploy();
   const { address: shifterPool } = shifterPoolContract;
   const shifterMockFactory = getFactory(ShifterRegistryMock);
@@ -276,6 +277,7 @@ describe('0confirmation sdk', () => {
       await logSheet(fixtures.contracts.zerobtc, 'renBTC pool before borrow', fixtures.contracts);
       try {
         const receipt = await (await deposited.executeBorrow(utils.parseUnits('1', 8).toString(), '100000')).wait();
+        ln(receipt);
         logGas(receipt);
         deferred.resolve(await deposited.getBorrowProxy());
       } catch (e) {
@@ -289,7 +291,7 @@ describe('0confirmation sdk', () => {
     const actions = [{
       to: fixtures.contracts.exchange,
       calldata: (new ethers.utils.Interface(filterABI(Exchange.abi))).functions.tokenToTokenSwapInput.encode([ utils.parseUnits('1.97', 8), '1', '1', String(Date.now() * 2), fixtures.contracts.dai ])
-    }, Zero.preprocessor(UniswapTradeAbsorb, borrowerAddress)];
+    }, Zero.preprocessor(TransferAll, fixtures.contracts.dai, borrowerAddress)];
     const liquidityRequest = fixtures.borrower.createLiquidityRequest({
       token: fixtures.contracts.zbtc,
       amount: utils.parseUnits('2', 8).toString(),

@@ -1,10 +1,11 @@
 pragma solidity ^0.6.0;
+pragma experimental ABIEncoderV2;
 
 import { SandboxLib } from "../../utils/sandbox/SandboxLib.sol";
 import { ShifterBorrowProxyLib } from "../../ShifterBorrowProxyLib.sol";
 
 library PreprocessorLib {
-  function toContext(bytes memory input) internal pure returns (SandboxLib.Context memory) {
+  function toContext(bytes memory input) internal pure returns (SandboxLib.ExecutionContext memory) {
     return SandboxLib.toContext(input);
   }
   function then(ShifterBorrowProxyLib.InitializationAction memory action, ShifterBorrowProxyLib.InitializationAction memory nextAction) internal pure returns (ShifterBorrowProxyLib.InitializationAction[] memory result) {

@@ -1,4 +1,5 @@
 pragma solidity ^0.6.0;
+pragma experimental ABIEncoderV2;
 
 abstract contract ICurve {
   uint256 constant N_COINS = 4;

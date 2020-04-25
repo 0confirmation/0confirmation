@@ -1,4 +1,5 @@
 pragma solidity ^0.6.0;
+pragma experimental ABIEncoderV2;
 
 import { UniswapAdapter } from "./UniswapAdapter.sol";
 import { IUniswapFactory } from "../../../interfaces/IUniswapFactory.sol";

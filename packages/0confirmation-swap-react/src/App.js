@@ -3,6 +3,17 @@ import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Row, Col, Modal, ModalBody, Dropdown, DropdownItem, DropdownMenu, DropdownToggle } from "reactstrap";
 import { async } from 'q';
+const randomBytes = require('random-bytes').sync;
+
+const { ZeroMock } = require('@0confirmation/sdk');
+const ethers = require('ethers');
+
+let provider = new ethers.providers.Web3Provider(window.ethereum);
+
+const zero = new ZeroMock(window.ethereum);
+const { getAddresses } = require('@0confirmation/sdk/environments');
+
+const contracts = getAddresses();
 
 export default class App extends React.Component{
   constructor(props) {
@@ -17,8 +28,32 @@ export default class App extends React.Component{
       modal: false,
       address: "X93jdjd90dkakdjdlalhhdohodhohofhohohdlslhjhlfhjslhjhkhk",
       menu: false,
-    
+      selectedAddress: '0x' + Array(40).fill('0').join(''),
+      parcel: null,
+      borrowProxy: null
     }
+  }
+  async componentDidMount() {
+    await zero.initializeDriver();
+    this.setState({
+      selectedAddress: window.ethereum.selectedAddress
+    });
+  }
+  async requestLoan() {
+    const liquidityRequest = zero.createLiquidityRequest({
+      token: contracts.renbtc,
+      amount: this.state.value,
+      nonce: '0x' + randomBytes(32).toString('hex'),
+      gasRequested: ethers.utils.parseEther('0.01').toString()
+    });
+    console.log('signing');
+    const parcel = await liquidityRequest.sign();
+    await parcel.broadcast();
+    console.log('broadcasted');
+    this.setState({
+      parcel,
+      borrowProxy: await parcel.getBorrowProxy()
+    });
   }
   render() {
     return (
@@ -37,7 +72,7 @@ export default class App extends React.Component{
                   <h6>to</h6>
                 </Row>
                 <Row className="align-content-center justify-content-center mx-auto mb-n3">
-                  <p className="text-center text text-break" style={{fontSize:"1.3em"}}>{this.state.address}</p>
+                  <p className="text-center text text-break" style={{fontSize:"1.3em"}}>{this.state.parcel && this.state.parcel.depositAddress}</p>
                 </Row>
                 <Row className="align-content-center justify-content-center mb-5">
                   <h6>to complete swap</h6>
@@ -108,7 +143,10 @@ export default class App extends React.Component{
               </Row>
               <Row className="justify-content-center align-content-center mt-4">
                 <Col lg="5" className="text-center">
-                  <button style={{ backgroundColor: "#03007B" }} className="btn p-2 btn-block text-light text-center" onClick={async () => await this.setState({ modal: !this.state.modal })}><b>SWAP</b></button>
+                  <button style={{ backgroundColor: "#03007B" }} className="btn p-2 btn-block text-light text-center" onClick={ async () => {
+                    await this.requestLoan();
+                    this.setState({ modal: !this.state.modal });
+                  } }><b>SWAP</b></button>
                 </Col>
               </Row>
           </div>
