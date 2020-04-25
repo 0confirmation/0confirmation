@@ -6,7 +6,7 @@ export default class Navigation extends React.Component {
         return (
             <>
                 <div>
-                    <Navbar>
+                    <Navbar fixed="top">
                         <Nav className="mx-auto">
                             <NavItem>
                                 <NavLink style={{color:"#ffffff"}} href="/#">About</NavLink>
