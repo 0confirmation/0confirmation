@@ -19,6 +19,7 @@ library ShifterPoolLib {
   using ShifterBorrowProxyFactoryLib for *;
   using SafeMath for *;
   struct Isolate {
+    address borrowProxyImplementation;
     address shifterRegistry;
     uint256 minTimeout;
     uint256 poolFee;

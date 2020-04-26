@@ -180,6 +180,7 @@ contract('ShifterPool', () => {
       const sig = await deposited.waitForSignature();
       try {
         const receipt = await (await deposited.executeBorrow(ethers.utils.parseUnits('1', 8).toString(), '100000')).wait();
+        console.log(receipt);
         deferred.resolve(await deposited.getBorrowProxy());
       } catch (e) {
         deferred.reject(e);
@@ -203,9 +204,9 @@ contract('ShifterPool', () => {
     const proxy = await deferred.promise;
     await fixtures.borrower.setBorrowProxy(liquidityRequestParcel.proxyAddress);
     const borrowedProvider = new ethers.providers.Web3Provider(fixtures.borrower.getProvider());
-    const exchangeWrapped = new ethers.Contract(fixtures.renbtcExchange.address, (Exchange.abi), borrowedProvider.getSigner());
     await (await proxy.repayLoan({ gasLimit: ethers.utils.hexlify(6e6) })).wait();
     await fixtures.keeper.stopListeningForLiquidityRequests();
-    console.log(await fixtures.DAI.balanceOf(borrowerAddress));
+    const tokenWrapped = new ethers.Contract(fixtures.renbtc.address, LiquidityToken.abi, new ethers.providers.Web3Provider(fixtures.borrower.driver).getProvider());
+    console.log(await tokenWrapped.balanceOf(borrowerAddress));
   });
 });

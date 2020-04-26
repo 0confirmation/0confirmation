@@ -12,22 +12,22 @@ import { BorrowProxyLib } from "../BorrowProxyLib.sol";
 contract SwapEntireLoan {
   using PreprocessorLib for *;
   BorrowProxyLib.ProxyIsolate isolate;
-  address factory;
-  address target;
+  address public factory;
+  address public target;
   constructor(address _factory, address _target) public {
     factory = _factory;
     target = _target;
   }
   function execute(bytes memory data) view public returns (ShifterBorrowProxyLib.InitializationAction[] memory result) {
     SandboxLib.ExecutionContext memory context = data.toContext();
-    result = IUniswapFactory(factory)
+    result = IUniswapFactory(SwapEntireLoan(context.preprocessorAddress).factory())
       .getExchange(isolate.token)
       .sendTransaction(abi.encodeWithSelector(
         IUniswapExchange.tokenToTokenSwapInput.selector,
         IERC20(isolate.token).balanceOf(address(this)),
         1,
-        1,
+        0,
         block.timestamp + 1,
-        target));
+        SwapEntireLoan(context.preprocessorAddress).target()));
   }
 }

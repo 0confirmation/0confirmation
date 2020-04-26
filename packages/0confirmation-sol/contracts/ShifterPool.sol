@@ -14,8 +14,9 @@ import { TokenUtils } from "./utils/TokenUtils.sol";
 import { ViewExecutor } from "./utils/ViewExecutor.sol";
 import { LiquidityToken } from "./LiquidityToken.sol";
 import { SandboxLib } from "./utils/sandbox/SandboxLib.sol";
+import { Create2CloneFactory } from "./utils/Create2CloneFactory.sol";
 
-contract ShifterPool is Ownable, ViewExecutor {
+contract ShifterPool is Ownable, ViewExecutor, Create2CloneFactory {
   using SandboxLib for *;
   using ShifterPoolLib for *;
   using TokenUtils for *;
@@ -36,6 +37,13 @@ contract ShifterPool is Ownable, ViewExecutor {
       ShifterPoolLib.LiquidityTokenLaunch memory launch = tokenLaunches[i];
       isolate.tokenToLiquidityToken[launch.token] = launch.liqToken;
     }
+  }
+  bytes32 constant BORROW_PROXY_IMPLEMENTATION_SALT = 0x84cafd7f9643e0c6819df789ff4b82881310e879917297b78da0aa385f8fa924; // keccak("borrow-proxy-implementation");
+  function deployBorrowProxyImplementation() public {
+    isolate.borrowProxyImplementation = BORROW_PROXY_IMPLEMENTATION_SALT.makeBorrowProxy();
+  }
+  function deployBorrowProxyClone(bytes32 salt) public returns (address payable created) {
+    created = address(uint160(create2Clone(isolate.borrowProxyImplementation, uint256(salt), new bytes(0))));
   }
   function _executeBorrow(ShifterBorrowProxyLib.LiquidityRequestParcel memory liquidityRequestParcel, uint256 bond, uint256 timeoutExpiry) internal returns (bytes32 borrowerSalt) {
     require(
@@ -66,9 +74,12 @@ contract ShifterPool is Ownable, ViewExecutor {
   }
   function executeBorrow(ShifterBorrowProxyLib.LiquidityRequestParcel memory liquidityRequestParcel, uint256 bond, uint256 timeoutExpiry) public payable {
     bytes32 salt = _executeBorrow(liquidityRequestParcel, bond, timeoutExpiry);
-    address payable proxyAddress = salt.makeBorrowProxy();
+    address payable proxyAddress = deployBorrowProxyClone(salt);
     proxyAddress.setupBorrowProxy(liquidityRequestParcel.request.borrower, liquidityRequestParcel.request.token);
     proxyAddress.sendInitializationActions(liquidityRequestParcel.request.actions);
+  }
+  function cloneConstructor(bytes calldata /* data */) external override {
+    // do nothing
   }
   function validateProxyRecordHandler(bytes memory proxyRecord) public view returns (bool) {
     return isolate.borrowProxyController.validateProxyRecord(msg.sender, proxyRecord);
