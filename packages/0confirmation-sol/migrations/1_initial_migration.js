@@ -42,7 +42,6 @@ module.exports = async function(deployer) {
   await deployer.deploy(DAI);
   const dai = await DAI.deployed();
   let shifterRegistry, renbtc, factory, renbtcExchange;
-  console.log(deployer.network);
   if (['ganache', 'test'].find((v) => v === deployer.network)) {
     await deployer.deploy(ShifterRegistryMock);
     shifterRegistry = await ShifterRegistryMock.deployed();

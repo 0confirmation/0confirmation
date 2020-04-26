@@ -633,15 +633,12 @@ class Zero {
     return await contract.approve(this.network.shifterPool, '0x' + Array(64).fill('f').join(''), overrides || {});
   }
   async getLiquidityTokenFor(token) {
-    console.log(this.network);
     const contract = new Contract(this.network.shifterPool, filterABI(ShifterPool.abi), getProvider(this.driver).getSigner());
     const liquidityToken = new Contract(await contract.getLiquidityTokenHandler(token), filterABI(LiquidityToken.abi), getProvider(this.driver).getSigner());
     return liquidityToken;
   }
   async approveLiquidityToken(token, overrides) {
-    console.log(token);
     const liquidityToken = await this.getLiquidityTokenFor(token);
-    console.log(await this.driver.sendWrapped('eth_accounts', []));
     const contract = new Contract(token, filterABI(LiquidityToken.abi), getProvider(this.driver).getSigner());
     return await contract.approve(liquidityToken.address, '0x' + Array(62).fill('f').join(''), overrides || {});
   }
