@@ -39,7 +39,10 @@ class ZeroBackend extends RPCWrapper {
   _nextFilterId(o) {
     return '0x' + (o._filterId = (o._filterId !== undefined ? o._filterId : -1) + 1).toString(16);
   }
-  async send({
+  send(o, cb) {
+    this.sendPromise(o).then((result) => cb(null, result)).catch((err) => cb(err));
+  }
+  async sendPromise({
     id,
     method,
     params

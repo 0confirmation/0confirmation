@@ -64,22 +64,14 @@ class ZeroDriver extends RPCWrapper {
     id,
     method,
     params
-  }) {
+  }, cb) {
     const prefix = method.split('_')[0];
-    try {
-      return await (this.getBackendByPrefix(prefix)).send({
-        jsonrpc,
-        id,
-        method,
-        params
-      });
-    } catch (e) {
-      return {
-        jsonrpc: '2.0',
-        id,
-        error: e
-      };
-    }
+    new Promise((resolve, reject) => this.getBackendByPrefix(prefix).send({
+      jsonrpc,
+      id,
+      method,
+      params
+    }, (err, result) => err ? reject(err) : resolve(result))).then((result) => cb(null, result)).catch((err) => cb(err));
   }
 }
 

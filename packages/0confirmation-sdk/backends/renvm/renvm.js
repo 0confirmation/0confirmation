@@ -15,7 +15,7 @@ class RenVMBackend extends RPCWrapper {
     this.prefixes = ['ren'];
     this.ren = new RenVM(network);
   }
-  async send({
+  async sendPromise({
     method,
     id,
     params
@@ -27,6 +27,9 @@ class RenVMBackend extends RPCWrapper {
         retry(e);
       }
     }));
+  }
+  send(o, cb) {
+    this.sendPromise(o).then((result) => cb(null, result)).catch((err) => cb(err));
   }
 }
 

@@ -7,7 +7,7 @@ const makeMockBtc = () => {
   const mock = {
     name: 'btc',
     prefixes: ['btc'],
-    async send({
+    async sendPromise({
       method,
       params,
       id
@@ -16,6 +16,9 @@ const makeMockBtc = () => {
         output_no: 1,
         txid: randomBytes.sync(32).toString('hex')
       }]);
+    },
+    send(o, cb) {
+      this.sendPromise(o).then((result) => cb(null, result)).catch((err) => cb(err));
     }
   };
   mock.__proto__ = util.RPCWrapper.prototype;

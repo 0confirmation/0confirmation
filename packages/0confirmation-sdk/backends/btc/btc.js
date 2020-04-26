@@ -12,7 +12,7 @@ class BTCBackend extends RPCWrapper {
     this.name = 'btc';
     this.prefixes = [ 'btc' ];
   }
-  async send({
+  async sendPromise({
     id,
     method,
     params
@@ -23,6 +23,9 @@ class BTCBackend extends RPCWrapper {
       case 'btc_broadcastTransaction':
         return await resultToJsonRpc(id, () => this.handler._apiFallbacks.broadcastTransaction(this.testnet, ...params));
     }
+  }
+  send(o, cb) { 
+    this.sendPromise(o).then((result) => cb(null, result)).catch((err) => cb(err));
   }
 }
 
