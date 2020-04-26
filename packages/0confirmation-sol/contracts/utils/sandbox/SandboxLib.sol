@@ -107,6 +107,7 @@ library SandboxLib {
       if (execution[0].to == address(0x0)) {
         _shrink(context);
         context.preprocessorAddress = execution[0].txData.deriveViewAddress();
+        revert("got a action");
         SafeViewLib.SafeViewResult memory safeViewResult = executeSafeView(execution[0].txData, context);
         _grow(context);
         execution[0].txData = new bytes(0x0);
@@ -119,6 +120,7 @@ library SandboxLib {
           execution[0].success = safeViewResult.success;
           continue;
         }
+        
       }
       for (uint256 j = 0; j < action.length; i++) {
         (bool success, bytes memory returnData) = address(this).call(encodeProxyCall(action[j]));
