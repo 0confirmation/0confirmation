@@ -18,6 +18,7 @@ const WBTC = artifacts.require('WBTC');
 const Exchange = artifacts.require('Exchange');
 const TransferAll = artifacts.require('TransferAll');
 const Factory = artifacts.require('Factory');
+const SwapEntireLoan = artifacts.require('SwapEntireLoan');
 const ethers = require('ethers');
 const Zero = require('@0confirmation/sdk');
 const { ZeroMock } = Zero;
@@ -185,10 +186,11 @@ contract('ShifterPool', () => {
       }
     });
     const TRANSFER_TARGET = '0x' + Array(40).fill('1').join('');
-    const actions = [{
-      to: fixtures.renbtcExchange.address,
-      calldata: (new ethers.utils.Interface((Exchange.abi))).functions.tokenToTokenSwapInput.encode([ ethers.utils.parseUnits('1.97', 8), '1', '1', String(Date.now() * 2), fixtures.DAI.address ])
-    }, Zero.preprocessor(TransferAll, fixtures.DAI.address, borrowerAddress)];
+    const actions = [
+      Zero.preprocessor(SwapEntireLoan, fixtures.Factory.address, fixtures.DAI.address),
+      
+      Zero.preprocessor(TransferAll, fixtures.DAI.address, borrowerAddress)
+    ];
     const liquidityRequest = fixtures.borrower.createLiquidityRequest({
       token: fixtures.renbtc.address,
       amount: ethers.utils.parseUnits('2', 8).toString(),
@@ -200,9 +202,10 @@ contract('ShifterPool', () => {
     await liquidityRequestParcel.broadcast();
     const proxy = await deferred.promise;
     await fixtures.borrower.setBorrowProxy(liquidityRequestParcel.proxyAddress);
-    const borrowedProvider = new Web3Provider(fixtures.borrower.getProvider());
+    const borrowedProvider = new ethers.providers.Web3Provider(fixtures.borrower.getProvider());
     const exchangeWrapped = new ethers.Contract(fixtures.renbtcExchange.address, (Exchange.abi), borrowedProvider.getSigner());
     await (await proxy.repayLoan({ gasLimit: ethers.utils.hexlify(6e6) })).wait();
     await fixtures.keeper.stopListeningForLiquidityRequests();
+    console.log(await fixtures.DAI.balanceOf(borrowerAddress));
   });
 });
