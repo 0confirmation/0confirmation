@@ -69,12 +69,10 @@ const makeMetamaskSimulatorForRemoteGanache = (suppliedMetamask) => {
   const baseProvider = personalSignProviderFromPrivate(pvt.substr(2), web3ProviderFromEthers(new ethers.providers.JsonRpcProvider(getGanacheUrl())));
   const wallet = new ethers.Wallet(pvt, new ethers.providers.Web3Provider(baseProvider));
   const engine = new RpcEngine();
-  console.log(metamask.selectedAddress);
   engine.push((req, res, next, end) => {
     const { selectedAddress } = metamask;
     if (selectedAddress && req.method === 'personal_sign') {
       ethersMetamask.send(req.method, [ req.params[1], selectedAddress ]).then((result) => next()).catch((err) => {
-        console.error(err);
         next()
       }); 
     } else { next(); }
@@ -175,6 +173,17 @@ if (__IS_TEST) {
   })().catch((err) => console.error(err));
 }
 
+const DECIMALS = {
+  renbtc: 8,
+  dai: 18
+};
+
+const coerceToDecimals = (nameOrDecimals) => typeof nameOrDecimals === 'string' && isNaN(nameOrDecimals) ? DECIMALS[nameOrDecimals] : Number(nameOrDecimals);
+
+const toFormat = (v, decimals) => ethers.utils.formatUnits(v, decimals);
+
+const toParsed = (v, decimals) => ethers.utils.parseUnits(v, decimals);
+
 
 export default class App extends React.Component{
   constructor(props) {
@@ -208,10 +217,10 @@ export default class App extends React.Component{
   }
   async getTradeDetails() {
     await this.updateMarket();
-    const trade = await getTradeExecution(provider, this.state.market, String(this.state.value));
+    const trade = await getTradeExecution(provider, this.state.market, toParsed(this.state.value, 'renbtc'));
     this.setState({
       trade,
-      calcValue: trade.outputAmount.amount.toString(10),
+      calcValue: toFormat(trade.outputAmount.amount.toString(10), 'dai'),
       rate: trade.executionRate.rate.toString(10),
       percentage: trade.marketRateSlippage.toString(10)
     });
