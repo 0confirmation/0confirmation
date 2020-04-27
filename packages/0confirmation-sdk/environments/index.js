@@ -12,6 +12,7 @@ const Curvefi = require('@0confirmation/sol/build/Curvefi');
 const CurveToken = require('@0confirmation/sol/build/CurveToken');
 const Exchange = require('@0confirmation/sol/build/Exchange');
 const Factory = require('@0confirmation/sol/build/Factory');
+const DAI = require('@0confirmation/sol/build/DAI');
 
 const chainIdFromNetwork = (network) => {
   switch (network) {
@@ -75,11 +76,20 @@ const curveFromNetwork = (network) => ({
   curveToken: fromArtifact(network, CurveToken)
 });
 
+const daiFromNetwork = (network) => {
+  if (network === 'ganache') {
+    return {
+      dai: fromArtifact(network, DAI)
+    };
+  }
+};
+
 const getAddresses = (network) => ({
   ...curveFromNetwork(network),
   ...uniswapFromNetwork(network),
   ...zeroContractsFromNetwork(network),
-  ...renvmFromEnvironment(network)
+  ...renvmFromEnvironment(network),
+  ...daiFromNetwork(network)
 });
 
 const getEnvironment = (provider, network, backends) => ({

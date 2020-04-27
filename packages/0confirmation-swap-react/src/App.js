@@ -5,24 +5,106 @@ import { Row, Col, Modal, ModalBody, Dropdown, DropdownItem, DropdownMenu, Dropd
 import { async } from 'q';
 const randomBytes = require('random-bytes').sync;
 const personalSignProviderFromPrivate = require('@0confirmation/sdk/mock/personal-sign-provider-from-private');
+const web3ProviderFromEthers = require('@0confirmation/sdk/mock/web3-provider-from-ethers');
+const ShifterERC20Mock = require('@0confirmation/sol/build/ShifterERC20Mock');
+const TransferAll = require('@0confirmation/sol/build/TransferAll');
+const SwapEntireLoan = require('@0confirmation/sol/build/SwapEntireLoan');
+const DAI = require('@0confirmation/sol/build/DAI');
 
 const Zero = require('@0confirmation/sdk');
 const { ZeroMock } = Zero;
 const ethers = require('ethers');
-const Web3 = require('web3');
-
 const __IS_TEST = Boolean(process.env.REACT_APP_TEST);
 
-if (__IS_TEST) {
-  window.ethereum = personalSignProviderFromPrivate(randomBytes(32).toString('hex'), new Web3.providers.HttpProvider('http://localhost:8545'));
-}
+const createSwapActions = ({
+  dai,
+  factory,
+  borrower
+}) => [
+  Zero.preprocessor(SwapEntireLoan, factory, dai),
+    
+  Zero.preprocessor(TransferAll, dai, borrower)
+];
+    
+
+if (__IS_TEST) window.ethereum = personalSignProviderFromPrivate(randomBytes(32).toString('hex'), web3ProviderFromEthers(new ethers.providers.JsonRpcProvider('http://localhost:8545')));
 
 let provider = new ethers.providers.Web3Provider(window.ethereum);
-
+  
 const zero = __IS_TEST ? new ZeroMock(window.ethereum) : new Zero(window.ethereum);
 const { getAddresses } = require('@0confirmation/sdk/environments');
 const contracts = __IS_TEST ? getAddresses('ganache') : getAddresses(process.env.REACT_APP_NETWORK);
 const getMockRenBTCAddress = require('@0confirmation/sdk/mock/renbtc');
+
+const getRenBTCAddress = async () => {
+  return contracts.renbtc || __IS_TEST && (contracts.renbtc = await getMockRenBTCAddress(new ethers.providers.Web3Provider(window.ethereum), contracts));
+};
+
+if (__IS_TEST) {
+  (async () => {
+    const ganache = new ethers.providers.JsonRpcProvider('http://localhost:8545');
+    const ganacheWeb3Compatible = web3ProviderFromEthers(ganache);
+    const ganacheAddress = (await ganache.send('eth_accounts', []))[0];
+    const keeperPvt = ethers.utils.solidityKeccak256(['address'], [ ganacheAddress ]).substr(2);
+    const keeperProvider = personalSignProviderFromPrivate(keeperPvt, ganacheWeb3Compatible);
+    const keeperEthers = new ethers.providers.Web3Provider(keeperProvider);
+    const [ keeperAddress ] = await keeperEthers.send('eth_accounts', []);
+    console.log('initializing mock keeper at: ' + keeperAddress);
+    if (ln(Number(await ganache.send('eth_getBalance', [ keeperAddress, 'latest' ]))) < Number(ethers.utils.parseEther('9'))) {
+      console.log('this keeper needs ether! sending 10');
+      const sendEtherTx = await ganache.send('eth_sendTransaction', [{
+        value: ethers.utils.hexlify(ethers.utils.parseEther('10')),
+        gas: ethers.utils.hexlify(21000),
+        gasPrice: '0x01',
+        to: keeperAddress,
+        from: ganacheAddress
+      }]);
+      await ganache.waitForTransaction(sendEtherTx);
+      console.log('done!');
+    }
+    const renbtcWrapped = new ethers.Contract(await getRenBTCAddress(), ShifterERC20Mock.abi, keeperEthers.getSigner());
+    console.log('minting 10 renbtc for keeper --');
+    await (await renbtcWrapped.mint(keeperAddress, ethers.utils.parseUnits('10', 8))).wait();
+    console.log('done!');
+    const keeperZero = new ZeroMock(keeperProvider);
+    Object.assign(keeperZero.network, contracts);
+    keeperZero.connectMock(zero);
+    console.log('shifter pool: ' + contracts.shifterPool);
+    console.log('renbtc: ', contracts.renbtc);
+    await (await keeperZero.approvePool(contracts.renbtc)).wait();
+    console.logBold = console.log;
+    console.logKeeper = (v) => console.logBold('keeper: ' + String(v));
+    console.logKeeper('online -- listening for loan requests!');
+    keeperZero.listenForLiquidityRequests(async (v) => {
+      console.logBold('waiting ..');
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+      console.logBold('received liquidity request over libp2p!');
+      console.logKeeper('got liquidity request!');
+      console.logKeeper('computing BTC address from liquidity request parameters: ' + v.depositAddress);
+      console.logKeeper('OK! ' + v.proxyAddress + ' is a borrow proxy derived from a deposit of ' + ethers.utils.formatUnits(v.amount, 8) + ' BTC at the target address');
+      if (Number(ethers.utils.formatEther(v.gasRequested)) > 0.1) {
+        console.logKeeper('request is for too much gas -- abort');
+        return
+      }
+      const deposited = await v.waitForDeposit();
+      console.logKeeper('found deposit -- initializing a borrow proxy!')
+      const bond = ethers.utils.bigNumberify(v.amount).div(9);
+      await (await deposited.executeBorrow(bond, '100000')).wait();
+      const result = await deposited.submitToRenVM();
+      const sig = await deposited.waitForSignature();
+      try {
+        const borrowProxy = await deposited.getBorrowProxy();
+        console.logKeeper('waiting for renvm ...');
+        await new Promise((resolve, reject) => setTimeout(resolve, 60000));
+        console.logKeeper('repaying loan for ' + deposited.proxyAddress + ' !');
+        await borrowProxy.repayLoan({ gasLimit: ethers.utils.hexlify(6e6) });
+      } catch (e) {
+        console.logKeeper('error');
+        console.error(e);
+      }
+    });
+  })().catch((err) => console.error(err));
+}
 
 const ln = (v) => ((console.log(v)), v);
 
@@ -50,14 +132,18 @@ export default class App extends React.Component{
     this.setState({
       selectedAddress: window.ethereum.selectedAddress
     });
-    if (__IS_TEST) contracts.renbtc = await getMockRenBTCAddress(provider, contracts);
   }
   async requestLoan() {
     const liquidityRequest = zero.createLiquidityRequest(ln({
-      token: contracts.renbtc,
-      amount: this.state.value,
+      token: await getRenBTCAddress(),
+      amount: ethers.utils.parseUnits(String(this.state.value), 8),
       nonce: '0x' + randomBytes(32).toString('hex'),
-      gasRequested: ethers.utils.parseEther('0.01').toString()
+      gasRequested: ethers.utils.parseEther('0.01').toString(),
+      actions: createSwapActions({
+        borrower: (await (new ethers.providers.Web3Provider(window.ethereum)).send('eth_accounts', []))[0],
+        dai: contracts.dai,
+        factory: contracts.factory
+      })
     }));
     const parcel = await liquidityRequest.sign();
     await parcel.broadcast();
