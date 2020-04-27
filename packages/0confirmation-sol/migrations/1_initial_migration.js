@@ -138,12 +138,12 @@ module.exports = async function(deployer) {
     const provider = new ethers.providers.Web3Provider(dai.contract.currentProvider);
     const [ truffleAddress ] = await provider.send('eth_accounts', []);
     from = truffleAddress;
-    await Promise.all([ [ renbtc.address, renbtcExchange.address ], [ dai.address, daiExchange.address ] ].map(async ([ token, exchange ]) => {
+    await Promise.all([ [ renbtc.address, renbtcExchange.address, 8, '1000' ], [ dai.address, daiExchange.address, 18, '7724680' ] ].map(async ([ token, exchange, decimals, amount ]) => {
       const tokenWrapped = new ethers.Contract(token, DAI.abi, provider.getSigner());
-      await (await tokenWrapped.mint(from, amount)).wait();
+      await (await tokenWrapped.mint(from, ethers.utils.parseUnits(amount, decimals))).wait();
       const exchangeWrapped = new ethers.Contract(exchange, Exchange.abi, provider.getSigner());
-      await (await tokenWrapped.approve(exchangeWrapped.address, amount)).wait();
-      await (await exchangeWrapped.addLiquidity(ethers.utils.parseEther('10'), ethers.utils.parseUnits('100', 8), String(Date.now() * 2), {
+      await (await tokenWrapped.approve(exchangeWrapped.address, ethers.utils.parseUnits(amount, decimals))).wait();
+      await (await exchangeWrapped.addLiquidity(ethers.utils.parseUnits(amount, decimals), ethers.utils.parseUnits(amount, decimals), String(Date.now() * 2), {
         value: ethers.utils.hexlify(ethers.utils.parseEther('10')),
         gasLimit: ethers.utils.hexlify(6e6)
       })).wait();

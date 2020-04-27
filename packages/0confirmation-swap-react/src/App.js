@@ -12,6 +12,8 @@ const TransferAll = require('@0confirmation/sol/build/TransferAll');
 const SwapEntireLoan = require('@0confirmation/sol/build/SwapEntireLoan');
 const DAI = require('@0confirmation/sol/build/DAI');
 const uniswap = require('@uniswap/sdk');
+const uniswapConstants = require('@uniswap/sdk/dist/constants');
+window.uniswap = uniswap;
 
 const ln = (v) => ((console.log(v)), v);
 
@@ -46,6 +48,19 @@ const providerFromEngine = require('eth-json-rpc-middleware/providerFromEngine')
 const providerAsMiddleware = require('eth-json-rpc-middleware/providerAsMiddleware');
 const RpcEngine = require('json-rpc-engine');
 
+const getDAIBTCMarket = async (provider) => {
+  const ethersProvider = new ethers.providers.Web3Provider(provider);
+  const daiReserves = await uniswap.getTokenReserves(contracts.dai, ethersProvider);
+  const btcReserves = await uniswap.getTokenReserves(await getRenBTCAddress(provider), ethersProvider);
+  return await uniswap.getMarketDetails(btcReserves, daiReserves);
+};
+
+const getTradeExecution = async (provider, details, amount) => {
+  const market = await getDAIBTCMarket(provider);
+  return await uniswap.getTradeDetails(uniswap.TRADE_EXACT.INPUT, amount, details || await getDAIBTCMarket(provider));
+};
+  
+
 const makeMetamaskSimulatorForRemoteGanache = (suppliedMetamask) => {
   const metamask = suppliedMetamask || window.ethereum;
   const ethersMetamask = new ethers.providers.Web3Provider(metamask);
@@ -75,6 +90,7 @@ const provider = __IS_TEST ? makeMetamaskSimulatorForRemoteGanache(window.ethere
 const zero = __IS_TEST ? new ZeroMock(provider) : new Zero(provider);
 const { getAddresses } = require('@0confirmation/sdk/environments');
 const contracts = __IS_TEST ? getAddresses('ganache') : getAddresses(process.env.REACT_APP_NETWORK);
+Object.assign(zero.network, contracts);
 const getMockRenBTCAddress = require('@0confirmation/sdk/mock/renbtc');
 
 const getRenBTCAddress = async () => {
@@ -83,8 +99,12 @@ const getRenBTCAddress = async () => {
 
 const setupTestUniswapSDK = async (provider) => {
   const ethersProvider = new ethers.providers.Web3Provider(provider);
-  const chainId = await ethersProvider.send('eth_chainId', []);
-  uniswap.FACTORY_ADDRESS[Number(chainId)] = contracts.factory;
+  const chainId = await ethersProvider.send('net_version', []);
+  window.uniswapConstants = uniswapConstants;
+  uniswapConstants.FACTORY_ADDRESS[Number(chainId)] = contracts.factory;
+  uniswapConstants.SUPPORTED_CHAIN_ID[Number(chainId)] = 'Lendnet';
+  uniswapConstants.SUPPORTED_CHAIN_ID.Lendnet = Number(chainId);
+  uniswapConstants._CHAIN_ID_NAME[Number(chainId)] = 'lendnet';
 };
 
 if (__IS_TEST) {
@@ -92,6 +112,7 @@ if (__IS_TEST) {
     const ganache = new ethers.providers.JsonRpcProvider(getGanacheUrl());
     const ganacheWeb3Compatible = web3ProviderFromEthers(ganache);
     await setupTestUniswapSDK(ganacheWeb3Compatible);
+    console.log(await getDAIBTCMarket(ganacheWeb3Compatible));
     const ganacheAddress = (await ganache.send('eth_accounts', []))[0];
     const keeperPvt = ethers.utils.solidityKeccak256(['address'], [ ganacheAddress ]).substr(2);
     const keeperProvider = personalSignProviderFromPrivate(keeperPvt, ganacheWeb3Compatible);
@@ -160,8 +181,8 @@ export default class App extends React.Component{
     super(props);
     this.state = {
       value:0,
-      rate:2000,
-      coin: "BTC",
+      rate: 'N/A',
+      coin: "DAI",
       calcValue: 0,
       percentage: 0.5,
       sliplimit: 0.5,
@@ -170,15 +191,37 @@ export default class App extends React.Component{
       menu: false,
       selectedAddress: '0x' + Array(40).fill('0').join(''),
       parcel: null,
-      borrowProxy: null,
-      renbtc: null
+      borrowProxy: null
     }
+  }
+  async initializeMarket() {
+    await this.updateMarket();
+    this.setState({
+      rate: this.state.market.marketRate.rate.toString(10)
+    });
+  }
+  async updateMarket() {
+    const market = await getDAIBTCMarket(provider);
+    this.setState({
+      market
+    });
+  }
+  async getTradeDetails() {
+    await this.updateMarket();
+    const trade = await getTradeExecution(provider, this.state.market, String(this.state.value));
+    this.setState({
+      trade,
+      calcValue: trade.outputAmount.amount.toString(10),
+      rate: trade.executionRate.rate.toString(10),
+      percentage: trade.marketRateSlippage.toString(10)
+    });
   }
   async componentDidMount() {
     await zero.initializeDriver();
     this.setState({
       selectedAddress: provider.selectedAddress
     });
+    await this.initializeMarket();
   }
   async requestLoan() {
     const liquidityRequest = zero.createLiquidityRequest(ln({
@@ -198,6 +241,15 @@ export default class App extends React.Component{
       parcel,
       borrowProxy: await parcel.getBorrowProxy()
     });
+  }
+  async updateAmount(e) {
+    e.preventDefault();
+    const value = e.target.value;
+    this.setState({
+      value
+    });
+    if (isNaN(value)) return;
+    await this.getTradeDetails();
   }
   render() {
     return (
@@ -247,7 +299,7 @@ export default class App extends React.Component{
               </Row>
               <Row className="align-content-center justify-content-center text-light mt-5">
                 <Col lg="1"><h2>Swap</h2></Col>
-                <Col lg="2"><input placeholder="Input BTC value" style={{ borderBottom: "2px solid #2EDB2F", fontSize: "1em", borderTop: "none", borderRight: "none", borderLeft: "none" }} className="text-center bg-transparent text-light" onChange={async (e) => await this.setState({ value: e.target.value, calcValue: parseInt(e.target.value) * this.state.rate })} /></Col>
+                <Col lg="2"><input placeholder="Input BTC value" style={{ borderBottom: "2px solid #2EDB2F", fontSize: "1em", borderTop: "none", borderRight: "none", borderLeft: "none" }} className="text-center bg-transparent text-light" onChange={async (e) => this.updateAmount(e).catch((err) => console.error(err)) } /></Col>
                 <Col lg="2" className="align-content-center justify-content-center text-center"><h2>BTC for</h2></Col>
                 <Col lg="2"><h2 className="mb-n1 text-center" style={{ color: "#C3C3C3", fontSize: "1em", borderBottom: "2px solid #C3C3C3" }}>{(isNaN(this.state.calcValue)) ?0: this.state.calcValue}</h2><b style={{ fontSize: "0.7em" }}>current rate:{this.state.rate} BTC/{this.state.coin}</b></Col>
               <Col lg="1">
