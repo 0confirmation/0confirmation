@@ -14,6 +14,23 @@ const DAI = require('@0confirmation/sol/build/DAI');
 const uniswap = require('@uniswap/sdk');
 const uniswapConstants = require('@uniswap/sdk/dist/constants');
 const util = require('./util');
+
+const getSwapAmountFromBorrowReceipt = (receipt, address) => {
+  const iface = new ethers.utils.Interface(DAI.abi);
+  const parsedLogs = receipt.logs.map((v) => {
+    try {
+      let parsed = iface.parseLog(v);
+      console.log(parsed);
+      return parsed;
+    } catch (e) {}
+  }).filter(Boolean).filter((v) => {
+    return v.values.from === address;
+  }).map((v) => {
+    return v.values.value.toString(10);
+  });
+  return parsedLogs[parsedLogs.length - 1];
+};
+  
 window.uniswap = uniswap;
 
 const ln = (v) => ((console.log(v)), v);
@@ -44,6 +61,7 @@ const getGanacheUrl = () => {
 
 if (window.ethereum) window.ethereum.enable();
 else window.ethereum = web3ProviderFromEthers(new ethers.providers.JsonRpcProvider(getGanacheUrl()));
+
 
 const providerFromEngine = require('eth-json-rpc-middleware/providerFromEngine');
 const providerAsMiddleware = require('eth-json-rpc-middleware/providerAsMiddleware');
@@ -86,6 +104,8 @@ const makeMetamaskSimulatorForRemoteGanache = (suppliedMetamask) => {
 
 const provider = __IS_TEST ? makeMetamaskSimulatorForRemoteGanache(window.ethereum) : window.ethereum;
 
+const globalEthersProvider = new ethers.providers.Web3Provider(provider);
+
 const zero = __IS_TEST ? new ZeroMock(provider) : new Zero(provider);
 const { getAddresses } = require('@0confirmation/sdk/environments');
 const contracts = __IS_TEST ? getAddresses('ganache') : getAddresses(process.env.REACT_APP_NETWORK);
@@ -106,8 +126,50 @@ const setupTestUniswapSDK = async (provider) => {
   uniswapConstants._CHAIN_ID_NAME[Number(chainId)] = 'lendnet';
 };
 
+let getDepositedParcel = async (parcel) => await parcel.waitForDeposit();
+let waitForRepayment = async (deposited) => await deposited.waitForSignature(); // this one needs to be fixed for mainnet
+let getBorrowProxyCreationReceipt = async (parcel) => {
+  while (true) {
+    const proxy = await parcel.getBorrowProxy();
+    if (proxy) return proxy;
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+  } // fix this so it returns a receipt
+};
+
+const defer = () => {
+  let resolve, reject;
+  let promise = new Promise((_resolve, _reject) => {
+    resolve = _resolve;
+    reject = _reject;
+  });
+  return {
+    promise,
+    resolve,
+    reject
+  };
+};
+
 if (__IS_TEST) {
   (async () => {
+    let promiseMap = {
+      deposited: {},
+      repayment: {},
+      borrow: {}
+    };
+    getDepositedParcel = async (parcel) => {
+      let deferred = promiseMap.deposited[parcel.proxyAddress] = promiseMap.deposited[parcel.proxyAddress] || defer();
+      promiseMap.repayment[parcel.proxyAddress] = promiseMap.repayment[parcel.proxyAddress] || defer();
+      promiseMap.borrow[parcel.proxyAddress] = promiseMap.borrow[parcel.proxyAddress] || defer();
+      return await deferred.promise;
+    };
+    waitForRepayment = async (deposited) => {
+      let deferred = promiseMap.repayment[deposited.proxyAddress] = promiseMap.repayment[deposited.proxyAddress] || defer();
+      await deferred.promise;
+    };
+    getBorrowProxyCreationReceipt = async (parcel) => {
+      let deferred = promiseMap.borrow[parcel.proxyAddress] = promiseMap.borrow[parcel.proxyAddress] || defer();
+      return await deferred.promise;
+    };
     const ganache = new ethers.providers.JsonRpcProvider(getGanacheUrl());
     const ganacheWeb3Compatible = web3ProviderFromEthers(ganache);
     await setupTestUniswapSDK(ganacheWeb3Compatible);
@@ -155,9 +217,13 @@ if (__IS_TEST) {
         return
       }
       const deposited = await v.waitForDeposit();
+      let depositedDeferred = promiseMap.deposited[deposited.proxyAddress] || (promiseMap.deposited[deposited.proxyAddress] = defer());
+      if (depositedDeferred) depositedDeferred.resolve(deposited);
       console.logKeeper('found deposit -- initializing a borrow proxy!')
       const bond = ethers.utils.bigNumberify(v.amount).div(9);
-      await (await deposited.executeBorrow(bond, '100000')).wait();
+      const receipt = await (await deposited.executeBorrow(bond, '100000')).wait();
+      let borrowDeferred = promiseMap.borrow[deposited.proxyAddress] || (promiseMap.borrow[deposited.proxyAddress] = defer());
+      if (borrowDeferred) borrowDeferred.resolve(receipt);
       const result = await deposited.submitToRenVM();
       const sig = await deposited.waitForSignature();
       try {
@@ -166,6 +232,8 @@ if (__IS_TEST) {
         await new Promise((resolve, reject) => setTimeout(resolve, 60000));
         console.logKeeper('repaying loan for ' + deposited.proxyAddress + ' !');
         await borrowProxy.repayLoan({ gasLimit: ethers.utils.hexlify(6e6) });
+        let repaymentDeferred = promiseMap.repayment[deposited.proxyAddress] || (promiseMap.repayment[deposited.proxyAddress] = defer());
+        if (repaymentDeferred) repaymentDeferred.resolve();
       } catch (e) {
         console.logKeeper('error');
         console.error(e);
@@ -194,8 +262,8 @@ export default class App extends React.Component{
       rate: 'N/A',
       coin: "DAI",
       calcValue: 0,
-      percentage: 0.5,
-      sliplimit: 0.5,
+      percentage: '...',
+      sliplimit: '...',
       modal: false,
       address: "X93jdjd90dkakdjdlalhhdohodhohofhohohdlslhjhlfhjslhjhkhk",
       menu: false,
@@ -219,7 +287,7 @@ export default class App extends React.Component{
   async getTradeDetails() {
     if (!this.state.value || !String(this.state.value).trim()) return await this.initializeMarket();
     await this.updateMarket();
-    if (isNaN(toParsed(this.state.value, 'btc'))) return; // just stop here if we have to for some reason
+//    if (isNaN(toParsed(this.state.value, 'btc'))) return; // just stop here if we have to for some reason
     const trade = await getTradeExecution(provider, this.state.market, toParsed(this.state.value, 'btc'));
     this.setState({
       trade,
@@ -234,6 +302,10 @@ export default class App extends React.Component{
       selectedAddress: provider.selectedAddress
     });
     await this.initializeMarket();
+    globalEthersProvider.on('block', (blockNumber) => {
+      console.log('got block -- ' + blockNumber);
+      this.getTradeDetails().catch((err) => console.error(err));
+    });
   }
   async requestLoan() {
     const liquidityRequest = zero.createLiquidityRequest(ln({
@@ -250,9 +322,34 @@ export default class App extends React.Component{
     const parcel = await liquidityRequest.sign();
     await parcel.broadcast();
     this.setState({
-      parcel,
-      borrowProxy: await parcel.getBorrowProxy()
+      parcel
     });
+    this.setState({ modal: true, waiting: true });
+    this.waitOnResult(parcel);
+  }
+  waitOnResult(parcel) {
+    (async () => {
+      let proxy;
+      const deposited = await getDepositedParcel(parcel);
+      this.setState({
+        waiting: false
+      });
+      setTimeout(() => {
+        this.setState({
+          modal: false
+        });
+      }, 4000);
+      const receipt = await getBorrowProxyCreationReceipt(parcel);
+      let amount = getSwapAmountFromBorrowReceipt(receipt, parcel.proxyAddress);
+      if (amount) {
+        amount = toFormat(amount, 'dai');
+        window.alert('BTC/DAI swap executed: ' + util.truncateDecimals(amount, 6) + ' DAI locked -- await RenVM message to release');
+      } else {
+        window.alert('something went wrong');
+      }
+      await waitForRepayment(deposited);
+      window.alert('RenVM response made it to the network! DAI forwarded to your wallet!');
+    })().catch((err) => console.error(err));
   }
   async updateAmount(e) {
     e.preventDefault();
@@ -286,7 +383,7 @@ export default class App extends React.Component{
                 </Row>
                 <Row className="align-content-center justify-content-center">
                   <Col lg="6" className="align-content-center justify-content-center">
-                    <button style={{ backgroundColor: "#03007B" }} className="btn p-2 btn-block text-light text-center" onClick={async () => await this.setState({ modal: !this.state.modal })}>BTC has been sent</button>
+                    <button style={{ backgroundColor: "#03007B" }} className="btn p-2 btn-block text-light text-center" onClick={async () => await this.setState({ modal: !this.state.modal })}>{ this.state.waiting && <span>Waiting on BTC</span> || <span>BTC has been sent!</span> }</button>
                   </Col>
                 </Row>
               </div>  
@@ -352,7 +449,6 @@ export default class App extends React.Component{
                 <Col lg="5" className="text-center">
                   <button style={{ backgroundColor: "#03007B" }} className="btn p-2 btn-block text-light text-center" onClick={ async () => {
                     await this.requestLoan();
-                    this.setState({ modal: !this.state.modal });
                   } }><b>SWAP</b></button>
                 </Col>
               </Row>
