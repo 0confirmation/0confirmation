@@ -8,11 +8,13 @@ const { ZERO_ADDRESS } = require('./constants');
 const BN = require('bignumber.js');
 const resultToJsonRpc = require('./util/result-to-jsonrpc');
 const { Buffer } = require('safe-buffer');
-const { RenVMType } = require('@renproject/ren-js-common');
+const {
+  Common: {
+    RenVMType
+  },
+  RenVM
+} = require('@0confirmation/renvm');
 const { NULL_PHASH, toHex, toBase64 } = require('./util');
-const RenJS = require('@renproject/ren');
-delete global._bitcore;
-delete global._bitcoreCash;
 const ethersUtil = require('ethers/utils');
 const { joinSignature, solidityKeccak256 } = ethersUtil;
 const ethers = require('ethers');
@@ -306,7 +308,7 @@ class DepositedLiquidityRequestParcel extends LiquidityRequestParcel {
   }
   computeShiftInTxHash() {
     return utils.computeShiftInTxHash({
-      renContract: RenJS.Tokens.BTC.Mint,
+      renContract: RenVM.Tokens.BTC.Mint,
       g: {
         to: this.proxyAddress,
         p: CONST_PHASH,
@@ -565,7 +567,7 @@ class Zero {
   }) {
     return await this.driver.sendWrapped('ren_submitTx', {
       tx: {
-        to: RenJS.Tokens.BTC.Mint,
+        to: RenVM.Tokens.BTC.Mint,
         in: [{
           name: 'p',
           type: RenVMType.ExtEthCompatPayload,

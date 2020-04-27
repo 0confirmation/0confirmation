@@ -1,10 +1,8 @@
 'use strict';
 
-delete global._bitcore;
-delete global._bitcoreCash;
-const RenJS = require('@renproject/ren').default;
-delete global._bitcore;
-delete global._bitcoreCash;
+/*
+const { RenVM } = require('@0confirmation/renvm');
+*/
 const uniswap = require('@uniswap/sdk');
 const ethers = require('ethers');
 const randomBytes = require('random-bytes').sync;
@@ -40,6 +38,7 @@ const renNetworkFromNetwork = (network) => {
   return network;
 };
 
+/*
 const renvmFromEnvironment = (network) => {
   if (network === 'ganache') {
     return {
@@ -60,6 +59,7 @@ const renvmFromEnvironment = (network) => {
     mpkh
   }
 };
+*/
 
 const zeroContractsFromNetwork = (network) => {
   const chainId = chainIdFromNetwork(network);
