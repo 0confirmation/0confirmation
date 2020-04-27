@@ -15,7 +15,6 @@ contract ERC20Adapter {
     return isolate.processEscrowForwards();
   }
   function handle(ModuleLib.AssetSubmodulePayload memory payload) public payable {
-    if (true) revert("woop");
     ERC20AdapterLib.Isolate storage isolate = ERC20AdapterLib.getIsolatePointer();
     (bytes4 sig, bytes memory args) = payload.callData.splitPayload();
     if (sig == ERC20.transfer.selector) {

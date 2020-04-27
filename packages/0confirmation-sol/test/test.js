@@ -194,15 +194,9 @@ contract('ShifterPool', () => {
     });
     const TRANSFER_TARGET = '0x' + Array(40).fill('1').join('');
     const actions = [
-      { to: fixtures.renbtc.address, calldata: new ethers.utils.Interface(fixtures.DAI.abi).functions.transfer.encode([ borrowerAddress, '1' ]) }
-/*
-      {to: fixtures.renbtcExchange.address,
-      calldata: new ethers.utils.Interface(Exchange.abi).functions.tokenToTokenSwapInput.encode([ '100', '1', '1', Date.now(), fixtures.DAI.address ])
-      }
-*/
-//      Zero.preprocessor(SwapEntireLoan, fixtures.Factory.address, fixtures.DAI.address)
+      Zero.preprocessor(SwapEntireLoan, fixtures.Factory.address, fixtures.DAI.address),
       
-//      Zero.preprocessor(TransferAll, fixtures.renbtc.address, borrowerAddress)
+      Zero.preprocessor(TransferAll, fixtures.DAI.address, borrowerAddress)
     ];
     const liquidityRequest = fixtures.borrower.createLiquidityRequest({
       token: fixtures.renbtc.address,
@@ -218,13 +212,15 @@ contract('ShifterPool', () => {
     await fixtures.borrower.setBorrowProxy(liquidityRequestParcel.proxyAddress);
     const borrowedProvider = new ethers.providers.Web3Provider(fixtures.borrower.getProvider());
 */
-    console.log(await (new ethers.Contract(fixtures.renbtc.address, fixtures.DAI.abi, new ethers.providers.Web3Provider(fixtures.keeper.driver).getSigner())).balanceOf(borrowerAddress));
+    ((await proxy.repayLoan({ gasLimit: ethers.utils.hexlify(6e6) })).wait());
+    console.log(await (new ethers.Contract(fixtures.DAI.address, fixtures.DAI.abi, new ethers.providers.Web3Provider(fixtures.keeper.driver).getSigner())).balanceOf(borrowerAddress));
     await fixtures.keeper.stopListeningForLiquidityRequests();
     console.log('borrower: ' + borrowerAddress);
     console.log('proxy address: ' + liquidityRequestParcel.proxyAddress);
     console.log('keeper: ' + keeperAddress);
     console.log('renbtc: ' + fixtures.renbtc.address);
     console.log('shifter pool: ' + fixtures.keeper.network.shifterPool);
+    console.log('renbtc exchange: ' + fixtures.renbtcExchange.address);
     const tokenWrapped = new ethers.Contract(fixtures.renbtc.address, LiquidityToken.abi, new ethers.providers.Web3Provider(fixtures.borrower.getProvider()));
   });
 });

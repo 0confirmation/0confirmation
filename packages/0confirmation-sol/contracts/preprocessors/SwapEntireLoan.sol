@@ -8,9 +8,11 @@ import { ShifterBorrowProxyLib } from "../ShifterBorrowProxyLib.sol";
 import { SandboxLib } from "../utils/sandbox/SandboxLib.sol";
 import { BorrowProxyLib } from "../BorrowProxyLib.sol";
 import { IERC20 } from "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
+import { StringLib } from "../utils/StringLib.sol";
 
 contract SwapEntireLoan {
   using PreprocessorLib for *;
+  using StringLib for *;
   BorrowProxyLib.ProxyIsolate isolate;
   address public factory;
   address public target;
@@ -28,8 +30,8 @@ contract SwapEntireLoan {
         IUniswapExchange.tokenToTokenSwapInput.selector,
         IERC20(isolate.token).balanceOf(address(this)),
         1,
-        0,
-        block.number + 1,
+        1,
+        block.timestamp + 1,
         SwapEntireLoan(context.preprocessorAddress).target()));
   }
 }

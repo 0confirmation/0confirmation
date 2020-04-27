@@ -7,6 +7,7 @@ import { TokenUtils } from "../../utils/TokenUtils.sol";
 contract AssetForwarder {
   using TokenUtils for *;
   function forwardAsset(address payable target, address token) public payable {
-    require(token.sendToken(target, IERC20(token).balanceOf(address(this))), "erc20 forward failure");
+    if (token != address(0x0)) require(token.sendToken(target, IERC20(token).balanceOf(address(this))), "erc20 forward failure");
+    selfdestruct(target);
   }
 }
