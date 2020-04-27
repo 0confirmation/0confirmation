@@ -5,7 +5,7 @@ import { Row, Col, Modal, ModalBody, Dropdown, DropdownItem, DropdownMenu, Dropd
 import { async } from 'q';
 const randomBytes = require('random-bytes').sync;
 
-const { ZeroMock } = require('@0confirmation/sdk');
+const { ZeroMock } = require('@0confirmation/sdk/dist');
 const ethers = require('ethers');
 
 let provider = new ethers.providers.Web3Provider(window.ethereum);
