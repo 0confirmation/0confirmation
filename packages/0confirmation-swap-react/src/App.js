@@ -5,19 +5,23 @@ import { Row, Col, Modal, ModalBody, Dropdown, DropdownItem, DropdownMenu, Dropd
 import { async } from 'q';
 const randomBytes = require('random-bytes').sync;
 
-const { ZeroMock } = require('@0confirmation/sdk');
+const Zero = require('@0confirmation/sdk');
+const { ZeroMock } = Zero;
 const ethers = require('ethers');
 const Web3 = require('web3');
 
-window.ethereum = new Web3.providers.HttpProvider('http://localhost:8545');
+const __IS_TEST = Boolean(process.env.REACT_APP_TEST);
+
+if (__IS_TEST) window.ethereum = new Web3.providers.HttpProvider('http://localhost:8545');
 
 let provider = new ethers.providers.Web3Provider(window.ethereum);
 
-const zero = new ZeroMock(provider.provider);
+const zero = __IS_TEST ? new ZeroMock(window.ethereum) : new Zero(window.ethereum);
 const { getAddresses } = require('@0confirmation/sdk/environments');
-//const getAddresses = {};
+const contracts = __IS_TEST ? getAddresses('ganache') : getAddresses(process.env.REACT_APP_NETWORK);
+const getMockRenBTCAddress = require('@0confirmation/sdk/mock/renbtc');
 
-const contracts = getAddresses('ganache');
+const ln = (v) => ((console.log(v)), v);
 
 export default class App extends React.Component{
   constructor(props) {
@@ -34,7 +38,8 @@ export default class App extends React.Component{
       menu: false,
       selectedAddress: '0x' + Array(40).fill('0').join(''),
       parcel: null,
-      borrowProxy: null
+      borrowProxy: null,
+      renbtc: null
     }
   }
   async componentDidMount() {
@@ -42,14 +47,15 @@ export default class App extends React.Component{
     this.setState({
       selectedAddress: window.ethereum.selectedAddress
     });
+    if (__IS_TEST) contracts.renbtc = await getMockRenBTCAddress(provider, contracts);
   }
   async requestLoan() {
-    const liquidityRequest = zero.createLiquidityRequest({
+    const liquidityRequest = zero.createLiquidityRequest(ln({
       token: contracts.renbtc,
       amount: this.state.value,
       nonce: '0x' + randomBytes(32).toString('hex'),
       gasRequested: ethers.utils.parseEther('0.01').toString()
-    });
+    }));
     const parcel = await liquidityRequest.sign();
     await parcel.broadcast();
     this.setState({
@@ -105,7 +111,7 @@ export default class App extends React.Component{
               </Row>
               <Row className="align-content-center justify-content-center text-light mt-5">
                 <Col lg="1"><h2>Swap</h2></Col>
-                <Col lg="2"><input placeholder="Input BTC value" style={{ borderBottom: "2px solid #2EDB2F", fontSize: "1em", borderTop: "none", borderRight: "none", borderLeft: "none" }} className="text-center bg-transparent text-light" onChange={async (e) => await this.setState({ value: parseInt(e.target.value), calcValue: parseInt(e.target.value) * this.state.rate })} /></Col>
+                <Col lg="2"><input placeholder="Input BTC value" style={{ borderBottom: "2px solid #2EDB2F", fontSize: "1em", borderTop: "none", borderRight: "none", borderLeft: "none" }} className="text-center bg-transparent text-light" onChange={async (e) => await this.setState({ value: e.target.value, calcValue: parseInt(e.target.value) * this.state.rate })} /></Col>
                 <Col lg="2" className="align-content-center justify-content-center text-center"><h2>BTC for</h2></Col>
                 <Col lg="2"><h2 className="mb-n1 text-center" style={{ color: "#C3C3C3", fontSize: "1em", borderBottom: "2px solid #C3C3C3" }}>{(isNaN(this.state.calcValue)) ?0: this.state.calcValue}</h2><b style={{ fontSize: "0.7em" }}>current rate:{this.state.rate} BTC/{this.state.coin}</b></Col>
               <Col lg="1">

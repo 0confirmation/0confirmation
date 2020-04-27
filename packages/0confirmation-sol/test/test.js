@@ -152,23 +152,9 @@ contract('ShifterPool', () => {
       value: ethers.utils.hexlify(ethers.utils.parseEther('20'))
     }]));
     fixtures.from = from;
-    const amount = ethers.utils.bigNumberify('0xffffffffffffffffffffffffffffffffffffffff');
-    await Promise.all([ [ fixtures.renbtc.address, fixtures.renbtcExchange.address ], [ fixtures.DAI.address, fixtures.daiExchange.address ] ].map(async ([ token, exchange ]) => {
-      const tokenWrapped = new ethers.Contract(token, DAI.abi, provider.getSigner());
-      await (await tokenWrapped.mint(from, amount)).wait();
-      const exchangeWrapped = new ethers.Contract(exchange, Exchange.abi, provider.getSigner());
-      await (await tokenWrapped.approve(exchangeWrapped.address, amount)).wait();
-      await (await exchangeWrapped.addLiquidity(ethers.utils.parseEther('10'), ethers.utils.parseUnits('100', 8), String(Date.now() * 2), {
-        value: ethers.utils.hexlify(ethers.utils.parseEther('10')),
-        gasLimit: ethers.utils.hexlify(6e6)
-      })).wait();
-    }));
-    fixtures.keeperAddress = keeperAddress;
     const renbtcWrapped = new ethers.Contract(fixtures.renbtc.address, ShifterERC20Mock.abi, new ethers.providers.Web3Provider(keeperProvider).getSigner());
     
     await (await renbtcWrapped.mint(fixtures.keeperAddress, ethers.utils.parseUnits('10', 8))).wait();
-    await (await fixtures.keeper.approveLiquidityToken(fixtures.renbtc.address)).wait();
-    await (await fixtures.keeper.addLiquidity(fixtures.renbtc.address, ethers.utils.parseUnits('5', 8).toString())).wait();
     await (await fixtures.keeper.approvePool(fixtures.renbtc.address)).wait();
   });
   it('should execute a payment', async () => {

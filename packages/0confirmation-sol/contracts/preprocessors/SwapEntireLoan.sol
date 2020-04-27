@@ -22,8 +22,6 @@ contract SwapEntireLoan {
   }
   function execute(bytes memory data) view public returns (ShifterBorrowProxyLib.InitializationAction[] memory result) {
     SandboxLib.ExecutionContext memory context = data.toContext();
-    uint256 amt = IERC20(isolate.token).balanceOf(address(this));
-    bytes memory amtBytes = abi.encodePacked(amt);
     result = IUniswapFactory(SwapEntireLoan(context.preprocessorAddress).factory())
       .getExchange(isolate.token)
       .sendTransaction(abi.encodeWithSelector(

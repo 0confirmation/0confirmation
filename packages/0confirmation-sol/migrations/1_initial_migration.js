@@ -4,6 +4,7 @@ const ShifterPool = artifacts.require('ShifterPool');
 const SandboxLib = artifacts.require('SandboxLib');
 const UniswapAdapter = artifacts.require('UniswapAdapter');
 const SimpleBurnLiquidationModule = artifacts.require('SimpleBurnLiquidationModule');
+const ShifterERC20Mock = artifacts.require('ShifterERC20Mock');
 const ERC20Adapter = artifacts.require('ERC20Adapter');
 const LiquidityToken = artifacts.require('LiquidityToken');
 const CurveAdapter = artifacts.require('CurveAdapter');
@@ -19,6 +20,7 @@ const ethers = require('ethers');
 const fs = require('fs');
 
 const Zero = require('@0confirmation/sdk');
+const { ZeroMock } = Zero;
 
 const ModuleTypes = {
   BY_CODEHASH: 1,
@@ -41,7 +43,7 @@ module.exports = async function(deployer) {
   await deployer.deploy(ERC20Adapter);
   await deployer.deploy(DAI);
   const dai = await DAI.deployed();
-  let shifterRegistry, renbtc, factory, renbtcExchange;
+  let shifterRegistry, renbtc, factory, renbtcExchange, daiExchange;
   if (['ganache', 'test'].find((v) => v === deployer.network)) {
     await deployer.deploy(ShifterRegistryMock);
     shifterRegistry = await ShifterRegistryMock.deployed();
@@ -58,7 +60,7 @@ module.exports = async function(deployer) {
       address: receipt.logs[0].args.exchange
     };
     receipt = await factory.createExchange(dai.address);
-    let daiExchange = {
+    daiExchange = {
       address: receipt.logs[0].args.exchange
     };
   } else {
@@ -132,4 +134,27 @@ module.exports = async function(deployer) {
     token: renbtc.address,
     liqToken: liquidityToken.address
   }]);
+  // setup uni and the liquidity pool with some liqudity
+  if (deployer.network === 'test' || deployer.network === 'ganache') {
+    const amount = ethers.utils.bigNumberify('0xffffffffffffffffffffffffffffffffffffffff');
+    const provider = new ethers.providers.Web3Provider(dai.contract.currentProvider);
+    const [ truffleAddress ] = await provider.send('eth_accounts', []);
+    from = truffleAddress;
+    await Promise.all([ [ renbtc.address, renbtcExchange.address ], [ dai.address, daiExchange.address ] ].map(async ([ token, exchange ]) => {
+      const tokenWrapped = new ethers.Contract(token, DAI.abi, provider.getSigner());
+      await (await tokenWrapped.mint(from, amount)).wait();
+      const exchangeWrapped = new ethers.Contract(exchange, Exchange.abi, provider.getSigner());
+      await (await tokenWrapped.approve(exchangeWrapped.address, amount)).wait();
+      await (await exchangeWrapped.addLiquidity(ethers.utils.parseEther('10'), ethers.utils.parseUnits('100', 8), String(Date.now() * 2), {
+        value: ethers.utils.hexlify(ethers.utils.parseEther('10')),
+        gasLimit: ethers.utils.hexlify(6e6)
+      })).wait();
+    }));
+    const renbtcWrapped = new ethers.Contract(renbtc.address, ShifterERC20Mock.abi, provider.getSigner());
+    await (await renbtcWrapped.mint(from, ethers.utils.parseUnits('10', 8))).wait();
+    const zero = new ZeroMock(dai.contract.currentProvider);
+    zero.network.shifterPool = shifterPool.address;
+    await (await zero.approveLiquidityToken(renbtc.address)).wait();
+    await (await zero.addLiquidity(renbtc.address, ethers.utils.parseUnits('5', 8).toString())).wait();
+  }
 };
