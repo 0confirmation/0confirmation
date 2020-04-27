@@ -11,6 +11,7 @@ const ShifterERC20Mock = require('@0confirmation/sol/build/ShifterERC20Mock');
 const TransferAll = require('@0confirmation/sol/build/TransferAll');
 const SwapEntireLoan = require('@0confirmation/sol/build/SwapEntireLoan');
 const DAI = require('@0confirmation/sol/build/DAI');
+const uniswap = require('@uniswap/sdk');
 
 const ln = (v) => ((console.log(v)), v);
 
@@ -54,7 +55,6 @@ const makeMetamaskSimulatorForRemoteGanache = (suppliedMetamask) => {
   engine.push(providerAsMiddleware(baseProvider));
   engine.push((req, res, next, end) => {
     const { selectedAddress } = metamask;
-    console.log(selectedAddress);
     if (selectedAddress && req.method === 'personal_sign') {
       ethersMetamask.send(req.method, [ selectedAddress, req.params[1] ]).then((result) => next(null)).catch((err) => console.error(err)); 
     } else { next(null); }
@@ -75,10 +75,17 @@ const getRenBTCAddress = async () => {
   return contracts.renbtc || __IS_TEST && (contracts.renbtc = await getMockRenBTCAddress(new ethers.providers.Web3Provider(provider), contracts));
 };
 
+const setupTestUniswapSDK = async (provider) => {
+  const ethersProvider = new ethers.providers.Web3Provider(provider);
+  const chainId = await provider.send('eth_chainId', []);
+  uniswap.FACTORY_ADDRESS[Number(chainId)] = contracts.factory;
+};
+
 if (__IS_TEST) {
   (async () => {
     const ganache = new ethers.providers.JsonRpcProvider(getGanacheUrl());
     const ganacheWeb3Compatible = web3ProviderFromEthers(ganache);
+    await setupTestUniswapSDK(ganacheWeb3Compatible);
     const ganacheAddress = (await ganache.send('eth_accounts', []))[0];
     const keeperPvt = ethers.utils.solidityKeccak256(['address'], [ ganacheAddress ]).substr(2);
     const keeperProvider = personalSignProviderFromPrivate(keeperPvt, ganacheWeb3Compatible);
