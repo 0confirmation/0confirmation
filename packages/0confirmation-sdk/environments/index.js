@@ -1,8 +1,6 @@
 'use strict';
 
-/*
 const { RenVM } = require('@0confirmation/renvm');
-*/
 const uniswap = require('@uniswap/sdk');
 const ethers = require('ethers');
 const randomBytes = require('random-bytes').sync;
@@ -38,7 +36,6 @@ const renNetworkFromNetwork = (network) => {
   return network;
 };
 
-/*
 const renvmFromEnvironment = (network) => {
   if (network === 'ganache') {
     return {
@@ -59,7 +56,6 @@ const renvmFromEnvironment = (network) => {
     mpkh
   }
 };
-*/
 
 const zeroContractsFromNetwork = (network) => {
   const chainId = chainIdFromNetwork(network);

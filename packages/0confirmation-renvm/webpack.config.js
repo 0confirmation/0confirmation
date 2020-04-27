@@ -7,6 +7,8 @@ module.exports = {
   target: 'web',
   entry: path.join(__dirname, 'index.js'),
   output: {
+    libraryTarget: 'umd',
+    library: 'renvm',
     path: path.join(__dirname),
     filename: 'ren.bundle.js'
   },

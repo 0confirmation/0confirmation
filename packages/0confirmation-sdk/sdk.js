@@ -501,7 +501,7 @@ class Zero {
       amount,
       nonce,
       borrower,
-      forbidLoan,
+      forbidLoan: false,
       gasRequested
     });
   }

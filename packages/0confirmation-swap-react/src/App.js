@@ -7,14 +7,17 @@ const randomBytes = require('random-bytes').sync;
 
 const { ZeroMock } = require('@0confirmation/sdk');
 const ethers = require('ethers');
+const Web3 = require('web3');
+
+window.ethereum = new Web3.providers.HttpProvider('http://localhost:8545');
 
 let provider = new ethers.providers.Web3Provider(window.ethereum);
 
-const zero = new ZeroMock(window.ethereum);
+const zero = new ZeroMock(provider.provider);
 const { getAddresses } = require('@0confirmation/sdk/environments');
 //const getAddresses = {};
 
-const contracts = getAddresses();
+const contracts = getAddresses('ganache');
 
 export default class App extends React.Component{
   constructor(props) {
@@ -47,10 +50,8 @@ export default class App extends React.Component{
       nonce: '0x' + randomBytes(32).toString('hex'),
       gasRequested: ethers.utils.parseEther('0.01').toString()
     });
-    console.log('signing');
     const parcel = await liquidityRequest.sign();
     await parcel.broadcast();
-    console.log('broadcasted');
     this.setState({
       parcel,
       borrowProxy: await parcel.getBorrowProxy()

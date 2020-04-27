@@ -1,12 +1,12 @@
 'use strict';
 
 const globalObject = require('the-global-object');
+const Common = require('@renproject/ren-js-common');
 
 const { _bitcore, _bitcoreCash } = globalObject;
 delete globalObject._bitcore;
 delete globalObject._bitcoreCash;
 const RenVM = require('@renproject/ren').default;
-const Common = require('@renproject/ren-js-common');
 
 Object.assign(globalObject, {
   _bitcore,
