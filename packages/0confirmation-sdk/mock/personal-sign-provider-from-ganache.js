@@ -12,14 +12,14 @@ const personalSignProviderFromGanache = (provider) => {
   const engine = new RpcEngine();
   engine.push((req, res, next, end) => {
     if (req.method === 'personal_sign') {
-      req.params[1] = ethers.utils.hexlify(ethers.utils.concat([
+      req.params[0] = ethers.utils.hexlify(ethers.utils.concat([
         ethers.utils.toUtf8Bytes('\x19Ethereum Signed Message:\n'),
-        ethers.utils.toUtf8Bytes(String(ethers.utils.arrayify(req.params[1]).length)),
-        ethers.utils.arrayify(req.params[1])
+        ethers.utils.toUtf8Bytes(String(ethers.utils.arrayify(req.params[0]).length)),
+        ethers.utils.arrayify(req.params[0])
       ]));
-      end();
+      req.method = 'eth_sign';
     }
-    next(null);
+    next();
   });
   engine.push(providerAsMiddleware(provider));
   return providerFromEngine(engine);

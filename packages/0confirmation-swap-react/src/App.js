@@ -39,6 +39,9 @@ const getGanacheUrl = () => {
   });
 };
 
+if (window.ethereum) window.ethereum.enable();
+else window.ethereum = web3ProviderFromEthers(new ethers.providers.JsonRpcProvider(getGanacheUrl()));
+
 const providerFromEngine = require('eth-json-rpc-middleware/providerFromEngine');
 const providerAsMiddleware = require('eth-json-rpc-middleware/providerAsMiddleware');
 const RpcEngine = require('json-rpc-engine');
@@ -52,13 +55,16 @@ const makeMetamaskSimulatorForRemoteGanache = (suppliedMetamask) => {
   const wallet = new ethers.Wallet(pvt, new ethers.providers.Web3Provider(baseProvider));
   const engine = new RpcEngine();
   console.log(metamask.selectedAddress);
-  engine.push(providerAsMiddleware(baseProvider));
   engine.push((req, res, next, end) => {
     const { selectedAddress } = metamask;
     if (selectedAddress && req.method === 'personal_sign') {
-      ethersMetamask.send(req.method, [ selectedAddress, req.params[1] ]).then((result) => next(null)).catch((err) => console.error(err)); 
-    } else { next(null); }
+      ethersMetamask.send(req.method, [ req.params[1], selectedAddress ]).then((result) => next()).catch((err) => {
+        console.error(err);
+        next()
+      }); 
+    } else { next(); }
   });
+  engine.push(providerAsMiddleware(baseProvider));
   return Object.assign(providerFromEngine(engine), {
     selectedAddress: wallet.address
   });
@@ -77,7 +83,7 @@ const getRenBTCAddress = async () => {
 
 const setupTestUniswapSDK = async (provider) => {
   const ethersProvider = new ethers.providers.Web3Provider(provider);
-  const chainId = await provider.send('eth_chainId', []);
+  const chainId = await ethersProvider.send('eth_chainId', []);
   uniswap.FACTORY_ADDRESS[Number(chainId)] = contracts.factory;
 };
 
