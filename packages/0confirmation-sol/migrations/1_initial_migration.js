@@ -48,8 +48,6 @@ module.exports = async function(deployer) {
     await deployer.deploy(ShifterRegistryMock);
     shifterRegistry = await ShifterRegistryMock.deployed();
     renbtc = { address: await shifterRegistry.token() };
-    console.log('renbtc address');
-    console.log(renbtc.address);
     await deployer.deploy(Factory);
     await deployer.deploy(Exchange);
     factory = await Factory.deployed();

@@ -32,11 +32,11 @@ const createSwapActions = ({
 
 const getGanacheUrl = () => {
   const parsed = url.parse(window.location.href);
-  return ln(url.format({
+  return url.format({
     hostname: parsed.hostname,
     port: '8545',
     protocol: parsed.protocol
-  }));
+  });
 };
 
 const providerFromEngine = require('eth-json-rpc-middleware/providerFromEngine');

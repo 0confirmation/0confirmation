@@ -141,6 +141,10 @@ contract('ShifterPool', () => {
     const [ from ] = await provider.send('eth_accounts', []);
     const [ keeperAddress ] = await keeperEthers.send('eth_accounts', []);
     const [ borrowerAddress ] = await borrowerEthers.send('eth_accounts', []);
+    Object.assign(fixtures, {
+      keeperAddress,
+      borrowerAddress
+    });
     await provider.waitForTransaction(await provider.send('eth_sendTransaction', [{
       from,
       to: keeperAddress,
@@ -160,7 +164,7 @@ contract('ShifterPool', () => {
   it('should execute a payment', async () => {
     const outputLogs = (v) => v.logs.map((log) => {
       try {
-        return new ethers.utils.Interface(fixtures.DAI.abi.concat(ShifterBorrowProxy.abi).concat(BorrowProxy.abi).concat(fixtures.ShifterPool.abi)).parseLog(log).values.message;
+        return new ethers.utils.Interface(fixtures.ShifterPool.abi).parseLog(log).values.message;
       } catch (e) { }
     }).filter(Boolean).forEach((v) => console.log(v));
     const deferred = defer();
@@ -172,8 +176,6 @@ contract('ShifterPool', () => {
       const sig = await deposited.waitForSignature();
       try {
         const receipt = await (await deposited.executeBorrow(ethers.utils.parseUnits('1', 8).toString(), '100000')).wait();
-        console.log(receipt.gasUsed);
-        outputLogs(receipt);
         deferred.resolve(await deposited.getBorrowProxy());
       } catch (e) {
         deferred.reject(e);
@@ -195,7 +197,6 @@ contract('ShifterPool', () => {
     await liquidityRequestParcel.broadcast();
     const proxy = await deferred.promise;
     await (await proxy.repayLoan({ gasLimit: ethers.utils.hexlify(6e6) })).wait();
-    console.log((await (new ethers.Contract(fixtures.DAI.address, fixtures.DAI.abi, new ethers.providers.Web3Provider(fixtures.keeper.driver).getSigner())).balanceOf(borrowerAddress)).toString());
     await fixtures.keeper.stopListeningForLiquidityRequests();
   });
 });
