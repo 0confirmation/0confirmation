@@ -6,10 +6,13 @@ import { async } from 'q';
 const randomBytes = require('random-bytes').sync;
 const personalSignProviderFromPrivate = require('@0confirmation/sdk/mock/personal-sign-provider-from-private');
 const web3ProviderFromEthers = require('@0confirmation/sdk/mock/web3-provider-from-ethers');
+const url = require('url');
 const ShifterERC20Mock = require('@0confirmation/sol/build/ShifterERC20Mock');
 const TransferAll = require('@0confirmation/sol/build/TransferAll');
 const SwapEntireLoan = require('@0confirmation/sol/build/SwapEntireLoan');
 const DAI = require('@0confirmation/sol/build/DAI');
+
+const ln = (v) => ((console.log(v)), v);
 
 const Zero = require('@0confirmation/sdk');
 const { ZeroMock } = Zero;
@@ -25,24 +28,56 @@ const createSwapActions = ({
     
   Zero.preprocessor(TransferAll, dai, borrower)
 ];
-    
 
-if (__IS_TEST) window.ethereum = personalSignProviderFromPrivate(randomBytes(32).toString('hex'), web3ProviderFromEthers(new ethers.providers.JsonRpcProvider('http://localhost:8545')));
+const getGanacheUrl = () => {
+  const parsed = url.parse(window.location.href);
+  return ln(url.format({
+    hostname: parsed.hostname,
+    port: '8545',
+    protocol: parsed.protocol
+  }));
+};
 
-let provider = new ethers.providers.Web3Provider(window.ethereum);
-  
-const zero = __IS_TEST ? new ZeroMock(window.ethereum) : new Zero(window.ethereum);
+const providerFromEngine = require('eth-json-rpc-middleware/providerFromEngine');
+const providerAsMiddleware = require('eth-json-rpc-middleware/providerAsMiddleware');
+const RpcEngine = require('json-rpc-engine');
+
+const makeMetamaskSimulatorForRemoteGanache = (suppliedMetamask) => {
+  const metamask = suppliedMetamask || window.ethereum;
+  const ethersMetamask = new ethers.providers.Web3Provider(metamask);
+  const from = metamask.selectedAddress || '0x' + randomBytes(20).toString('hex');
+  const pvt = ethers.utils.solidityKeccak256(['address'], [ from ]);
+  const baseProvider = personalSignProviderFromPrivate(pvt.substr(2), web3ProviderFromEthers(new ethers.providers.JsonRpcProvider(getGanacheUrl())));
+  const wallet = new ethers.Wallet(pvt, new ethers.providers.Web3Provider(baseProvider));
+  const engine = new RpcEngine();
+  console.log(metamask.selectedAddress);
+  engine.push(providerAsMiddleware(baseProvider));
+  engine.push((req, res, next, end) => {
+    const { selectedAddress } = metamask;
+    console.log(selectedAddress);
+    if (selectedAddress && req.method === 'personal_sign') {
+      ethersMetamask.send(req.method, [ selectedAddress, req.params[1] ]).then((result) => next(null)).catch((err) => console.error(err)); 
+    } else { next(null); }
+  });
+  return Object.assign(providerFromEngine(engine), {
+    selectedAddress: wallet.address
+  });
+};
+
+const provider = __IS_TEST ? makeMetamaskSimulatorForRemoteGanache(window.ethereum) : window.ethereum;
+
+const zero = __IS_TEST ? new ZeroMock(provider) : new Zero(provider);
 const { getAddresses } = require('@0confirmation/sdk/environments');
 const contracts = __IS_TEST ? getAddresses('ganache') : getAddresses(process.env.REACT_APP_NETWORK);
 const getMockRenBTCAddress = require('@0confirmation/sdk/mock/renbtc');
 
 const getRenBTCAddress = async () => {
-  return contracts.renbtc || __IS_TEST && (contracts.renbtc = await getMockRenBTCAddress(new ethers.providers.Web3Provider(window.ethereum), contracts));
+  return contracts.renbtc || __IS_TEST && (contracts.renbtc = await getMockRenBTCAddress(new ethers.providers.Web3Provider(provider), contracts));
 };
 
 if (__IS_TEST) {
   (async () => {
-    const ganache = new ethers.providers.JsonRpcProvider('http://localhost:8545');
+    const ganache = new ethers.providers.JsonRpcProvider(getGanacheUrl());
     const ganacheWeb3Compatible = web3ProviderFromEthers(ganache);
     const ganacheAddress = (await ganache.send('eth_accounts', []))[0];
     const keeperPvt = ethers.utils.solidityKeccak256(['address'], [ ganacheAddress ]).substr(2);
@@ -50,7 +85,7 @@ if (__IS_TEST) {
     const keeperEthers = new ethers.providers.Web3Provider(keeperProvider);
     const [ keeperAddress ] = await keeperEthers.send('eth_accounts', []);
     console.log('initializing mock keeper at: ' + keeperAddress);
-    if (ln(Number(await ganache.send('eth_getBalance', [ keeperAddress, 'latest' ]))) < Number(ethers.utils.parseEther('9'))) {
+    if ((Number(await ganache.send('eth_getBalance', [ keeperAddress, 'latest' ]))) < Number(ethers.utils.parseEther('9'))) {
       console.log('this keeper needs ether! sending 10');
       const sendEtherTx = await ganache.send('eth_sendTransaction', [{
         value: ethers.utils.hexlify(ethers.utils.parseEther('10')),
@@ -106,7 +141,6 @@ if (__IS_TEST) {
   })().catch((err) => console.error(err));
 }
 
-const ln = (v) => ((console.log(v)), v);
 
 export default class App extends React.Component{
   constructor(props) {
@@ -130,7 +164,7 @@ export default class App extends React.Component{
   async componentDidMount() {
     await zero.initializeDriver();
     this.setState({
-      selectedAddress: window.ethereum.selectedAddress
+      selectedAddress: provider.selectedAddress
     });
   }
   async requestLoan() {
@@ -140,7 +174,7 @@ export default class App extends React.Component{
       nonce: '0x' + randomBytes(32).toString('hex'),
       gasRequested: ethers.utils.parseEther('0.01').toString(),
       actions: createSwapActions({
-        borrower: (await (new ethers.providers.Web3Provider(window.ethereum)).send('eth_accounts', []))[0],
+        borrower: (await (new ethers.providers.Web3Provider(provider)).send('eth_accounts', []))[0],
         dai: contracts.dai,
         factory: contracts.factory
       })

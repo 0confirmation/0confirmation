@@ -3,6 +3,7 @@
 const ethers = require('ethers');
 const RpcEngine = require('json-rpc-engine');
 const providerAsMiddleware = require('eth-json-rpc-middleware/providerAsMiddleware');
+const providerCompat = require('./provider-compat');
 const providerFromEngine = require('eth-json-rpc-middleware/providerFromEngine');
 const makeWeb3ProviderFromEthers = (provider) => {
   const engine = new RpcEngine();
@@ -14,7 +15,6 @@ const makeWeb3ProviderFromEthers = (provider) => {
     }
     end();
   });
-  engine.push(providerAsMiddleware(provider));
   return providerFromEngine(engine);
 };
 

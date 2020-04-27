@@ -6,8 +6,9 @@ const asMiddleware = require('json-rpc-engine/src/asMiddleware');
 
 const providerAsMiddleware = require('eth-json-rpc-middleware/providerAsMiddleware');
 const providerFromEngine = require('eth-json-rpc-middleware/providerFromEngine');
+const providerCompat = require('./provider-compat');
 const personalSignProviderFromGanache = (provider) => {
-  if (!provider.sendAsync) provider.sendAsync = provider.send;
+  provider = providerCompat(provider);
   const engine = new RpcEngine();
   engine.push((req, res, next, end) => {
     if (req.method === 'personal_sign') {
@@ -16,7 +17,7 @@ const personalSignProviderFromGanache = (provider) => {
         ethers.utils.toUtf8Bytes(String(ethers.utils.arrayify(req.params[1]).length)),
         ethers.utils.arrayify(req.params[1])
       ]));
-      req.method = 'eth_sign';
+      end();
     }
     next(null);
   });
