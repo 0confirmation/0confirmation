@@ -409,7 +409,7 @@ export default class App extends React.Component{
                 <Col lg="1"><h2>Swap</h2></Col>
                 <Col lg="2"><input placeholder="Input BTC value" style={{ borderBottom: "2px solid #2EDB2F", fontSize: "1em", borderTop: "none", borderRight: "none", borderLeft: "none" }} className="text-center bg-transparent text-light" onChange={async (e) => this.updateAmount(e).catch((err) => console.error(err)) } /></Col>
                 <Col lg="2" className="align-content-center justify-content-center text-center"><h2>BTC for</h2></Col>
-                <Col lg="2"><h2 className="mb-n1 text-center" style={{ color: "#C3C3C3", fontSize: "1em", borderBottom: "2px solid #C3C3C3" }}>{(isNaN(this.state.calcValue)) ?0: this.state.calcValue}</h2><b style={{ fontSize: "0.7em" }}>current rate:{this.state.rate} BTC/{this.state.coin}</b></Col>
+                <Col lg="2"><h2 className="mb-n1 text-center" style={{ color: "#C3C3C3", fontSize: "1em", borderBottom: "2px solid #C3C3C3" }}>{(isNaN(this.state.calcValue)) ?0: this.state.calcValue}</h2><b style={{ fontSize: "0.7em" }}>current rate:{this.state.rate} {this.state.coin}/BTC</b></Col>
               <Col lg="1">
                 <Dropdown isOpen={this.state.menu} toggle={async () => await this.setState({ menu: !this.state.menu })}>
                   <DropdownToggle style={{backgroundColor:"transparent", border:"none"}}>
@@ -433,7 +433,7 @@ export default class App extends React.Component{
                   <Row className="justify-content-center align-content-center mx-5 text-center py-3" style={{ backgroundColor: "#C4C4C4" }}>
                     <Col lg="12" sm="12" md="12">
                     <h5>You are selling <span style={{ color: "#0E3AA9" }}><b>{isNaN(this.state.value) ? 0 : this.state.value}
-                    </b></span> <b>BTC</b> for at least <span style={{ color: "#0E3AA9" }}><b>{isNaN(this.state.rate) ? 0 : this.state.rate}
+                    </b></span> <b>BTC</b> for at least <span style={{ color: "#0E3AA9" }}><b>{isNaN(this.state.calcValue) ? '...' : this.state.calcValue}
                       </b></span>  <b>{this.state.coin}</b></h5></Col>
                     <Col lg="12" sm="12" md="12">
                       <h5>Expected Price Slippage: <span style={{ color: "#0E3AA9" }}><b>{this.state.percentage}%
