@@ -4,12 +4,16 @@
   "description": "0confirmation contracts",
   "main": "index.js",
   "scripts": {
-    "test": "mocha",
+    "test": "truffle test",
     "task:build:clean": "rimraf build",
     "task:build:truffle": "truffle compile",
-    "deploy:kovan": "truffle deploy --network kovan",
+    "task:build:insert-uniswap": "cross-env node scripts/insert-uniswap",
+    "task:build:insert-curvefi": "cross-env node scripts/insert-curvefi",
+    "launch:ganache": "ganache-cli",
+    "deploy:kovan": "truffle migrate --network kovan",
+    "deploy:ganache": "truffle migrate --network ganache",
     "clean": "npm-run-all task:build:clean",
-    "build": "npm-run-all task:build:clean task:build:truffle"
+    "build": "npm-run-all task:build:clean task:build:truffle task:build:insert-uniswap task:build:insert-curvefi"
   },
   "repository": {
     "type": "git",
@@ -26,12 +30,15 @@
   },
   "homepage": "https://github.com/0confirmation/0confirmation#readme",
   "dependencies": {
+    "@renproject/ren": "^1.0.0-alpha.3",
     "@truffle/workflow-compile": "^2.1.24",
     "contracts-vyper": "https://github.com/Uniswap/contracts-vyper",
     "cross-env": "^7.0.2",
+    "eth-json-rpc-middleware": "^4.4.1",
+    "json-rpc-engine": "^5.1.8",
     "mocha": "^7.1.1",
     "npm-run-all": "^4.1.5",
-    "openzeppelin-solidity": "https://github.com/OpenZeppelin/openzeppelin-contracts#v3.0.0-rc.0",
+    "openzeppelin-solidity": "https://github.com/OpenZeppelin/openzeppelin-contracts#v3.0.0-rc.1",
     "truffle": "^5.1.20"
   }
 }

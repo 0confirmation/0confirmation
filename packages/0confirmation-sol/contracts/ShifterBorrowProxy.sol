@@ -8,9 +8,14 @@ import { ILiquidationModule } from "./interfaces/ILiquidationModule.sol";
 import { TokenUtils } from "./utils/TokenUtils.sol";
 import { LiquidityToken } from "./LiquidityToken.sol";
 import { IERC20 } from "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
+import { SafeViewExecutor } from "./utils/sandbox/SafeViewExecutor.sol";
+import { SandboxLib } from "./utils/sandbox/SandboxLib.sol";
+import { StringLib } from "./utils/StringLib.sol";
 
-contract ShifterBorrowProxy is BorrowProxy {
+contract ShifterBorrowProxy is BorrowProxy, SafeViewExecutor {
   using ShifterBorrowProxyLib for *;
+  using StringLib for *;
+  using SandboxLib for *;
   using TokenUtils for *;
   constructor() BorrowProxy() public {}
   uint256 constant MINIMUM_GAS_CONTINUE = 5e5;
@@ -23,7 +28,7 @@ contract ShifterBorrowProxy is BorrowProxy {
     uint256 amount;
     if (!isolate.isRepaying) {
       isolate.isRepaying = true;
-      isolate.actualizedShift = amount = ShifterPool(isolate.masterAddress).getShifterHandler(parcel.record.request.token).shiftIn(parcel.pHash, parcel.record.request.amount, parcel.computeNHash(), parcel.darknodeSignature);
+      isolate.actualizedShift = amount = ShifterPool(isolate.masterAddress).getShifterHandler(parcel.record.request.token).mint(parcel.pHash, parcel.record.request.amount, parcel.computeNHash(), parcel.darknodeSignature);
       require(parcel.record.request.token.sendToken(address(liquidityToken), amount - fee), "token transfer failed");
     } else amount = isolate.actualizedShift;
     address[] memory set = isolate.repaymentSet.set;
@@ -70,6 +75,11 @@ contract ShifterBorrowProxy is BorrowProxy {
       return true;
     }
     return false;
+  }
+  function receiveInitializationActions(ShifterBorrowProxyLib.InitializationAction[] memory actions) public {
+    require(msg.sender == address(isolate.masterAddress), "must be called from shifter pool");
+    SandboxLib.ProtectedExecution[] memory trace = actions.processActions();
+    ShifterBorrowProxyLib.emitBorrowProxyInitialization(address(this), trace);
   }
   fallback() external payable override {}
   receive() external payable override {}

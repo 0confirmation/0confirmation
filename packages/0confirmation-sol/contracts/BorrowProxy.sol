@@ -10,13 +10,13 @@ import { IBorrowProxyController } from "./interfaces/IBorrowProxyController.sol"
 import { AddressSetLib } from "./utils/AddressSetLib.sol";
 import { ModuleLib } from "./adapters/lib/ModuleLib.sol";
 
-contract BorrowProxy is ViewExecutor {
+contract BorrowProxy {
   using SliceLib for *;
   using BorrowProxyLib for *;
   using AddressSetLib for *;
   BorrowProxyLib.ProxyIsolate isolate;
   modifier onlyOwnerOrPool {
-   require(msg.sender == isolate.owner || msg.sender == isolate.masterAddress, "borrow proxy can only be used by borrower");
+   require(msg.sender == isolate.owner || msg.sender == isolate.masterAddress || msg.sender == address(this), "borrow proxy can only be used by borrower");
     _;
   }
   function setup(address owner, address token) public returns (bool) {
@@ -45,7 +45,9 @@ contract BorrowProxy is ViewExecutor {
     (bool success, bytes memory retval) = module.delegate(payload, value);
     if (!success) revert(RevertCaptureLib.decodeError(retval));
     if (module.encapsulated.liquidationSubmodule != address(0x0)) isolate.liquidationSet.insert(module.encapsulated.liquidationSubmodule);
-    if (module.encapsulated.repaymentSubmodule != address(0x0)) isolate.repaymentSet.insert(module.encapsulated.repaymentSubmodule);
+    if (module.encapsulated.repaymentSubmodule != address(0x0)) {
+      isolate.repaymentSet.insert(module.encapsulated.repaymentSubmodule);
+    }
     ModuleLib.bubbleResult(success, retval);
   }
   receive() external payable virtual {

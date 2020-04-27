@@ -8,7 +8,7 @@ module.exports = {
   contracts_build_directory: path.join(__dirname, 'build'),
   compilers: {
     solc: {
-      version: 'v0.6.5',
+      version: 'v0.6.6',
       settings: {
         optimizer: {
           enabled: true,
@@ -21,6 +21,11 @@ module.exports = {
     kovan: {
       provider,
       network_id: '42'
+    },
+    ganache: {
+      host: 'localhost',
+      port: 8545,
+      network_id: '*'
     }
   }
 };

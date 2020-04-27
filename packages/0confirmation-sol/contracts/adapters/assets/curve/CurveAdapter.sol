@@ -19,11 +19,7 @@ contract CurveAdapter {
   function getExternalIsolateHandler() external view returns (CurveAdapterLib.Isolate memory isolate) {
     isolate = CurveAdapterLib.getIsolatePointer(address(this));
   }
-  receive() external payable {
-    // no op in sight
-  }
-  fallback() external payable {
-    ModuleLib.AssetSubmodulePayload memory payload = msg.data.decodeAssetSubmodulePayload();
+  function handle(ModuleLib.AssetSubmodulePayload memory payload) public payable {
     require(payload.to == CurveAdapter(payload.moduleAddress).getExternalIsolateHandler().curveAddress, "CurveAdapter instance must map one to one with a live curve.fi instance");
     (bytes4 sig, bytes memory args) = payload.callData.splitPayload();
     address newToken;

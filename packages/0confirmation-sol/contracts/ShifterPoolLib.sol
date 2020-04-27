@@ -1,17 +1,25 @@
 pragma solidity ^0.6.0;
+pragma experimental ABIEncoderV2;
 
 import { ECDSA } from "openzeppelin-solidity/contracts/cryptography/ECDSA.sol";
+import { TokenUtils } from "./utils/TokenUtils.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { BorrowProxyLib } from "./BorrowProxyLib.sol";
 import { IShifter } from "./interfaces/IShifter.sol";
 import { IShifterRegistry } from "./interfaces/IShifterRegistry.sol";
 import { LiquidityToken } from "./LiquidityToken.sol";
+import { ShifterBorrowProxy } from "./ShifterBorrowProxy.sol";
 import { ShifterBorrowProxyLib } from "./ShifterBorrowProxyLib.sol";
+import { ShifterBorrowProxyFactoryLib } from "./ShifterBorrowProxyFactoryLib.sol";
 
 library ShifterPoolLib {
   using BorrowProxyLib for *;
+  using TokenUtils for *;
+  using ShifterBorrowProxyLib for *;
+  using ShifterBorrowProxyFactoryLib for *;
   using SafeMath for *;
   struct Isolate {
+    address borrowProxyImplementation;
     address shifterRegistry;
     uint256 minTimeout;
     uint256 poolFee;
@@ -20,6 +28,18 @@ library ShifterPoolLib {
     mapping (address => address) tokenToLiquidityToken;
     BorrowProxyLib.ControllerIsolate borrowProxyController;
     BorrowProxyLib.ModuleRegistry registry;
+  }
+  function makeBorrowProxy(Isolate storage isolate, bytes32 salt) internal returns (address payable proxyAddress) {
+    proxyAddress = address(uint160(isolate.deployBorrowProxy(salt)));
+  }
+  function issueLoan(Isolate storage isolate, address token, address payable proxyAddress, uint256 fee) internal {
+    require(LiquidityToken(getLiquidityToken(isolate, token)).loan(proxyAddress, fee), "insufficient funds in liquidity pool");
+  }
+  function setupBorrowProxy(address payable proxyAddress, address borrower, address token) internal {
+    require(ShifterBorrowProxy(proxyAddress).setup(borrower, token), "setup phase failure");
+  }
+  function sendInitializationActions(address payable proxyAddress, ShifterBorrowProxyLib.InitializationAction[] memory actions) internal {
+    ShifterBorrowProxy(proxyAddress).receiveInitializationActions(actions);
   }
   function computeLoanParams(Isolate storage isolate, uint256 amount, uint256 bond, uint256 timeoutExpiry) internal view returns (ShifterBorrowProxyLib.LenderParams memory) {
     require(timeoutExpiry >= isolate.minTimeout, "timeout insufficient");
@@ -44,9 +64,9 @@ library ShifterPoolLib {
     address token;
     address liqToken;
   }
-  function launchLiquidityToken(Isolate storage isolate, address token, string memory name, string memory symbol) internal returns (address) {
+  function launchLiquidityToken(Isolate storage isolate, address token, string memory name, string memory symbol, uint8 decimals) internal returns (address) {
     require(isolate.tokenToLiquidityToken[token] == address(0x0), "already deployed liquidity token for target token");
-    address liquidityToken = address(new LiquidityToken(address(this), token, name, symbol));
+    address liquidityToken = address(new LiquidityToken(address(this), token, name, symbol, decimals));
     isolate.tokenToLiquidityToken[token] = liquidityToken;
     return liquidityToken;
   }
@@ -55,20 +75,9 @@ library ShifterPoolLib {
     require(retval != address(0x0), "not a registered liquidity token");
     return retval;
   }
-  function deriveProvisionHash(LiquidityProvisionMessage memory provision, bytes32 salt) internal pure returns (bytes32) {
-    return keccak256(abi.encodePacked(provision.amount, provision.timeoutExpiry, provision.nonce, salt));
-  }
-  function recoverAddressFromHash(bytes32 provisionHash, bytes memory signature) internal pure returns (address) {
-    return ECDSA.recover(provisionHash, signature);
-  }
-  function recoverAddress(LiquidityProvisionMessage memory provision, bytes32 salt) internal pure returns (address) {
-    bytes32 provisionHash = deriveProvisionHash(provision, salt);
-    return recoverAddressFromHash(provisionHash, provision.signature);
-  }
   function lendLiquidity(Isolate storage isolate, address provider, address token, address target, uint256 amount) internal returns (bool) {
     if (!isolate.isKeeper[provider]) return false;
-    (bool success,) = token.call(abi.encodeWithSignature("transferFrom(address,address,uint256)", provider, target, amount));
-    return success;
+    return token.transferTokenFrom(provider, target, amount);
   }
   function getShifter(Isolate storage isolate, address token) internal view returns (IShifter) {
     return IShifterRegistry(isolate.shifterRegistry).getShifterByToken(token);
@@ -80,4 +89,12 @@ library ShifterPoolLib {
     isolate.provisionExecuted[provisionHash] = true;
     return true;
   }
-}
+  function mapBorrowProxy(Isolate storage isolate, address proxyAddress, ShifterBorrowProxyLib.ProxyRecord memory record) internal {
+    bytes memory data = record.encodeProxyRecord();
+    isolate.borrowProxyController.setProxyToken(proxyAddress, record.request.token);
+    isolate.borrowProxyController.setProxyOwner(proxyAddress, record.request.borrower);
+    record.request.borrower.transfer(msg.value);
+    isolate.borrowProxyController.mapProxyRecord(proxyAddress, data);
+    BorrowProxyLib.emitBorrowProxyMade(record.request.borrower, proxyAddress, data);
+  }
+}   

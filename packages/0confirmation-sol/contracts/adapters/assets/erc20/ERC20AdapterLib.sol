@@ -44,11 +44,11 @@ library ERC20AdapterLib {
     });
   }
   function forwardEscrow(EscrowRecord memory record, uint256 index) internal {
-    address forwarder = Create2.deploy(computeForwarderSalt(index), type(AssetForwarder).creationCode);
+    address forwarder = Create2.deploy(0, computeForwarderSalt(index), type(AssetForwarder).creationCode);
     AssetForwarder(forwarder).forwardAsset(address(uint160(record.recipient)), record.token);
   }
   function returnEscrow(EscrowRecord memory record, uint256 index) internal {
-    address forwarder = Create2.deploy(computeForwarderSalt(index), type(AssetForwarder).creationCode);
+    address forwarder = Create2.deploy(0, computeForwarderSalt(index), type(AssetForwarder).creationCode);
     AssetForwarder(forwarder).forwardAsset(address(uint160(address(this))), record.token);
   }
   uint256 constant MINIMUM_GAS_TO_PROCESS = 5e5;

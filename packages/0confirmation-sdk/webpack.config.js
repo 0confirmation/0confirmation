@@ -5,7 +5,7 @@ const path = require('path');
 module.exports = {
   mode: 'development',
   target: 'web',
-  entry: path.join(__dirname, 'lib', 'sdk.js'),
+  entry: path.join(__dirname, 'sdk.js'),
   output: {
     path: path.join(__dirname, 'dist'),
     filename: 'zero.bundle.js'
