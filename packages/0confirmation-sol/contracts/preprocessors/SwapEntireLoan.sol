@@ -2,12 +2,12 @@ pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import { PreprocessorLib } from "./lib/PreprocessorLib.sol";
-import { IERC20 } from "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import { IUniswapExchange } from "../interfaces/IUniswapExchange.sol";
 import { IUniswapFactory } from "../interfaces/IUniswapFactory.sol";
 import { ShifterBorrowProxyLib } from "../ShifterBorrowProxyLib.sol";
 import { SandboxLib } from "../utils/sandbox/SandboxLib.sol";
 import { BorrowProxyLib } from "../BorrowProxyLib.sol";
+import { IERC20 } from "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 
 contract SwapEntireLoan {
   using PreprocessorLib for *;
@@ -20,6 +20,8 @@ contract SwapEntireLoan {
   }
   function execute(bytes memory data) view public returns (ShifterBorrowProxyLib.InitializationAction[] memory result) {
     SandboxLib.ExecutionContext memory context = data.toContext();
+    uint256 amt = IERC20(isolate.token).balanceOf(address(this));
+    bytes memory amtBytes = abi.encodePacked(amt);
     result = IUniswapFactory(SwapEntireLoan(context.preprocessorAddress).factory())
       .getExchange(isolate.token)
       .sendTransaction(abi.encodeWithSelector(
@@ -27,7 +29,7 @@ contract SwapEntireLoan {
         IERC20(isolate.token).balanceOf(address(this)),
         1,
         0,
-        block.timestamp + 1,
+        block.number + 1,
         SwapEntireLoan(context.preprocessorAddress).target()));
   }
 }

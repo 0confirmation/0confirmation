@@ -61,6 +61,23 @@ const computeLiquidityRequestHash = ({
   encodeInitializationActions(actions)
 ]);
 
+const encodeConstructor = () => {
+  const abi = [{
+    type: 'function',
+    name: 'cloneConstructor',
+    inputs: [{
+      name: 'consData',
+      type: 'bytes'
+    }]
+  }];
+  const iface = new ethers.utils.Interface(abi);
+  return iface.functions.cloneConstructor.encode(['0x']);
+};
+
+const assembleDeployCode = (shifterPool, implementation) => {
+  return '0x3d3d606380380380913d393d73' + shifterPool.substr(2) + '5af4602a57600080fd5b602d8060366000396000f3363d3d373d3d3d363d73' + implementation.substr(2) + '5af43d82803e903d91602b57fd5bf352e831dd00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000';
+};
+
 const computeBorrowProxyAddress = ({
   shifterPool,
   borrower,
@@ -85,10 +102,16 @@ const computeBorrowProxyAddress = ({
     forbidLoan,
     encodeInitializationActions(actions)
   ]);
+  const implementation = getCreate2Address({
+    from: shifterPool,
+    salt: ethers.utils.arrayify(solidityKeccak256(['string'], [ 'borrow-proxy-implementation' ])),
+    initCode: ethers.utils.arrayify(ShifterBorrowProxy.bytecode)
+  });
+  console.log(implementation);
   return getCreate2Address({
     from: shifterPool,
     salt: ethers.utils.arrayify(salt),
-    initCode: ethers.utils.arrayify(ShifterBorrowProxy.bytecode)
+    initCode: ethers.utils.arrayify(assembleDeployCode(shifterPool, implementation))
   });
 };
 

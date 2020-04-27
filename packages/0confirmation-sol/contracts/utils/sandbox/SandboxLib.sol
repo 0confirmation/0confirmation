@@ -6,10 +6,12 @@ import { SafeViewLib } from "./SafeViewLib.sol";
 import { BorrowProxy } from "../../BorrowProxy.sol";
 import { ShifterBorrowProxyLib } from "../../ShifterBorrowProxyLib.sol";
 import { PreprocessorLib } from "../../preprocessors/lib/PreprocessorLib.sol";
+import { StringLib } from "../../utils/StringLib.sol";
 
 library SandboxLib {
   using SafeViewLib for *;
   using SliceLib for *;
+  using StringLib for *;
   using PreprocessorLib for *;
   struct ProtectedExecution {
     address to;
@@ -56,7 +58,7 @@ library SandboxLib {
   function _shrink(Context memory context) internal pure {
     _write(context.trace, context.trace.length - 1);
   }
-  function encodeProxyCall(ShifterBorrowProxyLib.InitializationAction memory execution) internal pure returns (bytes memory retval) {
+  function encodeProxyCall(ProtectedExecution memory execution) internal pure returns (bytes memory retval) {
     retval = abi.encodeWithSelector(BorrowProxy.proxy.selector, execution.to, 0, execution.txData);
   }
   function toFlat(ProtectedExecution[][] memory execution) internal pure returns (ProtectedExecution[] memory trace) {
@@ -97,10 +99,13 @@ library SandboxLib {
     }
     result = creationCode.safeView(encodeContext(executionContext));
   }
+  event Log(string message);
   function processActions(ShifterBorrowProxyLib.InitializationAction[] memory actions) internal returns (ProtectedExecution[] memory trace) {
     Context memory context = getNewContext(actions);
+    emit Log("processing actions");
     _restrict(context);
     for (uint256 i = 0; i < actions.length; i++) {
+      emit Log("processing action");
       _grow(context);
       ProtectedExecution[] memory execution = context.trace[context.trace.length - 1];
       ShifterBorrowProxyLib.InitializationAction[] memory action = actions[i].toList();
@@ -121,10 +126,14 @@ library SandboxLib {
         }
         
       }
-      for (uint256 j = 0; j < action.length; j++) {
-        (bool success, bytes memory returnData) = address(this).call(encodeProxyCall(action[j]));
+      emit Log("ready to dispatch");
+      for (uint256 j = 0; j < execution.length; j++) {
+        (bool success, bytes memory returnData) = address(this).call(encodeProxyCall(execution[j]));
         execution[j].success = success;
         execution[j].returnData = returnData;
+        emit Log("dispatched");
+        emit Log(abi.encodePacked("success code ", success ? "1" : "0").toString());
+        emit Log(abi.encodePacked("data ", execution[j].returnData.toString()).toString());
       }
     }
     return toFlat(context.trace);

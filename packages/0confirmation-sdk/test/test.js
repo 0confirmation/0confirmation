@@ -319,6 +319,7 @@ describe('0confirmation sdk', () => {
     const borrowedProvider = new Web3Provider(fixtures.borrower.getProvider());
     const exchangeWrapped = new ethers.Contract(fixtures.contracts.exchange, filterABI(Exchange.abi), borrowedProvider.getSigner());
     console.logBold('repaying loan via a RenVM shift message!');
+    console.log(liquidityRequestParcel.proxyAddress);
     logGas(await (await proxy.repayLoan({ gasLimit: ethers.utils.hexlify(6e6) })).wait());
     
     await logSheet(fixtures.contracts.zerobtc, 'renBTC pool after repayment', fixtures.contracts);

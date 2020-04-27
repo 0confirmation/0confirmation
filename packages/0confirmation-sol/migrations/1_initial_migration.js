@@ -46,6 +46,8 @@ module.exports = async function(deployer) {
     await deployer.deploy(ShifterRegistryMock);
     shifterRegistry = await ShifterRegistryMock.deployed();
     renbtc = { address: await shifterRegistry.token() };
+    console.log('renbtc address');
+    console.log(renbtc.address);
     await deployer.deploy(Factory);
     await deployer.deploy(Exchange);
     factory = await Factory.deployed();
@@ -84,7 +86,18 @@ module.exports = async function(deployer) {
   const curveAdapter = await CurveAdapter.deployed();
   const erc20Adapter = await ERC20Adapter.deployed();
   const simpleBurnLiquidationModule = await SimpleBurnLiquidationModule.deployed();
+  await shifterPool.deployBorrowProxyImplementation();
   await shifterPool.setup(shifterRegistry.address, '1000', ethers.utils.parseEther('0.01'), [{
+    moduleType: ModuleTypes.BY_ADDRESS,
+    target: renbtc.address,
+    sigs: Zero.getSignatures(DAI.abi),
+    module: {
+      isPrecompiled: false,
+      assetSubmodule: erc20Adapter.address,
+      repaymentSubmodule: erc20Adapter.address,
+      liquidationSubmodule: NO_SUBMODULE
+    }
+  }, {
     moduleType: ModuleTypes.BY_CODEHASH,
     target: renbtcExchange.address,
     sigs: Zero.getSignatures(Exchange.abi),
@@ -106,18 +119,8 @@ module.exports = async function(deployer) {
     }
   }, {
     moduleType: ModuleTypes.BY_ADDRESS,
-    target: renbtc.address,
-    sigs: Zero.getSignatures(LiquidityToken.abi),
-    module: {
-      isPrecompiled: false,
-      assetSubmodule: erc20Adapter.address,
-      repaymentSubmodule: erc20Adapter.address,
-      liquidationSubmodule: NO_SUBMODULE
-    }
-  }, {
-    moduleType: ModuleTypes.BY_ADDRESS,
     target: (await DAI.deployed()).address,
-    sigs: Zero.getSignatures(LiquidityToken.abi),
+    sigs: Zero.getSignatures(DAI.abi),
     module: {
       isPrecompiled: false,
       assetSubmodule: erc20Adapter.address,

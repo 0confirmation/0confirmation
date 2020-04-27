@@ -29,8 +29,8 @@ library ShifterPoolLib {
     BorrowProxyLib.ControllerIsolate borrowProxyController;
     BorrowProxyLib.ModuleRegistry registry;
   }
-  function makeBorrowProxy(bytes32 salt) internal returns (address payable proxyAddress) {
-    proxyAddress = address(uint160(salt.deployBorrowProxy()));
+  function makeBorrowProxy(Isolate storage isolate, bytes32 salt) internal returns (address payable proxyAddress) {
+    proxyAddress = address(uint160(isolate.deployBorrowProxy(salt)));
   }
   function issueLoan(Isolate storage isolate, address token, address payable proxyAddress, uint256 fee) internal {
     require(LiquidityToken(getLiquidityToken(isolate, token)).loan(proxyAddress, fee), "insufficient funds in liquidity pool");

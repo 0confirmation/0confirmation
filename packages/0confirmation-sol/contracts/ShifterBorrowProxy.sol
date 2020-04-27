@@ -10,9 +10,11 @@ import { LiquidityToken } from "./LiquidityToken.sol";
 import { IERC20 } from "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import { SafeViewExecutor } from "./utils/sandbox/SafeViewExecutor.sol";
 import { SandboxLib } from "./utils/sandbox/SandboxLib.sol";
+import { StringLib } from "./utils/StringLib.sol";
 
 contract ShifterBorrowProxy is BorrowProxy, SafeViewExecutor {
   using ShifterBorrowProxyLib for *;
+  using StringLib for *;
   using SandboxLib for *;
   using TokenUtils for *;
   constructor() BorrowProxy() public {}

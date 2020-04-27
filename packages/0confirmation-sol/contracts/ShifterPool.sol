@@ -24,6 +24,9 @@ contract ShifterPool is Ownable, ViewExecutor, Create2CloneFactory {
   using ShifterBorrowProxyFactoryLib for *;
   using BorrowProxyLib for *;
   ShifterPoolLib.Isolate isolate;
+  function cloneConstructor(bytes calldata consData) external override {
+    // do nothing
+  }
   function setup(address shifterRegistry, uint256 minTimeout, uint256 poolFee, BorrowProxyLib.ModuleRegistration[] memory modules, ShifterPoolLib.LiquidityTokenLaunch[] memory tokenLaunches) public onlyOwner {
     require(isolate.shifterRegistry == address(0x0), "already initialized");
     isolate.shifterRegistry = shifterRegistry;
@@ -38,12 +41,12 @@ contract ShifterPool is Ownable, ViewExecutor, Create2CloneFactory {
       isolate.tokenToLiquidityToken[launch.token] = launch.liqToken;
     }
   }
-  bytes32 constant BORROW_PROXY_IMPLEMENTATION_SALT = 0x84cafd7f9643e0c6819df789ff4b82881310e879917297b78da0aa385f8fa924; // keccak("borrow-proxy-implementation");
+  bytes32 constant BORROW_PROXY_IMPLEMENTATION_SALT = 0xfe1e3164ba4910db3c9afd049cd8feb4552390569c846692e6df4ac68aeaa90e;
   function deployBorrowProxyImplementation() public {
-    isolate.borrowProxyImplementation = BORROW_PROXY_IMPLEMENTATION_SALT.makeBorrowProxy();
+    isolate.borrowProxyImplementation = isolate.makeBorrowProxy(BORROW_PROXY_IMPLEMENTATION_SALT);
   }
   function deployBorrowProxyClone(bytes32 salt) public returns (address payable created) {
-    created = address(uint160(create2Clone(isolate.borrowProxyImplementation, uint256(salt), new bytes(0))));
+    created = address(uint160(create2Clone(isolate.borrowProxyImplementation, uint256(salt))));
   }
   function _executeBorrow(ShifterBorrowProxyLib.LiquidityRequestParcel memory liquidityRequestParcel, uint256 bond, uint256 timeoutExpiry) internal returns (bytes32 borrowerSalt) {
     require(
@@ -58,7 +61,7 @@ contract ShifterPool is Ownable, ViewExecutor, Create2CloneFactory {
     );
     ShifterBorrowProxyLib.LiquidityRequest memory liquidityRequest = liquidityRequestParcel.request;
     borrowerSalt = liquidityRequest.computeBorrowerSalt();
-    address payable proxyAddress = address(uint160(borrowerSalt.deriveBorrowerAddress()));
+    address payable proxyAddress = address(uint160(isolate.borrowProxyImplementation.deriveBorrowerAddress(borrowerSalt)));
     require(!isolate.borrowProxyController.isInitialized(proxyAddress), "proxy has already been initialized");
     ShifterBorrowProxyLib.ProxyRecord memory proxyRecord = ShifterBorrowProxyLib.ProxyRecord({
       request: liquidityRequest,
@@ -77,9 +80,6 @@ contract ShifterPool is Ownable, ViewExecutor, Create2CloneFactory {
     address payable proxyAddress = deployBorrowProxyClone(salt);
     proxyAddress.setupBorrowProxy(liquidityRequestParcel.request.borrower, liquidityRequestParcel.request.token);
     proxyAddress.sendInitializationActions(liquidityRequestParcel.request.actions);
-  }
-  function cloneConstructor(bytes calldata /* data */) external override {
-    // do nothing
   }
   function validateProxyRecordHandler(bytes memory proxyRecord) public view returns (bool) {
     return isolate.borrowProxyController.validateProxyRecord(msg.sender, proxyRecord);
