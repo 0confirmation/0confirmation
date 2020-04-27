@@ -29,12 +29,10 @@ contract BorrowProxy {
   function validateProxyRecord(bytes memory record) internal returns (bool) {
     return IBorrowProxyController(isolate.masterAddress).validateProxyRecordHandler(record);
   }
-  event Log(string message);
   function proxy(address to, uint256 value, bytes memory payload) public onlyOwnerOrPool {
     bytes4 sig = bytes4(uint32(uint256(payload.toSlice(0, 4).asWord())));
     BorrowProxyLib.ModuleExecution memory module = isolate.fetchModule(to, sig);
     module.token = isolate.token;
-    emit Log("entered proxy");
     if (isolate.unbound && !module.encapsulated.isPrecompiled) {
       (bool success, bytes memory retval) = to.call{
         value: value
@@ -49,8 +47,7 @@ contract BorrowProxy {
     if (module.encapsulated.liquidationSubmodule != address(0x0)) isolate.liquidationSet.insert(module.encapsulated.liquidationSubmodule);
     if (module.encapsulated.repaymentSubmodule != address(0x0)) {
       isolate.repaymentSet.insert(module.encapsulated.repaymentSubmodule);
-      emit Log("inserted into set");
-    } else emit Log("did not insert into set");
+    }
     ModuleLib.bubbleResult(success, retval);
   }
   receive() external payable virtual {

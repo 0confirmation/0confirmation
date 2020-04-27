@@ -65,7 +65,6 @@ class ZeroDriver extends RPCWrapper {
     method,
     params
   }, cb) {
-    console.log(method);
     const prefix = method.split('_')[0];
     new Promise((resolve, reject) => this.getBackendByPrefix(prefix).send({
       jsonrpc,

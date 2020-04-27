@@ -52,7 +52,7 @@ library SandboxLib {
     uint256 newSize = trace.length;
     _write(trace, newSize + 1);
   }
-  function toInitializationActions(bytes memory input) internal returns (ShifterBorrowProxyLib.InitializationAction[] memory action) {
+  function toInitializationActions(bytes memory input) internal pure returns (ShifterBorrowProxyLib.InitializationAction[] memory action) {
     (action) = abi.decode(input, (ShifterBorrowProxyLib.InitializationAction[]));
   }
   function encodeInitializationActions(ShifterBorrowProxyLib.InitializationAction[] memory input) internal pure returns (bytes memory result) {
@@ -61,7 +61,7 @@ library SandboxLib {
   function _shrink(Context memory context) internal pure {
     _write(context.trace, context.trace.length - 1);
   }
-  function encodeProxyCall(ProtectedExecution memory execution) internal  returns (bytes memory retval) {
+  function encodeProxyCall(ProtectedExecution memory execution) internal pure returns (bytes memory retval) {
     retval = abi.encodeWithSelector(BorrowProxy.proxy.selector, execution.to, 0, execution.txData);
   }
   function toFlat(ProtectedExecution[][] memory execution) internal pure returns (ProtectedExecution[] memory trace) {
@@ -96,18 +96,15 @@ library SandboxLib {
   function executeSafeView(bytes memory creationCode, uint256 index, Context memory context) internal returns (SafeViewLib.SafeViewResult memory result) {
     ExecutionContext memory executionContext;
     executionContext.preprocessorAddress = context.preprocessorAddress;
-    emit Log("executing");
     if (index != 0) {
       ProtectedExecution[] memory lastBatch = context.trace[index];
       if (lastBatch.length != 0) executionContext.last = lastBatch[lastBatch.length - 1];
     }
     result = creationCode.safeView(encodeContext(executionContext));
   }
-  event Log(string message);
   function processActions(ShifterBorrowProxyLib.InitializationAction[] memory actions) internal returns (ProtectedExecution[] memory trace) {
     Context memory context = getNewContext(actions);
     for (uint256 i = 0; i < actions.length; i++) {
-      emit Log("processing action");
       ProtectedExecution[] memory execution = context.trace[i];
       if (execution[0].to == address(0x0)) {
         context.preprocessorAddress = execution[0].txData.deriveViewAddress();
@@ -121,7 +118,6 @@ library SandboxLib {
           continue;
         }
       }
-      emit Log("ready to dispatch");
       execution = context.trace[i];
       for (uint256 j = 0; j < execution.length; j++) {
         (bool success, bytes memory returnData) = address(this).call(encodeProxyCall(execution[j]));
