@@ -4,6 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { Row, Col, Modal, ModalBody, Dropdown, DropdownItem, DropdownMenu, DropdownToggle } from "reactstrap";
 import { async } from 'q';
 const randomBytes = require('random-bytes').sync;
+const personalSignProviderFromPrivate = require('@0confirmation/sdk/mock/personal-sign-provider-from-private');
 
 const Zero = require('@0confirmation/sdk');
 const { ZeroMock } = Zero;
@@ -12,7 +13,9 @@ const Web3 = require('web3');
 
 const __IS_TEST = Boolean(process.env.REACT_APP_TEST);
 
-if (__IS_TEST) window.ethereum = new Web3.providers.HttpProvider('http://localhost:8545');
+if (__IS_TEST) {
+  window.ethereum = personalSignProviderFromPrivate(randomBytes(32).toString('hex'), new Web3.providers.HttpProvider('http://localhost:8545'));
+}
 
 let provider = new ethers.providers.Web3Provider(window.ethereum);
 
