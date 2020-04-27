@@ -13,6 +13,7 @@ const SwapEntireLoan = require('@0confirmation/sol/build/SwapEntireLoan');
 const DAI = require('@0confirmation/sol/build/DAI');
 const uniswap = require('@uniswap/sdk');
 const uniswapConstants = require('@uniswap/sdk/dist/constants');
+const util = require('./util');
 window.uniswap = uniswap;
 
 const ln = (v) => ((console.log(v)), v);
@@ -174,15 +175,15 @@ if (__IS_TEST) {
 }
 
 const DECIMALS = {
-  renbtc: 8,
+  btc: 8,
   dai: 18
 };
 
 const coerceToDecimals = (nameOrDecimals) => typeof nameOrDecimals === 'string' && isNaN(nameOrDecimals) ? DECIMALS[nameOrDecimals] : Number(nameOrDecimals);
 
-const toFormat = (v, decimals) => ethers.utils.formatUnits(v, decimals);
+const toFormat = (v, decimals) => util.truncateDecimals(ethers.utils.formatUnits(v, coerceToDecimals(decimals)), 4);
 
-const toParsed = (v, decimals) => ethers.utils.parseUnits(v, decimals);
+const toParsed = (v, decimals) => ethers.utils.parseUnits(v, coerceToDecimals(decimals));
 
 
 export default class App extends React.Component{
@@ -206,7 +207,7 @@ export default class App extends React.Component{
   async initializeMarket() {
     await this.updateMarket();
     this.setState({
-      rate: this.state.market.marketRate.rate.toString(10)
+      rate: util.truncateDecimals(this.state.market.marketRate.rate.toString(10), 2)
     });
   }
   async updateMarket() {
@@ -216,13 +217,15 @@ export default class App extends React.Component{
     });
   }
   async getTradeDetails() {
+    if (!this.state.value || !String(this.state.value).trim()) return await this.initializeMarket();
     await this.updateMarket();
-    const trade = await getTradeExecution(provider, this.state.market, toParsed(this.state.value, 'renbtc'));
+    if (isNaN(toParsed(this.state.value, 'btc'))) return; // just stop here if we have to for some reason
+    const trade = await getTradeExecution(provider, this.state.market, toParsed(this.state.value, 'btc'));
     this.setState({
       trade,
       calcValue: toFormat(trade.outputAmount.amount.toString(10), 'dai'),
-      rate: trade.executionRate.rate.toString(10),
-      percentage: trade.marketRateSlippage.toString(10)
+      rate: util.truncateDecimals(trade.executionRate.rate.toString(10), 2),
+      percentage: util.truncateDecimals(trade.marketRateSlippage.toString(10), 4)
     });
   }
   async componentDidMount() {
@@ -257,7 +260,6 @@ export default class App extends React.Component{
     this.setState({
       value
     });
-    if (isNaN(value)) return;
     await this.getTradeDetails();
   }
   render() {
