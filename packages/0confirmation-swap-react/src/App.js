@@ -10,6 +10,7 @@ const url = require('url');
 const ShifterERC20Mock = require('@0confirmation/sol/build/ShifterERC20Mock');
 const TransferAll = require('@0confirmation/sol/build/TransferAll');
 const SwapEntireLoan = require('@0confirmation/sol/build/SwapEntireLoan');
+const BTCBackend = require('@0confirmation/sdk/backends/btc');
 const DAI = require('@0confirmation/sol/build/DAI');
 const uniswap = require('@uniswap/sdk');
 const uniswapConstants = require('@uniswap/sdk/dist/constants');
@@ -107,6 +108,9 @@ const provider = __IS_TEST ? makeMetamaskSimulatorForRemoteGanache(window.ethere
 const globalEthersProvider = new ethers.providers.Web3Provider(provider);
 
 const zero = __IS_TEST ? new ZeroMock(provider) : new Zero(provider);
+if (__IS_TEST && process.env.USE_BTC_TESTNET) zero.registerBackend(new BTCBackend({
+  network: 'testnet'
+}));
 const { getAddresses } = require('@0confirmation/sdk/environments');
 const contracts = __IS_TEST ? getAddresses('ganache') : getAddresses(process.env.REACT_APP_NETWORK);
 Object.assign(zero.network, contracts);
@@ -197,6 +201,9 @@ if (__IS_TEST) {
     await (await renbtcWrapped.mint(keeperAddress, ethers.utils.parseUnits('10', 8))).wait();
     console.log('done!');
     const keeperZero = new ZeroMock(keeperProvider);
+    if (process.env.USE_BTC_TESTNET) keeperZero.registerBackend(new BTCBackend({
+      network: 'testnet'
+    }));
     Object.assign(keeperZero.network, contracts);
     keeperZero.connectMock(zero);
     console.log('shifter pool: ' + contracts.shifterPool);
