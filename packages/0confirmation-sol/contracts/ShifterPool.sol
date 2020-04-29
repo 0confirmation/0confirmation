@@ -14,9 +14,10 @@ import { TokenUtils } from "./utils/TokenUtils.sol";
 import { ViewExecutor } from "./utils/ViewExecutor.sol";
 import { LiquidityToken } from "./LiquidityToken.sol";
 import { SandboxLib } from "./utils/sandbox/SandboxLib.sol";
+import { SafeViewExecutor } from "./utils/sandbox/SafeViewExecutor.sol";
 import { Create2CloneFactory } from "./utils/Create2CloneFactory.sol";
 
-contract ShifterPool is Ownable, ViewExecutor, Create2CloneFactory {
+contract ShifterPool is Ownable, SafeViewExecutor, Create2CloneFactory {
   using SandboxLib for *;
   using ShifterPoolLib for *;
   using TokenUtils for *;
@@ -26,6 +27,9 @@ contract ShifterPool is Ownable, ViewExecutor, Create2CloneFactory {
   ShifterPoolLib.Isolate isolate;
   function cloneConstructor(bytes calldata consData) external override {
     // do nothing
+  }
+  constructor() Ownable() public {
+    isolate.genesis = block.number;
   }
   function setup(address shifterRegistry, uint256 minTimeout, uint256 poolFee, BorrowProxyLib.ModuleRegistration[] memory modules, ShifterPoolLib.LiquidityTokenLaunch[] memory tokenLaunches) public onlyOwner {
     require(isolate.shifterRegistry == address(0x0), "already initialized");

@@ -113,7 +113,7 @@ if (__IS_TEST && process.env.USE_BTC_TESTNET) zero.registerBackend(new BTCBacken
 }));
 const { getAddresses } = require('@0confirmation/sdk/environments');
 const contracts = __IS_TEST ? getAddresses('ganache') : getAddresses(process.env.REACT_APP_NETWORK);
-Object.assign(zero.network, contracts);
+zero.setEnvironment(contracts);
 const getMockRenBTCAddress = require('@0confirmation/sdk/mock/renbtc');
 
 const getRenBTCAddress = async () => {

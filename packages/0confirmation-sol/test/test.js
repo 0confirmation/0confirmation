@@ -1,5 +1,8 @@
 'use strict';
 
+
+const ln = (v) => ((console.log(require('util').inspect(v, { colors: true, depth: 100 }))), v);
+
 const ShifterPool = artifacts.require('ShifterPool');
 const ShifterERC20Mock = artifacts.require('ShifterERC20Mock');
 const randomBytes = require('random-bytes').sync;
@@ -30,11 +33,11 @@ const providerFromMiddleware = require('eth-json-rpc-middleware/providerFromMidd
 const providerAsMiddleware = require('eth-json-rpc-middleware/providerAsMiddleware');
 const providerFromEngine = require('eth-json-rpc-middleware/providerFromEngine');
 const HDWalletProvider = require('@truffle/hdwallet-provider');
-const asMiddleware = require('json-rpc-engine/src/asMiddleware')
+const asMiddleware = require('json-rpc-engine/src/asMiddleware');
 
 const makeZero = async (provider, contracts) => {
   const zero = new ZeroMock(provider);
-  Object.assign(zero.network, contracts);
+  zero.setEnvironment(contracts);
   return zero;
 };
 
@@ -91,8 +94,6 @@ const defer = () => {
 };
 
 const nodeUtil = require('util');
-
-const ln = (v, desc) => ((console.log(desc + ': ')), (console.log(nodeUtil.inspect(v, { colors: true, depth: 3 }))), v);
 
 const chalk = require('chalk');
 
@@ -196,7 +197,9 @@ contract('ShifterPool', () => {
     const liquidityRequestParcel = await liquidityRequest.sign();
     await liquidityRequestParcel.broadcast();
     const proxy = await deferred.promise;
+    ln(await proxy.queryTransfers());
     await (await proxy.repayLoan({ gasLimit: ethers.utils.hexlify(6e6) })).wait();
+    ln(await proxy.queryTransfers());
     await fixtures.keeper.stopListeningForLiquidityRequests();
   });
 });
