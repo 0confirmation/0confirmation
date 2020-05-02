@@ -22,7 +22,7 @@ const personalSignProviderFromGanache = (provider) => {
     next();
   });
   engine.push(providerAsMiddleware(provider));
-  return providerFromEngine(engine);
+  return makeBaseProvider(providerFromEngine(engine));
 };
 
 module.exports = personalSignProviderFromGanache;

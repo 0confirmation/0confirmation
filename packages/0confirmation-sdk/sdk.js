@@ -1,10 +1,11 @@
 'use strict';
 
-const UTXO_POLL_INTERVAL = 5000;
-const DARKNODE_QUERY_TX_INTERVAL = 5000;
-
+const ISafeViewExecutor = require('@0confirmation/sol/build/ISafeViewExecutor');
+const pendingTransfersQuery = require('./queries/query-pending-transfers');
+const genesisQuery = require('./queries/query-genesis');
+const { makeManagerClass } = require('./manager');
 const environment = require('./environments');
-const { ZERO_ADDRESS } = require('./constants');
+const constants = require('./constants');
 const BN = require('bignumber.js');
 const resultToJsonRpc = require('./util/result-to-jsonrpc');
 const { Buffer } = require('safe-buffer');
@@ -14,7 +15,8 @@ const {
   },
   RenVM
 } = require('@0confirmation/renvm');
-const { NULL_PHASH, toHex, toBase64 } = require('./util');
+const makeBaseProvider = require('@0confirmation/providers/base-provider');
+const { toHex, toBase64 } = require('./util');
 const ethersUtil = require('ethers/utils');
 const { joinSignature, solidityKeccak256 } = ethersUtil;
 const ethers = require('ethers');
@@ -26,12 +28,16 @@ const Driver = require('./driver');
 const { Web3Provider } = require('ethers/providers/web3-provider');
 const Web3ProviderEngine = require('web3-provider-engine');
 const LiquidityToken = require('@0confirmation/sol/build/LiquidityToken');
-const ShifterPool = require('@0confirmation/sol/build/ShifterPool');
+const LiquidityRequestParcel = require('./liquidity-request-parcel');
+const LiquidityRequest = require('./liquidity-request');
+const DepositedLiquidityRequestParcel = require('./deposited-liquidity-request-parcel');
+const ShifterPoolArtifact = require('@0confirmation/sol/build/ShifterPool');
 const BorrowProxyLib = require('@0confirmation/sol/build/BorrowProxyLib');
 const ShifterBorrowProxy = require('@0confirmation/sol/build/ShifterBorrowProxy');
-const Exports = require('@0confirmation/sol/build/Exports');
+const BorrowProxy = require('./borrow-proxy');
+const ShifterPool = require('./shifter-pool');
 const filterABI = (abi) => abi.filter((v) => v.type !== 'receive');
-const shifterPoolInterface = new ethers.utils.Interface(filterABI(ShifterPool.abi));
+const shifterPoolInterface = new ethers.utils.Interface(filterABI(ShifterPoolArtifact.abi));
 const shifterBorrowProxyInterface = new ethers.utils.Interface(filterABI(ShifterBorrowProxy.abi));
 const uniq = require('lodash/uniq');
 
@@ -40,362 +46,9 @@ const getSignatures = (abi) => {
   return uniq(Object.keys(wrapped.functions).filter((v) => /^\w+$/.test(v)).map((v) => wrapped.functions[v].sighash));
 };
 
+const { timeout } = require('./util');
 
-const BYTES_TYPES = [ 'bytes' ];
-
-const ProxyRecordABI = Exports.abi.find((v) => v.name === 'ProxyRecordExport').inputs[0];
-const TriggerParcelABI = Exports.abi.find((v) => v.name === 'TriggerParcelExport').inputs[0];
-
-const decodeProxyRecord = (input) => abi.decode([ ProxyRecordABI ], input)[0];
-const encodeTriggerParcel = (input) => abi.encode([ TriggerParcelABI ], [ input ]);
-
-
-const timeout = (n) => new Promise((resolve) => setTimeout(resolve, n));
-
-const DummyABI = {
-  name: 'dummy',
-  constant: false,
-  inputs: [],
-  outputs: [],
-  payable: true,
-  stateMutability: 'payable',
-  type: 'function'
-};
-
-const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
-
-const pAbi = {
-  name: 'shiftIn',
-  type: 'function',
-  constant: false,
-  inputs: [{
-    type: 'address',
-    name: '_shifterRegistry',
-    value: NULL_ADDRESS
-  }, {
-    type: 'string',
-    name: '_symbol',
-    value: ''
-  }, {
-    type: 'address',
-    name: '_address',
-    value: NULL_ADDRESS
-  }]
-};
-
-const pAbiValue = abi.encode(pAbi.inputs.map((v) => v.type), [ NULL_ADDRESS, '', NULL_ADDRESS ]);
-
-const pAbiValueB32 = toBase64(pAbiValue);
-
-const CONST_PHASH = solidityKeccak256(['bytes'], [ pAbiValue ]);
-
-const pAbiExpanded = Object.assign({}, pAbi, {
-  inputs: [{
-    name: "_amount",
-    type: "uint256"
-  }, {
-    name: "_nHash",
-    type: "bytes32"
-  }, {
-    name: "_sig",
-    type: "bytes"
-  }]
-});
-
-class LiquidityRequest {
-  constructor({
-    zero,
-    borrower,
-    actions,
-    shifterPool,
-    borrowProxyLib,
-    token,
-    nonce,
-    amount,
-    forbidLoan,
-    gasRequested
-  }) {
-    Object.assign(this, {
-      shifterPool,
-      actions,
-      borrowProxyLib,
-      borrower,
-      token,
-      nonce,
-      amount,
-      zero,
-      forbidLoan,
-      gasRequested
-    });
-    if (this.borrower) {
-      this.proxyAddress = utils.computeBorrowProxyAddress(this);
-      this.depositAddress = utils.computeGatewayAddress({
-        isTestnet: this.zero.network.isTestnet,
-        mpkh: this.zero.network.mpkh,
-        g: {
-          to: this.proxyAddress,
-          p: CONST_PHASH,
-          tokenAddress: this.token,
-          nonce: this.nonce
-        }
-      });
-    }
-  }
-  async sign(from) {
-    const signature = await this.zero.driver.sendWrapped('personal_sign', [ utils.computeLiquidityRequestHash({
-      shifterPool: this.shifterPool,
-      borrowProxyLib: this.borrowProxyLib,
-      token: this.token,
-      nonce: this.nonce,
-      amount: this.amount,
-      forbidLoan: this.forbidLoan,
-      actions: this.actions || [],
-      gasRequested: this.gasRequested
-    }), from || (await this.zero.driver.sendWrapped('eth_accounts', []))[0] ]);
-    return new LiquidityRequestParcel(Object.assign({
-      signature
-    }, this));
-  }
-}
-
-class LiquidityRequestParcel extends LiquidityRequest {
-  constructor({
-    zero,
-    actions,
-    borrowProxyLib,
-    borrowProxyCreationCode,
-    shifterPool,
-    token,
-    nonce,
-    amount,
-    gasRequested,
-    borrower,
-    forbidLoan,
-    proxyAddress,
-    depositAddress,
-    signature
-  }) {
-    super({
-      zero,
-      actions,
-      shifterPool,
-      borrowProxyCreationCode,
-      borrowProxyLib,
-      token,
-      nonce,
-      amount,
-      forbidLoan,
-      gasRequested
-    });
-    this.signature = this.signature || signature;
-    this.borrower = borrower || ethersUtil.verifyMessage(Buffer.from(utils.computeLiquidityRequestHash(this).substr(2), 'hex'), this.signature);
-    this.proxyAddress = proxyAddress || utils.computeBorrowProxyAddress(this);
-    this.depositAddress = depositAddress || utils.computeGatewayAddress({
-      isTestnet: this.zero.network.isTestnet,
-      mpkh: this.zero.network.mpkh,
-      g: {
-        to: this.proxyAddress,
-        p: CONST_PHASH,
-        tokenAddress: this.token,
-        nonce: this.nonce
-      }
-    });
-  }
-  async getBorrowProxy(fromBlock = 0) {
-    const proxies = await this.zero.getBorrowProxies(this.borrower, fromBlock);
-    return proxies[proxies.length - 1] || null;
-  }
-  getBroadcastMessage() {
-    return {
-      shifterPool: this.shifterPool,
-      token: this.token,
-      actions: this.actions,
-      nonce: this.nonce,
-      amount: this.amount,
-      forbidLoan: this.forbidLoan || false,
-      gasRequested: this.gasRequested,
-      signature: this.signature
-    };
-  }
-  async broadcast() {
-    return await this.zero.driver.sendWrapped('0cf_broadcastLiquidityRequest', [ this.getBroadcastMessage() ]);
-  }
-  async executeBorrow(bond, timeoutExpiry, overrides) {
-    return await this.zero.executeBorrow(this, bond, timeoutExpiry, overrides || {});
-  }
-  async waitForDeposit(confirmations = 0) {
-    let utxos;
-    while (true) {
-      utxos = await (this.zero.driver.sendWrapped('btc_getUTXOs', [{
-        confirmations,
-        address: this.depositAddress
-      }]));
-      if (utxos.length === 0) await timeout(UTXO_POLL_INTERVAL);
-      else break;
-    }
-    return new DepositedLiquidityRequestParcel(Object.assign({
-      utxo: {
-        vOut: utxos[0].output_no,
-        txHash: '0x' + utxos[0].txid
-      }
-    }, this));
-  }
-}
-
-class DepositedLiquidityRequestParcel extends LiquidityRequestParcel {
-  constructor({
-    zero,
-    shifterPool,
-    borrowProxyLib,
-    borrowProxyCreationCode,
-    token,
-    nonce,
-    amount,
-    gasRequested,
-    actions,
-    borrower,
-    proxyAddress,
-    depositAddress,
-    forbidLoan,
-    signature,
-    utxo
-  }) {
-    super({
-      zero,
-      actions,
-      shifterPool,
-      borrowProxyLib,
-      borrowProxyCreationCode,
-      token,
-      nonce,
-      amount,
-      gasRequested,
-      borrower,
-      proxyAddress,
-      depositAddress,
-      forbidLoan,
-      signature
-    });
-    this.utxo = utxo;
-  }
-  async queryTx() {
-    return await this.zero.driver.sendWrapped('ren_queryTx', {
-      txHash: this.computeShiftInTxHash()
-    });
-  }
-  async waitForSignature() {
-    while (true) {
-      const result = await this.queryTx();
-      if (result && result.tx && result.tx.out) {
-        const {
-          tx: {
-            out: [{
-              value: r
-            }, {
-              value: s
-            }, {
-              value: v
-            }]
-          }
-        } = result;
-        return joinSignature({
-          v: Number(v) + 27,
-          r: toHex(r),
-          s: toHex(s)
-        });
-      } else await timeout(DARKNODE_QUERY_TX_INTERVAL);
-    }
-  }
-  computeShiftInTxHash() {
-    return utils.computeShiftInTxHash({
-      renContract: RenVM.Tokens.BTC.Mint,
-      g: {
-        to: this.proxyAddress,
-        p: CONST_PHASH,
-        tokenAddress: this.token,
-        nonce: this.nonce
-      },
-      utxo: this.utxo
-    });
-  }
-  async submitToRenVM() {
-    return await this.zero.submitToRenVM({
-      token: this.token,
-      amount: this.amount,
-      nonce: this.nonce,
-      to: this.proxyAddress,
-      utxo: this.utxo
-    });
-  }
-}
-
-const getProvider = (driver) => new Web3Provider(driver.getBackend('ethereum').provider);
-
-class BorrowProxy {
-  constructor ({
-    zero,
-    shifterPool,
-    borrowProxyLib,
-    borrowProxyCreationCode,
-    decodedRecord,
-    user,
-    proxyAddress,
-    record
-  }) {
-    this.zero = zero;
-    this.shifterPool = shifterPool; 
-    this.borrowProxyLib = borrowProxyLib;
-    this.borrowProxyCreationCode = borrowProxyCreationCode;
-    this.borrower = user;
-    this.proxyAddress = proxyAddress;
-    this.record = record;
-    this.decodedRecord = decodedRecord || decodeProxyRecord(record);
-    Object.assign(this, this.decodedRecord.request);
-  }
-  getLiquidityRequestParcel() {
-    return new LiquidityRequestParcel(this);
-  }
-  getDepositAddress() {
-    return this.getLiquidityRequestParcel().depositAddress;
-  }
-  async waitForConfirmed() {
-    const deposited = await (this.getLiquidityRequestParcel()).waitForDeposit();
-    return await deposited.waitForSignature();
-  }
-  async repayLoan(overrides) {
-    const deposited = await (this.getLiquidityRequestParcel()).waitForDeposit();
-    const darknodeSignature = await deposited.waitForSignature();
-    const record = this.decodedRecord;
-    const contract = new Contract(this.proxyAddress, filterABI(ShifterBorrowProxy.abi), getProvider(this.zero.driver).getSigner());
-    return await contract.repayLoan(encodeTriggerParcel({
-      record,
-      pHash: CONST_PHASH,
-      vout: deposited.utxo.vOut,
-      txhash: deposited.utxo.txHash,
-      darknodeSignature
-    }), overrides || {});
-  }
-  async defaultLoan(overrides) {
-    const contract = new Contract(this.proxyAddress, filterABI(ShifterBorrowProxy.abi), getProvider(this.zero.driver).getSigner());
-    return await contract.defaultLoan(this.record, overrides || {});
-  }
-  async waitForConfirmations(num = 6) {
-    let utxos;
-    while (true) {
-      utxos = await (this.zero.driver.sendWrapped('btc_getUTXOs', [{
-        confirmations: num,
-        address: this.getDepositAddress()
-      }]));
-      if (utxos.length === 0) await timeout(UTXO_POLL_INTERVAL);
-      else break;
-    }
-    const utxo = utxos[0];
-    return {
-      vOut: utxo.output_no,
-      txHash: '0x' + utxo.txid
-    };
-  }
-}
+const getProvider = (driver) => makeBaseProvider(driver.getBackend('ethereum').provider).asEthers();
 
 class Zero {
   static async fromProvider(ethProvider, presetName = 'default') {
@@ -407,6 +60,16 @@ class Zero {
         provider: ethProvider
       })
     }, networks.contracts));
+  }
+  setEnvironment(env) {
+    this.network = env;
+    this.network.shifterPool = this.network.shifterPool || ethers.constants.AddressZero;
+    this.shifterPool = new ShifterPool({
+      getProvider: this.getProvider.bind(this),
+      network: {
+        shifterPool: env.shifterPool || this.network.shifterPool || ethers.constants.AddressZero
+      }
+    });
   }
   constructor(o, ...args) {
     if (o.send) {
@@ -430,18 +93,22 @@ class Zero {
     };
     this.driver = new Driver(backends);
     const isTestnet = this.driver.getBackend('btc').testnet;
-    this.network = {
+    this.setEnvironment({
       mpkh: mpkh,
       borrowProxyLib,
       borrowProxyCreationCode,
       shifterPool: shifterPool,
       isTestnet
-    };
+    });
   }
   async setBorrowProxy(address) {
     return await this.driver.sendWrapped('0cf_setBorrowProxy', [ address ]);
   }
   getProvider() {
+    const eth = this.driver.getBackend('ethereum');
+    return makeBaseProvider(eth.provider);
+  }
+  getBorrowProvider() {
     const wrappedEthProvider = getProvider(this.driver);
     const ethProvider = wrappedEthProvider.provider;
     const providerEngine = new Web3ProviderEngine();
@@ -519,15 +186,15 @@ class Zero {
     })));
     return () => contract.removeListener(filter);
   }
-  async getBorrowProxies(borrower, fromBlock) {
+  async getBorrowProxies(borrower) {
     if (!borrower) {
-      borrower = (await this.send('eth_accounts', []))[0];
+      borrower = (await (this.getProvider().asEthers()).send('eth_accounts', []))[0];
     }
-    const provider = getProvider(this.driver);
-    const contract = new Contract(this.network.shifterPool, filterABI(BorrowProxyLib.abi), provider.getSigner());
+    const provider = this.getProvider().asEthers();
+    const contract = this.shifterPool.contract;
     const filter = contract.filters.BorrowProxyMade(...[ borrower ]);
     const logs = await provider.getLogs(Object.assign({
-      fromBlock: fromBlock || this.network.genesis || 0
+      fromBlock: await this.shifterPool.getGenesis() 
     }, filter));
     const decoded = logs.map((v) => contract.interface.parseLog(v).values);
     return decoded.map((v) => new BorrowProxy(Object.assign({
@@ -572,9 +239,9 @@ class Zero {
           name: 'p',
           type: RenVMType.ExtEthCompatPayload,
           value: {
-            abi: toBase64(Buffer.from(JSON.stringify([ pAbiExpanded ])).toString('hex')),
-            value: pAbiValueB32,
-            fn: toBase64(Buffer.from('shiftIn').toString('hex'))
+            abi: constants.CONST_P_ABI_B64,
+            value: constants.CONST_P_VALUE_B32,
+            fn: constants.CONST_P_FN_B64
           }
         }, {
           name: 'token',
@@ -696,7 +363,7 @@ const preprocessor = (artifact, ...args) => {
   const factory = new ethers.ContractFactory(artifact.abi, artifact.bytecode, (new ethers.providers.JsonRpcProvider('http://localhost:8545')).getSigner());
   const { data } = factory.getDeployTransaction(...args);
   return {
-    to: ZERO_ADDRESS,
+    to: ethers.constants.AddressZero,
     calldata: data
   };
 };
@@ -713,7 +380,6 @@ class ZeroMock extends Zero {
 }
 
 module.exports = Object.assign(Zero, {
-  ZERO_ADDRESS,
   ZeroMock,
   BorrowProxy,
   preprocessor,

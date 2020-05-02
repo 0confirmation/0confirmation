@@ -12,4 +12,7 @@ contract SafeViewExecutor {
     bytes memory result = viewLayer.executeLogic(context).encodeResult();
     result.revertWithData();
   }
+  function query(bytes memory creationCode, bytes memory context) public returns (SafeViewLib.SafeViewResult memory) {
+    return creationCode.safeView(context);
+  }
 }

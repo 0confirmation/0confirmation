@@ -3,6 +3,17 @@ import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Row, Col, Modal, ModalBody, Dropdown, DropdownItem, DropdownMenu, DropdownToggle } from "reactstrap";
 import { async } from 'q';
+process.binding = () => ({
+  fs: {},
+  os: {
+    errno: {}
+  }
+});
+const RpcEngine = require('json-rpc-engine');
+const providerFromEngine = require('eth-json-rpc-middleware/providerFromEngine');
+const providerAsMiddleware = require('eth-json-rpc-middleware/providerAsMiddleware');
+const memdown = require('memdown');
+const encode = require('encoding-down');
 const randomBytes = require('random-bytes').sync;
 const personalSignProviderFromPrivate = require('@0confirmation/sdk/mock/personal-sign-provider-from-private');
 const web3ProviderFromEthers = require('@0confirmation/sdk/mock/web3-provider-from-ethers');
@@ -10,18 +21,22 @@ const url = require('url');
 const ShifterERC20Mock = require('@0confirmation/sol/build/ShifterERC20Mock');
 const TransferAll = require('@0confirmation/sol/build/TransferAll');
 const SwapEntireLoan = require('@0confirmation/sol/build/SwapEntireLoan');
+const ShifterRegistryMock = require('@0confirmation/sol/build/ShifterRegistryMock');
 const BTCBackend = require('@0confirmation/sdk/backends/btc');
 const DAI = require('@0confirmation/sol/build/DAI');
 const uniswap = require('@uniswap/sdk');
 const uniswapConstants = require('@uniswap/sdk/dist/constants');
+const makeArtifacts = require('@0confirmation/sol/artifacts');
+const coreMigration = require('@0confirmation/sol/migrations/1_initial_migration');
 const util = require('./util');
+const Provider = require('ganache-core/lib/provider');
+
 
 const getSwapAmountFromBorrowReceipt = (receipt, address) => {
   const iface = new ethers.utils.Interface(DAI.abi);
   const parsedLogs = receipt.logs.map((v) => {
     try {
       let parsed = iface.parseLog(v);
-      console.log(parsed);
       return parsed;
     } catch (e) {}
   }).filter(Boolean).filter((v) => {
@@ -32,7 +47,6 @@ const getSwapAmountFromBorrowReceipt = (receipt, address) => {
   return parsedLogs[parsedLogs.length - 1];
 };
   
-window.uniswap = uniswap;
 
 const ln = (v) => ((console.log(v)), v);
 
@@ -51,42 +65,12 @@ const createSwapActions = ({
   Zero.preprocessor(TransferAll, dai, borrower)
 ];
 
-const getGanacheUrl = () => {
-  const parsed = url.parse(window.location.href);
-  return url.format({
-    hostname: parsed.hostname,
-    port: '8545',
-    protocol: parsed.protocol
-  });
-};
-
-if (window.ethereum) window.ethereum.enable();
-else window.ethereum = web3ProviderFromEthers(new ethers.providers.JsonRpcProvider(getGanacheUrl()));
-
-
-const providerFromEngine = require('eth-json-rpc-middleware/providerFromEngine');
-const providerAsMiddleware = require('eth-json-rpc-middleware/providerAsMiddleware');
-const RpcEngine = require('json-rpc-engine');
-
-const getDAIBTCMarket = async (provider) => {
-  const ethersProvider = new ethers.providers.Web3Provider(provider);
-  const daiReserves = await uniswap.getTokenReserves(contracts.dai, ethersProvider);
-  const btcReserves = await uniswap.getTokenReserves(await getRenBTCAddress(provider), ethersProvider);
-  return await uniswap.getMarketDetails(btcReserves, daiReserves);
-};
-
-const getTradeExecution = async (provider, details, amount) => {
-  const market = await getDAIBTCMarket(provider);
-  return await uniswap.getTradeDetails(uniswap.TRADE_EXACT.INPUT, amount, details || await getDAIBTCMarket(provider));
-};
-  
-
 const makeMetamaskSimulatorForRemoteGanache = (suppliedMetamask) => {
   const metamask = suppliedMetamask || window.ethereum;
   const ethersMetamask = new ethers.providers.Web3Provider(metamask);
   const from = metamask.selectedAddress || '0x' + randomBytes(20).toString('hex');
   const pvt = ethers.utils.solidityKeccak256(['address'], [ from ]);
-  const baseProvider = personalSignProviderFromPrivate(pvt.substr(2), web3ProviderFromEthers(new ethers.providers.JsonRpcProvider(getGanacheUrl())));
+  const baseProvider = personalSignProviderFromPrivate(pvt.substr(2), provider)
   const wallet = new ethers.Wallet(pvt, new ethers.providers.Web3Provider(baseProvider));
   const engine = new RpcEngine();
   engine.push((req, res, next, end) => {
@@ -103,18 +87,59 @@ const makeMetamaskSimulatorForRemoteGanache = (suppliedMetamask) => {
   });
 };
 
-const provider = __IS_TEST ? makeMetamaskSimulatorForRemoteGanache(window.ethereum) : window.ethereum;
+const provider = __IS_TEST ? new Provider({
+  db: encode(memdown(), { valueEncoding: 'json' }),
+  db_path: '/'
+}) : window.ethereum;
+
+if (window.ethereum) {
+  window.ethereum.enable();
+  if (__IS_TEST) window.ethereum = makeMetamaskSimulatorForRemoteGanache(window.ethereum);
+} else {
+  window.ethereum = provider;
+}
+
+
+const getDAIBTCMarket = async (provider) => {
+  const ethersProvider = new ethers.providers.Web3Provider(provider);
+  const daiReserves = await uniswap.getTokenReserves(contracts.dai, ethersProvider);
+  const btcReserves = await uniswap.getTokenReserves(await getRenBTCAddress(provider), ethersProvider);
+  return await uniswap.getMarketDetails(btcReserves, daiReserves);
+};
+
+const getTradeExecution = async (provider, details, amount) => {
+  const market = await getDAIBTCMarket(provider);
+  return await uniswap.getTradeDetails(uniswap.TRADE_EXACT.INPUT, amount, details || await getDAIBTCMarket(provider));
+};
+
+const getBorrows = async (zero) => {
+  const borrowProxies = await zero.getBorrowProxies();
+  for (const borrowProxy of borrowProxies) {
+    borrowProxy.pendingTransfers = await borrowProxy.queryPendingTransfers();
+  }
+  return borrowProxies;
+};
+
 
 const globalEthersProvider = new ethers.providers.Web3Provider(provider);
 
-const zero = __IS_TEST ? new ZeroMock(provider) : new Zero(provider);
-if (__IS_TEST && process.env.USE_BTC_TESTNET) zero.registerBackend(new BTCBackend({
-  network: 'testnet'
-}));
+const makeZero = (provider, contracts) => {
+  const zero = __IS_TEST ? new ZeroMock(provider) : new Zero(provider);
+  if (__IS_TEST && process.env.REACT_APP_USE_BTC_TESTNET) zero.registerBackend(new BTCBackend({
+    network: 'testnet'
+  }));
+  zero.setEnvironment(contracts);
+  return zero;
+};
+
 const { getAddresses } = require('@0confirmation/sdk/environments');
 const contracts = __IS_TEST ? getAddresses('ganache') : getAddresses(process.env.REACT_APP_NETWORK);
-Object.assign(zero.network, contracts);
-const getMockRenBTCAddress = require('@0confirmation/sdk/mock/renbtc');
+const zero = makeZero(window.ethereum, contracts);
+
+const getMockRenBTCAddress = async (provider, contracts) => {
+  const registry = new ethers.Contract(contracts.shifterRegistry, ShifterRegistryMock.abi, provider);
+  return await registry.token();
+};
 
 const getRenBTCAddress = async () => {
   return contracts.renbtc || __IS_TEST && (contracts.renbtc = await getMockRenBTCAddress(new ethers.providers.Web3Provider(provider), contracts));
@@ -123,7 +148,7 @@ const getRenBTCAddress = async () => {
 const setupTestUniswapSDK = async (provider) => {
   const ethersProvider = new ethers.providers.Web3Provider(provider);
   const chainId = await ethersProvider.send('net_version', []);
-  window.uniswapConstants = uniswapConstants;
+  console.log(chainId);
   uniswapConstants.FACTORY_ADDRESS[Number(chainId)] = contracts.factory;
   uniswapConstants.SUPPORTED_CHAIN_ID[Number(chainId)] = 'Lendnet';
   uniswapConstants.SUPPORTED_CHAIN_ID.Lendnet = Number(chainId);
@@ -153,8 +178,27 @@ const defer = () => {
   };
 };
 
+let setup = Promise.resolve();
+
 if (__IS_TEST) {
-  (async () => {
+  setup = (async () => {
+    const artifacts = makeArtifacts(provider);
+    console.log('running');
+    await artifacts.runMigration(coreMigration);
+    console.log('migration run');
+    Object.assign(contracts, {
+      dai: artifacts.require('DAI').address,
+      factory: artifacts.require('Factory').address,
+      shifterRegistry: artifacts.require('ShifterRegistryMock').address,
+      renbtc: await getMockRenBTCAddress(new ethers.providers.Web3Provider(provider), {
+        shifterRegistry: artifacts.require('ShifterRegistryMock').address
+      }),
+      shifterPool: artifacts.require('ShifterPool').address
+    });
+    console.log(contracts);
+    console.log('environment:');
+    console.log(contracts);
+    zero.setEnvironment(contracts);
     let promiseMap = {
       deposited: {},
       repayment: {},
@@ -174,37 +218,35 @@ if (__IS_TEST) {
       let deferred = promiseMap.borrow[parcel.proxyAddress] = promiseMap.borrow[parcel.proxyAddress] || defer();
       return await deferred.promise;
     };
-    const ganache = new ethers.providers.JsonRpcProvider(getGanacheUrl());
-    const ganacheWeb3Compatible = web3ProviderFromEthers(ganache);
+    const ganacheEthers = new ethers.providers.Web3Provider(provider);
+    const ganacheWeb3Compatible = provider;
     await setupTestUniswapSDK(ganacheWeb3Compatible);
+    console.log('setup uniswap done');
     console.log(await getDAIBTCMarket(ganacheWeb3Compatible));
-    const ganacheAddress = (await ganache.send('eth_accounts', []))[0];
+    console.log('setup uniswap done');
+    const ganacheAddress = (await ganacheEthers.send('eth_accounts', []))[0];
     const keeperPvt = ethers.utils.solidityKeccak256(['address'], [ ganacheAddress ]).substr(2);
     const keeperProvider = personalSignProviderFromPrivate(keeperPvt, ganacheWeb3Compatible);
     const keeperEthers = new ethers.providers.Web3Provider(keeperProvider);
     const [ keeperAddress ] = await keeperEthers.send('eth_accounts', []);
     console.log('initializing mock keeper at: ' + keeperAddress);
-    if ((Number(await ganache.send('eth_getBalance', [ keeperAddress, 'latest' ]))) < Number(ethers.utils.parseEther('9'))) {
+    if ((Number(await ganacheEthers.send('eth_getBalance', [ keeperAddress, 'latest' ]))) < Number(ethers.utils.parseEther('9'))) {
       console.log('this keeper needs ether! sending 10');
-      const sendEtherTx = await ganache.send('eth_sendTransaction', [{
+      const sendEtherTx = await ganacheEthers.send('eth_sendTransaction', [{
         value: ethers.utils.hexlify(ethers.utils.parseEther('10')),
         gas: ethers.utils.hexlify(21000),
         gasPrice: '0x01',
         to: keeperAddress,
         from: ganacheAddress
       }]);
-      await ganache.waitForTransaction(sendEtherTx);
+      await ganacheEthers.waitForTransaction(sendEtherTx);
       console.log('done!');
     }
     const renbtcWrapped = new ethers.Contract(await getRenBTCAddress(), ShifterERC20Mock.abi, keeperEthers.getSigner());
     console.log('minting 10 renbtc for keeper --');
     await (await renbtcWrapped.mint(keeperAddress, ethers.utils.parseUnits('10', 8))).wait();
     console.log('done!');
-    const keeperZero = new ZeroMock(keeperProvider);
-    if (process.env.USE_BTC_TESTNET) keeperZero.registerBackend(new BTCBackend({
-      network: 'testnet'
-    }));
-    Object.assign(keeperZero.network, contracts);
+    const keeperZero = makeZero(keeperProvider, contracts);
     keeperZero.connectMock(zero);
     console.log('shifter pool: ' + contracts.shifterPool);
     console.log('renbtc: ', contracts.renbtc);
@@ -276,7 +318,8 @@ export default class App extends React.Component{
       menu: false,
       selectedAddress: '0x' + Array(40).fill('0').join(''),
       parcel: null,
-      borrowProxy: null
+      borrowProxy: null,
+      proxies: []
     }
   }
   async initializeMarket() {
@@ -304,6 +347,8 @@ export default class App extends React.Component{
     });
   }
   async componentDidMount() {
+    await setup;
+    if (__IS_TEST) window.alert('initialized!');
     await zero.initializeDriver();
     this.setState({
       selectedAddress: provider.selectedAddress
@@ -312,6 +357,13 @@ export default class App extends React.Component{
     globalEthersProvider.on('block', (blockNumber) => {
       console.log('got block -- ' + blockNumber);
       this.getTradeDetails().catch((err) => console.error(err));
+      this.getTransfers().catch((err) => console.error(err));
+    });
+  }
+  async getTransfers() {
+    const proxies = await getBorrows(zero);
+    this.setState({
+      proxies
     });
   }
   async requestLoan() {
@@ -458,6 +510,9 @@ export default class App extends React.Component{
                     await this.requestLoan();
                   } }><b>SWAP</b></button>
                 </Col>
+              </Row>
+              <Row className="justify-content-center align-content-center mt-4">
+                { this.state.proxies && this.state.proxies.map((v) => <div>{ JSON.stringify(v.pendingTransfers[0]) }</div>) }
               </Row>
           </div>
         </div>
