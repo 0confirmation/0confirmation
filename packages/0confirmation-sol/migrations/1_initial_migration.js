@@ -1,22 +1,5 @@
-const Migrations = artifacts.require('Migrations');
-const environments = require('@0confirmation/sdk/environments');
-const ShifterPool = artifacts.require('ShifterPool');
-const SandboxLib = artifacts.require('SandboxLib');
-const UniswapAdapter = artifacts.require('UniswapAdapter');
-const SimpleBurnLiquidationModule = artifacts.require('SimpleBurnLiquidationModule');
-const ShifterERC20Mock = artifacts.require('ShifterERC20Mock');
-const ERC20Adapter = artifacts.require('ERC20Adapter');
-const LiquidityToken = artifacts.require('LiquidityToken');
-const CurveAdapter = artifacts.require('CurveAdapter');
-const ShifterRegistryMock = artifacts.require('ShifterRegistryMock');
-const ShifterBorrowProxyFactoryLib = artifacts.require('ShifterBorrowProxyFactoryLib');
-const Curvefi = artifacts.require('Curvefi');
-const CurveToken = artifacts.require('CurveToken');
-const DAI = artifacts.require('DAI');
-const WBTC = artifacts.require('WBTC');
-const Exchange = artifacts.require('Exchange');
-const Factory = artifacts.require('Factory');
 const ethers = require('ethers');
+const environments = require('@0confirmation/sdk/environments');
 const fs = require('fs');
 
 const Zero = require('@0confirmation/sdk');
@@ -35,7 +18,24 @@ const getAddress = (artifact, network_id) => {
 
 const NO_SUBMODULE = '0x' + Array(40).fill('0').join('');
 
-module.exports = async function(deployer) {
+module.exports = (artifacts) => async function(deployer) {
+  const Migrations = artifacts.require('Migrations');
+  const ShifterPool = artifacts.require('ShifterPool');
+  const SandboxLib = artifacts.require('SandboxLib');
+  const UniswapAdapter = artifacts.require('UniswapAdapter');
+  const SimpleBurnLiquidationModule = artifacts.require('SimpleBurnLiquidationModule');
+  const ShifterERC20Mock = artifacts.require('ShifterERC20Mock');
+  const ERC20Adapter = artifacts.require('ERC20Adapter');
+  const LiquidityToken = artifacts.require('LiquidityToken');
+  const CurveAdapter = artifacts.require('CurveAdapter');
+  const ShifterRegistryMock = artifacts.require('ShifterRegistryMock');
+  const ShifterBorrowProxyFactoryLib = artifacts.require('ShifterBorrowProxyFactoryLib');
+  const Curvefi = artifacts.require('Curvefi');
+  const CurveToken = artifacts.require('CurveToken');
+  const DAI = artifacts.require('DAI');
+  const WBTC = artifacts.require('WBTC');
+  const Exchange = artifacts.require('Exchange');
+  const Factory = artifacts.require('Factory');
   await deployer.deploy(Migrations);
   await deployer.deploy(ShifterBorrowProxyFactoryLib);
   await deployer.link(ShifterBorrowProxyFactoryLib, ShifterPool);
@@ -155,4 +155,7 @@ module.exports = async function(deployer) {
     await (await zero.approveLiquidityToken(renbtc.address)).wait();
     await (await zero.addLiquidity(renbtc.address, ethers.utils.parseUnits('5', 8).toString())).wait();
   }
-};
+}
+
+const globalObject = require('the-global-object');
+if (globalObject.artifacts) module.exports = module.exports(globalObject.artifacts);
