@@ -138,7 +138,7 @@ const makeZero = (provider, contracts) => {
 
 const { getAddresses } = require('@0confirmation/sdk/environments');
 const contracts = __IS_TEST ? getAddresses('ganache') : getAddresses(process.env.REACT_APP_NETWORK);
-const zero = makeZero(provider, contracts);
+const zero = makeZero(window.ethereum, contracts);
 
 const getMockRenBTCAddress = async (provider, contracts) => {
   const registry = new ethers.Contract(contracts.shifterRegistry, ShifterRegistryMock.abi, provider);
