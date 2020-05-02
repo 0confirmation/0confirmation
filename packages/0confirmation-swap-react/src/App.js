@@ -3,8 +3,6 @@ import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Row, Col, Modal, ModalBody, Dropdown, DropdownItem, DropdownMenu, DropdownToggle } from "reactstrap";
 import { async } from 'q';
-const { log } = console;
-const cachedConsole = console;
 process.binding = () => ({
   fs: {},
   os: {
@@ -101,8 +99,6 @@ if (window.ethereum) {
   window.ethereum = provider;
 }
 
-window.console = cachedConsole;
-window.console.log = log.bind(cachedConsole);
 
 const getDAIBTCMarket = async (provider) => {
   const ethersProvider = new ethers.providers.Web3Provider(provider);
