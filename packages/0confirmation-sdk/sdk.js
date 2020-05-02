@@ -188,7 +188,7 @@ class Zero {
   }
   async getBorrowProxies(borrower) {
     if (!borrower) {
-      borrower = (await this.send('eth_accounts', []))[0];
+      borrower = (await (this.getProvider().asEthers()).send('eth_accounts', []))[0];
     }
     const provider = this.getProvider().asEthers();
     const contract = this.shifterPool.contract;

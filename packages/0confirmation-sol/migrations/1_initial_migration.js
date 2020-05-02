@@ -52,14 +52,14 @@ module.exports = (artifacts) => async function(deployer) {
     await deployer.deploy(Exchange);
     factory = await Factory.deployed();
     let template = await Exchange.deployed();
-    await factory.initializeFactory(template.address);
-    let receipt = await factory.createExchange(renbtc.address);
+    await factory.initializeFactory(template.address, { gasLimit: ethers.utils.hexlify(6e6) });
+    await factory.createExchange(renbtc.address, { gasLimit: ethers.utils.hexlify(6e6) });
     renbtcExchange = {
-      address: receipt.logs[0].args.exchange
+      address: await factory.getExchange(renbtc.address)
     };
-    receipt = await factory.createExchange(dai.address);
+    await factory.createExchange(dai.address, { gasLimit: ethers.utils.hexlify(6e6) });
     daiExchange = {
-      address: receipt.logs[0].args.exchange
+      address: await factory.getExchange(dai.address)
     };
   } else {
     renbtc = { address: kovan.renbtc };
