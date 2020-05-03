@@ -15,9 +15,10 @@ import { ViewExecutor } from "./utils/ViewExecutor.sol";
 import { LiquidityToken } from "./LiquidityToken.sol";
 import { SandboxLib } from "./utils/sandbox/SandboxLib.sol";
 import { SafeViewExecutor } from "./utils/sandbox/SafeViewExecutor.sol";
-import { Create2CloneFactory } from "./utils/Create2CloneFactory.sol";
+import { FactoryLib } from "./FactoryLib.sol";
+import { NullCloneConstructor } from "./NullCloneConstructor.sol";
 
-contract ShifterPool is Ownable, SafeViewExecutor, Create2CloneFactory {
+contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
   using SandboxLib for *;
   using ShifterPoolLib for *;
   using TokenUtils for *;
@@ -25,9 +26,6 @@ contract ShifterPool is Ownable, SafeViewExecutor, Create2CloneFactory {
   using ShifterBorrowProxyFactoryLib for *;
   using BorrowProxyLib for *;
   ShifterPoolLib.Isolate isolate;
-  function cloneConstructor(bytes calldata consData) external override {
-    // do nothing
-  }
   constructor() Ownable() public {
     isolate.genesis = block.number;
   }
@@ -49,8 +47,8 @@ contract ShifterPool is Ownable, SafeViewExecutor, Create2CloneFactory {
   function deployBorrowProxyImplementation() public {
     isolate.borrowProxyImplementation = isolate.makeBorrowProxy(BORROW_PROXY_IMPLEMENTATION_SALT);
   }
-  function deployBorrowProxyClone(bytes32 salt) public returns (address payable created) {
-    created = address(uint160(create2Clone(isolate.borrowProxyImplementation, uint256(salt))));
+  function deployBorrowProxyClone(bytes32 salt) internal returns (address payable created) {
+    created = address(uint160(FactoryLib.create2Clone(isolate.borrowProxyImplementation, uint256(salt))));
   }
   function _executeBorrow(ShifterBorrowProxyLib.LiquidityRequestParcel memory liquidityRequestParcel, uint256 bond, uint256 timeoutExpiry) internal returns (bytes32 borrowerSalt) {
     require(

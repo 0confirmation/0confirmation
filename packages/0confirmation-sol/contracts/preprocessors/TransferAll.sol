@@ -12,9 +12,8 @@ contract TransferAll {
   BorrowProxyLib.ProxyIsolate isolate;
   address public token;
   address public target;
-  constructor(address _token, address _target) public {
-    token = _token;
-    target = _target;
+  function setup(bytes memory consData) public {
+    (token, target) = abi.decode(consData, (address, address));
   }
   function execute(bytes memory data) view public returns (ShifterBorrowProxyLib.InitializationAction[] memory) {
     SandboxLib.ExecutionContext memory context = data.toContext();

@@ -16,9 +16,8 @@ contract SwapEntireLoan {
   BorrowProxyLib.ProxyIsolate isolate;
   address public factory;
   address public target;
-  constructor(address _factory, address _target) public {
-    factory = _factory;
-    target = _target;
+  function setup(bytes memory consData) public {
+    (factory, target) = abi.decode(consData, (address, address));
   }
   function execute(bytes memory data) view public returns (ShifterBorrowProxyLib.InitializationAction[] memory result) {
     SandboxLib.ExecutionContext memory context = data.toContext();

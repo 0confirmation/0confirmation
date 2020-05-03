@@ -1,5 +1,6 @@
 'use strict';
 
+const staticPreprocessor = require('./static-preprocessor');
 const ISafeViewExecutor = require('@0confirmation/sol/build/ISafeViewExecutor');
 const pendingTransfersQuery = require('./queries/query-pending-transfers');
 const genesisQuery = require('./queries/query-genesis');
@@ -383,6 +384,7 @@ module.exports = Object.assign(Zero, {
   ZeroMock,
   BorrowProxy,
   preprocessor,
+  staticPreprocessor,
   getSignatures,
   LiquidityRequestParcel,
   LiquidityRequest,

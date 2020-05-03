@@ -8,6 +8,7 @@ import { BorrowProxyLib } from "../../../BorrowProxyLib.sol";
 import { ShifterBorrowProxyLib } from "../../../ShifterBorrowProxyLib.sol";
 import { Create2 } from "openzeppelin-solidity/contracts/utils/Create2.sol";
 import { ModuleLib } from "../../lib/ModuleLib.sol";
+import { AssetForwarderLib } from "../../lib/AssetForwarderLib.sol";
 import { AssetForwarder } from "../../lib/AssetForwarder.sol";
 
 library UniswapAdapterLib {
@@ -16,6 +17,7 @@ library UniswapAdapterLib {
   bytes32 constant ETHER_FORWARDER_SALT = 0x3e8d8e49b9a35f50b96f6ba4b93e0fc6c1d66a2e1c04975ef848d7031c8158a4; // keccak("uniswap-adapter.ether-forwarder")
   struct ExternalIsolate {
     address factoryAddress;
+    address assetForwarderImplementation;
   }
   struct TokenToTokenSwapInputInputs {
     uint256 tokens_sold;
@@ -316,11 +318,11 @@ library UniswapAdapterLib {
   function computeIsolatePointer(address instance) public pure returns (uint256) {
     return uint256(keccak256(abi.encodePacked("isolate.uniswap-adapter", instance)));
   }
-  function computeForwarderAddress() internal view returns (address payable) {
-    return address(uint160(Create2.computeAddress(ETHER_FORWARDER_SALT, keccak256(type(AssetForwarder).creationCode))));
+  function computeForwarderAddress(address moduleAddress) internal returns (address payable) {
+    return address(uint160(AssetForwarderLib.deriveAssetForwarderAddress(UniswapAdapter(address(uint160(moduleAddress))).getExternalIsolateHandler().assetForwarderImplementation, ETHER_FORWARDER_SALT)));
   }
-  function callForwarder(address payable target, address payable token) internal {
-    address forwarder = Create2.deploy(0, ETHER_FORWARDER_SALT, type(AssetForwarder).creationCode);
+  function callForwarder(address moduleAddress, address payable target, address payable token) internal {
+    address forwarder = AssetForwarderLib.deployAssetForwarderClone(UniswapAdapter(address(uint160(moduleAddress))).getExternalIsolateHandler().assetForwarderImplementation, ETHER_FORWARDER_SALT);
     AssetForwarder(forwarder).forwardAsset(target, token);
   }
   function getCastStorageType() internal pure returns (function (uint256) internal pure returns (ExternalIsolate storage) swap) {

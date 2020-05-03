@@ -5,6 +5,8 @@ import { Create2 } from "openzeppelin-solidity/contracts/utils/Create2.sol";
 import { IERC20 } from "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import { ModuleLib } from "../../lib/ModuleLib.sol";
 import { AssetForwarder } from "../../lib/AssetForwarder.sol";
+import { AssetForwarderLib } from "../../lib/AssetForwarderLib.sol";
+import { ERC20Adapter } from "./ERC20Adapter.sol";
 
 library ERC20AdapterLib {
   struct EscrowRecord {
@@ -15,6 +17,15 @@ library ERC20AdapterLib {
     EscrowRecord[] payments;
     bool isProcessing;
     uint256 processed;
+    address assetForwarderImplementation;
+  }
+  struct ExternalIsolate {
+    address assetForwarderImplementation;
+  }
+  function toExternal(Isolate storage isolate) internal view returns (ExternalIsolate memory result) {
+    result = ExternalIsolate({
+      assetForwarderImplementation: isolate.assetForwarderImplementation
+    });
   }
   function isDone(Isolate storage isolate) internal view returns (bool) {
     return !isolate.isProcessing && isolate.payments.length == isolate.processed;
@@ -25,12 +36,12 @@ library ERC20AdapterLib {
   function computeForwarderSalt(uint256 index) internal pure returns (bytes32) {
     return keccak256(abi.encodePacked(index));
   }
-  function computeForwarderAddress(uint256 index) internal view returns (address) {
-    return Create2.computeAddress(computeForwarderSalt(index), keccak256(type(AssetForwarder).creationCode));
+  function computeForwarderAddress(address moduleAddress, uint256 index) internal view returns (address) {
+    return AssetForwarderLib.deriveAssetForwarderAddress(ERC20Adapter(moduleAddress).getExternalIsolateHandler().assetForwarderImplementation, computeForwarderSalt(index));
   }
-  function liquidate() internal returns (bool) {
+  function liquidate(address moduleAddress) internal returns (bool) {
     ERC20AdapterLib.Isolate storage isolate = getIsolatePointer();
-    return processEscrowReturns(isolate);
+    return processEscrowReturns(isolate, moduleAddress);
   }
   struct TransferInputs {
     address recipient;
@@ -43,36 +54,36 @@ library ERC20AdapterLib {
       amount: amount
     });
   }
-  function forwardEscrow(EscrowRecord memory record, uint256 index) internal {
-    address forwarder = Create2.deploy(0, computeForwarderSalt(index), type(AssetForwarder).creationCode);
+  function forwardEscrow(address moduleAddress, EscrowRecord memory record, uint256 index) internal {
+    address forwarder = AssetForwarderLib.deployAssetForwarderClone(ERC20Adapter(moduleAddress).getExternalIsolateHandler().assetForwarderImplementation, computeForwarderSalt(index));
     AssetForwarder(forwarder).forwardAsset(address(uint160(record.recipient)), record.token);
   }
-  function returnEscrow(EscrowRecord memory record, uint256 index) internal {
-    address forwarder = Create2.deploy(0, computeForwarderSalt(index), type(AssetForwarder).creationCode);
+  function returnEscrow(address moduleAddress, EscrowRecord memory record, uint256 index) internal {
+    address forwarder = AssetForwarderLib.deployAssetForwarderClone(ERC20Adapter(moduleAddress).getExternalIsolateHandler().assetForwarderImplementation, computeForwarderSalt(index));
     AssetForwarder(forwarder).forwardAsset(address(uint160(address(this))), record.token);
   }
   uint256 constant MINIMUM_GAS_TO_PROCESS = 5e5;
   uint256 constant MAX_RECORDS = 100;
-  function processEscrowForwards(Isolate storage isolate) internal returns (bool) {
+  function processEscrowForwards(Isolate storage isolate, address moduleAddress) internal returns (bool) {
     if (!isolate.isProcessing) isolate.isProcessing = true;
     for (uint256 i = isolate.processed; i < isolate.payments.length; i++) {
       if (gasleft() < MINIMUM_GAS_TO_PROCESS) {
         isolate.processed = i;
         return false;
       } else {
-        forwardEscrow(isolate.payments[i], i);
+        forwardEscrow(moduleAddress, isolate.payments[i], i);
       }
     }
     return true;
   }
-  function processEscrowReturns(Isolate storage isolate) internal returns (bool) {
+  function processEscrowReturns(Isolate storage isolate, address moduleAddress) internal returns (bool) {
     if (!isolate.isProcessing) isolate.isProcessing = true;
     for (uint256 i = isolate.processed; i < isolate.payments.length; i++) {
       if (gasleft() < MINIMUM_GAS_TO_PROCESS) {
         isolate.processed = i;
         return false;
       } else {
-        returnEscrow(isolate.payments[i], i);
+        returnEscrow(moduleAddress, isolate.payments[i], i);
       }
     }
     return true;

@@ -14,9 +14,10 @@ contract SimpleBurnLiquidationModule {
   using AddressSetLib for *;
   using TokenUtils for *;
   BorrowProxyLib.ProxyIsolate proxyIsolate;
-  constructor(address factoryAddress) public {
+  constructor(address factoryAddress, address erc20Module) public {
     SimpleBurnLiquidationModuleLib.Isolate storage isolate = SimpleBurnLiquidationModuleLib.getIsolatePointer();
     isolate.factoryAddress = factoryAddress;
+    isolate.erc20Module = erc20Module;
   }
   function notify(address /* moduleAddress */, bytes memory payload) public returns (bool) {
     (address token) = abi.decode(payload, (address));
@@ -24,8 +25,8 @@ contract SimpleBurnLiquidationModule {
     isolate.toLiquidate.insert(token);
     return true;
   }
-  function liquidate() public returns (bool) {
-    if (!ERC20AdapterLib.liquidate()) return false;
+  function liquidate(address moduleAddress) public returns (bool) {
+    if (!ERC20AdapterLib.liquidate(SimpleBurnLiquidationModuleLib.getExternalIsolate(moduleAddress).erc20Module)) return false;
     SimpleBurnLiquidationModuleLib.Isolate storage isolate = SimpleBurnLiquidationModuleLib.getIsolatePointer();
     IUniswapFactory factory = IUniswapFactory(isolate.factoryAddress);
     address liquidateTo = address(uint160(proxyIsolate.token));
@@ -52,7 +53,8 @@ contract SimpleBurnLiquidationModule {
   function getExternalIsolateHandler() external view returns (SimpleBurnLiquidationModuleLib.ExternalIsolate memory) {
     SimpleBurnLiquidationModuleLib.Isolate storage isolate = SimpleBurnLiquidationModuleLib.getIsolatePointer();
     return SimpleBurnLiquidationModuleLib.ExternalIsolate({
-      factoryAddress: isolate.factoryAddress
+      factoryAddress: isolate.factoryAddress,
+      erc20Module: isolate.erc20Module
     });
   }
 }

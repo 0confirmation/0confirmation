@@ -8,6 +8,7 @@ import { IUniswapExchange } from "../../../interfaces/IUniswapExchange.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { ModuleLib } from "../../lib/ModuleLib.sol";
 import { AssetForwarder } from "../../lib/AssetForwarder.sol";
+import { AssetForwarderLib } from "../../lib/AssetForwarderLib.sol";
 import { BorrowProxyLib } from "../../../BorrowProxyLib.sol";
 
 contract UniswapAdapter {
@@ -18,6 +19,7 @@ contract UniswapAdapter {
   constructor(address factoryAddress) public {
     UniswapAdapterLib.ExternalIsolate storage isolate = UniswapAdapterLib.getIsolatePointer(address(this));
     isolate.factoryAddress = factoryAddress;
+    isolate.assetForwarderImplementation = AssetForwarderLib.deployAssetForwarder();
   }
   function getExternalIsolateHandler() external payable returns (UniswapAdapterLib.ExternalIsolate memory) {
     return UniswapAdapterLib.getIsolatePointer(address(this));
@@ -46,25 +48,25 @@ contract UniswapAdapter {
     } else if (sig == IUniswapExchange.tokenToEthSwapInput.selector) {
       UniswapAdapterLib.TokenToEthSwapInputInputs memory inputs = args.decodeTokenToEthSwapInputInputs();
       require(tokenAddress.approveForMaxIfNeeded(payload.to), "approval of token failed");
-      payload.callData = inputs.addRecipient(UniswapAdapterLib.computeForwarderAddress()).encodeWithSelector();
+      payload.callData = inputs.addRecipient(UniswapAdapterLib.computeForwarderAddress(payload.moduleAddress)).encodeWithSelector();
       usedForwarder = true;
     } else if (sig == IUniswapExchange.tokenToEthSwapOutput.selector) {
       UniswapAdapterLib.TokenToEthSwapOutputInputs memory inputs = args.decodeTokenToEthSwapOutputInputs();
       require(tokenAddress.approveForMaxIfNeeded(payload.to), "approval of token failed");
-      payload.callData = inputs.addRecipient(UniswapAdapterLib.computeForwarderAddress()).encodeWithSelector();
+      payload.callData = inputs.addRecipient(UniswapAdapterLib.computeForwarderAddress(payload.moduleAddress)).encodeWithSelector();
       usedForwarder = true;
     } else if (sig == IUniswapExchange.tokenToEthTransferInput.selector) {
       UniswapAdapterLib.TokenToEthTransferInputInputs memory inputs = args.decodeTokenToEthTransferInputInputs();
       require(inputs.recipient == address(this), "recipient must be borrow proxy");
       require(tokenAddress.approveForMaxIfNeeded(payload.to), "approval of token failed");
-      inputs.recipient = UniswapAdapterLib.computeForwarderAddress();
+      inputs.recipient = UniswapAdapterLib.computeForwarderAddress(payload.moduleAddress);
       payload.callData = inputs.encodeWithSelector();
       usedForwarder = true;
     } else if (sig == IUniswapExchange.tokenToEthTransferOutput.selector) {
       UniswapAdapterLib.TokenToEthTransferOutputInputs memory inputs = args.decodeTokenToEthTransferOutputInputs();
       require(inputs.recipient == address(this), "recipient must be borrow proxy");
       require(tokenAddress.approveForMaxIfNeeded(payload.to), "approval of token failed");
-      inputs.recipient = UniswapAdapterLib.computeForwarderAddress();
+      inputs.recipient = UniswapAdapterLib.computeForwarderAddress(payload.moduleAddress);
       payload.callData = inputs.encodeWithSelector();
       usedForwarder = true;
     } else if (sig == IUniswapExchange.tokenToTokenSwapInput.selector) {
@@ -72,7 +74,7 @@ contract UniswapAdapter {
       if (inputs.tokens_sold > 0 || inputs.min_tokens_bought > 0 || inputs.min_eth_bought > 0) newToken = inputs.token_addr;
       require(tokenAddress.approveForMaxIfNeeded(payload.to), "approval of token failed");
       newToken = address(uint160(inputs.token_addr));
-      payload.callData = inputs.addRecipient(UniswapAdapterLib.computeForwarderAddress()).encodeTokenToTokenTransferInput();
+      payload.callData = inputs.addRecipient(UniswapAdapterLib.computeForwarderAddress(payload.moduleAddress)).encodeTokenToTokenTransferInput();
       usedForwarder = true;
     } else if (sig == IUniswapExchange.tokenToTokenTransferInput.selector) {
       UniswapAdapterLib.TokenToTokenTransferInputInputs memory inputs = args.decodeTokenToTokenTransferInputInputs();
@@ -115,7 +117,7 @@ contract UniswapAdapter {
     } else revert("unsupported contract call");
     if (newToken != address(0x0)) require(payload.liquidationSubmodule.delegateNotify(newToken.encodeLiquidationNotify()), "liquidation module notification failure");
     (bool success, bytes memory retval) = payload.to.call{ gas: gasleft(), value: payload.value }(payload.callData);
-    if (usedForwarder) UniswapAdapterLib.callForwarder(address(this), address(uint160(newToken)));
+    if (usedForwarder) UniswapAdapterLib.callForwarder(payload.moduleAddress, address(this), address(uint160(newToken)));
     ModuleLib.bubbleResult(success, retval);
   }
 }

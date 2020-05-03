@@ -1,3 +1,23 @@
+const Migrations = artifacts.require('Migrations');
+const ShifterPool = artifacts.require('ShifterPool');
+const SandboxLib = artifacts.require('SandboxLib');
+const UniswapAdapter = artifacts.require('UniswapAdapter');
+const SimpleBurnLiquidationModule = artifacts.require('SimpleBurnLiquidationModule');
+const ShifterERC20Mock = artifacts.require('ShifterERC20Mock');
+const ERC20Adapter = artifacts.require('ERC20Adapter');
+const LiquidityToken = artifacts.require('LiquidityToken');
+const CurveAdapter = artifacts.require('CurveAdapter');
+const ShifterRegistryMock = artifacts.require('ShifterRegistryMock');
+const ShifterBorrowProxyFactoryLib = artifacts.require('ShifterBorrowProxyFactoryLib');
+const Curvefi = artifacts.require('Curvefi');
+const CurveToken = artifacts.require('CurveToken');
+const DAI = artifacts.require('DAI');
+const WBTC = artifacts.require('WBTC');
+const Exchange = artifacts.require('Exchange');
+const Factory = artifacts.require('Factory');
+const TransferAll = artifacts.require('TransferAll');
+const SwapEntireLoan = artifacts.require('SwapEntireLoan');
+
 const ethers = require('ethers');
 const environments = require('@0confirmation/sdk/environments');
 const fs = require('fs');
@@ -18,30 +38,15 @@ const getAddress = (artifact, network_id) => {
 
 const NO_SUBMODULE = '0x' + Array(40).fill('0').join('');
 
-module.exports = (artifacts) => async function(deployer) {
-  const Migrations = artifacts.require('Migrations');
-  const ShifterPool = artifacts.require('ShifterPool');
-  const SandboxLib = artifacts.require('SandboxLib');
-  const UniswapAdapter = artifacts.require('UniswapAdapter');
-  const SimpleBurnLiquidationModule = artifacts.require('SimpleBurnLiquidationModule');
-  const ShifterERC20Mock = artifacts.require('ShifterERC20Mock');
-  const ERC20Adapter = artifacts.require('ERC20Adapter');
-  const LiquidityToken = artifacts.require('LiquidityToken');
-  const CurveAdapter = artifacts.require('CurveAdapter');
-  const ShifterRegistryMock = artifacts.require('ShifterRegistryMock');
-  const ShifterBorrowProxyFactoryLib = artifacts.require('ShifterBorrowProxyFactoryLib');
-  const Curvefi = artifacts.require('Curvefi');
-  const CurveToken = artifacts.require('CurveToken');
-  const DAI = artifacts.require('DAI');
-  const WBTC = artifacts.require('WBTC');
-  const Exchange = artifacts.require('Exchange');
-  const Factory = artifacts.require('Factory');
+module.exports = async function(deployer) {
   await deployer.deploy(Migrations);
   await deployer.deploy(ShifterBorrowProxyFactoryLib);
   await deployer.link(ShifterBorrowProxyFactoryLib, ShifterPool);
   await deployer.deploy(ShifterPool);
   await deployer.deploy(ERC20Adapter);
   await deployer.deploy(DAI);
+  await deployer.deploy(TransferAll);
+  await deployer.deploy(SwapEntireLoan);
   const dai = await DAI.deployed();
   let shifterRegistry, renbtc, factory, renbtcExchange, daiExchange;
   if (['ganache', 'test'].find((v) => v === deployer.network)) {
@@ -52,12 +57,12 @@ module.exports = (artifacts) => async function(deployer) {
     await deployer.deploy(Exchange);
     factory = await Factory.deployed();
     let template = await Exchange.deployed();
-    await factory.initializeFactory(template.address, { gasLimit: ethers.utils.hexlify(6e6) });
-    await factory.createExchange(renbtc.address, { gasLimit: ethers.utils.hexlify(6e6) });
+    await factory.initializeFactory(template.address);//, { gasLimit: ethers.utils.hexlify(6e6) });
+    await factory.createExchange(renbtc.address); // { gasLimit: ethers.utils.hexlify(6e6) });
     renbtcExchange = {
       address: await factory.getExchange(renbtc.address)
     };
-    await factory.createExchange(dai.address, { gasLimit: ethers.utils.hexlify(6e6) });
+    await factory.createExchange(dai.address); //, { gasLimit: ethers.utils.hexlify(6e6) });
     daiExchange = {
       address: await factory.getExchange(dai.address)
     };
@@ -78,13 +83,13 @@ module.exports = (artifacts) => async function(deployer) {
   const shifterPool = await ShifterPool.deployed();
   await deployer.deploy(CurveAdapter, getAddress(Curvefi, deployer.network_id));
   await deployer.deploy(UniswapAdapter, factory.address);
-  await deployer.deploy(SimpleBurnLiquidationModule, factory.address);
+  const erc20Adapter = await ERC20Adapter.deployed();
+  await deployer.deploy(SimpleBurnLiquidationModule, factory.address, erc20Adapter.address);
   await deployer.deploy(LiquidityToken, shifterPool.address, renbtc.address, 'zeroBTC', 'zeroBTC', 8);
   await deployer;
   const liquidityToken = await LiquidityToken.deployed();
   const uniswapAdapter = await UniswapAdapter.deployed();
   const curveAdapter = await CurveAdapter.deployed();
-  const erc20Adapter = await ERC20Adapter.deployed();
   const simpleBurnLiquidationModule = await SimpleBurnLiquidationModule.deployed();
   await shifterPool.deployBorrowProxyImplementation();
   await shifterPool.setup(shifterRegistry.address, '1000', ethers.utils.parseEther('0.01'), [{
@@ -155,7 +160,4 @@ module.exports = (artifacts) => async function(deployer) {
     await (await zero.approveLiquidityToken(renbtc.address)).wait();
     await (await zero.addLiquidity(renbtc.address, ethers.utils.parseUnits('5', 8).toString())).wait();
   }
-}
-
-const globalObject = require('the-global-object');
-if (globalObject.artifacts) module.exports = module.exports(globalObject.artifacts);
+};

@@ -11,8 +11,9 @@ import { IERC20 } from "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import { SafeViewExecutor } from "./utils/sandbox/SafeViewExecutor.sol";
 import { SandboxLib } from "./utils/sandbox/SandboxLib.sol";
 import { StringLib } from "./utils/StringLib.sol";
+import { NullCloneConstructor } from "./NullCloneConstructor.sol";
 
-contract ShifterBorrowProxy is BorrowProxy, SafeViewExecutor {
+contract ShifterBorrowProxy is BorrowProxy, SafeViewExecutor, NullCloneConstructor {
   using ShifterBorrowProxyLib for *;
   using StringLib for *;
   using SandboxLib for *;
@@ -79,7 +80,8 @@ contract ShifterBorrowProxy is BorrowProxy, SafeViewExecutor {
   function receiveInitializationActions(ShifterBorrowProxyLib.InitializationAction[] memory actions) public {
     require(msg.sender == address(isolate.masterAddress), "must be called from shifter pool");
     SandboxLib.ProtectedExecution[] memory trace = actions.processActions();
-    ShifterBorrowProxyLib.emitBorrowProxyInitialization(address(this), trace);
+    require(trace.length >= 0);
+//    ShifterBorrowProxyLib.emitBorrowProxyInitialization(address(this), trace);
   }
   fallback() external payable override {}
   receive() external payable override {}
