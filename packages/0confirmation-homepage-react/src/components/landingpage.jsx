@@ -96,7 +96,7 @@ export default class LandingPage extends React.Component {
                                                                     </Col>
                                                                     <Col lg="12" md="12" sm="12">
                                                                         <p className="pb-3" style={{
-                                                                            fontSize: "10px", color: "#ffffff", letterSpacing: "0.2em",
+                                                                            fontSize: "10px", color: "#ffffff", letterSpacing: "0.1em",
                                                                             fontFamily: "PT Sans", fontStyle: "normal", fontWeight: "normal", textAlign: "center"
                                                                         }}>
                                                                             Third parties will not control your assets while they are being transferred to their end destination
