@@ -7,7 +7,7 @@ import {
     Input,
     DropdownToggle,
     DropdownMenu,
-    DropdownItem
+    DropdownItem,Modal, ModalBody, ModalFooter, ModalHeader, Button
 } from "reactstrap";
 import { Link } from "react-router-dom";
 import { FaAngleDown } from 'react-icons/fa';
@@ -19,12 +19,15 @@ import ethIcon from '@iconify/icons-cryptocurrency/eth';
 import usdtIcon from '@iconify/icons-cryptocurrency/usdt';
 import eosIcon from '@iconify/icons-cryptocurrency/eos';
 import btgIcon from '@iconify/icons-cryptocurrency/btg';
+import { QRCode } from 'react-qrcode-logo';
+
 export default class TradeRoom extends React.Component {
     constructor(props) {
         super(props)
 
         this.state = {
             showdetail: true,
+            wallet:"xfekdjj39jsgahshjebah3i393jandbbrrb",
             sendOpen:false,
             getOpen: false,
             send: 0,
@@ -32,7 +35,9 @@ export default class TradeRoom extends React.Component {
             rate:203,
             getvalue: 0,
             sendvalue: 0,
-            slippage:0.5,
+            slippage: 0.5,
+            copied:false,
+            modal:false,
             _getcoins: 
                 { coin: <Fragment><InlineIcon color="#ffffff" style={{fontSize:"1.5em"}} className="mr-2" icon={daiIcon} /></Fragment>, id: 0, name: "DAI" },
             _sendcoins:
@@ -62,9 +67,89 @@ export default class TradeRoom extends React.Component {
         { coin: <Fragment><InlineIcon color="#ffffff" style={{fontSize:"1.5em"}} className="mr-2" icon={btgIcon} /></Fragment>,id:6, name: "BTG" },
     ];
     render() {
+        const closeBtn = <button className="btn" style={{ color: "#317333" }} onClick={ async ()=> await this.setState({modal:!this.state.modal})}>&times;</button>;
         return (
             <>
+                <Modal
+                    style={{ overflowX: "hidden"}}
+                    className="dmodal"
+                    wrapClassName="dmodal"
+                    modalClassName="dmodal"
+                    backdropClassName="dmodal"
+                    contentClassName="dmodal"                    centered isOpen={this.state.modal} 
+                    toggle={async () => await this.setState({ modal: !this.state.modal })}>
+                    <ModalBody style={{ backgroundColor: "#1f2820" }} className="h-100" >
+                            <Row className="w-100 align-content-center justify-content-center my-3">
+                                <Col lg="10" sm="10" md="10" className="align-content-center justify-content-center text-center">
+                                    <span style={{ fontSize: "1.7em", fontFamily:"PT Sans", fontWeight:"bolder" }}
+                                        className="mx-auto align-content-center justify-content-center text-center text-light ml-3">
+                                        Bitcoin Payment
+                                </span>
+                                </Col>
+                                <Col lg="1" sm="1" md="1">{closeBtn}</Col>
+                        </Row>
+                        <Row className="w-100 align-content-center justify-content-center text-center text-light">
+                            <Col lg="12" sm="12" md="12" style={{fontSize:"0.9em"}} className="align-content-center justify-content-center text-center text-light">
+                                You are selling <b>{this.state.sendvalue} {this.state._sendcoins.name}</b> for at least <b>{this.state.sendvalue * this.state.rate} {this.state._getcoins.name}</b><br/>
+                                Expected Price Slippage: <b>{this.state.slippage}%</b><br />
+                                Additional slippage limit: <b>{this.state.slippage}%</b>
+                            </Col>
+                        </Row>
+                        <Row className="my-3 align-content-start justify-content-start">
+                            <Col lg="3" md="3" sm="3"
+                                className="text-light text-center align-content-start justify-content-start">
+                                <QRCode value={this.state.wallet}
+                                    fgColor="#317333"
+                                    logoHeight={30}
+                                    logoWidth={30}
+                                    logoOpacity={0.5}
+                                    logoImage={require("../images/0cf.svg")}
+                                    size={100} bgColor="transparent"
+                                    qrStyle="squares" />
+                                {/* <img src={require("../images/barcode.svg")} alt="0CF" className="img-fluid" /> */}
+                            </Col>
+                            <Col lg="9" md="9" sm="9" className="align-content-start justify-content-start">
+                                <Row style={{ border: "2px solid #317333", borderRadius: "10px" }}
+                                    className="text-light mx-1 h-100 text-center align-content-center justify-content-center">
+                                    <Col lg="12" md="12" sm="12" className="text-light text-center align-content-center justify-content-center">
+                                        <span style={{ fontSize: "0.7em" }}>To complete payment, send 0.1 BTC to the below address</span>
+                                    </Col>
+                                    <Col lg="12" md="12" sm="12" className="text-light text-center align-content-center justify-content-center">
+                                        <span className="mx-1" style={{
+                                            fontSize: "0.79em", letterSpacing: "0.03em", color: "#137333",
+                                            
+                                        }}>
+                                            <b className="mr-1 pb-3"
+                                                style={{ borderBottom: "1px solid #137333 "}}
+                                            >{this.state.wallet}</b>
+                                            {(this.state.copied)?
+                                                <b style={{ fontSize: "0.79em", letterSpacing: "0.03em", color: "#137333" }}>Copied!</b>
+                                                :<img
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    // e.clipboardData.setData('text/plain', this.state.wallet);
+                                                        navigator.clipboard.writeText(this.state.wallet);
+                                                    this.setState({copied:true})
+                                                }}
+                                                style={{ cursor: "pointer" }} className="img-fluid" src={require("../images/copy.svg")} alt="Copy" />}</span>
+                                    </Col>
+                                    <Col lg="12" md="12" sm="12" className="text-light my-3 mx-1 text-center align-content-center justify-content-center">
+                                        <span style={{ fontSize: "0.7em" }}>Time Left To Pay: 12:34 mins</span>
+                                    </Col>
+                                </Row>
+                            </Col>
+                        </Row>
+                        <Row className="align-content-center justify-content-center mt-4 mb-5 text-center text-light">
+                            <Col lg="8" sm="8" md="8" style={{ fontSize: "0.9em" }} className="align-content-center justify-content-center">
+                                <button className="btn btn-block rounded-pill bg-danger text-center text-light">
+                                    Payment Sent
+                                </button>
+                            </Col>
+                        </Row>
+                        </ModalBody>
+                </Modal>
                 <div className="justify-content-center align-content-center pt-5" style={{overflowX:"hidden"}} >
+                    
                     <div className="justify-content-center align-content-center text-center mx-auto my-auto pb-4 pt-5">
                         <button className="btn text-light button-small btn-sm" style={{ fontSize: "24dp", backgroundColor: "#317333", width: "248dp", borderRadius: "10px" }}>Connect Wallet</button>
                     </div>
@@ -212,9 +297,9 @@ export default class TradeRoom extends React.Component {
                             
                             <div className="justify-content-center align-content-center text-center mx-auto my-auto pt-3">
                                 {(window.location.pathname.split("/")[2] === "earn") ?
-                                    <button className="btn text-light button-small btn-sm px-5" style={{ fontSize: "24dp", backgroundColor: "#317333", borderRadius: "10px" }}>Pool</button>
+                                    <button onClick={async()=>{await this.setState({modal:true})}} className="btn text-light button-small btn-sm px-5" style={{ fontSize: "24dp", backgroundColor: "#317333", borderRadius: "10px" }}>Pool</button>
                                 :
-                                    <button className="btn text-light button-small btn-sm px-5" style={{ fontSize: "24dp", backgroundColor: "#317333", borderRadius: "10px" }}>Swap</button>
+                                    <button onClick={async()=>{await this.setState({modal:true})}} className="btn text-light button-small btn-sm px-5" style={{ fontSize: "24dp", backgroundColor: "#317333", borderRadius: "10px" }}>Swap</button>
                                 }
                             </div>
                             <Row className="justify-content-center align-content-center text-center mx-auto py-3">
