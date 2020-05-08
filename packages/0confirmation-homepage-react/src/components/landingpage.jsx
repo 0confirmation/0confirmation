@@ -1,6 +1,7 @@
 import React from 'react';
 import { Row, Card, CardBody, Col, Tooltip } from "reactstrap";
 import "../App.css";
+import { FaTelegramPlane, FaMedium, FaRedditAlien, FaTwitter } from "react-icons/fa";
 export default class LandingPage extends React.Component {
     constructor(props) {
         super(props);
@@ -349,9 +350,20 @@ export default class LandingPage extends React.Component {
                             </Row>
                             
                         </Col>
-                        <Col lg="12" md="12" sm="12">
-                            <Row>
-                                <img className="img-fluid w-10 h-25 mx-4" alt="Powered By" src={require("../images/foot.svg")} />
+                        <Col lg="12" md="12" sm="12" className="align-content-start justify-content-start py-4">
+                            <Row className="align-content-start justify-content-start">
+                                <Col lg="2" md="2" sm="2" className="align-content-start justify-content-start">
+                                    <img className="img-fluid ml-5 w-50" alt="Powered By" src={require("../images/foot.svg")} />
+                                </Col>
+                                <Col lg="2" md="2" sm="2" className="align-content-start justify-content-start">
+                                    <span style={{color:"#ffffff", fontFamily:"PT Sans", fontStyle:"normal", fontWeight:"normal", fontSize:"0.8em"}}>Follow Us</span>
+                                    <Row className="align-content-start justify-content-start ml-1">
+                                        <FaMedium size={20} style={{cursor:"pointer"}} onClick={()=>{ window.open("https://medium.com");}} color="#317333" className="mr-2"/>
+                                        <FaRedditAlien size={20} style={{cursor:"pointer"}} onClick={()=>{ window.open("https://reddit.com");}} color="#317333" className="mr-2"/>
+                                        <FaTelegramPlane size={20} style={{cursor:"pointer"}} onClick={()=>{ window.open("https://telegram.com");}} color="#317333" className="mr-2"/>
+                                        <FaTwitter size={20} style={{cursor:"pointer"}} onClick={()=>{ window.open("https://twitter.com");}} color="#317333" className="mr-2"/>
+                                    </Row>
+                                </Col>
                             </Row>
                         </Col>
                    </Row>
