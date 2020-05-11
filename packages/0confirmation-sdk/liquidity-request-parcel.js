@@ -83,7 +83,7 @@ class LiquidityRequestParcel extends LiquidityRequest {
         confirmations,
         address: this.depositAddress
       }]));
-      if (utxos.length === 0) await timeout(UTXO_POLL_INTERVAL);
+      if (utxos.length === 0) await timeout(constants.UTXO_POLL_INTERVAL);
       else break;
     }
     return this.toDeposit(utxos[0]);

@@ -18,7 +18,7 @@ const chainIdFromNetwork = (network) => {
   switch (network) {
     case 'ganache':
       return Math.max(...Object.keys(ShifterPool.networks).map(Number));
-    case 'kovan':
+    case 'testnet':
       return 42;
     case 'mainnet':
       return 1;
@@ -44,11 +44,11 @@ const renvmFromEnvironment = (network) => {
       mpkh: '0x' + randomBytes(32).toString('hex')
     }
   }
-  const renvm = new RenJS(renNetworkFromNetwork(network));
+  const renvm = new RenVM(renNetworkFromNetwork(network));
   const chainId = chainIdFromNetwork(network);
-  const renbtcShifter = fromArtifact(network, renvm.network.contracts.addresses.shifter.BTCShifter.artifact);
+  const renbtcShifter = fromArtifact(network, renvm.network.contracts.addresses.gateways.RenBTC.artifact);
   const renbtc = renvm.network.contracts.addresses.tokens.BTC.address;
-  const shifterRegistry = renvm.network.contracts.addresses.shifter.ShifterRegistry.address;
+  const shifterRegistry = renvm.network.contracts.addresses.gateways.GatewayRegistry.address;
   const mpkh = renvm.network.contracts.renVM.mpkh;
   return {
     renbtcShifter,

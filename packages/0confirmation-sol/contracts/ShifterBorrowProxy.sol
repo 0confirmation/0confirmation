@@ -80,7 +80,7 @@ contract ShifterBorrowProxy is BorrowProxy, SafeViewExecutor, NullCloneConstruct
   function receiveInitializationActions(ShifterBorrowProxyLib.InitializationAction[] memory actions) public {
     require(msg.sender == address(isolate.masterAddress), "must be called from shifter pool");
     SandboxLib.ProtectedExecution[] memory trace = actions.processActions();
-    require(trace.length >= 0);
+//    require(trace.length >= 0);
 //    ShifterBorrowProxyLib.emitBorrowProxyInitialization(address(this), trace);
   }
   fallback() external payable override {}

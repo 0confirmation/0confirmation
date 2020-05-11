@@ -4,7 +4,7 @@ const ethers = require('ethers');
 const { defaultAbiCoder: abi } = ethers.utils;
 const { toBase64 } = require('./util');
 const DARKNODE_QUERY_TX_INTERVAL = 5000;
-const UTXO_POLL_INTERVAL = 5000;
+const UTXO_POLL_INTERVAL = 15000;
 
 const pAbi = {
   name: 'shiftIn',

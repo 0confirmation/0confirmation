@@ -198,11 +198,12 @@ class Zero {
       fromBlock: await this.shifterPool.getGenesis() 
     }, filter));
     const decoded = logs.map((v) => contract.interface.parseLog(v).values);
-    return decoded.map((v) => new BorrowProxy(Object.assign({
+    return decoded.map((v, i) => new BorrowProxy(Object.assign({
       zero: this,
       shifterPool: this.network.shifterPool,
       borrowProxyCreationCode: this.network.borrowProxyCreationCode,
-      borrowProxyLib: this.network.borrowProxyLib
+      borrowProxyLib: this.network.borrowProxyLib,
+      transactionHash: logs[i].transactionHash,
     }, v)));
   } 
   async broadcastLiquidityRequest({

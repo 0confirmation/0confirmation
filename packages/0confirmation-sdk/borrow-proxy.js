@@ -19,6 +19,7 @@ const encodeTriggerParcel = (input) => abi.encode([ TriggerParcelABI ], [ input 
 class BorrowProxy extends makeManagerClass(ShifterBorrowProxy) {
   constructor ({
     zero,
+    transactionHash,
     shifterPool,
     borrowProxyLib,
     borrowProxyCreationCode,
@@ -28,6 +29,8 @@ class BorrowProxy extends makeManagerClass(ShifterBorrowProxy) {
     record
   }) {
     super(proxyAddress, zero.getProvider().asEthers().getSigner());
+    this.transactionHash = transactionHash;
+    console.log(this.transactionHash);
     this.zero = zero;
     this.shifterPool = shifterPool; 
     this.borrowProxyLib = borrowProxyLib;
@@ -37,6 +40,12 @@ class BorrowProxy extends makeManagerClass(ShifterBorrowProxy) {
     this.record = record;
     this.decodedRecord = decodedRecord || decodeProxyRecord(record);
     Object.assign(this, this.decodedRecord.request);
+  }
+  async getTransaction() {
+    return await (this.zero.getProvider().asEthers()).send('eth_getTransactionByHash', [ this.transactionHash ]);
+  }
+  async getTransactionReceipt() {
+    return await (this.zero.getProvider().asEthers()).send('eth_getTransactionReceipt', [ this.transactionHash ]);
   }
   async queryTransfers(fromBlock) {
     if (!fromBlock) fromBlock = await this.zero.shifterPool.getGenesis();

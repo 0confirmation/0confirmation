@@ -20,7 +20,7 @@ class BaseProvider {
 
 const convertToBaseProvider = (provider) => Object.setPrototypeOf(provider, BaseProvider.prototype);
 
-class ZeroProviderEngine extends RpcEngine {
+class PolymarketProviderEngine extends RpcEngine {
   asProvider() {
     return convertToBaseProvider(providerFromEngine(this));
   }
@@ -29,7 +29,7 @@ class ZeroProviderEngine extends RpcEngine {
 Object.setPrototypeOf(BaseProvider.prototype, baseProviderProto);
 
 const makeBaseProvider = (provider) => {
-  const engine = new ZeroProviderEngine();
+  const engine = new PolymarketProviderEngine();
   const send = provider.send || provider.sendAsync;
   engine.push((req, res, next, end) => {
     send.call(provider, req, (err, result) => {
@@ -37,12 +37,15 @@ const makeBaseProvider = (provider) => {
       end(err);
     });
   });
-  return engine.asProvider();
+  return Object.assign(engine.asProvider(), {
+    enable: provider.enable && provider.enable.bind(provider)
+  });
 };
 
 module.exports = {
   makeBaseProvider,
-  ZeroProviderEngine,
+  makeEngine: () => new PolymarketProviderEngine(),
+  PolymarketProviderEngine,
   BaseProvider,
   convertToBaseProvider
 };
