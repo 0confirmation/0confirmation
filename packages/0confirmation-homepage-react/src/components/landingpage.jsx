@@ -2,6 +2,8 @@ import React from 'react';
 import { Row, Card, CardBody, Col, Tooltip } from "reactstrap";
 import "../App.css";
 import { FaTelegramPlane, FaMedium, FaRedditAlien, FaTwitter } from "react-icons/fa";
+import {Link} from "react-router-dom";
+
 export default class LandingPage extends React.Component {
     constructor(props) {
         super(props);
@@ -15,13 +17,13 @@ export default class LandingPage extends React.Component {
     render() {
         return (
             <>
-                <div className="justify-content-center align-content-center overflow-hidden">
+                <div className="justify-content-center align-content-center overflow-hidden pt-5">
                     <Row className={(this.props.ismobile) ? "justify-content-center align-content-center px-3" : "justify-content-center align-content-center landing px-3"}>
                         <Col lg="10" md="12" sm="12" className="justify-content-center mx-auto align-content-center my-4">
                             <Row className="justify-content-center align-content-center my-5">
                                 <Col lg="6" md="12" sm="12" className="justify-content-center align-content-center my-auto">
                                     <Row className="justify-content-center align-content-center mx-auto">
-                                        <Card style={{ backgroundColor: "#1F2820" }}>
+                                        <Card className="card-shadow" style={{ backgroundColor: "#1F2820" }}>
                                             <CardBody>
                                                 <Row className="justify-content-center align-content-center mx-auto">
                                                     <Col lg="5" md="5" sm="5" className="justify-content-center align-content-center mx-auto">
@@ -44,9 +46,9 @@ export default class LandingPage extends React.Component {
                                 </Col>
                                 <Col lg="6" md="12" sm="12" className="justify-content-center align-content-center">
                                     <Row className="justify-content-center align-content-center">
-                                        <Col lg="5" md="5" sm="5" className="justify-content-center align-content-center my-2">
+                                        <Col lg="6" md="6" sm="6" className="justify-content-center align-content-center my-4">
                                             <Row className="justify-content-center align-content-center mx-auto">
-                                                <Card style={{ backgroundColor: "#1F2820", height:"15em", width:"250em" }}>
+                                                <Card className="card-shadow" style={{ backgroundColor: "#1F2820", height:"15em", width:"250em" }}>
                                                     <CardBody>
                                                         <Row className="justify-content-center align-content-center">
                                                             <Col lg="12" md="12" sm="12" className="justify-content-center align-content-center">
@@ -57,14 +59,14 @@ export default class LandingPage extends React.Component {
                                                                         </Row>
                                                                     </Col>
                                                                     <Col lg="12" md="12" sm="12" className="text-center">
-                                                                        <p style={{
-                                                                            fontSize: "12px", color: "#ffffff",
+                                                                        <p className="mt-auto mb-auto pt-2 pb-2" style={{
+                                                                            fontSize: "24px", color: "#ffffff",
                                                                             fontFamily: "PT Sans", fontStyle: "normal", fontWeight: "bold"
                                                                         }}>SPEED</p>
                                                                     </Col>
                                                                     <Col lg="12" md="12" sm="12">
                                                                         <p className="pb-3" style={{
-                                                                            fontSize: "10px", color: "#ffffff", letterSpacing: "0.2em",
+                                                                            fontSize: "18px", color: "#ffffff", lineHeight: "1",
                                                                             fontFamily: "PT Sans", fontStyle: "normal", fontWeight: "normal", textAlign: "center"
                                                                         }}>
                                                                             Access your non-ETH based assets on DeFi nearly instantly
@@ -77,9 +79,9 @@ export default class LandingPage extends React.Component {
                                                 </Card>
                                             </Row>
                                         </Col>
-                                        <Col lg="5" md="5" sm="5" className="justify-content-center align-content-center my-2">
+                                        <Col lg="6" md="6" sm="6" className="justify-content-center align-content-center my-4">
                                             <Row className="justify-content-center align-content-center mx-auto">
-                                                <Card style={{ backgroundColor: "#1F2820", height:"15em", width:"250em" }}>
+                                                <Card className="card-shadow" style={{ backgroundColor: "#1F2820", height:"15em", width:"250em" }}>
                                                     <CardBody>
                                                         <Row className="justify-content-center align-content-center">
                                                             <Col lg="12" md="12" sm="12" className="justify-content-center align-content-center">
@@ -90,14 +92,14 @@ export default class LandingPage extends React.Component {
                                                                         </Row>
                                                                     </Col>
                                                                     <Col lg="12" md="12" sm="12" className="text-center">
-                                                                        <p style={{
-                                                                            fontSize: "12px", color: "#ffffff",
+                                                                        <p className="mt-auto mb-auto pt-2 pb-2" style={{
+                                                                            fontSize: "24px", color: "#ffffff",
                                                                             fontFamily: "PT Sans", fontStyle: "normal", fontWeight: "bold"
                                                                         }}>DECENTRALIZATION</p>
                                                                     </Col>
                                                                     <Col lg="12" md="12" sm="12">
                                                                         <p className="pb-3" style={{
-                                                                            fontSize: "10px", color: "#ffffff", letterSpacing: "0.1em",
+                                                                            fontSize: "18px", color: "#ffffff", lineHeight: "1",
                                                                             fontFamily: "PT Sans", fontStyle: "normal", fontWeight: "normal", textAlign: "center"
                                                                         }}>
                                                                             Third parties will not control your assets while they are being transferred to their end destination
@@ -112,9 +114,9 @@ export default class LandingPage extends React.Component {
                                         </Col>
                                     </Row>
                                     <Row className="justify-content-center align-content-center">
-                                        <Col lg="5" md="5" sm="5" className="justify-content-center align-content-center my-2">
+                                        <Col lg="6" md="6" sm="6" className="justify-content-center align-content-center my-4">
                                             <Row className="justify-content-center align-content-center mx-auto">
-                                                <Card style={{ backgroundColor: "#1F2820", height:"15em", width:"250em" }}>
+                                                <Card className="card-shadow" style={{ backgroundColor: "#1F2820", height:"15em", width:"250em" }}>
                                                     <CardBody>
                                                         <Row className="justify-content-center align-content-center">
                                                             <Col lg="12" md="12" sm="12" className="justify-content-center align-content-center">
@@ -125,14 +127,14 @@ export default class LandingPage extends React.Component {
                                                                         </Row>
                                                                     </Col>
                                                                     <Col lg="12" md="12" sm="12" className="text-center">
-                                                                        <p style={{
-                                                                            fontSize: "12px", color: "#ffffff",
+                                                                        <p className="mt-auto mb-auto pt-2 pb-2" style={{
+                                                                            fontSize: "24px", color: "#ffffff",
                                                                             fontFamily: "PT Sans", fontStyle: "normal", fontWeight: "bold"
                                                                         }}>PRICE LOCK</p>
                                                                     </Col>
                                                                     <Col lg="12" md="12" sm="12">
                                                                         <p className="pb-3" style={{
-                                                                            fontSize: "10px", color: "#ffffff", letterSpacing: "0.2em",
+                                                                            fontSize: "18px", color: "#ffffff", lineHeight: "1",
                                                                             fontFamily: "PT Sans", fontStyle: "normal", fontWeight: "normal", textAlign: "center"
                                                                         }}>
                                                                             0cf will lock in your price at time of execution, providing access to DeFi with no slippage
@@ -145,9 +147,9 @@ export default class LandingPage extends React.Component {
                                                 </Card>
                                             </Row>
                                         </Col>
-                                        <Col lg="5" md="5" sm="5" className="justify-content-center align-content-center my-2">
+                                        <Col lg="6" md="6" sm="6" className="justify-content-center align-content-center my-4">
                                             <Row className="justify-content-center align-content-center mx-auto">
-                                                <Card style={{ backgroundColor: "#1F2820", height:"15em", width:"250em" }}>
+                                                <Card className="card-shadow" style={{ backgroundColor: "#1F2820", height:"15em", width:"250em" }}>
                                                     <CardBody>
                                                         <Row className="justify-content-center align-content-center">
                                                             <Col lg="12" md="12" sm="12" className="justify-content-center align-content-center">
@@ -158,14 +160,14 @@ export default class LandingPage extends React.Component {
                                                                         </Row>
                                                                     </Col>
                                                                     <Col lg="12" md="12" sm="12" className="text-center">
-                                                                        <p style={{
-                                                                            fontSize: "12px", color: "#ffffff",
+                                                                        <p className="mt-auto mb-auto pt-2 pb-2" style={{
+                                                                            fontSize: "24px", color: "#ffffff",
                                                                             fontFamily: "PT Sans", fontStyle: "normal", fontWeight: "bold"
                                                                         }}>SPEED</p>
                                                                     </Col>
                                                                     <Col lg="12" md="12" sm="12">
                                                                         <p className="pb-3" style={{
-                                                                            fontSize: "10px", color: "#ffffff", letterSpacing: "0.2em",
+                                                                            fontSize: "18px", color: "#ffffff", lineHeight: "1",
                                                                             fontFamily: "PT Sans", fontStyle: "normal", fontWeight: "normal", textAlign: "center"
                                                                         }}>
                                                                             Add liquidity to the 0cf pool and earn income from short term loan interest
@@ -186,8 +188,8 @@ export default class LandingPage extends React.Component {
                     </Row>
                     <Row className="bg-light justify-content-center align-content-center text-center py-5 px-3">
                         <Col lg="12" md="12" sm="12" className="bg-light justify-content-center align-content-center text-center">
-                            <Row className="bg-light justify-content-center align-content-center text-center">
-                                <h6 style={{ color: "#141513", fontFamily:"PT Sans", fontSize:"28px", fontStyle:"normal"}}><b>Where Can I Use 0cf?</b></h6>
+                            <Row className="bg-light py-4 justify-content-center align-content-center text-center">
+                                <h6 style={{ color: "#212529", fontFamily:"Open Sans", fontWeight:"800", fontSize:"42px", letterSpacing:"1.2px"}}><b>Where Can I Use 0cf?</b></h6>
                             </Row>
                         </Col>
                         <Col lg="12" md="12" sm="12" className="bg-light justify-content-center align-content-center text-center">
@@ -201,9 +203,8 @@ export default class LandingPage extends React.Component {
                             </Row>
                         </Col>
                         <Col lg="3" md="3" sm="2" className="bg-light justify-content-center align-content-center text-center">
-                            <Row className="bg-light justify-content-center align-content-center text-center">
-                                <button className="btn button-small btn-block w-auto text-light text-center bold my-3"
-                                    style={{ backgroundColor: "#317333", borderRadius:"0.8em" }}>Integrate 0cf</button>
+                            <Row className="bg-light justify-content-center align-content-center text-center py-5">
+                                <Link style={{textDecoration:"none"}} to="/"><p className="inline-block" style={{color: "#317333", fontSize:"24px", fontWeight:"bold"}}>Integrate 0cf →</p></Link>
                             </Row>
                         </Col>
                     </Row>
@@ -212,14 +213,14 @@ export default class LandingPage extends React.Component {
                             <Row className="justify-content-center align-content-center text-center py-5 px-3">
                                 <Col lg="12" md="12" sm="12" className="justify-content-center align-content-center text-center">
                                     <Row className="justify-content-center align-content-center text-center">
-                                        <h6 style={{ color: "#ffffff", fontFamily: "PT Sans", fontSize: "28px", fontStyle: "normal" }}><b>Usage Statistics</b></h6>
+                                        <h6 style={{ color: "#ffffff", fontFamily:"Open Sans", fontWeight:"800", fontSize:"42px", letterSpacing:"1.2px"}}><b>Usage Statistics</b></h6>
                                     </Row>
                                 </Col>
                                 <Col lg="12" md="12" sm="12" className="justify-content-center align-content-center text-center">
                                     <Row className="justify-content-center align-content-center text-center py-4">
                                         <Col lg="2" md="12" sm="12" className="align-content-center justify-content-center mx-3 my-2">
                                             <Row className="justify-content-center align-content-center mx-auto">
-                                                <Card style={{ backgroundColor: "#1F2820",width:"20em" }}>
+                                                <Card className="card-shadow" style={{ backgroundColor: "#1F2820",width:"20em" }}>
                                                     <CardBody>
                                                         <Row className="justify-content-center align-content-center">
                                                             <Col lg="12" md="12" sm="12" className="justify-content-center align-content-center">
@@ -251,7 +252,7 @@ export default class LandingPage extends React.Component {
                                         </Col>
                                         <Col lg="2" mm="12" sm="12" className="align-content-center justify-content-center mx-3 my-2">
                                             <Row className="justify-content-center align-content-center mx-auto">
-                                                <Card style={{ backgroundColor: "#1F2820", width: "20em" }}>
+                                                <Card className="card-shadow" style={{ backgroundColor: "#1F2820", width: "20em" }}>
                                                     <CardBody>
                                                         <Row className="justify-content-center align-content-center">
                                                             <Col lg="12" md="12" sm="12" className="justify-content-center align-content-center">
@@ -283,7 +284,7 @@ export default class LandingPage extends React.Component {
                                     </Col>
                                         <Col lg="2" mm="12" sm="12" className="align-content-center justify-content-center mx-3 my-2">
                                             <Row className="justify-content-center align-content-center mx-auto">
-                                                <Card style={{ backgroundColor: "#1F2820", width: "20em" }}>
+                                                <Card className="card-shadow" style={{ backgroundColor: "#1F2820", width: "20em" }}>
                                                     <CardBody>
                                                         <Row className="justify-content-center align-content-center">
                                                             <Col lg="12" md="12" sm="12" className="justify-content-center align-content-center">
@@ -315,7 +316,7 @@ export default class LandingPage extends React.Component {
                                     </Col>
                                         <Col lg="2" md="12" sm="12" className="align-content-center justify-content-center mx-3 my-2">
                                             <Row className="justify-content-center align-content-center mx-auto">
-                                                <Card style={{ backgroundColor: "#1F2820", width: "20em" }}>
+                                                <Card className="card-shadow" style={{ backgroundColor: "#1F2820", width: "20em" }}>
                                                     <CardBody>
                                                         <Row className="justify-content-center align-content-center">
                                                             <Col lg="12" md="12" sm="12" className="justify-content-center align-content-center">
@@ -353,7 +354,7 @@ export default class LandingPage extends React.Component {
                         <Col lg="12" md="12" sm="12" className="align-content-start justify-content-start py-4">
                             <Row className="align-content-start justify-content-start">
                                 <Col lg="2" md="2" sm="2" className="align-content-start justify-content-start">
-                                    <img className="img-fluid ml-5 w-50" alt="Powered By" src={require("../images/foot.svg")} />
+                                    <img className="img-fluid ml-5" style={{width:"100px"}} alt="Powered By" src={require("../images/foot.svg")} />
                                 </Col>
                                 <Col lg="2" md="2" sm="2" className="align-content-start justify-content-start">
                                     <span style={{color:"#ffffff", fontFamily:"PT Sans", fontStyle:"normal", fontWeight:"normal", fontSize:"0.8em"}}>Follow Us</span>
