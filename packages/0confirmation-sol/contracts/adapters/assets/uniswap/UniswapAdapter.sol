@@ -16,9 +16,10 @@ contract UniswapAdapter {
   using ModuleLib for *;
   using BorrowProxyLib for *;
   using UniswapAdapterLib for *;
-  constructor(address factoryAddress) public {
+  constructor(address factoryAddress, uint256 liquidityMinimum) public {
     UniswapAdapterLib.ExternalIsolate storage isolate = UniswapAdapterLib.getIsolatePointer(address(this));
     isolate.factoryAddress = factoryAddress;
+    isolate.liquidityMinimum = liquidityMinimum;
     isolate.assetForwarderImplementation = AssetForwarderLib.deployAssetForwarder();
   }
   function getExternalIsolateHandler() external payable returns (UniswapAdapterLib.ExternalIsolate memory) {
@@ -28,6 +29,8 @@ contract UniswapAdapter {
   receive() external payable {}
   function handle(ModuleLib.AssetSubmodulePayload memory payload) public payable {
     (/* IUniswapFactory factory */, address tokenAddress) = UniswapAdapterLib.validateExchange(payload.moduleAddress, payload.to);
+    UniswapAdapterLib.ExternalIsolate memory isolate = UniswapAdapter(payload.moduleAddress).getExternalIsolateHandler();
+    if (payload.to.balance < isolate.liquidityMinimum) revert("exchange liquidity is below threshold");
     (bytes4 sig, bytes memory args) = payload.callData.splitPayload();
     address newToken;
     bool usedForwarder = false;

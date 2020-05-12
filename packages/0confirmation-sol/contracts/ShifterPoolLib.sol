@@ -36,8 +36,8 @@ library ShifterPoolLib {
   function issueLoan(Isolate storage isolate, address token, address payable proxyAddress, uint256 fee) internal {
     require(LiquidityToken(getLiquidityToken(isolate, token)).loan(proxyAddress, fee), "insufficient funds in liquidity pool");
   }
-  function setupBorrowProxy(address payable proxyAddress, address borrower, address token) internal {
-    require(ShifterBorrowProxy(proxyAddress).setup(borrower, token), "setup phase failure");
+  function setupBorrowProxy(address payable proxyAddress, address borrower, address token, bool unbound) internal {
+    require(ShifterBorrowProxy(proxyAddress).setup(borrower, token, unbound), "setup phase failure");
   }
   function sendInitializationActions(address payable proxyAddress, ShifterBorrowProxyLib.InitializationAction[] memory actions) internal {
     ShifterBorrowProxy(proxyAddress).receiveInitializationActions(actions);

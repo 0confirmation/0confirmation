@@ -84,18 +84,26 @@ library ShifterBorrowProxyLib {
   function validateSignature(LiquidityRequestParcel memory parcel, bytes32 hash) internal pure returns (bool) {
     return parcel.request.borrower == ECDSA.recover(ECDSA.toEthSignedMessageHash(hash), parcel.signature);
   }
-  struct TriggerParcel {
-    ProxyRecord record;
+  struct ShiftParameters {
     bytes32 txhash;
     uint256 vout;
     bytes32 pHash;
     bytes darknodeSignature;
   }
+  struct TriggerParcel {
+    ProxyRecord record;
+    ShiftParameters shiftParameters;
+  }
+  struct SansBorrowShiftParcel {
+    LiquidityRequestParcel liquidityRequestParcel;
+    ShiftParameters shiftParameters;
+    InitializationAction[] actions;
+  }
   function decodeTriggerParcel(bytes memory parcel) internal pure returns (TriggerParcel memory result) {
     (result) = abi.decode(parcel, (TriggerParcel));
   }
   function encodeNPreimage(TriggerParcel memory parcel) internal pure returns (bytes memory result) {
-    result = abi.encodePacked(parcel.record.request.nonce, parcel.txhash, parcel.vout);
+    result = abi.encodePacked(parcel.record.request.nonce, parcel.shiftParameters.txhash, parcel.shiftParameters.vout);
   }
   function computeNHash(TriggerParcel memory parcel) internal pure returns (bytes32) {
     return keccak256(encodeNPreimage(parcel));

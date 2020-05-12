@@ -22,6 +22,7 @@ contract ShifterBorrowProxy is BorrowProxy, SafeViewExecutor, NullCloneConstruct
   uint256 constant MINIMUM_GAS_CONTINUE = 5e5;
   function repayLoan(bytes memory data) public returns (bool) {
     (ShifterBorrowProxyLib.TriggerParcel memory parcel) = data.decodeTriggerParcel();
+    parcel.record.request.actions = new ShifterBorrowProxyLib.InitializationAction[](0);
     require(validateProxyRecord(parcel.record.encodeProxyRecord()), "proxy record invalid");
     require(!isolate.isLiquidating, "proxy is being liquidated");
     uint256 fee = parcel.record.computeAdjustedKeeperFee(parcel.record.request.amount);
@@ -29,7 +30,7 @@ contract ShifterBorrowProxy is BorrowProxy, SafeViewExecutor, NullCloneConstruct
     uint256 amount;
     if (!isolate.isRepaying) {
       isolate.isRepaying = true;
-      isolate.actualizedShift = amount = ShifterPool(isolate.masterAddress).getShifterHandler(parcel.record.request.token).mint(parcel.pHash, parcel.record.request.amount, parcel.computeNHash(), parcel.darknodeSignature);
+      isolate.actualizedShift = amount = ShifterPool(isolate.masterAddress).getShifterHandler(parcel.record.request.token).mint(parcel.shiftParameters.pHash, parcel.record.request.amount, parcel.computeNHash(), parcel.shiftParameters.darknodeSignature);
       require(parcel.record.request.token.sendToken(address(liquidityToken), amount - fee), "token transfer failed");
     } else amount = isolate.actualizedShift;
     address[] memory set = isolate.repaymentSet.set;
@@ -79,9 +80,7 @@ contract ShifterBorrowProxy is BorrowProxy, SafeViewExecutor, NullCloneConstruct
   }
   function receiveInitializationActions(ShifterBorrowProxyLib.InitializationAction[] memory actions) public {
     require(msg.sender == address(isolate.masterAddress), "must be called from shifter pool");
-    SandboxLib.ProtectedExecution[] memory trace = actions.processActions();
-//    require(trace.length >= 0);
-//    ShifterBorrowProxyLib.emitBorrowProxyInitialization(address(this), trace);
+    actions.processActions();
   }
   fallback() external payable override {}
   receive() external payable override {}

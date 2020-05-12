@@ -39,8 +39,6 @@ const getAddress = (artifact, network_id) => {
 const NO_SUBMODULE = '0x' + Array(40).fill('0').join('');
 
 module.exports = async function(deployer) {
-  console.log('woop');
-  console.log(deployer.network);
   await deployer.deploy(Migrations);
   await deployer.deploy(ShifterBorrowProxyFactoryLib);
   await deployer.link(ShifterBorrowProxyFactoryLib, ShifterPool);
@@ -84,7 +82,7 @@ module.exports = async function(deployer) {
   await curveToken.set_minter(curve.address);
   const shifterPool = await ShifterPool.deployed();
   await deployer.deploy(CurveAdapter, getAddress(Curvefi, deployer.network_id));
-  await deployer.deploy(UniswapAdapter, factory.address);
+  await deployer.deploy(UniswapAdapter, factory.address, (deployer.network === 'test' || deployer.network === 'ganache' || deployer.network === 'kovan') ? ethers.utils.parseEther('1').toString() : ethers.utils.parseEther('100').toString());
   const erc20Adapter = await ERC20Adapter.deployed();
   await deployer.deploy(SimpleBurnLiquidationModule, factory.address, erc20Adapter.address);
   await deployer.deploy(LiquidityToken, shifterPool.address, renbtc.address, 'zeroBTC', 'zeroBTC', 8);
@@ -94,7 +92,6 @@ module.exports = async function(deployer) {
   const curveAdapter = await CurveAdapter.deployed();
   const simpleBurnLiquidationModule = await SimpleBurnLiquidationModule.deployed();
   await shifterPool.deployBorrowProxyImplementation();
-  console.log('weee');
   await shifterPool.setup(shifterRegistry.address, '1000', ethers.utils.parseEther('0.01'), [{
     moduleType: ModuleTypes.BY_ADDRESS,
     target: renbtc.address,
@@ -142,7 +139,6 @@ module.exports = async function(deployer) {
   }]);
   // setup uni and the liquidity pool with some liqudity
   if (deployer.network === 'test' || deployer.network === 'ganache') {
-    console.log('woop');
     const amount = ethers.utils.bigNumberify('0xffffffffffffffffffffffffffffffffffffffff');
     const provider = new ethers.providers.Web3Provider(dai.contract.currentProvider);
     const [ truffleAddress ] = await provider.send('eth_accounts', []);
@@ -163,6 +159,5 @@ module.exports = async function(deployer) {
     zero.network.shifterPool = shifterPool.address;
     await (await zero.approveLiquidityToken(renbtc.address)).wait();
     await (await zero.addLiquidity(renbtc.address, ethers.utils.parseUnits('5', 8).toString())).wait();
-    console.log('yep');
   }
 };
