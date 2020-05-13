@@ -30,7 +30,6 @@ class BorrowProxy extends makeManagerClass(ShifterBorrowProxy) {
   }) {
     super(proxyAddress, zero.getProvider().asEthers().getSigner());
     this.transactionHash = transactionHash;
-    console.log(this.transactionHash);
     this.zero = zero;
     this.shifterPool = shifterPool; 
     this.borrowProxyLib = borrowProxyLib;
@@ -67,10 +66,12 @@ class BorrowProxy extends makeManagerClass(ShifterBorrowProxy) {
     const record = this.decodedRecord;
     return await super.repayLoan(encodeTriggerParcel({
       record,
-      pHash: constants.CONST_PHASH,
-      vout: deposited.utxo.vOut,
-      txhash: deposited.utxo.txHash,
-      darknodeSignature
+      shiftParameters: {
+        pHash: constants.CONST_PHASH,
+        vout: deposited.utxo.vOut,
+        txhash: deposited.utxo.txHash,
+        darknodeSignature
+      }
     }), overrides || {});
   }
   async defaultLoan(overrides) {

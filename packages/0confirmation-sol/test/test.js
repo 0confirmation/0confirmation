@@ -203,7 +203,6 @@ contract('ShifterPool', () => {
     const proxy = await deferred.promise;
     await (await proxy.repayLoan({ gasLimit: ethers.utils.hexlify(6e6) })).wait();
     const daiWrapped = new ethers.Contract(fixtures.DAI.address, fixtures.DAI.abi, fixtures.borrower.getProvider().asEthers());
-    console.log(await daiWrapped.balanceOf(borrowerAddress));
     //console.log(await proxy.queryTransfers());
     await fixtures.keeper.stopListeningForLiquidityRequests();
   });

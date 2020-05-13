@@ -18,6 +18,7 @@ library UniswapAdapterLib {
   struct ExternalIsolate {
     address factoryAddress;
     address assetForwarderImplementation;
+    uint256 liquidityMinimum;
   }
   struct TokenToTokenSwapInputInputs {
     uint256 tokens_sold;

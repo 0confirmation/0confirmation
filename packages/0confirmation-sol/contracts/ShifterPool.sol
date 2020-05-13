@@ -51,6 +51,7 @@ contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
     created = address(uint160(FactoryLib.create2Clone(isolate.borrowProxyImplementation, uint256(salt))));
   }
   function _executeBorrow(ShifterBorrowProxyLib.LiquidityRequestParcel memory liquidityRequestParcel, uint256 bond, uint256 timeoutExpiry) internal returns (bytes32 borrowerSalt) {
+    require(liquidityRequestParcel.request.forbidLoan == false, "is not a loan request, try using executeShiftSansBorrow");
     require(
       liquidityRequestParcel.gasRequested == msg.value,
       "supplied ether is not equal to gas requested"
@@ -65,6 +66,7 @@ contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
     borrowerSalt = liquidityRequest.computeBorrowerSalt();
     address payable proxyAddress = address(uint160(isolate.borrowProxyImplementation.deriveBorrowerAddress(borrowerSalt)));
     require(!isolate.borrowProxyController.isInitialized(proxyAddress), "proxy has already been initialized");
+    liquidityRequest.actions = new ShifterBorrowProxyLib.InitializationAction[](0);
     ShifterBorrowProxyLib.ProxyRecord memory proxyRecord = ShifterBorrowProxyLib.ProxyRecord({
       request: liquidityRequest,
       loan: ShifterBorrowProxyLib.LenderRecord(
@@ -78,10 +80,52 @@ contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
     return borrowerSalt;
   }
   function executeBorrow(ShifterBorrowProxyLib.LiquidityRequestParcel memory liquidityRequestParcel, uint256 bond, uint256 timeoutExpiry) public payable {
+    ShifterBorrowProxyLib.InitializationAction[] memory actions = liquidityRequestParcel.request.actions;
     bytes32 salt = _executeBorrow(liquidityRequestParcel, bond, timeoutExpiry);
     address payable proxyAddress = deployBorrowProxyClone(salt);
-    proxyAddress.setupBorrowProxy(liquidityRequestParcel.request.borrower, liquidityRequestParcel.request.token);
-    proxyAddress.sendInitializationActions(liquidityRequestParcel.request.actions);
+    proxyAddress.setupBorrowProxy(liquidityRequestParcel.request.borrower, liquidityRequestParcel.request.token, false);
+    proxyAddress.sendInitializationActions(actions);
+  }
+  function executeShiftSansBorrow(ShifterBorrowProxyLib.SansBorrowShiftParcel memory parcel) public payable {
+    (address payable proxyAddress, ShifterBorrowProxyLib.InitializationAction[] memory actions) = _executeShiftSansBorrow(parcel);
+    if (actions.length != 0) proxyAddress.sendInitializationActions(actions);
+  }
+  function _executeShiftSansBorrow(ShifterBorrowProxyLib.SansBorrowShiftParcel memory parcel) internal returns (address payable proxyAddress, ShifterBorrowProxyLib.InitializationAction[] memory actions) {
+    ShifterBorrowProxyLib.TriggerParcel memory triggerParcel = ShifterBorrowProxyLib.TriggerParcel({
+      record: ShifterBorrowProxyLib.ProxyRecord({
+        request: parcel.liquidityRequestParcel.request,
+        loan: ShifterBorrowProxyLib.LenderRecord({
+          keeper: msg.sender,
+          params: isolate.computeLoanParams(parcel.liquidityRequestParcel.request.amount, parcel.liquidityRequestParcel.request.amount / 10, 1000)
+        })
+      }),
+      shiftParameters: ShifterBorrowProxyLib.ShiftParameters({
+        txhash: parcel.shiftParameters.txhash,
+        vout: parcel.shiftParameters.vout,
+        pHash: parcel.shiftParameters.pHash,
+        darknodeSignature: parcel.shiftParameters.darknodeSignature
+      })
+    });
+    require(
+      parcel.liquidityRequestParcel.validateSignature(
+        parcel.liquidityRequestParcel.computeLiquidityRequestHash()
+      ),
+      "liquidity request signature rejected"
+    );
+    bytes32 borrowerSalt = parcel.liquidityRequestParcel.request.computeBorrowerSalt();
+    proxyAddress = address(uint160(isolate.borrowProxyImplementation.deriveBorrowerAddress(borrowerSalt)));
+    require(!isolate.borrowProxyController.isInitialized(proxyAddress), "proxy has already been initialized");
+    isolate.borrowProxyController.mapProxyRecord(proxyAddress, abi.encodePacked(uint256(1)));
+    isolate.getShifter(parcel.liquidityRequestParcel.request.token).mint(parcel.shiftParameters.pHash, parcel.liquidityRequestParcel.request.amount, triggerParcel.computeNHash(), parcel.shiftParameters.darknodeSignature);
+    uint256 fee = triggerParcel.record.computeAdjustedKeeperFee(parcel.liquidityRequestParcel.request.amount);
+    deployBorrowProxyClone(borrowerSalt);
+    proxyAddress.setupBorrowProxy(parcel.liquidityRequestParcel.request.borrower, parcel.liquidityRequestParcel.request.token, true);
+    if (parcel.liquidityRequestParcel.request.borrower != msg.sender && msg.value == parcel.liquidityRequestParcel.gasRequested) {
+      parcel.liquidityRequestParcel.request.borrower.transfer(msg.value);
+      require(parcel.liquidityRequestParcel.request.token.sendToken(msg.sender, fee), "keeper payout failed");
+      actions = parcel.liquidityRequestParcel.request.actions;
+    } else if (parcel.liquidityRequestParcel.request.borrower == msg.sender) actions = parcel.actions;
+    else revert("incorrect gas supplied with gas requested");
   }
   function validateProxyRecordHandler(bytes memory proxyRecord) public view returns (bool) {
     return isolate.borrowProxyController.validateProxyRecord(msg.sender, proxyRecord);
