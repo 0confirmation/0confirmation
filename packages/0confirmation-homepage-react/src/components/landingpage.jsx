@@ -46,11 +46,11 @@ export default class LandingPage extends React.Component {
                                 </Col>
                                 <Col lg="6" md="12" sm="12" className="justify-content-center align-content-center">
                                     <Row className="justify-content-center align-content-center">
-                                        <Col lg="6" md="6" sm="6" className="justify-content-center align-content-center my-4">
-                                            <Row className="justify-content-center align-content-center mx-auto">
-                                                <Card className="card-shadow" style={{ backgroundColor: "#1F2820", height:"15em", width:"250em" }}>
+                                        <Col lg="6" md="6" sm="6" className="my-4">
+                                            <Row className="mx-auto" style={{height:"100%"}}>
+                                                <Card className="card-shadow" style={{ backgroundColor: "#1F2820", width:"250em" }}>
                                                     <CardBody>
-                                                        <Row className="justify-content-center align-content-center">
+                                                        <Row>
                                                             <Col lg="12" md="12" sm="12" className="justify-content-center align-content-center">
                                                                 <Row className="justify-content-center align-content-center">
                                                                     <Col lg="6" md="6" sm="6" className="mx-auto justify-content-center align-content-center my-2">
@@ -59,16 +59,10 @@ export default class LandingPage extends React.Component {
                                                                         </Row>
                                                                     </Col>
                                                                     <Col lg="12" md="12" sm="12" className="text-center">
-                                                                        <p className="mt-auto mb-auto pt-2 pb-2" style={{
-                                                                            fontSize: "24px", color: "#ffffff",
-                                                                            fontFamily: "PT Sans", fontStyle: "normal", fontWeight: "bold"
-                                                                        }}>SPEED</p>
+                                                                        <p className="mt-auto mb-auto pt-2 pb-2 header-text">Speed</p>
                                                                     </Col>
                                                                     <Col lg="12" md="12" sm="12">
-                                                                        <p className="pb-3" style={{
-                                                                            fontSize: "18px", color: "#ffffff", lineHeight: "1",
-                                                                            fontFamily: "PT Sans", fontStyle: "normal", fontWeight: "normal", textAlign: "center"
-                                                                        }}>
+                                                                        <p className="pb-3 sub-header-text">
                                                                             Access your non-ETH based assets on DeFi nearly instantly
                                                                             </p>
                                                                     </Col>
@@ -79,9 +73,9 @@ export default class LandingPage extends React.Component {
                                                 </Card>
                                             </Row>
                                         </Col>
-                                        <Col lg="6" md="6" sm="6" className="justify-content-center align-content-center my-4">
-                                            <Row className="justify-content-center align-content-center mx-auto">
-                                                <Card className="card-shadow" style={{ backgroundColor: "#1F2820", height:"15em", width:"250em" }}>
+                                        <Col lg="6" md="6" sm="6" className="my-4">
+                                            <Row className="mx-auto" style={{height:"100%"}}>
+                                                <Card className="card-shadow" style={{ backgroundColor: "#1F2820", width:"250em" }}>
                                                     <CardBody>
                                                         <Row className="justify-content-center align-content-center">
                                                             <Col lg="12" md="12" sm="12" className="justify-content-center align-content-center">
@@ -92,16 +86,10 @@ export default class LandingPage extends React.Component {
                                                                         </Row>
                                                                     </Col>
                                                                     <Col lg="12" md="12" sm="12" className="text-center">
-                                                                        <p className="mt-auto mb-auto pt-2 pb-2" style={{
-                                                                            fontSize: "24px", color: "#ffffff",
-                                                                            fontFamily: "PT Sans", fontStyle: "normal", fontWeight: "bold"
-                                                                        }}>DECENTRALIZATION</p>
+                                                                        <p className="mt-auto mb-auto pt-2 pb-2 header-text">Decentralization</p>
                                                                     </Col>
-                                                                    <Col lg="12" md="12" sm="12">
-                                                                        <p className="pb-3" style={{
-                                                                            fontSize: "18px", color: "#ffffff", lineHeight: "1",
-                                                                            fontFamily: "PT Sans", fontStyle: "normal", fontWeight: "normal", textAlign: "center"
-                                                                        }}>
+                                                                    <Col className="mb-3" lg="12" md="12" sm="12">
+                                                                        <p className="sub-header-text">
                                                                             Third parties will not control your assets while they are being transferred to their end destination
                                                                             </p>
                                                                     </Col>
@@ -115,8 +103,8 @@ export default class LandingPage extends React.Component {
                                     </Row>
                                     <Row className="justify-content-center align-content-center">
                                         <Col lg="6" md="6" sm="6" className="justify-content-center align-content-center my-4">
-                                            <Row className="justify-content-center align-content-center mx-auto">
-                                                <Card className="card-shadow" style={{ backgroundColor: "#1F2820", height:"15em", width:"250em" }}>
+                                        <Row className="mx-auto" style={{height:"100%"}}>
+                                                <Card className="card-shadow" style={{ backgroundColor: "#1F2820", width:"250em" }}>
                                                     <CardBody>
                                                         <Row className="justify-content-center align-content-center">
                                                             <Col lg="12" md="12" sm="12" className="justify-content-center align-content-center">
@@ -127,18 +115,12 @@ export default class LandingPage extends React.Component {
                                                                         </Row>
                                                                     </Col>
                                                                     <Col lg="12" md="12" sm="12" className="text-center">
-                                                                        <p className="mt-auto mb-auto pt-2 pb-2" style={{
-                                                                            fontSize: "24px", color: "#ffffff",
-                                                                            fontFamily: "PT Sans", fontStyle: "normal", fontWeight: "bold"
-                                                                        }}>PRICE LOCK</p>
+                                                                        <p className="mt-auto mb-auto pt-2 pb-2 header-text">Price Lock</p>
                                                                     </Col>
                                                                     <Col lg="12" md="12" sm="12">
-                                                                        <p className="pb-3" style={{
-                                                                            fontSize: "18px", color: "#ffffff", lineHeight: "1",
-                                                                            fontFamily: "PT Sans", fontStyle: "normal", fontWeight: "normal", textAlign: "center"
-                                                                        }}>
+                                                                        <p className="pb-3 sub-header-text">
                                                                             0cf will lock in your price at time of execution, providing access to DeFi with no slippage
-                                                                            </p>
+                                                                        </p>
                                                                     </Col>
                                                                 </Row>
                                                             </Col>
@@ -149,7 +131,7 @@ export default class LandingPage extends React.Component {
                                         </Col>
                                         <Col lg="6" md="6" sm="6" className="justify-content-center align-content-center my-4">
                                             <Row className="justify-content-center align-content-center mx-auto">
-                                                <Card className="card-shadow" style={{ backgroundColor: "#1F2820", height:"15em", width:"250em" }}>
+                                                <Card className="card-shadow" style={{ flex:"flex-grow", backgroundColor: "#1F2820", minHeight:"15em", width:"250em" }}>
                                                     <CardBody>
                                                         <Row className="justify-content-center align-content-center">
                                                             <Col lg="12" md="12" sm="12" className="justify-content-center align-content-center">
@@ -160,18 +142,12 @@ export default class LandingPage extends React.Component {
                                                                         </Row>
                                                                     </Col>
                                                                     <Col lg="12" md="12" sm="12" className="text-center">
-                                                                        <p className="mt-auto mb-auto pt-2 pb-2" style={{
-                                                                            fontSize: "24px", color: "#ffffff",
-                                                                            fontFamily: "PT Sans", fontStyle: "normal", fontWeight: "bold"
-                                                                        }}>SPEED</p>
+                                                                        <p className="mt-auto mb-auto pt-2 pb-2 header-text">Income</p>
                                                                     </Col>
                                                                     <Col lg="12" md="12" sm="12">
-                                                                        <p className="pb-3" style={{
-                                                                            fontSize: "18px", color: "#ffffff", lineHeight: "1",
-                                                                            fontFamily: "PT Sans", fontStyle: "normal", fontWeight: "normal", textAlign: "center"
-                                                                        }}>
+                                                                        <p className="pb-3 sub-header-text">
                                                                             Add liquidity to the 0cf pool and earn income from short term loan interest
-                                                                            </p>
+                                                                        </p>
                                                                     </Col>
                                                                 </Row>
                                                             </Col>
@@ -187,18 +163,27 @@ export default class LandingPage extends React.Component {
                         </Col>
                     </Row>
                     <Row className="bg-light justify-content-center align-content-center text-center py-5 px-3">
-                        <Col lg="12" md="12" sm="12" className="bg-light justify-content-center align-content-center text-center">
-                            <Row className="bg-light py-4 justify-content-center align-content-center text-center">
-                                <h6 style={{ color: "#212529", fontFamily:"Open Sans", fontWeight:"800", fontSize:"42px", letterSpacing:"1.2px"}}><b>Where Can I Use 0cf?</b></h6>
+                        <Col lg="12" md="12" sm="12" className="justify-content-center align-content-center text-center" style={{backgroundColor:"rgb(249, 250, 251)"}}>
+                            <Row className="bg-light justify-content-center align-content-center text-center">
+                                <h6 className="header-text" style={{ color: "#212529", fontSize:"42px", paddingTop:"40px"}}><b>Where Can I Use 0cf?</b></h6>
                             </Row>
                         </Col>
                         <Col lg="12" md="12" sm="12" className="bg-light justify-content-center align-content-center text-center">
                             <Row className="bg-light justify-content-center align-content-center text-center py-4">
-                                <Col lg="2" md="4" sm="8" className="align-content-center justify-content-center px-3">
-                                    <img className="img-fluid" alt="UNISWAP" width="250em" src={require("../images/uniswap.svg")}/>
+                                <Col lg="3" md="4" sm="8" className="py-5">
+                                    <Card className="card-shadow py-5">
+                                        <CardBody>
+                                            <img className="img-fluid" alt="UNISWAP" width="250em" src={require("../images/uniswap.svg")}/>
+                                        </CardBody>
+                                    </Card>
                                 </Col>
-                                <Col lg="2" md="4" sm="8" className="align-content-center justify-content-center px-3 py-2">
-                                    <img className="img-fluid" width="250em" alt="CURVE" src={require("../images/curve.svg")}/>
+                                <Col lg="3" md="4" sm="8" className="py-5">
+                                <Card className="card-shadow py-5" style={{height:"100%"}}>
+                                        <CardBody className="justify-content-center align-content-center" style={{display:"flex"}}>
+                                            <img className="img-fluid" width="250em" style={{alignItems:"center", display:"inline-block"}} alt="CURVE" src={require("../images/curve.svg")}/>
+                                        </CardBody>
+                                    </Card>
+                                    
                                 </Col>
                             </Row>
                         </Col>
@@ -213,32 +198,26 @@ export default class LandingPage extends React.Component {
                             <Row className="justify-content-center align-content-center text-center py-5 px-3">
                                 <Col lg="12" md="12" sm="12" className="justify-content-center align-content-center text-center">
                                     <Row className="justify-content-center align-content-center text-center">
-                                        <h6 style={{ color: "#ffffff", fontFamily:"Open Sans", fontWeight:"800", fontSize:"42px", letterSpacing:"1.2px"}}><b>Usage Statistics</b></h6>
+                                        <h6 className="header-text" style={{fontSize: "42px", paddingTop: "40px", paddingBottom: "40px"}}><b>Usage Statistics</b></h6>
                                     </Row>
                                 </Col>
                                 <Col lg="12" md="12" sm="12" className="justify-content-center align-content-center text-center">
                                     <Row className="justify-content-center align-content-center text-center py-4">
                                         <Col lg="2" md="12" sm="12" className="align-content-center justify-content-center mx-3 my-2">
                                             <Row className="justify-content-center align-content-center mx-auto">
-                                                <Card className="card-shadow" style={{ backgroundColor: "#1F2820",width:"20em" }}>
+                                                <Card className="card-shadow py-4" style={{ backgroundColor: "#1F2820",width:"20em" }}>
                                                     <CardBody>
                                                         <Row className="justify-content-center align-content-center">
                                                             <Col lg="12" md="12" sm="12" className="justify-content-center align-content-center">
                                                                 <Row className="justify-content-center align-content-center">
                                                                     <Col lg="12" md="12" sm="12" className="text-center">
-                                                                        <p style={{
-                                                                            fontSize: "15px", color: "#ffffff",
-                                                                            fontFamily: "PT Sans", fontStyle: "normal", fontWeight: "bold"
-                                                                        }}><span><b>Total Liquidity</b><span><i id="liquidity"><img alt="i" width="12px" className="img-fluid mb-3 ml-2" src={require("../images/info.svg")}/></i><Tooltip placement="top"
+                                                                        <p className="header-text">Total Liquidity<span><i id="liquidity"><img alt="i" width="12px" className="img-fluid mb-3 ml-2" src={require("../images/info.svg")}/></i><Tooltip placement="top"
                                                                             isOpen={this.state.tooltip1} target="liquidity" toggle={async (e) => await this.setState({ tooltip1: !this.state.tooltip1 })} >
                                                                                 info
-                                                                            </Tooltip></span></span></p>
+                                                                            </Tooltip></span></p>
                                                                     </Col>
                                                                     <Col lg="12" md="12" sm="12">
-                                                                        <b className="pb-3" style={{
-                                                                            fontSize: "20px", color: "#ffffff", 
-                                                                            fontFamily: "PT Sans", fontStyle: "normal", fontWeight: "normal", textAlign: "center"
-                                                                        }}>
+                                                                        <b className="pb-3 sub-header-text">
                                                                             450.392 BTC<br/>
                                                                             $4.05M
                                                                         </b>
@@ -252,25 +231,19 @@ export default class LandingPage extends React.Component {
                                         </Col>
                                         <Col lg="2" mm="12" sm="12" className="align-content-center justify-content-center mx-3 my-2">
                                             <Row className="justify-content-center align-content-center mx-auto">
-                                                <Card className="card-shadow" style={{ backgroundColor: "#1F2820", width: "20em" }}>
+                                                <Card className="card-shadow py-4" style={{ backgroundColor: "#1F2820", width: "20em" }}>
                                                     <CardBody>
                                                         <Row className="justify-content-center align-content-center">
                                                             <Col lg="12" md="12" sm="12" className="justify-content-center align-content-center">
                                                                 <Row className="justify-content-center align-content-center">
                                                                     <Col lg="12" md="12" sm="12" className="text-center">
-                                                                        <p style={{
-                                                                            fontSize: "15px", color: "#ffffff",
-                                                                            fontFamily: "PT Sans", fontStyle: "normal", fontWeight: "bold"
-                                                                        }}><b>BTC On Loan</b><span><i id="loan"><img alt="i" width="12px" className="img-fluid mb-3 ml-2" src={require("../images/info.svg")}/></i><Tooltip placement="top"
+                                                                        <p className="header-text">BTC On Loan<span><i id="loan"><img alt="i" width="12px" className="img-fluid mb-3 ml-2" src={require("../images/info.svg")}/></i><Tooltip placement="top"
                                                                             isOpen={this.state.tooltip2} target="loan" toggle={async (e) => await this.setState({ tooltip2: !this.state.tooltip2 })} >
                                                                                 info
                                                                             </Tooltip></span></p>
                                                                     </Col>
                                                                     <Col lg="12" md="12" sm="12">
-                                                                        <b className="pb-3" style={{
-                                                                            fontSize: "20px", color: "#ffffff", 
-                                                                            fontFamily: "PT Sans", fontStyle: "normal", fontWeight: "normal", textAlign: "center"
-                                                                        }}>
+                                                                        <b className="pb-3 sub-header-text">
                                                                             450.392 BTC<br/>
                                                                             $4.05M
                                                                         </b>
@@ -284,25 +257,19 @@ export default class LandingPage extends React.Component {
                                     </Col>
                                         <Col lg="2" mm="12" sm="12" className="align-content-center justify-content-center mx-3 my-2">
                                             <Row className="justify-content-center align-content-center mx-auto">
-                                                <Card className="card-shadow" style={{ backgroundColor: "#1F2820", width: "20em" }}>
+                                                <Card className="card-shadow py-4" style={{ backgroundColor: "#1F2820", width: "20em" }}>
                                                     <CardBody>
                                                         <Row className="justify-content-center align-content-center">
                                                             <Col lg="12" md="12" sm="12" className="justify-content-center align-content-center">
                                                                 <Row className="justify-content-center align-content-center">
                                                                     <Col lg="12" md="12" sm="12" className="text-center">
-                                                                        <p style={{
-                                                                            fontSize: "15px", color: "#ffffff",
-                                                                            fontFamily: "PT Sans", fontStyle: "normal", fontWeight: "bold"
-                                                                        }}><span><b>Idle BTC</b><span><i id="idle-btc"><img alt="i" width="12px" className="img-fluid mb-3 ml-2" src={require("../images/info.svg")}/></i><Tooltip placement="top"
+                                                                        <p className="header-text">Idle BTC<span><i id="idle-btc"><img alt="i" width="12px" className="img-fluid mb-3 ml-2" src={require("../images/info.svg")}/></i><Tooltip placement="top"
                                                                             isOpen={this.state.tooltip3} target="idle-btc" toggle={async (e) => await this.setState({ tooltip3: !this.state.tooltip3 })} >
                                                                                 info
-                                                                            </Tooltip></span></span></p>
+                                                                            </Tooltip></span></p>
                                                                     </Col>
                                                                     <Col lg="12" md="12" sm="12">
-                                                                        <b className="pb-3" style={{
-                                                                            fontSize: "20px", color: "#ffffff", 
-                                                                            fontFamily: "PT Sans", fontStyle: "normal", fontWeight: "normal", textAlign: "center"
-                                                                        }}>
+                                                                        <b className="pb-3 sub-header-text">
                                                                             450.392 BTC<br/>
                                                                             $4.05M
                                                                         </b>
@@ -316,25 +283,19 @@ export default class LandingPage extends React.Component {
                                     </Col>
                                         <Col lg="2" md="12" sm="12" className="align-content-center justify-content-center mx-3 my-2">
                                             <Row className="justify-content-center align-content-center mx-auto">
-                                                <Card className="card-shadow" style={{ backgroundColor: "#1F2820", width: "20em" }}>
+                                                <Card className="card-shadow py-4" style={{ backgroundColor: "#1F2820", width: "20em" }}>
                                                     <CardBody>
                                                         <Row className="justify-content-center align-content-center">
                                                             <Col lg="12" md="12" sm="12" className="justify-content-center align-content-center">
                                                                 <Row className="justify-content-center align-content-center">
                                                                     <Col lg="12" md="12" sm="12" className="text-center">
-                                                                        <p style={{
-                                                                            fontSize: "15px", color: "#ffffff",
-                                                                            fontFamily: "PT Sans", fontStyle: "normal", fontWeight: "bold"
-                                                                        }}><span><b>Total Returns</b><span><i id="returns"><img alt="i" width="12px" className="img-fluid mb-3 ml-2" src={require("../images/info.svg")}/></i><Tooltip placement="top"
+                                                                        <p className="header-text">Total Returns<span><i id="returns"><img alt="i" width="12px" className="img-fluid mb-3 ml-2" src={require("../images/info.svg")}/></i><Tooltip placement="top"
                                                                             isOpen={this.state.tooltip4} target="returns" toggle={async (e) => await this.setState({ tooltip4: !this.state.tooltip4 })} >
                                                                                 info
-                                                                            </Tooltip></span></span></p>
+                                                                            </Tooltip></span></p>
                                                                     </Col>
                                                                     <Col lg="12" md="12" sm="12">
-                                                                        <b className="pb-3" style={{
-                                                                            fontSize: "20px", color: "#ffffff", 
-                                                                            fontFamily: "PT Sans", fontStyle: "normal", fontWeight: "normal", textAlign: "center"
-                                                                        }}>
+                                                                        <b className="pb-3 sub-header-text">
                                                                             450.392 BTC<br/>
                                                                             $4.05M
                                                                         </b>
