@@ -320,10 +320,10 @@ export default class LandingPage extends React.Component {
                                 <Col lg="2" md="2" sm="2" className="align-content-start justify-content-start">
                                     <span style={{color:"#ffffff", fontFamily:"PT Sans", fontStyle:"normal", fontWeight:"normal", fontSize:"0.8em"}}>Follow Us</span>
                                     <Row className="align-content-start justify-content-start ml-1">
-                                        <FaMedium size={20} style={{cursor:"pointer"}} onClick={()=>{ window.open("https://medium.com");}} color="#317333" className="mr-2"/>
-                                        <FaRedditAlien size={20} style={{cursor:"pointer"}} onClick={()=>{ window.open("https://reddit.com");}} color="#317333" className="mr-2"/>
-                                        <FaTelegramPlane size={20} style={{cursor:"pointer"}} onClick={()=>{ window.open("https://telegram.com");}} color="#317333" className="mr-2"/>
-                                        <FaTwitter size={20} style={{cursor:"pointer"}} onClick={()=>{ window.open("https://twitter.com");}} color="#317333" className="mr-2"/>
+                                        <FaMedium size={20} style={{cursor:"pointer"}} onClick={()=>{ window.open("https://medium.com/0confirmation");}} color="#317333" className="mr-2"/>
+                                        {/* <FaRedditAlien size={20} style={{cursor:"pointer"}} onClick={()=>{ window.open("https://www.reddit.com/r/RenProject");}} color="#317333" className="mr-2"/> */}
+                                        <FaTelegramPlane size={20} style={{cursor:"pointer"}} onClick={()=>{ window.open("https://t.me/zeroconfirmation");}} color="#317333" className="mr-2"/>
+                                        <FaTwitter size={20} style={{cursor:"pointer"}} onClick={()=>{ window.open("https://twitter.com/0confirmation");}} color="#317333" className="mr-2"/>
                                     </Row>
                                 </Col>
                             </Row>

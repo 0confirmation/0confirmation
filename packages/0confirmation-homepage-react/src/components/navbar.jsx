@@ -82,21 +82,21 @@ export default class Navigation extends React.Component {
                         <NavbarBrand href="/"><img src={require("../images/0cf.svg")} alt="0cf"/></NavbarBrand>
                         <NavbarToggler onClick={async()=>await this.setState({isopen:!this.state.isopen})} />
                         <Nav className="ml-auto">
-                            <NavItem className="nav-button" style={{width:"75px", marginRight:"4px", marginLeft:"4px", textAlign:"center", outline:"none", textDecoration:"none", backgroundColor:(window.location.pathname.split("/")[2] === "doc")?"#1F2820":"" }}>
-                                <Link to="/" style={{color: "#ffffff",textDecoration:"none"}} className="mx-1">
-                                    Docs
-                                </Link>
-                            </NavItem>
-                            <NavItem className="nav-button" style={{width:"75px", marginRight:"4px", marginLeft:"4px", textAlign:"center", outline:"none", textDecoration:"none", backgroundColor:(window.location.pathname.split("/")[2] === "earn")?"#1F2820":"" }}>
-                                <Link to="/trade/earn" style={{color: "#ffffff",textDecoration:"none"}} className="mx-1">
-                                    Earn
-                                </Link>
-                            </NavItem>
-                            <NavItem className="nav-button" style={{width:"75px", marginRight:"4px", marginLeft:"4px", textAlign:"center", outline:"none", textDecoration:"none", backgroundColor:(window.location.pathname.split("/")[2] === "swap")?"#1F2820":"" }}>
-                                <Link to="/trade/swap" style={{color: "#ffffff",textDecoration:"none"}} className="mx-1">
+                            <Link to="/" style={{color: "#ffffff",textDecoration:"none"}} className="mx-1">
+                                <NavItem className="nav-button" style={{width:"75px", marginRight:"4px", marginLeft:"4px", textAlign:"center", outline:"none", textDecoration:"none", backgroundColor:(window.location.pathname.split("/")[2] === "doc")?"#1F2820":"" }}>
+                                         Docs
+                                </NavItem>
+                            </Link>
+                            <Link to="/trade/earn" style={{color: "#ffffff",textDecoration:"none"}} className="mx-1">
+                                <NavItem className="nav-button" style={{width:"75px", marginRight:"4px", marginLeft:"4px", textAlign:"center", outline:"none", textDecoration:"none", backgroundColor:(window.location.pathname.split("/")[2] === "earn")?"#1F2820":"" }}>
+                                        Earn
+                                </NavItem>
+                            </Link>
+                            <Link to="/trade/swap" style={{color: "#ffffff",textDecoration:"none"}} className="mx-1">
+                                <NavItem className="nav-button" style={{width:"75px", marginRight:"4px", marginLeft:"4px", textAlign:"center", outline:"none", textDecoration:"none", backgroundColor:(window.location.pathname.split("/")[2] === "swap")?"#1F2820":"" }}>
                                     Swap
-                                </Link>
-                            </NavItem>
+                                </NavItem>
+                            </Link>
                        </Nav>
                     </Navbar>}
                 </div>
