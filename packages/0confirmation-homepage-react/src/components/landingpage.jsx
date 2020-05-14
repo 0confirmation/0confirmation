@@ -63,8 +63,8 @@ export default class LandingPage extends React.Component {
                                                                     </Col>
                                                                     <Col lg="12" md="12" sm="12">
                                                                         <p className="pb-3 sub-header-text">
-                                                                            Access your non-ETH based assets on DeFi nearly instantly
-                                                                            </p>
+                                                                            Use your non-ethereum assets with the most popular DeFi protocols in a fraction of the time it takes to deposit on centralized platforms
+                                                                        </p>
                                                                     </Col>
                                                                 </Row>
                                                             </Col>
@@ -86,12 +86,12 @@ export default class LandingPage extends React.Component {
                                                                         </Row>
                                                                     </Col>
                                                                     <Col lg="12" md="12" sm="12" className="text-center">
-                                                                        <p className="mt-auto mb-auto pt-2 pb-2 header-text">Decentralization</p>
+                                                                        <p className="mt-auto mb-auto pt-2 pb-2 header-text">Non-Custodial</p>
                                                                     </Col>
                                                                     <Col className="mb-3" lg="12" md="12" sm="12">
                                                                         <p className="sub-header-text">
-                                                                            Third parties will not control your assets while they are being transferred to their end destination
-                                                                            </p>
+                                                                            Your keys, your coins.  You stay in control of your assets throughout the process. 
+                                                                        </p>
                                                                     </Col>
                                                                 </Row>
                                                             </Col>
@@ -119,7 +119,7 @@ export default class LandingPage extends React.Component {
                                                                     </Col>
                                                                     <Col lg="12" md="12" sm="12">
                                                                         <p className="pb-3 sub-header-text">
-                                                                            0cf will lock in your price at time of execution, providing access to DeFi with no slippage
+                                                                            Execute your trade at the price you want directly from your hardware wallet
                                                                         </p>
                                                                     </Col>
                                                                 </Row>
@@ -130,7 +130,7 @@ export default class LandingPage extends React.Component {
                                             </Row>
                                         </Col>
                                         <Col lg="6" md="6" sm="6" className="justify-content-center align-content-center my-4">
-                                            <Row className="justify-content-center align-content-center mx-auto">
+                                            <Row className="mx-auto" style={{height:"100%"}}>
                                                 <Card className="card-shadow" style={{ flex:"flex-grow", backgroundColor: "#1F2820", minHeight:"15em", width:"250em" }}>
                                                     <CardBody>
                                                         <Row className="justify-content-center align-content-center">
@@ -142,11 +142,11 @@ export default class LandingPage extends React.Component {
                                                                         </Row>
                                                                     </Col>
                                                                     <Col lg="12" md="12" sm="12" className="text-center">
-                                                                        <p className="mt-auto mb-auto pt-2 pb-2 header-text">Income</p>
+                                                                        <p className="mt-auto mb-auto pt-2 pb-2 header-text">Earn</p>
                                                                     </Col>
                                                                     <Col lg="12" md="12" sm="12">
                                                                         <p className="pb-3 sub-header-text">
-                                                                            Add liquidity to the 0cf pool and earn income from short term loan interest
+                                                                            Add liquidity to the 0cf pool and earn a return from the interest paid on short term loans
                                                                         </p>
                                                                     </Col>
                                                                 </Row>
@@ -317,7 +317,7 @@ export default class LandingPage extends React.Component {
                                 <Col lg="2" md="2" sm="2" className="align-content-start justify-content-start">
                                     <img className="img-fluid ml-5" style={{width:"100px"}} alt="Powered By" src={require("../images/foot.svg")} />
                                 </Col>
-                                <Col lg="2" md="2" sm="2" className="align-content-start justify-content-start">
+                                <Col lg="2" md="2" sm="2" className="social align-content-start justify-content-start">
                                     <span style={{color:"#ffffff", fontFamily:"PT Sans", fontStyle:"normal", fontWeight:"normal", fontSize:"0.8em"}}>Follow Us</span>
                                     <Row className="align-content-start justify-content-start ml-1">
                                         <FaMedium size={20} style={{cursor:"pointer"}} onClick={()=>{ window.open("https://medium.com/0confirmation");}} color="#317333" className="mr-2"/>
