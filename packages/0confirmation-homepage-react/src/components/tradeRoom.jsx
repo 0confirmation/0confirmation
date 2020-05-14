@@ -11,6 +11,7 @@ import {
 } from "reactstrap";
 import { Link } from "react-router-dom";
 import { FaAngleDown } from 'react-icons/fa';
+import { FaAngleUp } from 'react-icons/fa';
 import { InlineIcon } from '@iconify/react';
 import btcIcon from '@iconify/icons-cryptocurrency/btc';
 import daiIcon from '@iconify/icons-cryptocurrency/dai';
@@ -70,15 +71,16 @@ export default class TradeRoom extends React.Component {
         const closeBtn = <button className="btn" style={{ color: "#317333" }} onClick={ async ()=> await this.setState({modal:!this.state.modal})}>&times;</button>;
         return (
             <>
+                <div className="modal-bg" style={{display: this.state.modal ? "block": "none"}} />
                 <Modal
-                    style={{ overflowX: "hidden"}}
+                    style={{ zIndex: "1", overflowX: "hidden", backgroundColor: "transparent"}}
                     className="dmodal"
                     wrapClassName="dmodal"
                     modalClassName="dmodal"
                     backdropClassName="dmodal"
                     contentClassName="dmodal"                    centered isOpen={this.state.modal} 
                     toggle={async () => await this.setState({ modal: !this.state.modal })}>
-                    <ModalBody style={{ backgroundColor: "#1f2820" }} className="h-100" >
+                    <ModalBody style={{ backgroundColor: "#1f2820" }} className="h-100 card" >
                             <Row className="w-100 align-content-center justify-content-center my-3">
                                 <Col lg="10" sm="10" md="10" className="align-content-center justify-content-center text-center">
                                     <span style={{ fontSize: "1.7em", fontFamily:"PT Sans", fontWeight:"bolder" }}
@@ -86,7 +88,7 @@ export default class TradeRoom extends React.Component {
                                         Bitcoin Payment
                                 </span>
                                 </Col>
-                                <Col lg="1" sm="1" md="1">{closeBtn}</Col>
+                                <Col style={{marginTop: "-15px"}} lg="1" sm="1" md="1">{closeBtn}</Col>
                         </Row>
                         <Row className="w-100 align-content-center justify-content-center text-center text-light">
                             <Col lg="12" sm="12" md="12" style={{fontSize:"0.9em"}} className="align-content-center justify-content-center text-center text-light">
@@ -112,7 +114,7 @@ export default class TradeRoom extends React.Component {
                                 <Row style={{ border: "2px solid #317333", borderRadius: "10px" }}
                                     className="text-light mx-1 h-100 text-center align-content-center justify-content-center">
                                     <Col lg="12" md="12" sm="12" className="text-light text-center align-content-center justify-content-center">
-                                        <span style={{ fontSize: "0.7em" }}>To complete payment, send 0.1 BTC to the below address</span>
+                                        <span className="sub-header-text" style={{fontSize:"18px"}}>To complete payment, send 0.1 BTC to the below address</span>
                                     </Col>
                                     <Col lg="12" md="12" sm="12" className="text-light text-center align-content-center justify-content-center">
                                         <span className="mx-1" style={{
@@ -130,6 +132,11 @@ export default class TradeRoom extends React.Component {
                                                     // e.clipboardData.setData('text/plain', this.state.wallet);
                                                         navigator.clipboard.writeText(this.state.wallet);
                                                     this.setState({copied:true})
+                                                    setTimeout(() => {
+                                                            this.setState({copied:false})
+                                                        }, 
+                                                        2000
+                                                    )
                                                 }}
                                                 style={{ cursor: "pointer" }} className="img-fluid" src={require("../images/copy.svg")} alt="Copy" />}</span>
                                     </Col>
@@ -141,64 +148,60 @@ export default class TradeRoom extends React.Component {
                         </Row>
                         <Row className="align-content-center justify-content-center mt-4 mb-5 text-center text-light">
                             <Col lg="8" sm="8" md="8" style={{ fontSize: "0.9em" }} className="align-content-center justify-content-center">
-                                <button className="btn btn-block rounded-pill bg-danger text-center text-light">
+                                <button className="btn btn-block rounded-pill text-center text-light zcf-button-danger" >
                                     Payment Sent
                                 </button>
                             </Col>
                         </Row>
                         </ModalBody>
                 </Modal>
-                <div className="justify-content-center align-content-center pt-5" style={{overflowX:"hidden"}} >
+                <div className="justify-content-center align-content-center pt-5" style={{zIndex: "1", overflowX:"hidden"}} >
                     
                     <div className="justify-content-center align-content-center text-center mx-auto my-auto pb-4 pt-5">
-                        <button className="btn text-light button-small btn-sm" style={{ fontSize: "24dp", backgroundColor: "#317333", width: "248dp", borderRadius: "10px" }}>Connect Wallet</button>
+                        <button className="btn text-light button-small btn-sm py-2 px-4" style={{ fontSize: "24dp", backgroundColor: "#317333", width: "248dp", borderRadius: "10px" }}>Connect Wallet</button>
                     </div>
                     <Row className="justify-content-center align-content-center text-center mx-auto">
                         <Col lg="2" md="2" sm="6" className="justify-content-center align-content-center mx-auto w-50" style={{ backgroundColor: "#1F2820", borderRadius: "10px"}}>
                             <Row className="justify-content-center align-content-center p-1 text-light">
                                 <Col className="justify-content-center align-content-center py-1" lg="6" md="6" sm="6" style={{ borderRadius: (this.props.ismobile)? "0px":"13px",backgroundColor: (window.location.pathname.split("/")[2] === "swap") ? "#317333" : "" }}>
-                                    <Link to="/trade/swap" style={{ outline: "none", textDecoration: "none", color: "#ffffff" }} href="/#"
-
-                                    >Swap</Link>
+                                    <Link to="/trade/swap" className="py-1 pill-button" href="/#">Swap</Link>
                                 </Col>
                                 <Col className="justify-content-center align-content-center py-1" lg="6" md="6" sm="6" style={{ borderRadius: (this.props.ismobile)? "0px":"13px",backgroundColor: (window.location.pathname.split("/")[2] === "earn") ? "#317333" : "" }}>
-                                 <Link to="/trade/earn" style={{ outline: "none", textDecoration: "none", color: "#ffffff" }} href="/#"
-
-                                    >Earn</Link>
+                                    <Link to="/trade/earn" className="py-1 pill-button" href="/#">Earn</Link>
                                 </Col>
                             </Row>
                         </Col>
                     </Row>
                     <Row className="justify-content-center align-content-center text-center mx-auto my-1">
-                        {(window.location.pathname.split("/")[2] === "earn")?null:<Col lg="6" md="6" sm="6">
-                            <Link to="/" style={{ outline: "none", textDecoration: "none", borderBottom: "1px solid #317333", color: "#317333", fontSize:"0.8em", fontStyle:"normal", fontWeight:"bold" }} href="/#"
+                        {(window.location.pathname.split("/")[2] === "earn")?<Col style={{height: "24px"}} lg="6" md="6" sm="6"></Col>:<Col lg="6" md="6" sm="6">
+                            <Link to="/" style={{ height: "24px", outline: "none", textDecoration: "none", borderBottom: "1px solid #317333", color: "#317333", fontSize:"0.8em", fontStyle:"normal", fontWeight:"bold" }} href="/#"
 
                             >Recent Transactions</Link>
                         </Col>}
                     </Row>
                     <Row  className="justify-content-center align-content-center text-center">
-                        <Col lg="8" md="8" sm="8" style={{ backgroundColor:"#1F2820", borderRadius:"10px 10px 0px 0px", minHeight:"70vh"}} className="shadow-lg mx-4">
+                        <Col lg="8" md="8" sm="8" style={{ backgroundColor:"#1F2820", borderRadius:"10px 10px 0px 0px", minHeight:"70vh"}} className="card-shadow mx-4">
 
                             <Row className="justify-content-center align-content-center text-center mx-auto mt-3">
                                 {(window.location.pathname.split("/")[2] === "earn") ?
                                     <Col lg="6" md="6" sm="6">
-                                        <p style={{ fontWeight: "bold", fontStyle: "normal", fontSize: "2em", fontFamily: "PT Sans", color: "#ffffff" }}>0cf Earn</p>
+                                        <p className="header-text"  style={{fontSize:"42px"}}>0cf Earn</p>
                                     </Col>
                                     :
                                     <Col lg="6" md="6" sm="6">
-                                    <p style={{fontWeight:"bold", fontStyle:"normal", fontSize:"2em", fontFamily:"PT Sans", color:"#ffffff"}}>0cf Swap</p>
+                                    <p className="header-text" style={{fontSize:"42px"}}>0cf Swap</p>
                                 </Col>}
                             </Row>
                             <Row className="justify-content-center align-content-center text-center mx-auto">
                                 {(window.location.pathname.split("/")[2] === "earn") ?
                                     <Col lg="12" md="12" sm="12">
-                                        <p style={{ fontWeight: "normal", fontStyle: "normal", fontSize: "0.8em", fontFamily: "PT Sans", color: "#ffffff" }}>
+                                        <p className="sub-header-text">
                                             Add BTC to the 0cf pool to gain interest on short term liquidity loans
                                     </p>
                                     </Col>
                                     :
                                     <Col lg="12" md="12" sm="12">
-                                    <p style={{ fontWeight: "normal", fontStyle: "normal", fontSize: "0.8em", fontFamily: "PT Sans", color: "#ffffff" }}>
+                                    <p className="sub-header-text">
                                         Instantly Swap BTC for ETH assets using decentralized exchanges
                                     </p>
                                 </Col>}
@@ -209,10 +212,9 @@ export default class TradeRoom extends React.Component {
                                     <InputGroup style={{height:"52px"}}> 
                                         <Input type="text"
                                         value={this.state.sendvalue} onChange={event => this.setState({sendvalue: event.target.value.replace(/\D/,'')})}
-                                        className="sendcoin h-100" style={{backgroundColor:"#354737",
-                                        borderRadius:"8px 0px 0px 8px", color:"#ffffff", border:"none", outline:"none"}} />
-                                        <InputGroupButtonDropdown style={{backgroundColor:"#354737",borderRadius:"0px 8px 8px 0px", color:"#ffffff"}} direction="right" setActiveFromChild={true} addonType="append" isOpen={this.state.sendOpen} toggle={async (e) => await this.setState({ sendOpen: !this.state.sendOpen})}>
-                                            <DropdownToggle style={{backgroundColor:"#485F4B", borderRadius:"0px 8px 8px 0px", color:"#ffffff", border:"none", outline:"none"}}>
+                                        className="sendcoin h-100 swap-input-text"/>
+                                        <InputGroupButtonDropdown className="force-z" style={{ backgroundColor:"#354737", borderRadius:"0px 8px 8px 0px", color:"#ffffff" }} direction="right" setActiveFromChild={true} addonType="append" isOpen={this.state.sendOpen} toggle={async (e) => await this.setState({ sendOpen: !this.state.sendOpen})}>
+                                            <DropdownToggle style={{ backgroundColor:"#485F4B", borderRadius:"0px 8px 8px 0px", color:"#ffffff", border:"none", outline:"none"}}>
                                                 {this.state._sendcoins.coin}{' '} 
                                                 {this.state._sendcoins.name}{' '}<FaAngleDown />
                                             </DropdownToggle>
@@ -238,9 +240,8 @@ export default class TradeRoom extends React.Component {
                                     <InputGroup style={{height:"52px"}}> 
                                         <Input type="text"
                                         value={this.state.sendvalue} onChange={event => this.setState({sendvalue: event.target.value.replace(/\D/,'')})}
-                                        className="sendcoin h-100" style={{backgroundColor:"#354737",
-                                        borderRadius:"8px 0px 0px 8px", color:"#ffffff", border:"none", outline:"none"}} />
-                                        <InputGroupButtonDropdown style={{backgroundColor:"#354737",borderRadius:"0px 8px 8px 0px", color:"#ffffff"}} direction="right" setActiveFromChild={true} addonType="append" isOpen={this.state.sendOpen} toggle={async (e) => await this.setState({ sendOpen: !this.state.sendOpen})}>
+                                        className="sendcoin swap-input-text h-100" />
+                                        <InputGroupButtonDropdown className="force-z" style={{backgroundColor:"#354737",borderRadius:"0px 8px 8px 0px", color:"#ffffff"}} direction="right" setActiveFromChild={true} addonType="append" isOpen={this.state.sendOpen} toggle={async (e) => await this.setState({ sendOpen: !this.state.sendOpen})}>
                                             <DropdownToggle style={{backgroundColor:"#485F4B", borderRadius:"0px 8px 8px 0px", color:"#ffffff", border:"none", outline:"none"}}>
                                                 {this.state._sendcoins.coin}{' '} 
                                                 {this.state._sendcoins.name}{' '}<FaAngleDown />
@@ -269,9 +270,8 @@ export default class TradeRoom extends React.Component {
                                             value={this.state.sendvalue * this.state.rate}
                                             // value={this.state.getvalue}
                                             // onChange={event => this.setState({ getvalue: event.target.value.replace(/\D/, '') })}
-                                        className="getcoin h-100"  style={{backgroundColor:"#354737",
-                                        borderRadius:"8px 0px 0px 8px", color:"#ffffff", border:"none", outline:"none"}}/>
-                                        <InputGroupButtonDropdown style={{backgroundColor:"#354737",borderRadius:"0px 8px 8px 0px", color:"#ffffff"}} direction="right" setActiveFromChild={true} addonType="append" isOpen={this.state.getOpen} toggle={async (e) => await this.setState({ getOpen: !this.state.getOpen })}>
+                                        className="getcoin h-100 swap-input-text"/>
+                                        <InputGroupButtonDropdown className="force-z" style={{backgroundColor:"#354737",borderRadius:"0px 8px 8px 0px", color:"#ffffff"}} direction="right" setActiveFromChild={true} addonType="append" isOpen={this.state.getOpen} toggle={async (e) => await this.setState({ getOpen: !this.state.getOpen })}>
                                             <DropdownToggle style={{backgroundColor:"#485F4B", borderRadius:"0px 8px 8px 0px", color:"#ffffff", border:"none", outline:"none"}}>
 
                                                 {this.state._getcoins.coin}{' '}
@@ -304,7 +304,7 @@ export default class TradeRoom extends React.Component {
                             </div>
                             <Row className="justify-content-center align-content-center text-center mx-auto py-3">
                                 <Col lg="6" md="6" sm="6">
-                                    <span onClick={async (e) => await this.setState({ showdetail: !this.state.showdetail })} className="text-light" style={{ fontWeight: "normal", cursor:"pointer", fontStyle: "normal", fontSize: "0.7em", fontFamily: "PT Sans", color: "#ffffff" }}>Details <FaAngleDown/></span>
+                            <span onClick={async (e) => await this.setState({ showdetail: !this.state.showdetail })} className="text-light noselect" style={{ fontWeight: "normal", cursor:"pointer", fontStyle: "normal", fontSize: "0.7em", fontFamily: "PT Sans", color: "#ffffff" }}>Details {this.state.showdetail === true ? <FaAngleUp/> : <FaAngleDown/> }</span>
                                 </Col>
                             </Row>
                             {(this.state.showdetail)?
@@ -334,8 +334,8 @@ export default class TradeRoom extends React.Component {
                                     <Col lg="9" md="9" sm="9" style={{ backgroundColor: "#354737", borderRadius: "10px" }} className="shadow-lg mx-4  py-3">
                                             <Row className="align-content-center justify-content-center">
                                                 <Col lg="7" md="7" sm="7" className="justify-content-center align-content-center">
-                                                    <p className="text-center text-break" style={{ fontWeight: "normal", fontStyle: "normal", fontSize: "0.8em", fontFamily: "PT Sans", color: "#ffffff" }}>
-                                                        You are selling <b>{this.state.sendvalue} {this.state._sendcoins.name}</b> for at least <b>{this.state.sendvalue * this.state.rate} {this.state._getcoins.name}</b> Expected Price Slippage: <b>{this.state.slippage}%</b>  Additional slippage limit: <b>{this.state.slippage}%</b> fee disclosures
+                                                    <p className="text-center text-break sub-header-text">
+                                                        You are selling <b>{this.state.sendvalue} {this.state._sendcoins.name}</b> for at least <b>{this.state.sendvalue * this.state.rate} {this.state._getcoins.name}</b><br /><br /> Expected Price Slippage: <b>{this.state.slippage}%</b> <br /> Additional slippage limit: <b>{this.state.slippage}%</b> fee disclosures
                                                     </p>
                                                 </Col>
                                         </Row>
