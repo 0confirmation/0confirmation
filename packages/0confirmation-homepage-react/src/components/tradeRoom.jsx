@@ -268,7 +268,7 @@ export default class TradeRoom extends React.Component {
                                 <Col lg="4" md="12" sm="12" className="mt-2">
                                     <InputGroup style={{height:"52px"}}> 
                                         <Input readonly="readonly" type="text"
-                                            value={this.state.sendvalue * this.state.rate}
+                                            value={isNaN(parseFloat(this.state.sendvalue)) ? "0.000" : parseFloat(this.state.sendvalue * this.state.rate).toFixed(3)}
                                             // value={this.state.getvalue}
                                             // onChange={event => this.setState({ getvalue: event.target.value.replace(/\D/, '') })}
                                         className="getcoin h-100 swap-input-text"/>
@@ -336,7 +336,7 @@ export default class TradeRoom extends React.Component {
                                             <Row className="align-content-center justify-content-center">
                                                 <Col lg="7" md="7" sm="7" className="justify-content-center align-content-center">
                                                     <p className="text-center text-break sub-header-text">
-                                                        You are selling <b>{this.state.sendvalue} {this.state._sendcoins.name}</b> for at least <b>{this.state.sendvalue * this.state.rate} {this.state._getcoins.name}</b><br /><br /> Expected Price Slippage: <b>{this.state.slippage}%</b> <br /> Additional slippage limit: <b>{this.state.slippage}%</b> fee disclosures
+                                                        You are selling <b>{isNaN(parseFloat(this.state.sendvalue)) ? "0" : parseFloat(this.state.sendvalue)} {this.state._sendcoins.name}</b> for at least <b>{isNaN(this.state.sendvalue) ? "0.000" : parseFloat(this.state.sendvalue * this.state.rate).toFixed(3)} {this.state._getcoins.name}</b><br /><br /> Expected Price Slippage: <b>{this.state.slippage}%</b> <br /> Additional slippage limit: <b>{this.state.slippage}%</b> fee disclosures
                                                     </p>
                                                 </Col>
                                         </Row>
