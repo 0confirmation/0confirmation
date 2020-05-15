@@ -314,19 +314,17 @@ export default class LandingPage extends React.Component {
                         </Col>
                         <Col lg="12" md="12" sm="12" className="align-content-start justify-content-start py-4">
                             <Row className="align-content-start justify-content-start">
-                                <Col lg="4" md="4" sm="4" className="align-content-start justify-content-start">
+                                <Col lg="2" md="4" sm="4" className="align-content-start justify-content-start">
                                     <img className="img-fluid ml-5" style={{width:"100px"}} alt="Powered By" src={require("../images/foot.svg")} />
                                 </Col>
-                                <Col lg="4" md="4" sm="4" className="social align-content-start justify-content-start">
-                                    <div>
-                                    <span style={{color:"#ffffff", fontFamily:"PT Sans", fontStyle:"normal", fontWeight:"normal", fontSize:"0.8em"}}>Follow Us</span>
+                                <Col lg="2" md="4" sm="4" className="social align-content-start justify-content-start">
+                                    <span className="mb-2" style={{color:"#ffffff", fontFamily:"PT Sans", fontStyle:"normal", fontWeight:"normal", fontSize:"0.8em"}}>Follow Us</span>
                                     <Row className="align-content-start justify-content-start ml-1">
-                                        <FaMedium size={20} style={{cursor:"pointer"}} onClick={()=>{ window.open("https://medium.com/0confirmation");}} color="#317333" className="mr-2"/>
+                                        <FaMedium size={30} style={{cursor:"pointer"}} onClick={()=>{ window.open("https://medium.com/0confirmation");}} color="#317333" className="mr-2"/>
                                         {/* <FaRedditAlien size={20} style={{cursor:"pointer"}} onClick={()=>{ window.open("https://www.reddit.com/r/RenProject");}} color="#317333" className="mr-2"/> */}
-                                        <FaTelegramPlane size={20} style={{cursor:"pointer"}} onClick={()=>{ window.open("https://t.me/zeroconfirmation");}} color="#317333" className="mr-2"/>
-                                        <FaTwitter size={20} style={{cursor:"pointer"}} onClick={()=>{ window.open("https://twitter.com/0confirmation");}} color="#317333" className="mr-2"/>
+                                        <FaTelegramPlane size={30} style={{cursor:"pointer"}} onClick={()=>{ window.open("https://t.me/zeroconfirmation");}} color="#317333" className="mr-2"/>
+                                        <FaTwitter size={30} style={{cursor:"pointer"}} onClick={()=>{ window.open("https://twitter.com/0confirmation");}} color="#317333" className="mr-2"/>
                                     </Row>
-                                    </div>
                                 </Col>
                             </Row>
                         </Col>
