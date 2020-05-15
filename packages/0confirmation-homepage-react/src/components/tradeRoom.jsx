@@ -158,16 +158,16 @@ export default class TradeRoom extends React.Component {
                 <div className="justify-content-center align-content-center pt-5" style={{zIndex: "1", overflowX:"hidden"}} >
                     
                     <div className="justify-content-center align-content-center text-center mx-auto my-auto pb-4 pt-5">
-                        <button className="btn text-light button-small btn-sm py-2 px-4" style={{ fontSize: "24dp", backgroundColor: "#317333", width: "248dp", borderRadius: "10px" }}>Connect Wallet</button>
+                        <button className="btn text-light button-small btn-sm py-2 px-3 button-text" style={{ backgroundColor: "#317333", borderRadius: "13px" }}>Connect Wallet</button>
                     </div>
                     <Row className="justify-content-center align-content-center text-center mx-auto">
                         <Col lg="2" md="2" sm="6" className="justify-content-center align-content-center mx-auto w-50" style={{ backgroundColor: "#1F2820", borderRadius: "10px"}}>
                             <Row className="justify-content-center align-content-center p-1 text-light">
                                 <Col className="justify-content-center align-content-center py-1" lg="6" md="6" sm="6" style={{ borderRadius: (this.props.ismobile)? "0px":"13px",backgroundColor: (window.location.pathname.split("/")[2] === "swap") ? "#317333" : "" }}>
-                                    <Link to="/trade/swap" className="py-1 pill-button" href="/#">Swap</Link>
+                                    <Link to="/trade/swap" className="py-1 pill-button button-text" href="/#">Swap</Link>
                                 </Col>
                                 <Col className="justify-content-center align-content-center py-1" lg="6" md="6" sm="6" style={{ borderRadius: (this.props.ismobile)? "0px":"13px",backgroundColor: (window.location.pathname.split("/")[2] === "earn") ? "#317333" : "" }}>
-                                    <Link to="/trade/earn" className="py-1 pill-button" href="/#">Earn</Link>
+                                    <Link to="/trade/earn" className="py-1 pill-button button-text" href="/#">Earn</Link>
                                 </Col>
                             </Row>
                         </Col>
@@ -297,9 +297,9 @@ export default class TradeRoom extends React.Component {
                             
                             <div className="justify-content-center align-content-center text-center mx-auto my-auto pt-3">
                                 {(window.location.pathname.split("/")[2] === "earn") ?
-                                    <button onClick={async()=>{await this.setState({modal:true})}} className="btn text-light button-small btn-sm px-5" style={{ fontSize: "24dp", backgroundColor: "#317333", borderRadius: "10px" }}>Pool</button>
+                                    <button onClick={async()=>{await this.setState({modal:true})}} className="btn text-light button-small btn-sm px-5 button-text" style={{ fontSize: "24dp", backgroundColor: "#317333", borderRadius: "10px" }}>Pool</button>
                                 :
-                                    <button onClick={async()=>{await this.setState({modal:true})}} className="btn text-light button-small btn-sm px-5" style={{ fontSize: "24dp", backgroundColor: "#317333", borderRadius: "10px" }}>Swap</button>
+                                    <button onClick={async()=>{await this.setState({modal:true})}} className="btn text-light button-small btn-sm px-5 button-text" style={{ fontSize: "24dp", backgroundColor: "#317333", borderRadius: "10px" }}>Swap</button>
                                 }
                             </div>
                             <Row className="justify-content-center align-content-center text-center mx-auto py-3">
