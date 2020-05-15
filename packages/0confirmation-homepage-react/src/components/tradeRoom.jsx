@@ -37,6 +37,7 @@ export default class TradeRoom extends React.Component {
             getvalue: 0,
             sendvalue: 0,
             slippage: 0.5,
+            returnPercentage: .232,
             copied:false,
             modal:false,
             _getcoins: 
@@ -211,7 +212,7 @@ export default class TradeRoom extends React.Component {
                                 <Col lg="4" md="12" sm="12" className="mt-2">
                                     <InputGroup style={{height:"52px"}}> 
                                         <Input type="text"
-                                        value={this.state.sendvalue} onChange={event => this.setState({sendvalue: event.target.value.replace(/\D/,'')})}
+                                        value={this.state.sendvalue} onChange={event => this.setState({sendvalue: event.target.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1')})}
                                         className="sendcoin h-100 swap-input-text"/>
                                         <InputGroupButtonDropdown className="force-z" style={{ backgroundColor:"#354737", borderRadius:"0px 8px 8px 0px", color:"#ffffff" }} direction="right" setActiveFromChild={true} addonType="append" isOpen={this.state.sendOpen} toggle={async (e) => await this.setState({ sendOpen: !this.state.sendOpen})}>
                                             <DropdownToggle style={{ backgroundColor:"#485F4B", borderRadius:"0px 8px 8px 0px", color:"#ffffff", border:"none", outline:"none"}}>
@@ -239,7 +240,7 @@ export default class TradeRoom extends React.Component {
                                 <Col lg="4" md="12" sm="12" className="mt-2">
                                     <InputGroup style={{height:"52px"}}> 
                                         <Input type="text"
-                                        value={this.state.sendvalue} onChange={event => this.setState({sendvalue: event.target.value.replace(/\D/,'')})}
+                                        value={this.state.sendvalue} onChange={event => this.setState({sendvalue: event.target.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1')})}
                                         className="sendcoin swap-input-text h-100" />
                                         <InputGroupButtonDropdown className="force-z" style={{backgroundColor:"#354737",borderRadius:"0px 8px 8px 0px", color:"#ffffff"}} direction="right" setActiveFromChild={true} addonType="append" isOpen={this.state.sendOpen} toggle={async (e) => await this.setState({ sendOpen: !this.state.sendOpen})}>
                                             <DropdownToggle style={{backgroundColor:"#485F4B", borderRadius:"0px 8px 8px 0px", color:"#ffffff", border:"none", outline:"none"}}>
@@ -314,8 +315,8 @@ export default class TradeRoom extends React.Component {
                                     <Col lg="9" md="9" sm="9" style={{ backgroundColor: "#354737", borderRadius: "10px" }} className="shadow-lg mx-4  py-3">
                                         <Row className="justify-content-center align-content-center">
                                                 <Col sm="7" lg="7" md="7">
-                                                    <p className="text-center text-break" style={{ fontWeight: "normal", fontStyle: "normal", fontSize: "0.8em", fontFamily: "PT Sans", color: "#ffffff" }}>
-                                                        {this.state.sendvalue} {this.state._sendcoins.name} has historic returns of 23.2% APY or .0232 BTC interest per year
+                                                    <p className="text-center text-break sub-header-text">
+                                                        {isNaN(parseFloat(this.state.sendvalue)) ? "0" : parseFloat(this.state.sendvalue)} {this.state._sendcoins.name} has historic returns of {parseFloat(this.state.returnPercentage * 100).toFixed(1)}% APY or {isNaN(parseFloat(this.state.sendvalue)) ? "0.000" : (parseFloat(this.state.sendvalue) * this.state.returnPercentage).toFixed(3)} BTC interest per year
                                                     </p>
                                                 </Col>
                                                 <Col sm="12" lg="12" md="12">
