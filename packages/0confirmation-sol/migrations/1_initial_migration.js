@@ -30,6 +30,8 @@ const ModuleTypes = {
   BY_ADDRESS: 2
 };
 
+const kovan = environments.getAddresses('testnet');
+
 const getAddress = (artifact, network_id) => {
   if (network_id) return artifact.networks[network_id].address;
   const highest = Math.max(...Object.keys(artifact.networks).map((v) => Number(v)));

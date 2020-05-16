@@ -1,7 +1,7 @@
 'use strict';
 
 const globalObject = require('the-global-object');
-const Common = require('@renproject/ren-js-common');
+const Common = require('@renproject/interfaces');
 
 const { _bitcore, _bitcoreCash } = globalObject;
 delete globalObject._bitcore;

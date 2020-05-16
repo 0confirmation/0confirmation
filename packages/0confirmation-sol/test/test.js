@@ -32,6 +32,8 @@ const providerFromEngine = require('eth-json-rpc-middleware/providerFromEngine')
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 const asMiddleware = require('json-rpc-engine/src/asMiddleware');
 
+ShifterPool.currentProvider.setMaxListeners(100);
+
 const makeZero = async (provider, contracts) => {
   const zero = new ZeroMock(provider);
   zero.setEnvironment(contracts);

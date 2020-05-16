@@ -103,6 +103,7 @@ if (CHAIN === 'embedded' || CHAIN === 'test') {
       '@0confirmation/sdk': require('@0confirmation/sdk'),
       console
     });
+    window.alert('0confirmation: demo environment bootstrapped');
     return artifacts;
   };
 }

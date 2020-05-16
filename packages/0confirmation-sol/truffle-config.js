@@ -1,7 +1,16 @@
 'use strict';
 
 const path = require('path');
-const { provider } = require('./deploy/test-provider');
+const ethers = require('ethers');
+const { fromV3 } = require('ethereumjs-wallet');
+const fromPrivate = require('@0confirmation/providers/private-key-or-seed');
+const fromEthers = require('@0confirmation/providers/from-ethers');
+const kovanWallet = require('./deploy/kovan');
+const validateHasPassword = (envVar) => {
+  if (!envVar) throw Error('You must supply a password, try PASSWORD=secret yarn deploy:<network>');
+  return envVar;
+};
+
 
 module.exports = {
   contracts_directory: path.join(__dirname, 'contracts'),
@@ -19,8 +28,11 @@ module.exports = {
   },
   networks: {
     kovan: {
-      provider,
-      network_id: '42'
+      provider: () => fromPrivate(fromV3(kovanWallet, validateHasPassword(process.env.PASSWORD)).getPrivateKeyString().substr(2), fromEthers(new ethers.providers.InfuraProvider('kovan'))),
+      from: '0x' + kovanWallet.address,
+      network_id: '42',
+      gas: (5.5e6),
+      timeoutBlocks: 1e9
     },
     ganache: {
       host: 'localhost',
