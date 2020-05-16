@@ -411,7 +411,7 @@ class TradeRoom extends React.Component {
     render() {
         const closeBtn = <button className="btn" style={{ color: "#317333" }} onClick={ async ()=> await this.setState({modal:!this.state.modal})}>&times;</button>;
         return (
-          <>
+          <div className="swap">
             <div className="modal-bg" style={{display: this.state.modal ? "block": "none"}} />
                 <Modal
                     style={{ zIndex: "1", overflowX: "hidden", backgroundColor: "transparent"}}
@@ -495,14 +495,14 @@ class TradeRoom extends React.Component {
                         </Row>
                         </ModalBody>
                 </Modal>
-                <div className="justify-content-center align-content-center pt-5" style={{zIndex: "1", overflowX:"hidden"}} >
+                <div className="justify-content-center align-content-center pt-5" style={{zIndex: "1", overflowX:"hidden", position:"relative"}} >
                     <div className="justify-content-center align-content-center text-center mx-auto my-auto pb-4 pt-5">
                         <button className="btn text-light button-small btn-sm py-2 px-3 button-text" style={{ backgroundColor: "#317333", borderRadius: "13px" }} onClick={ (evt) => { evt.preventDefault(); if (window.ethereum) window.ethereum.enable() } }>Connect Wallet</button>
                         </div>
                         <div className="alert-box">
                         <Alert delay={2000} boldText="Test Green" detailText="Test Detail" alertType="alert-green" />
                         <Alert delay={3000} boldText="Test Yellow" detailText="Test Detail" alertType="alert-yellow" />
-                        <Alert delay={4000} boldText="Test Red" detailText="Test Detail" alertType="alert-red" />
+                        <Alert boldText="Test Red" detailText="Test Detail" alertType="alert-red" />
                     </div>
                     <Row className="justify-content-center align-content-center text-center mx-auto">
                         <Col lg="2" md="2" sm="6" className="justify-content-center align-content-center mx-auto w-50" style={{ backgroundColor: "#1F2820", borderRadius: "10px"}}>
@@ -694,7 +694,7 @@ class TradeRoom extends React.Component {
                         </Col>
                     </Row>
                 </div>
-            </>
+            </div>
         );
     }
 }
