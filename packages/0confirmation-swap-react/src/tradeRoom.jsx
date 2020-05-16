@@ -157,8 +157,7 @@ export default class TradeRoom extends React.Component {
                         </Row>
                         </ModalBody>
                 </Modal>
-                <div className="justify-content-center align-content-center pt-5" style={{zIndex: "1", overflowX:"hidden"}} >
-                    
+                <div className="justify-content-center align-content-center pt-5" style={{zIndex: "1", overflowX:"hidden"}} >               
                     <div className="justify-content-center align-content-center text-center mx-auto my-auto pb-4 pt-5">
                     <button className="btn text-light button-small btn-sm py-2 px-3 button-text" style={{ backgroundColor: "#317333", borderRadius: "13px" }}>Connect Wallet</button>
                     </div>
@@ -173,7 +172,6 @@ export default class TradeRoom extends React.Component {
                         <Alert boldText="Test Red" detailText="Test Detail" alertType="alert-red" />
                     </Expire>
                 </div>
-                    
                     <Row className="justify-content-center align-content-center text-center mx-auto">
                         <Col lg="2" md="2" sm="6" className="justify-content-center align-content-center mx-auto w-50" style={{ backgroundColor: "#1F2820", borderRadius: "10px"}}>
                             <Row className="justify-content-center align-content-center p-1 text-light">
