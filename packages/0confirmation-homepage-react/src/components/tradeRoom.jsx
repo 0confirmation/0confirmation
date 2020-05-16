@@ -21,6 +21,7 @@ import usdtIcon from '@iconify/icons-cryptocurrency/usdt';
 import eosIcon from '@iconify/icons-cryptocurrency/eos';
 import btgIcon from '@iconify/icons-cryptocurrency/btg';
 import { QRCode } from 'react-qrcode-logo';
+import Alert from './alert'
 
 export default class TradeRoom extends React.Component {
     constructor(props) {
@@ -158,9 +159,21 @@ export default class TradeRoom extends React.Component {
                 </Modal>
                 <div className="justify-content-center align-content-center pt-5" style={{zIndex: "1", overflowX:"hidden"}} >
                     
-                    <div className="justify-content-center align-content-center text-center mx-auto my-auto pb-4 pt-5">
+                <div className="justify-content-center align-content-center text-center mx-auto my-auto pb-4 pt-5">
                         <button className="btn text-light button-small btn-sm py-2 px-3 button-text" style={{ backgroundColor: "#317333", borderRadius: "13px" }}>Connect Wallet</button>
                     </div>
+                <div className="alert-box">
+                    <Expire delay={2000}>
+                        <Alert boldText="Test Green" detailText="Test Detail" alertType="alert-green" />
+                    </Expire>
+                    <Expire delay={3000}>
+                        <Alert boldText="Test Yellow" detailText="Test Detail" alertType="alert-yellow" />
+                    </Expire>
+                    <Expire delay={4000}>
+                        <Alert boldText="Test Red" detailText="Test Detail" alertType="alert-red" />
+                    </Expire>
+                </div>
+                    
                     <Row className="justify-content-center align-content-center text-center mx-auto">
                         <Col lg="2" md="2" sm="6" className="justify-content-center align-content-center mx-auto w-50" style={{ backgroundColor: "#1F2820", borderRadius: "10px"}}>
                             <Row className="justify-content-center align-content-center p-1 text-light">
