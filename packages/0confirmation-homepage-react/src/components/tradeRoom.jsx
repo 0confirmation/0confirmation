@@ -7,7 +7,7 @@ import {
     Input,
     DropdownToggle,
     DropdownMenu,
-    DropdownItem,Modal, ModalBody, ModalFooter, ModalHeader, Button
+    DropdownItem, Modal, ModalBody, ModalFooter, ModalHeader, Button
 } from "reactstrap";
 import { Link } from "react-router-dom";
 import { FaAngleDown } from 'react-icons/fa';
