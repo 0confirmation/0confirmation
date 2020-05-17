@@ -27,6 +27,10 @@ console.logKeeper = (v) => console.logBold(chalk.magenta('keeper: ') + v);
   console.log('approving shifter pool for bonds');
 //  await (await zero.approvePool(env.renbtc)).wait();
   console.log('approved!');
+  const node = zero.driver.getBackend('zero').node;
+  node.socket.on('peer:discovery', (peer) => {
+    console.log(peer);
+  });
   zero.listenForLiquidityRequests(async (v) => {
     console.logBold('received liquidity request over libp2p!');
     console.logKeeper('got liquidity request!');
