@@ -1,71 +1,19 @@
 'use strict';
 
-const RenJS = require('@renproject/ren');
-global._bitcore = undefined;
-global._bitcoreCash = undefined;
-const Zero = require('@0confirmation/sdk');
-global._bitcore = undefined;
-global._bitcoreCash = undefined;
-const HDWalletProvider = require('@truffle/hdwallet-provider');
+const fromPrivate = require('@0confirmation/providers/private-key-or-seed');
+const fromEthers = require('@0confirmation/providers/from-ethers');
 const ethers = require('ethers');
-const ShifterPool = require('@0confirmation/sol/build/ShifterPool');
-const BorrowProxyLib = require('@0confirmation/sol/build/BorrowProxyLib');
-const kovan = require('@0confirmation/sol/environments/kovan');
+const CHAIN = process.env.CHAIN;
+const NETWORK = CHAIN === '1' ? 'mainnet' : CHAIN === '42' ? 'testnet' : '';
+const ETH_NETWORK = NETWORK === 'testnet' ? 'kovan' : NETWORK;
+const Zero = require('@0confirmation/sdk');
 
-const throwError = (err) => { throw Error(err); };
-
-const setupProvider = (network) => {
-  let url;
-  switch (network) {
-    case 'lendnet':
-      url = (new ethers.providers.InfuraProvider('kovan')).connection.url;
-      break;
-    default:
-      url = network || throwError('Must supply $NETWORK to target a chain')
-  }
-  return new HDWalletProvider(process.env.SEED || throwError('Must supply $SEED which can be a mnemonic or private key without 0x prefix'), url);
-};
-
-const toEthers = (provider) => new ethers.provider.Web3Provider(provider);
-
-const getChainId = async (provider) => {
-  return String(Number(await (toEthers(provider)).send('eth_chainId', [])));
-};
-
-const getEnvironment = (network) => {
-  const provider = setupProvider(network);
-  switch (network) {
-    case 'lendnet':
-      return {
-        backends: {
-          ethereum: {
-            provider
-          },
-          renvm: {
-            network: 'testnet'
-          },
-          btc: {
-            network: 'testnet'
-          },
-          zero: {
-            multiaddr: 'lendnet',
-            dht: true
-          }
-        },
-        borrowProxyLib: BorrowProxyLib.networks[42].address,
-        shifterPool: ShifterPool.networks[42].address,
-        renbtc: RenJS.NetworkDetails.NetworkTestnet.contracts.addresses.tokens.BTC.address,
-        mpkh: RenJS.NetworkDetails.NetworkTestnet.contracts.renVM.mpkh
-      };
-    default:
-      throwError('unsupported network: ' + network);
-  }
-};
+const provider = fromPrivate(process.env.PRIVATE, fromEthers(new ethers.providers.InfuraProvider(ETH_NETWORK)));
 
 const chalk = require('chalk');
 
-const makeZero = async (env) => {
-  const zero = new Zero(env);
+const makeZero = async () => {
+  const zero = new Zero(provider, NETWORK);
   await zero.initializeDriver();
   return zero;
 };
@@ -75,9 +23,7 @@ console.logKeeper = (v) => console.logBold(chalk.magenta('keeper: ') + v);
 
 
 (async () => {
-  const network = process.env.NETWORK;
-  const env = getEnvironment(network);
-  const zero = await makeZero(env);
+  const zero = await makeZero();
   console.log('approving shifter pool for bonds');
 //  await (await zero.approvePool(env.renbtc)).wait();
   console.log('approved!');

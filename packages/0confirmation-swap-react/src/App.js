@@ -263,6 +263,11 @@ class TradeRoom extends React.Component {
     }
     async componentDidMount() {
         if (CHAIN === 'test' || CHAIN === 'embedded') await this.setup();
+        else {
+          await zero.initializeDriver();
+          console.log('libp2p: bootstrapped');
+        }
+        
     }
     constructor(props) {
         super(props)

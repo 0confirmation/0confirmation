@@ -105,7 +105,7 @@ const getEnvironment = (provider, network, backends) => ({
       network
     },
     renvm: {
-      network: renvmNetworkFromNetwork(network)
+      network: renNetworkFromNetwork(network)
     }
   },
   ...getAddresses(network)
