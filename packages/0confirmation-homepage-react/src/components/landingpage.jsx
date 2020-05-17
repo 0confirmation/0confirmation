@@ -165,7 +165,7 @@ export default class LandingPage extends React.Component {
                     <Row className="bg-light justify-content-center align-content-center text-center py-5 px-3">
                         <Col lg="12" md="12" sm="12" className="justify-content-center align-content-center text-center" style={{backgroundColor:"rgb(249, 250, 251)"}}>
                             <Row className="bg-light justify-content-center align-content-center text-center">
-                                <h6 className="header-text" style={{ color: "#212529", fontSize:"42px", paddingTop:"40px"}}><b>Where Can I Use 0cf?</b></h6>
+                                <h6 className="header-text" style={{ color: "#212529", fontSize:"42px", paddingTop:"40px"}}>0cf In Action</h6>
                             </Row>
                         </Col>
                         <Col lg="12" md="12" sm="12" className="bg-light justify-content-center align-content-center text-center">
@@ -198,22 +198,21 @@ export default class LandingPage extends React.Component {
                             <Row className="justify-content-center align-content-center text-center py-5 px-3">
                                 <Col lg="12" md="12" sm="12" className="justify-content-center align-content-center text-center">
                                     <Row className="justify-content-center align-content-center text-center">
-                                        <h6 className="header-text" style={{fontSize: "42px", paddingTop: "40px", paddingBottom: "40px"}}><b>Usage Statistics</b></h6>
+                                        <h6 className="header-text" style={{fontSize: "42px", paddingTop: "40px", paddingBottom: "40px"}}>Usage Statistics</h6>
                                     </Row>
                                 </Col>
                                 <Col lg="12" md="12" sm="12" className="justify-content-center align-content-center text-center">
                                     <Row className="justify-content-center align-content-center text-center py-4">
-                                        <Col lg="2" md="12" sm="12" className="align-content-center justify-content-center mx-3 my-2">
-                                            <Row className="justify-content-center align-content-center mx-auto" style={{ height:"100%" }}>
+                                    <Col md="12" sm="12" className="align-content-center justify-content-center mx-1 my-2" style={{maxWidth:"20%", minWidth:"280px"}}>                                            <Row className="justify-content-center align-content-center mx-auto" style={{ height:"100%" }}>
                                                 <Card className="card-shadow py-4" style={{ height:"100%", backgroundColor: "#1F2820",width:"20em" }}>
                                                     <CardBody>
                                                         <Row className="justify-content-center align-content-center">
                                                             <Col lg="12" md="12" sm="12" className="justify-content-center align-content-center">
                                                                 <Row className="justify-content-center align-content-center">
                                                                     <Col lg="12" md="12" sm="12" className="text-center">
-                                                                        <p className="header-text">Total Liquidity<span><i id="liquidity"><img alt="i" width="12px" className="img-fluid mb-3 ml-2" src={require("../images/info.svg")}/></i><Tooltip placement="top"
+                                                                        <p className="header-text">Total Liquidity<span><i id="liquidity"><img alt="i" width="18px" className="img-fluid mb-3 ml-2" src={require("../images/info.svg")}/></i><Tooltip placement="top"
                                                                             isOpen={this.state.tooltip1} target="liquidity" toggle={async (e) => await this.setState({ tooltip1: !this.state.tooltip1 })} >
-                                                                                info
+                                                                                Total available BTC for short term loans.
                                                                             </Tooltip></span></p>
                                                                     </Col>
                                                                     <Col lg="12" md="12" sm="12">
@@ -229,17 +228,16 @@ export default class LandingPage extends React.Component {
                                                 </Card>
                                             </Row>
                                         </Col>
-                                        <Col lg="2" mm="12" sm="12" className="align-content-center justify-content-center mx-3 my-2">
-                                            <Row className="justify-content-center align-content-center mx-auto" style={{ height:"100%" }}>
+                                        <Col md="12" sm="12" className="align-content-center justify-content-center mx-1 my-2" style={{maxWidth:"20%", minWidth:"280px"}}>                                            <Row className="justify-content-center align-content-center mx-auto" style={{ height:"100%" }}>
                                                 <Card className="card-shadow py-4" style={{ height:"100%", backgroundColor: "#1F2820", width: "20em" }}>
                                                     <CardBody>
                                                         <Row className="justify-content-center align-content-center">
                                                             <Col lg="12" md="12" sm="12" className="justify-content-center align-content-center">
                                                                 <Row className="justify-content-center align-content-center">
                                                                     <Col lg="12" md="12" sm="12" className="text-center">
-                                                                        <p className="header-text">BTC On Loan<span><i id="loan"><img alt="i" width="12px" className="img-fluid mb-3 ml-2" src={require("../images/info.svg")}/></i><Tooltip placement="top"
+                                                                        <p className="header-text">BTC On Loan<span><i id="loan"><img alt="i" width="18px" className="img-fluid mb-3 ml-2" src={require("../images/info.svg")}/></i><Tooltip placement="top"
                                                                             isOpen={this.state.tooltip2} target="loan" toggle={async (e) => await this.setState({ tooltip2: !this.state.tooltip2 })} >
-                                                                                info
+                                                                                Total amount of BTC loaned out awaiting 6 confirmations.
                                                                             </Tooltip></span></p>
                                                                     </Col>
                                                                     <Col lg="12" md="12" sm="12">
@@ -255,17 +253,16 @@ export default class LandingPage extends React.Component {
                                                 </Card>
                                             </Row>
                                     </Col>
-                                        <Col lg="2" mm="12" sm="12" className="align-content-center justify-content-center mx-3 my-2">
-                                            <Row className="justify-content-center align-content-center mx-auto" style={{ height:"100%" }}>
+                                        <Col md="12" sm="12" className="align-content-center justify-content-center mx-1 my-2" style={{maxWidth:"20%", minWidth:"280px"}}>                                            <Row className="justify-content-center align-content-center mx-auto" style={{ height:"100%" }}>
                                                 <Card className="card-shadow py-4" style={{ height:"100%", backgroundColor: "#1F2820", width: "20em" }}>
                                                     <CardBody>
                                                         <Row className="justify-content-center align-content-center">
                                                             <Col lg="12" md="12" sm="12" className="justify-content-center align-content-center">
                                                                 <Row className="justify-content-center align-content-center">
                                                                     <Col lg="12" md="12" sm="12" className="text-center">
-                                                                        <p className="header-text">Idle BTC<span><i id="idle-btc"><img alt="i" width="12px" className="img-fluid mb-3 ml-2" src={require("../images/info.svg")}/></i><Tooltip placement="top"
+                                                                        <p className="header-text">Idle BTC<span><i id="idle-btc"><img alt="i" width="18px" className="img-fluid mb-3 ml-2" src={require("../images/info.svg")}/></i><Tooltip placement="top"
                                                                             isOpen={this.state.tooltip3} target="idle-btc" toggle={async (e) => await this.setState({ tooltip3: !this.state.tooltip3 })} >
-                                                                                info
+                                                                                Total BTC not on loan.
                                                                             </Tooltip></span></p>
                                                                     </Col>
                                                                     <Col lg="12" md="12" sm="12">
@@ -281,7 +278,7 @@ export default class LandingPage extends React.Component {
                                                 </Card>
                                             </Row>
                                     </Col>
-                                        <Col lg="2" md="12" sm="12" className="align-content-center justify-content-center mx-3 my-2">
+                                        <Col md="12" sm="12" className="align-content-center justify-content-center mx-1 my-2" style={{maxWidth:"20%", minWidth:"280px"}}>
                                             <Row className="justify-content-center align-content-center mx-auto" style={{ height:"100%" }}>
                                                 <Card className="card-shadow py-4" style={{ height:"100%", backgroundColor: "#1F2820", width: "20em" }}>
                                                     <CardBody>
@@ -289,9 +286,9 @@ export default class LandingPage extends React.Component {
                                                             <Col lg="12" md="12" sm="12" className="justify-content-center align-content-center">
                                                                 <Row className="justify-content-center align-content-center">
                                                                     <Col lg="12" md="12" sm="12" className="text-center">
-                                                                        <p className="header-text">Total Returns<span><i id="returns"><img alt="i" width="12px" className="img-fluid mb-3 ml-2" src={require("../images/info.svg")}/></i><Tooltip placement="top"
+                                                                        <p className="header-text">Total Returns<span><i id="returns"><img alt="i" width="18px" className="img-fluid mb-3 ml-2" src={require("../images/info.svg")}/></i><Tooltip placement="top"
                                                                             isOpen={this.state.tooltip4} target="returns" toggle={async (e) => await this.setState({ tooltip4: !this.state.tooltip4 })} >
-                                                                                info
+                                                                                Total interest gained from loans issued via 0cf
                                                                             </Tooltip></span></p>
                                                                     </Col>
                                                                     <Col lg="12" md="12" sm="12">
@@ -314,16 +311,16 @@ export default class LandingPage extends React.Component {
                         </Col>
                         <Col lg="12" md="12" sm="12" className="align-content-start justify-content-start py-4">
                             <Row className="align-content-start justify-content-start">
-                                <Col lg="2" md="2" sm="2" className="align-content-start justify-content-start">
+                                <Col lg="2" md="4" sm="4" className="align-content-start justify-content-start">
                                     <img className="img-fluid ml-5" style={{width:"100px"}} alt="Powered By" src={require("../images/foot.svg")} />
                                 </Col>
-                                <Col lg="2" md="2" sm="2" className="social align-content-start justify-content-start">
-                                    <span style={{color:"#ffffff", fontFamily:"PT Sans", fontStyle:"normal", fontWeight:"normal", fontSize:"0.8em"}}>Follow Us</span>
+                                <Col lg="2" md="4" sm="4" className="social align-content-start justify-content-start">
+                                    <span className="mb-2" style={{color:"#ffffff", fontFamily:"PT Sans", fontStyle:"normal", fontWeight:"normal", fontSize:"0.8em"}}>Follow Us</span>
                                     <Row className="align-content-start justify-content-start ml-1">
-                                        <FaMedium size={20} style={{cursor:"pointer"}} onClick={()=>{ window.open("https://medium.com/0confirmation");}} color="#317333" className="mr-2"/>
+                                        <FaMedium size={30} style={{cursor:"pointer"}} onClick={()=>{ window.open("https://medium.com/0confirmation");}} color="#317333" className="mr-2"/>
                                         {/* <FaRedditAlien size={20} style={{cursor:"pointer"}} onClick={()=>{ window.open("https://www.reddit.com/r/RenProject");}} color="#317333" className="mr-2"/> */}
-                                        <FaTelegramPlane size={20} style={{cursor:"pointer"}} onClick={()=>{ window.open("https://t.me/zeroconfirmation");}} color="#317333" className="mr-2"/>
-                                        <FaTwitter size={20} style={{cursor:"pointer"}} onClick={()=>{ window.open("https://twitter.com/0confirmation");}} color="#317333" className="mr-2"/>
+                                        <FaTelegramPlane size={30} style={{cursor:"pointer"}} onClick={()=>{ window.open("https://t.me/zeroconfirmation");}} color="#317333" className="mr-2"/>
+                                        <FaTwitter size={30} style={{cursor:"pointer"}} onClick={()=>{ window.open("https://twitter.com/0confirmation");}} color="#317333" className="mr-2"/>
                                     </Row>
                                 </Col>
                             </Row>

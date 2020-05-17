@@ -7,7 +7,7 @@ import {
     Input,
     DropdownToggle,
     DropdownMenu,
-    DropdownItem,Modal, ModalBody, ModalFooter, ModalHeader, Button
+    DropdownItem, Modal, ModalBody, ModalFooter, ModalHeader, Button
 } from "reactstrap";
 import { Link } from "react-router-dom";
 import { FaAngleDown } from 'react-icons/fa';
@@ -21,6 +21,7 @@ import usdtIcon from '@iconify/icons-cryptocurrency/usdt';
 import eosIcon from '@iconify/icons-cryptocurrency/eos';
 import btgIcon from '@iconify/icons-cryptocurrency/btg';
 import { QRCode } from 'react-qrcode-logo';
+import Alert from './alert'
 
 export default class TradeRoom extends React.Component {
     constructor(props) {
@@ -37,6 +38,7 @@ export default class TradeRoom extends React.Component {
             getvalue: 0,
             sendvalue: 0,
             slippage: 0.5,
+            returnPercentage: .232,
             copied:false,
             modal:false,
             _getcoins: 
@@ -157,17 +159,29 @@ export default class TradeRoom extends React.Component {
                 </Modal>
                 <div className="justify-content-center align-content-center pt-5" style={{zIndex: "1", overflowX:"hidden"}} >
                     
-                    <div className="justify-content-center align-content-center text-center mx-auto my-auto pb-4 pt-5">
-                        <button className="btn text-light button-small btn-sm py-2 px-4" style={{ fontSize: "24dp", backgroundColor: "#317333", width: "248dp", borderRadius: "10px" }}>Connect Wallet</button>
+                <div className="justify-content-center align-content-center text-center mx-auto my-auto pb-4 pt-5">
+                        <button className="btn text-light button-small btn-sm py-2 px-3 button-text" style={{ backgroundColor: "#317333", borderRadius: "13px" }}>Connect Wallet</button>
                     </div>
+                <div className="alert-box">
+                    <Expire delay={2000}>
+                        <Alert boldText="Test Green" detailText="Test Detail" alertType="alert-green" />
+                    </Expire>
+                    <Expire delay={3000}>
+                        <Alert boldText="Test Yellow" detailText="Test Detail" alertType="alert-yellow" />
+                    </Expire>
+                    <Expire delay={4000}>
+                        <Alert boldText="Test Red" detailText="Test Detail" alertType="alert-red" />
+                    </Expire>
+                </div>
+                    
                     <Row className="justify-content-center align-content-center text-center mx-auto">
                         <Col lg="2" md="2" sm="6" className="justify-content-center align-content-center mx-auto w-50" style={{ backgroundColor: "#1F2820", borderRadius: "10px"}}>
                             <Row className="justify-content-center align-content-center p-1 text-light">
                                 <Col className="justify-content-center align-content-center py-1" lg="6" md="6" sm="6" style={{ borderRadius: (this.props.ismobile)? "0px":"13px",backgroundColor: (window.location.pathname.split("/")[2] === "swap") ? "#317333" : "" }}>
-                                    <Link to="/trade/swap" className="py-1 pill-button" href="/#">Swap</Link>
+                                    <Link to="/trade/swap" className="py-1 pill-button button-text" href="/#">Swap</Link>
                                 </Col>
                                 <Col className="justify-content-center align-content-center py-1" lg="6" md="6" sm="6" style={{ borderRadius: (this.props.ismobile)? "0px":"13px",backgroundColor: (window.location.pathname.split("/")[2] === "earn") ? "#317333" : "" }}>
-                                    <Link to="/trade/earn" className="py-1 pill-button" href="/#">Earn</Link>
+                                    <Link to="/trade/earn" className="py-1 pill-button button-text" href="/#">Earn</Link>
                                 </Col>
                             </Row>
                         </Col>
@@ -211,7 +225,7 @@ export default class TradeRoom extends React.Component {
                                 <Col lg="4" md="12" sm="12" className="mt-2">
                                     <InputGroup style={{height:"52px"}}> 
                                         <Input type="text"
-                                        value={this.state.sendvalue} onChange={event => this.setState({sendvalue: event.target.value.replace(/\D/,'')})}
+                                        value={this.state.sendvalue} onChange={event => this.setState({sendvalue: event.target.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1')})}
                                         className="sendcoin h-100 swap-input-text"/>
                                         <InputGroupButtonDropdown className="force-z" style={{ backgroundColor:"#354737", borderRadius:"0px 8px 8px 0px", color:"#ffffff" }} direction="right" setActiveFromChild={true} addonType="append" isOpen={this.state.sendOpen} toggle={async (e) => await this.setState({ sendOpen: !this.state.sendOpen})}>
                                             <DropdownToggle style={{ backgroundColor:"#485F4B", borderRadius:"0px 8px 8px 0px", color:"#ffffff", border:"none", outline:"none"}}>
@@ -239,7 +253,7 @@ export default class TradeRoom extends React.Component {
                                 <Col lg="4" md="12" sm="12" className="mt-2">
                                     <InputGroup style={{height:"52px"}}> 
                                         <Input type="text"
-                                        value={this.state.sendvalue} onChange={event => this.setState({sendvalue: event.target.value.replace(/\D/,'')})}
+                                        value={this.state.sendvalue} onChange={event => this.setState({sendvalue: event.target.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1')})}
                                         className="sendcoin swap-input-text h-100" />
                                         <InputGroupButtonDropdown className="force-z" style={{backgroundColor:"#354737",borderRadius:"0px 8px 8px 0px", color:"#ffffff"}} direction="right" setActiveFromChild={true} addonType="append" isOpen={this.state.sendOpen} toggle={async (e) => await this.setState({ sendOpen: !this.state.sendOpen})}>
                                             <DropdownToggle style={{backgroundColor:"#485F4B", borderRadius:"0px 8px 8px 0px", color:"#ffffff", border:"none", outline:"none"}}>
@@ -267,7 +281,7 @@ export default class TradeRoom extends React.Component {
                                 <Col lg="4" md="12" sm="12" className="mt-2">
                                     <InputGroup style={{height:"52px"}}> 
                                         <Input readonly="readonly" type="text"
-                                            value={this.state.sendvalue * this.state.rate}
+                                            value={isNaN(parseFloat(this.state.sendvalue)) ? "0.000" : parseFloat(this.state.sendvalue * this.state.rate).toFixed(3)}
                                             // value={this.state.getvalue}
                                             // onChange={event => this.setState({ getvalue: event.target.value.replace(/\D/, '') })}
                                         className="getcoin h-100 swap-input-text"/>
@@ -297,9 +311,9 @@ export default class TradeRoom extends React.Component {
                             
                             <div className="justify-content-center align-content-center text-center mx-auto my-auto pt-3">
                                 {(window.location.pathname.split("/")[2] === "earn") ?
-                                    <button onClick={async()=>{await this.setState({modal:true})}} className="btn text-light button-small btn-sm px-5" style={{ fontSize: "24dp", backgroundColor: "#317333", borderRadius: "10px" }}>Pool</button>
+                                    <button onClick={async()=>{await this.setState({modal:true})}} className="btn text-light button-small btn-sm px-5 button-text" style={{ fontSize: "24dp", backgroundColor: "#317333", borderRadius: "10px" }}>Pool</button>
                                 :
-                                    <button onClick={async()=>{await this.setState({modal:true})}} className="btn text-light button-small btn-sm px-5" style={{ fontSize: "24dp", backgroundColor: "#317333", borderRadius: "10px" }}>Swap</button>
+                                    <button onClick={async()=>{await this.setState({modal:true})}} className="btn text-light button-small btn-sm px-5 button-text" style={{ fontSize: "24dp", backgroundColor: "#317333", borderRadius: "10px" }}>Swap</button>
                                 }
                             </div>
                             <Row className="justify-content-center align-content-center text-center mx-auto py-3">
@@ -314,8 +328,8 @@ export default class TradeRoom extends React.Component {
                                     <Col lg="9" md="9" sm="9" style={{ backgroundColor: "#354737", borderRadius: "10px" }} className="shadow-lg mx-4  py-3">
                                         <Row className="justify-content-center align-content-center">
                                                 <Col sm="7" lg="7" md="7">
-                                                    <p className="text-center text-break" style={{ fontWeight: "normal", fontStyle: "normal", fontSize: "0.8em", fontFamily: "PT Sans", color: "#ffffff" }}>
-                                                        {this.state.sendvalue} {this.state._sendcoins.name} has historic returns of 23.2% APY or .0232 BTC interest per year
+                                                    <p className="text-center text-break sub-header-text">
+                                                        {isNaN(parseFloat(this.state.sendvalue)) ? "0" : parseFloat(this.state.sendvalue)} {this.state._sendcoins.name} has historic returns of {parseFloat(this.state.returnPercentage * 100).toFixed(1)}% APY or {isNaN(parseFloat(this.state.sendvalue)) ? "0.000" : (parseFloat(this.state.sendvalue) * this.state.returnPercentage).toFixed(3)} BTC interest per year
                                                     </p>
                                                 </Col>
                                                 <Col sm="12" lg="12" md="12">
@@ -335,7 +349,7 @@ export default class TradeRoom extends React.Component {
                                             <Row className="align-content-center justify-content-center">
                                                 <Col lg="7" md="7" sm="7" className="justify-content-center align-content-center">
                                                     <p className="text-center text-break sub-header-text">
-                                                        You are selling <b>{this.state.sendvalue} {this.state._sendcoins.name}</b> for at least <b>{this.state.sendvalue * this.state.rate} {this.state._getcoins.name}</b><br /><br /> Expected Price Slippage: <b>{this.state.slippage}%</b> <br /> Additional slippage limit: <b>{this.state.slippage}%</b> fee disclosures
+                                                        You are selling <b>{isNaN(parseFloat(this.state.sendvalue)) ? "0" : parseFloat(this.state.sendvalue)} {this.state._sendcoins.name}</b> for at least <b>{isNaN(this.state.sendvalue) ? "0.000" : parseFloat(this.state.sendvalue * this.state.rate).toFixed(3)} {this.state._getcoins.name}</b><br /><br /> Expected Price Slippage: <b>{this.state.slippage}%</b> <br /> Additional slippage limit: <b>{this.state.slippage}%</b> fee disclosures
                                                     </p>
                                                 </Col>
                                         </Row>
