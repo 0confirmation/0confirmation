@@ -6,6 +6,7 @@ const { fromV3 } = require('ethereumjs-wallet');
 const fromPrivate = require('@0confirmation/providers/private-key-or-seed');
 const fromEthers = require('@0confirmation/providers/from-ethers');
 const kovanWallet = require('./deploy/kovan');
+const HDWalletProvider = require('@truffle/hdwallet-provider');
 const validateHasPassword = (envVar) => {
   if (!envVar) throw Error('You must supply a password, try PASSWORD=secret yarn deploy:<network>');
   return envVar;
@@ -28,11 +29,12 @@ module.exports = {
   },
   networks: {
     kovan: {
-      provider: () => fromPrivate(fromV3(kovanWallet, validateHasPassword(process.env.PASSWORD)).getPrivateKeyString().substr(2), fromEthers(new ethers.providers.InfuraProvider('kovan'))),
+      provider: () => new HDWalletProvider(fromV3(kovanWallet, validateHasPassword(process.env.PASSWORD)).getPrivateKeyString().substr(2), fromEthers(new ethers.providers.InfuraProvider('kovan'))),
       from: '0x' + kovanWallet.address,
+      gasPrice: ethers.utils.parseUnits('1', 9).toString(),
+      skipDryRun: true,
       network_id: '42',
-      gas: (5.5e6),
-      timeoutBlocks: 1e9
+      timeoutBlocks: 1e4
     },
     ganache: {
       host: 'localhost',

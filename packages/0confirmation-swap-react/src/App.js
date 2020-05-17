@@ -43,7 +43,6 @@ const uniswapConstants = require('@uniswap/sdk/dist/constants');
 const BTCBackend = require('@0confirmation/sdk/backends/btc');
 let Zero = require('@0confirmation/sdk');
 const { staticPreprocessor } = Zero;
-Zero = Zero.ZeroMock;
 
 if (CHAIN === 'embedded' || CHAIN === 'test') Zero = Zero.ZeroMock;
 
@@ -100,7 +99,7 @@ const mpkh = contracts.mpkh;
 const USE_TESTNET_BTC = process.env.USE_TESTNET_BTC || process.env.REACT_APP_USE_TESTNET_BTC;
 
 const makeZero = (provider) => {
-  const zero = new Zero(provider);
+  const zero = new Zero(provider, CHAIN === '42' ? 'testnet' : CHAIN === '1' ? 'mainnet' : 'ganache');
   if (USE_TESTNET_BTC) zero.driver.registerBackend(new BTCBackend({
     network: 'testnet'
   }));
@@ -263,7 +262,7 @@ class TradeRoom extends React.Component {
       contractsDeferred.resolve(contracts);
     }
     async componentDidMount() {
-        await this.setup();
+        if (CHAIN === 'test' || CHAIN === 'embedded') await this.setup();
     }
     constructor(props) {
         super(props)

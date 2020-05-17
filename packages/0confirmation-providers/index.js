@@ -22,13 +22,16 @@ const convertToBaseProvider = (provider) => Object.setPrototypeOf(provider, Base
 
 class PolymarketProviderEngine extends RpcEngine {
   asProvider() {
-    return convertToBaseProvider(providerFromEngine(this));
+    const provider = convertToBaseProvider(providerFromEngine(this));
+    if (provider.setMaxListeners) provider.setMaxListeners(0xffff);
+    return provider;
   }
 }
 
 Object.setPrototypeOf(BaseProvider.prototype, baseProviderProto);
 
 const makeBaseProvider = (provider) => {
+  if (provider.setMaxListeners) provider.setMaxListeners(0xffff);
   const engine = new PolymarketProviderEngine();
   const send = provider.send || provider.sendAsync;
   engine.push((req, res, next, end) => {

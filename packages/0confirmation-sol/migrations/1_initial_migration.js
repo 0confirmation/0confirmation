@@ -38,6 +38,8 @@ const getAddress = (artifact, network_id) => {
   return artifact.networks[highest].address;
 };
 
+const isNetworkOrFork = (v, network) => [network, network + '-fork'].includes(v);
+
 const NO_SUBMODULE = '0x' + Array(40).fill('0').join('');
 
 module.exports = async function(deployer) {
@@ -51,7 +53,7 @@ module.exports = async function(deployer) {
   await deployer.deploy(SwapEntireLoan);
   const dai = await DAI.deployed();
   let shifterRegistry, renbtc, factory, renbtcExchange, daiExchange;
-  if (['ganache', 'test'].find((v) => v === deployer.network)) {
+  if (['ganache', 'test'].find((v) => v === isNetworkOrFork(deployer.network))) {
     await deployer.deploy(ShifterRegistryMock);
     shifterRegistry = await ShifterRegistryMock.deployed();
     renbtc = { address: await shifterRegistry.token() };
@@ -140,7 +142,7 @@ module.exports = async function(deployer) {
     liqToken: liquidityToken.address
   }]);
   // setup uni and the liquidity pool with some liqudity
-  if (deployer.network === 'test' || deployer.network === 'ganache') {
+  if (isNetworkOrFork(deployer.network, 'test') || isNetworkOrFork(deployer.network, 'ganache')) {
     const amount = ethers.utils.bigNumberify('0xffffffffffffffffffffffffffffffffffffffff');
     const provider = new ethers.providers.Web3Provider(dai.contract.currentProvider);
     const [ truffleAddress ] = await provider.send('eth_accounts', []);
