@@ -191,4 +191,4 @@ if (CHAIN === 'embedded') globalObject.provider = provider;
 
 provider.builds = builds;
 provider.makeFauxMetamaskSigner = makeFauxMetamaskSigner;
-module.exports = provider;
+export default provider;
