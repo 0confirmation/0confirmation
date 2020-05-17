@@ -36,7 +36,7 @@ console.logKeeper = (v) => console.logBold(chalk.magenta('keeper: ') + v);
     console.logKeeper('got liquidity request!');
     console.logKeeper('computing BTC address from liquidity request parameters: ' + chalk.cyan(v.depositAddress));
     console.logKeeper('OK! ' + chalk.yellow(v.proxyAddress) + ' is a borrow proxy derived from a deposit of ' + ethers.utils.formatUnits(v.amount, 8) + ' BTC at the target address');
-    if (Number(ethers.utils.parseEther(v.gasRequested)) > 0.1) {
+    if (Number(ethers.utils.formatEther(v.gasRequested)) > 0.11) {
       console.logKeeper('request is for too much gas -- abort');
       return
     }

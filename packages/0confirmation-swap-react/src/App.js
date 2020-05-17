@@ -264,10 +264,17 @@ class TradeRoom extends React.Component {
     async componentDidMount() {
         if (CHAIN === 'test' || CHAIN === 'embedded') await this.setup();
         else {
+          provider.setSigningProvider(window.ethereum);
           await zero.initializeDriver();
+          contractsDeferred.resolve(contracts);
+          contracts.transferAll = {
+            address: contracts.transferAll
+          };
+          contracts.swapEntireLoan = {
+            address: contracts.swapEntireLoan
+          };
           console.log('libp2p: bootstrapped');
         }
-        
     }
     constructor(props) {
         super(props)
@@ -338,8 +345,6 @@ class TradeRoom extends React.Component {
     async requestLoan(evt) {
       evt.preventDefault();
       const contracts = await contractsDeferred.promise;
-      console.log(await (provider.asEthers()).send('eth_getCode', [ contracts.transferAll.address, 'latest' ]));
-      console.log(await (provider.asEthers()).send('eth_getCode', [ contracts.swapEntireLoan.address, 'latest' ]));
       const liquidityRequest = zero.createLiquidityRequest({
         token: await getRenBTCAddress(),
         amount: ethers.utils.parseUnits(String(this.state.value), 8),

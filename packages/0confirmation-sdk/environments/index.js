@@ -13,6 +13,8 @@ const CurveToken = require('@0confirmation/sol/build/CurveToken');
 const Exchange = require('@0confirmation/sol/build/Exchange');
 const Factory = require('@0confirmation/sol/build/Factory');
 const DAI = require('@0confirmation/sol/build/DAI');
+const SwapEntireLoan = require('@0confirmation/sol/build/SwapEntireLoan');
+const TransferAll = require('@0confirmation/sol/build/TransferAll');
 
 const chainIdFromNetwork = (network) => {
   switch (network) {
@@ -46,10 +48,10 @@ const renvmFromEnvironment = (network) => {
   }
   const renvm = new RenVM(renNetworkFromNetwork(network));
   const chainId = chainIdFromNetwork(network);
-  const renbtcShifter = renvm.network.contracts.addresses.gateways.BTCGateway._address;
-  const renbtc = renvm.network.contracts.addresses.tokens.BTC.address;
-  const shifterRegistry = renvm.network.contracts.addresses.gateways.GatewayRegistry.address;
-  const mpkh = renvm.network.contracts.renVM.mpkh;
+  const renbtcShifter = renvm.network.addresses.gateways.BTCGateway._address;
+  const renbtc = renvm.network.addresses.tokens.BTC.address;
+  const shifterRegistry = renvm.network.addresses.gateways.GatewayRegistry.address;
+  const mpkh = '0xc998b2a88ac96676e14f07739003419799a6823a';
   return {
     renbtcShifter,
     renbtc,
@@ -62,7 +64,8 @@ const zeroContractsFromNetwork = (network) => {
   const chainId = chainIdFromNetwork(network);
   return {
     shifterPool: fromArtifact(network, ShifterPool),
-    borrowProxyLib: fromArtifact(network, ShifterPool)
+    transferAll: fromArtifact(network, TransferAll),
+    swapEntireLoan: fromArtifact(network, SwapEntireLoan)
   };
 };
 
