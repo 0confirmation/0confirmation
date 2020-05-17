@@ -46,7 +46,7 @@ const renvmFromEnvironment = (network) => {
   }
   const renvm = new RenVM(renNetworkFromNetwork(network));
   const chainId = chainIdFromNetwork(network);
-  const renbtcShifter = fromArtifact(network, renvm.network.contracts.addresses.gateways.RenBTC.artifact);
+  const renbtcShifter = renvm.network.contracts.addresses.gateways.BTCGateway._address;
   const renbtc = renvm.network.contracts.addresses.tokens.BTC.address;
   const shifterRegistry = renvm.network.contracts.addresses.gateways.GatewayRegistry.address;
   const mpkh = renvm.network.contracts.renVM.mpkh;
@@ -80,6 +80,14 @@ const daiFromNetwork = (network) => {
   if (network === 'ganache') {
     return {
       dai: fromArtifact(network, DAI)
+    };
+  } else if (network === 'testnet') {
+    return {
+      dai: '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa'
+    };
+  } else if (network === 'mainnet') {
+    return {
+      dai: '0x6b175474e89094c44da98b954eedeac495271d0f'
     };
   }
 };
