@@ -30,7 +30,6 @@ contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
     isolate.genesis = block.number;
   }
   function setup(address shifterRegistry, uint256 minTimeout, uint256 poolFee, BorrowProxyLib.ModuleRegistration[] memory modules, ShifterPoolLib.LiquidityTokenLaunch[] memory tokenLaunches) public onlyOwner {
-    require(isolate.shifterRegistry == address(0x0), "already initialized");
     isolate.shifterRegistry = shifterRegistry;
     isolate.minTimeout = minTimeout;
     isolate.poolFee = poolFee;
