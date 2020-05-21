@@ -282,9 +282,10 @@ class TradeRoom extends React.Component {
         this.state = {
             showdetail: true,
             sendOpen:false,
+            showAlert:false,
             getOpen: false,
             send: 0,
-            get: 0,
+            gets: 0,
             rate: '0',
             getvalue: 0,
             slippage:0.5,
@@ -294,6 +295,7 @@ class TradeRoom extends React.Component {
             returnPercentage: .232,
             copied:false,
             modal:false,
+            message:'',
             _getcoins: 
                 { coin: <Fragment><InlineIcon color="#ffffff" style={{fontSize:"1.5em"}} className="mr-2" icon={daiIcon} /></Fragment>, id: 0, name: "DAI" },
             _sendcoins:
@@ -385,14 +387,17 @@ class TradeRoom extends React.Component {
         });
         let amount = getSwapAmountFromBorrowReceipt(receipt, deposited.proxyAddress);
         if (amount) {
-          amount = toFormat(amount, 'dai');
-          window.alert('BTC/DAI swap executed: ' + util.truncateDecimals(amount, 6) + ' DAI locked -- await RenVM message to release');
+          amount = toFormat(amount, 'dai');          
+          await this.setState({showAlert:true, message:`BTC/DAI swap executed: ${util.truncateDecimals(amount, 6)} DAI locked -- await RenVM message to release`});
+          // window.alert('BTC/DAI swap executed: ' + util.truncateDecimals(amount, 6) + ' DAI locked -- await RenVM message to release');
         } else {
-          window.alert('something went wrong');
+          // window.alert('something went wrong');
+          await this.setState({showAlert:true, message:"something went wrong"});
         }
         if (CHAIN === 'embedded' || CHAIN === 'test') await new Promise((resolve, reject) => setTimeout(resolve, 60000));
         await this.waitForRepayment(deposited);
-        window.alert('RenVM response made it to the network! DAI forwarded to your wallet!');
+        await this.setState({showAlert:true, message:"RenVM response made it to the network! DAI forwarded to your wallet!"});
+        // window.alert('RenVM response made it to the network! DAI forwarded to your wallet!');
       })().catch((err) => console.error(err));
     }
     async waitForRepayment(deposited) {
@@ -509,9 +514,9 @@ class TradeRoom extends React.Component {
                         <button className="btn text-light button-small btn-sm py-2 px-3 button-text" style={{ backgroundColor: "#317333", borderRadius: "13px" }} onClick={ (evt) => { evt.preventDefault(); if (window.ethereum) window.ethereum.enable() } }>Connect Wallet</button>
                         </div>
                         <div className="alert-box">
-                        <Alert delay={2000} boldText="Test Green" detailText="Test Detail" alertType="alert-green" />
-                        <Alert delay={3000} boldText="Test Yellow" detailText="Test Detail" alertType="alert-yellow" />
-                        <Alert boldText="Test Red" detailText="Test Detail" alertType="alert-red" />
+                        {(this.state.showAlert)? <Alert delay={2000} boldText="Transaction Detail" detailText={this.state.message}        alertType="alert-green" />:null}
+                       {/* <Alert delay={3000} boldText="Test Yellow" detailText="Test Detail" alertType="alert-yellow" />
+                        <Alert boldText="Test Red" detailText="Test Detail" alertType="alert-red" /> */}
                     </div>
                     <Row className="justify-content-center align-content-center text-center mx-auto">
                         <Col lg="2" md="2" sm="6" className="justify-content-center align-content-center mx-auto w-50" style={{ backgroundColor: "#1F2820", borderRadius: "10px"}}>
@@ -634,9 +639,9 @@ class TradeRoom extends React.Component {
 
                                                 {this._coins.map( (a, i)=> {
                                                     return (
-                                                        <DropdownItem key={i} className="dhover" style={{ color: "#ffffff", backgroundColor: (this.state.get === a.id) ? "#485F4B" : "" }}
+                                                        <DropdownItem key={i} className="dhover" style={{ color: "#ffffff", backgroundColor: (this.state.gets === a.id) ? "#485F4B" : "" }}
                                                             // onClick={() => {this._get = i; alert(this._get)}}
-                                                            onClick={(i) => { this.setState({ get: a.id, _getcoins: { name: a.name, id: a.id, coin: a.coin } }) }}
+                                                            onClick={(i) => { this.setState({ gets: a.id, _getcoins: { name: a.name, id: a.id, coin: a.coin } }) }}
                                                         >
                                                             {a.coin}<tab/> {a.name}</DropdownItem>
                                                     );
