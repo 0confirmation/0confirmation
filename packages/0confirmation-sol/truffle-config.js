@@ -41,5 +41,11 @@ module.exports = {
       port: 8545,
       network_id: '*'
     }
+  },
+  plugins: [
+    'truffle-plugin-verify'
+  ],
+  api_keys: {
+    etherscan: process.env.ETHERSCAN_API_KEY
   }
 };
