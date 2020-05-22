@@ -64,14 +64,14 @@ export default class Navigation extends React.Component {
                                         <Link to="/" style={{outline:"none", textDecoration:"none", color: "#ffffff"}} className="my-2 p-2">Docs
                                             <NavItem style={{ backgroundColor: (window.location.pathname.split("/")[2] === "doc") ? "#1F2820" : "" }} />
                                         </Link>
-                                        <Link to="/trade/earn" style={{outline:"none", textDecoration:"none", color: "#ffffff", backgroundColor: (window.location.pathname.split("/")[2] === "earn") ? "#1F2820" : "" }} className="my-2 p-2">
+                                        <a href="https://swap.0confirmation.com/trade/earn" style={{outline:"none", textDecoration:"none", color: "#ffffff", backgroundColor: (window.location.pathname.split("/")[2] === "earn") ? "#1F2820" : "" }} className="my-2 p-2">
                                             Earn
                                             <NavItem />
-                                        </Link>
-                                        <Link to="/trade/swap" style={{outline:"none", textDecoration:"none", color: "#ffffff", backgroundColor: (window.location.pathname.split("/")[2] === "swap") ? "#1F2820" : ""  }} className="my-2 p-2">
+                                        </a>
+                                        <a href="https://swap.0confirmation.com/trade/swap" style={{outline:"none", textDecoration:"none", color: "#ffffff", backgroundColor: (window.location.pathname.split("/")[2] === "swap") ? "#1F2820" : ""  }} className="my-2 p-2">
                                             Swap
                                             <NavItem />
-                                        </Link>
+                                        </a>
                                     </Nav>
                                 </div>
                             </Drawer>
@@ -87,16 +87,16 @@ export default class Navigation extends React.Component {
                                          Docs
                                 </NavItem>
                             </Link>
-                            <Link to="/trade/earn" style={{color: "#ffffff",textDecoration:"none"}} className="mx-1">
+                            <a href="https://swap.0confirmation.com/trade/earn" style={{color: "#ffffff",textDecoration:"none"}} className="mx-1">
                                 <NavItem className="nav-button" style={{width:"75px", marginRight:"4px", marginLeft:"4px", textAlign:"center", outline:"none", textDecoration:"none", backgroundColor:(window.location.pathname.split("/")[2] === "earn")?"#1F2820":"" }}>
                                         Earn
                                 </NavItem>
-                            </Link>
-                            <Link to="/trade/swap" style={{color: "#ffffff",textDecoration:"none"}} className="mx-1">
+                            </a>
+                            <a href="https://swap.0confirmation.com/trade/swap" style={{color: "#ffffff",textDecoration:"none"}} className="mx-1">
                                 <NavItem className="nav-button" style={{width:"75px", marginRight:"4px", marginLeft:"4px", textAlign:"center", outline:"none", textDecoration:"none", backgroundColor:(window.location.pathname.split("/")[2] === "swap")?"#1F2820":"" }}>
                                     Swap
                                 </NavItem>
-                            </Link>
+                            </a>
                        </Nav>
                     </Navbar>}
                 </div>

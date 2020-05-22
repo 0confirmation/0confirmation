@@ -217,8 +217,8 @@ export default class LandingPage extends React.Component {
                                                                     </Col>
                                                                     <Col lg="12" md="12" sm="12">
                                                                         <b className="pb-3 sub-header-text">
-                                                                            450.392 BTC<br/>
-                                                                            $4.05M
+                                                                            Coming Soon<br/>
+                                                                            
                                                                         </b>
                                                                     </Col>
                                                                 </Row>
@@ -242,8 +242,8 @@ export default class LandingPage extends React.Component {
                                                                     </Col>
                                                                     <Col lg="12" md="12" sm="12">
                                                                         <b className="pb-3 sub-header-text">
-                                                                            450.392 BTC<br/>
-                                                                            $4.05M
+                                                                            Coming Soon<br/>
+                                                                            
                                                                         </b>
                                                                     </Col>
                                                                 </Row>
@@ -267,8 +267,8 @@ export default class LandingPage extends React.Component {
                                                                     </Col>
                                                                     <Col lg="12" md="12" sm="12">
                                                                         <b className="pb-3 sub-header-text">
-                                                                            450.392 BTC<br/>
-                                                                            $4.05M
+                                                                            Coming Soon<br/>
+                                                                            
                                                                         </b>
                                                                     </Col>
                                                                 </Row>
@@ -293,8 +293,8 @@ export default class LandingPage extends React.Component {
                                                                     </Col>
                                                                     <Col lg="12" md="12" sm="12">
                                                                         <b className="pb-3 sub-header-text">
-                                                                            450.392 BTC<br/>
-                                                                            $4.05M
+                                                                            Coming Soon<br/>
+                                                                            
                                                                         </b>
                                                                     </Col>
                                                                 </Row>

@@ -23,6 +23,8 @@ import btgIcon from '@iconify/icons-cryptocurrency/btg';
 import { QRCode } from 'react-qrcode-logo';
 import Alert from './alert'
 
+const Expire = () => <div></div>;
+
 export default class TradeRoom extends React.Component {
     constructor(props) {
         super(props)
