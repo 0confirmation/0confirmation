@@ -7,7 +7,7 @@ import {
     Input,
     DropdownToggle,
     DropdownMenu,
-    DropdownItem, Modal, ModalBody, ModalFooter, ModalHeader, Button
+    DropdownItem, Modal, ModalBody, ModalFooter, ModalHeader, Button , Table, Tooltip
 } from "reactstrap";
 import { Link } from "react-router-dom";
 import { FaAngleDown } from 'react-icons/fa';
@@ -22,18 +22,24 @@ import eosIcon from '@iconify/icons-cryptocurrency/eos';
 import btgIcon from '@iconify/icons-cryptocurrency/btg';
 import { QRCode } from 'react-qrcode-logo';
 import Alert from './alert'
+import { async } from 'q';
 
 export default class TradeRoom extends React.Component {
     constructor(props) {
         super(props)
 
         this.state = {
+            feetooltip: false,
+            blocktooltip:false,
             showdetail: true,
             wallet:"xfekdjj39jsgahshjebah3i393jandbbrrb",
             sendOpen:false,
             getOpen: false,
             send: 0,
             get: 0,
+            transactions: true,
+            transactionDetails: 0,
+            transactionModal: false,
             rate:203,
             getvalue: 0,
             sendvalue: 0,
@@ -42,9 +48,9 @@ export default class TradeRoom extends React.Component {
             copied:false,
             modal:false,
             _getcoins: 
-                { coin: <Fragment><InlineIcon color="#ffffff" style={{fontSize:"1.5em"}} className="mr-2" icon={daiIcon} /></Fragment>, id: 0, name: "DAI" },
+                { coin: <Fragment><InlineIcon color="#ffffff" style={{fontSize:"1.5em"}} className="mr-2" icon={daiIcon} /></Fragment>, id: 0, fullname:"Ethereum", name: "DAI" },
             _sendcoins:
-                { coin: <Fragment><InlineIcon color="#ffffff" style={{fontSize:"1.5em"}} className="mr-2" icon={btcIcon} /></Fragment>, id: 0, name: "BTC" },
+                { coin: <Fragment><InlineIcon color="#ffffff" style={{fontSize:"1.5em"}} className="mr-2" icon={btcIcon} /></Fragment>, id: 0, fullname: "Bitcoin", name: "BTC" },
              
         }
         this.setsend = this.setsend.bind(this);
@@ -61,16 +67,66 @@ export default class TradeRoom extends React.Component {
     _get = 0;
     _coin = <Fragment><InlineIcon color="#ffffff" style={{fontSize:"1.5em"}} className="mr-2" icon={btcIcon} /></Fragment>
     _coins = [
-        { coin: <Fragment><InlineIcon color="#ffffff" style={{fontSize:"1.5em"}} className="mr-2" icon={btcIcon} /></Fragment>,id:0, name: "BTC" },
-        { coin: <Fragment><InlineIcon color="#ffffff" style={{fontSize:"1.5em"}} className="mr-2" icon={daiIcon} /></Fragment>,id:1, name: "DAI" },
-        { coin: <Fragment><InlineIcon color="#ffffff" style={{fontSize:"1.5em"}} className="mr-2" icon={ltcIcon} /></Fragment>,id:2, name: "LTC" },
-        { coin: <Fragment><InlineIcon color="#ffffff" style={{fontSize:"1.5em"}} className="mr-2" icon={ethIcon} /></Fragment>,id:3, name: "ETH" },
-        { coin: <Fragment><InlineIcon color="#ffffff" style={{fontSize:"1.5em"}} className="mr-2" icon={usdtIcon} /></Fragment>,id:4, name: "USDT"},
-        { coin: <Fragment><InlineIcon color="#ffffff" style={{fontSize:"1.5em"}} className="mr-2" icon={eosIcon} /></Fragment>,id:5, name: "EOS" },
-        { coin: <Fragment><InlineIcon color="#ffffff" style={{fontSize:"1.5em"}} className="mr-2" icon={btgIcon} /></Fragment>,id:6, name: "BTG" },
+        { coin: <Fragment><InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={btcIcon} /></Fragment>, id: 0, fullname:"Bitcoin" ,name: "BTC" },
+        { coin: <Fragment><InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={daiIcon} /></Fragment>, id: 1, fullname:"Ethereum" ,name: "DAI" },
+        { coin: <Fragment><InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={ltcIcon} /></Fragment>, id: 2, fullname:"Litecoin" ,name: "LTC" },
+        { coin: <Fragment><InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={ethIcon} /></Fragment>, id: 3, fullname:"Ethereum" ,name: "ETH" },
+        { coin: <Fragment><InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={usdtIcon} /></Fragment>, id: 4, fullname:"USDT" ,name: "USDT" },
+        { coin: <Fragment><InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={eosIcon} /></Fragment>, id: 5, fullname:"EOS" ,name: "EOS" },
+        { coin: <Fragment><InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={btgIcon} /></Fragment>, id: 6, fullname:"BTG" ,name: "BTG" },
+    ];
+    _history = [
+        {
+            created: "05/06/20 10:15", address: "xfekdjj39jsgahshjebah3i393jandbbrrb", confirmations: 1, sent: "0.200",
+            received: "836.42", status: "Liquidated",
+            sentcoin: <Fragment><InlineIcon color="#ffffff" style={{ fontSize: "2.5em" }} className="mr-2" icon={btcIcon} /></Fragment>,
+            sentfullname: "Bitcoin", sentname: "BTC",
+            receivedcoin: <Fragment><InlineIcon color="#ffffff" style={{ fontSize: "2.5em" }} className="mr-2" icon={daiIcon} /></Fragment>,
+            receivedfullname: "Ethereum", receivedname: "DAI",blocks:"8,294", target:"qk1kkwkekekqlqkwelekkqlkwlek", fees:"0.0001"
+        },
+        {created:"05/06/20 10:15",address:"xfekdjj39jsgahshjebah3i393jandbbrrb", confirmations:4, sent:"0.200", 
+          sentcoin: <Fragment><InlineIcon color="#ffffff" style={{ fontSize: "2.5em" }} className="mr-2" icon={btcIcon} /></Fragment>,
+            sentfullname: "Bitcoin", sentname: "BTC",
+            receivedcoin: <Fragment><InlineIcon color="#ffffff" style={{ fontSize: "2.5em" }} className="mr-2" icon={daiIcon} /></Fragment>,
+            receivedfullname: "Ethereum", receivedname: "DAI",blocks:"8,294", target:"qk1kkwkekekqlqkwelekkqlkwlek", fees:"0.0001", received:"836.42", status:"Pending"},
+        {created:"05/06/20 10:15",address:"xfekdjj39jsgahshjebah3i393jandbbrrb", confirmations:4, sent:"0.200", 
+          sentcoin: <Fragment><InlineIcon color="#ffffff" style={{ fontSize: "2.5em" }} className="mr-2" icon={btcIcon} /></Fragment>,
+            sentfullname: "Bitcoin", sentname: "BTC",
+            receivedcoin: <Fragment><InlineIcon color="#ffffff" style={{ fontSize: "2.5em" }} className="mr-2" icon={daiIcon} /></Fragment>,
+            receivedfullname: "Ethereum", receivedname: "DAI",blocks:"8,294", target:"qk1kkwkekekqlqkwelekkqlkwlek", fees:"0.0001", received:"836.42", status:"Pending"},
+        {created:"05/06/20 10:15",address:"xfekdjj39jsgahshjebah3i393jandbbrrb", confirmations:4, sent:"0.200", 
+          sentcoin: <Fragment><InlineIcon color="#ffffff" style={{ fontSize: "2.5em" }} className="mr-2" icon={btcIcon} /></Fragment>,
+            sentfullname: "Bitcoin", sentname: "BTC",
+            receivedcoin: <Fragment><InlineIcon color="#ffffff" style={{ fontSize: "2.5em" }} className="mr-2" icon={daiIcon} /></Fragment>,
+            receivedfullname: "Ethereum", receivedname: "DAI",blocks:"8,294", target:"qk1kkwkekekqlqkwelekkqlkwlek", fees:"0.0001", received:"836.42", status:"Pending"},
+        {created:"05/06/20 10:15",address:"xfekdjj39jsgahshjebah3i393jandbbrrb", confirmations:6, sent:"0.200", 
+          sentcoin: <Fragment><InlineIcon color="#ffffff" style={{ fontSize: "2.5em" }} className="mr-2" icon={btcIcon} /></Fragment>,
+            sentfullname: "Bitcoin", sentname: "BTC",
+            receivedcoin: <Fragment><InlineIcon color="#ffffff" style={{ fontSize: "2.5em" }} className="mr-2" icon={daiIcon} /></Fragment>,
+            receivedfullname: "Ethereum", receivedname: "DAI",blocks:"8,294", target:"qk1kkwkekekqlqkwelekkqlkwlek", fees:"0.0001", received:"836.42", status:"Completed"},
+        {created:"05/06/20 10:15",address:"xfekdjj39jsgahshjebah3i393jandbbrrb", confirmations:6, sent:"0.200", 
+          sentcoin: <Fragment><InlineIcon color="#ffffff" style={{ fontSize: "2.5em" }} className="mr-2" icon={btcIcon} /></Fragment>,
+            sentfullname: "Bitcoin", sentname: "BTC",
+            receivedcoin: <Fragment><InlineIcon color="#ffffff" style={{ fontSize: "2.5em" }} className="mr-2" icon={daiIcon} /></Fragment>,
+            receivedfullname: "Ethereum", receivedname: "DAI",blocks:"8,294", target:"qk1kkwkekekqlqkwelekkqlkwlek", fees:"0.0001", received:"836.42", status:"Completed"},
+        {created:"05/06/20 10:15",address:"xfekdjj39jsgahshjebah3i393jandbbrrb", confirmations:6, sent:"0.200", 
+          sentcoin: <Fragment><InlineIcon color="#ffffff" style={{ fontSize: "2.5em" }} className="mr-2" icon={btcIcon} /></Fragment>,
+            sentfullname: "Bitcoin", sentname: "BTC",
+            receivedcoin: <Fragment><InlineIcon color="#ffffff" style={{ fontSize: "2.5em" }} className="mr-2" icon={daiIcon} /></Fragment>,
+            receivedfullname: "Ethereum", receivedname: "DAI",blocks:"8,294", target:"qk1kkwkekekqlqkwelekkqlkwlek", fees:"0.0001", received:"836.42", status:"Completed"},
+        {created:"05/06/20 10:15",address:"xfekdjj39jsgahshjebah3i393jandbbrrb", confirmations:1, sent:"0.200", 
+          sentcoin: <Fragment><InlineIcon color="#ffffff" style={{ fontSize: "2.5em" }} className="mr-2" icon={btcIcon} /></Fragment>,
+            sentfullname: "Bitcoin", sentname: "BTC",
+            receivedcoin: <Fragment><InlineIcon color="#ffffff" style={{ fontSize: "2.5em" }} className="mr-2" icon={daiIcon} /></Fragment>,
+            receivedfullname: "Ethereum", receivedname: "DAI",blocks:"8,294", target:"qk1kkwkekekqlqkwelekkqlkwlek", fees:"0.0001", received:"836.42", status:"Liquidated"},
+        {created:"05/06/20 10:15",address:"xfekdjj39jsgahshjebah3i393jandbbrrb", confirmations:1, sent:"0.200", 
+          sentcoin: <Fragment><InlineIcon color="#ffffff" style={{ fontSize: "2.5em" }} className="mr-2" icon={btcIcon} /></Fragment>,
+            sentfullname: "Bitcoin", sentname: "BTC",
+            receivedcoin: <Fragment><InlineIcon color="#ffffff" style={{ fontSize: "2.5em" }} className="mr-2" icon={daiIcon} /></Fragment>,
+            receivedfullname: "Ethereum", receivedname: "DAI",blocks:"8,294", target:"qk1kkwkekekqlqkwelekkqlkwlek", fees:"0.0001", received:"836.42", status:"Liquidated"},
     ];
     render() {
-        const closeBtn = <button className="btn" style={{ color: "#317333" }} onClick={ async ()=> await this.setState({modal:!this.state.modal})}>&times;</button>;
+                const closeBtn = <button className="btn" style={{ color: "#317333", fontSize:(this.state.transactionModal)?"2em":"" }} onClick={async () => (this.state.modal) ? await this.setState({ modal: !this.state.modal }) : await this.setState({ transactionModal: !this.state.transactionModal })}>&times;</button>;
         return (
             <>
                 <div className="modal-bg" style={{display: this.state.modal ? "block": "none"}} />
@@ -175,10 +231,10 @@ export default class TradeRoom extends React.Component {
                     <Row className="justify-content-center align-content-center text-center mx-auto">
                         <Col lg="2" md="2" sm="6" className="justify-content-center align-content-center mx-auto w-50" style={{ backgroundColor: "#1F2820", borderRadius: "10px"}}>
                             <Row className="justify-content-center align-content-center p-1 text-light">
-                                <Col className="justify-content-center align-content-center py-1" lg="6" md="6" sm="6" style={{ borderRadius: (this.props.ismobile)? "0px":"13px",backgroundColor: (window.location.pathname.split("/")[2] === "swap") ? "#317333" : "" }}>
+                                <Col className="justify-content-center align-content-center py-1" lg="6" md="6" sm="6" style={{ borderRadius: (this.props.ismobile)? "10px":"13px",backgroundColor: (window.location.pathname.split("/")[2] === "swap") ? "#317333" : "" }}>
                                 <Link to="/trade/swap" className="py-1 pill-button button-text" href="/#">Swap</Link>
                                 </Col>
-                                <Col className="justify-content-center align-content-center py-1" lg="6" md="6" sm="6" style={{ borderRadius: (this.props.ismobile)? "0px":"13px",backgroundColor: (window.location.pathname.split("/")[2] === "earn") ? "#317333" : "" }}>
+                                <Col className="justify-content-center align-content-center py-1" lg="6" md="6" sm="6" style={{ borderRadius: (this.props.ismobile)? "10px":"13px",backgroundColor: (window.location.pathname.split("/")[2] === "earn") ? "#317333" : "" }}>
                                 <Link to="/trade/earn" className="py-1 pill-button button-text" href="/#">Earn</Link>
                                 </Col>
                             </Row>
@@ -186,8 +242,8 @@ export default class TradeRoom extends React.Component {
                     </Row>
                     <Row className="justify-content-center align-content-center text-center mx-auto my-1">
                         {(window.location.pathname.split("/")[2] === "earn")?<Col style={{height: "24px"}} lg="6" md="6" sm="6"></Col>:<Col lg="6" md="6" sm="6">
-                            <Link to="/" style={{ height: "24px", outline: "none", textDecoration: "none", borderBottom: "1px solid #317333", color: "#317333", fontSize:"0.8em", fontStyle:"normal", fontWeight:"bold" }} href="/#"
-
+                            <Link to= "##" style={{ height: "24px", outline: "none", textDecoration: "none", borderBottom: "1px solid #317333", color: "#317333", fontSize:"0.8em", fontStyle:"normal", fontWeight:"bold" }} href="/#"
+                                onClick={async()=> await this.setState({transactions:!this.state.transactions})}
                             >Recent Transactions</Link>
                         </Col>}
                     </Row>
