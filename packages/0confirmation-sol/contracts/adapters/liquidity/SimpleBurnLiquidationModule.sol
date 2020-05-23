@@ -3,20 +3,22 @@ pragma experimental ABIEncoderV2;
 
 import { AddressSetLib } from "../../utils/AddressSetLib.sol";
 import { BorrowProxyLib } from "../../BorrowProxyLib.sol";
-import { IUniswapExchange } from "../../interfaces/IUniswapExchange.sol";
-import { IUniswapFactory } from "../../interfaces/IUniswapFactory.sol";
 import { IERC20 } from "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { SimpleBurnLiquidationModuleLib } from "./SimpleBurnLiquidationModuleLib.sol";
 import { ERC20AdapterLib } from "../assets/erc20/ERC20AdapterLib.sol";
+import { UniswapV2AdapterLib } from "../assets/uniswap-v2/UniswapV2AdapterLib.sol";
+import { IUniswapV2Router01 } from "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router01.sol";
+import { ShifterPool } from "../../ShifterPool.sol";
 
 contract SimpleBurnLiquidationModule {
   using AddressSetLib for *;
   using TokenUtils for *;
+  using UniswapV2AdapterLib for *;
   BorrowProxyLib.ProxyIsolate proxyIsolate;
-  constructor(address factoryAddress, address erc20Module) public {
+  constructor(address routerAddress, address erc20Module) public {
     SimpleBurnLiquidationModuleLib.Isolate storage isolate = SimpleBurnLiquidationModuleLib.getIsolatePointer();
-    isolate.factoryAddress = factoryAddress;
+    isolate.routerAddress = routerAddress;
     isolate.erc20Module = erc20Module;
   }
   function notify(address /* moduleAddress */, bytes memory payload) public returns (bool) {
@@ -26,10 +28,12 @@ contract SimpleBurnLiquidationModule {
     return true;
   }
   function liquidate(address moduleAddress) public returns (bool) {
-    if (!ERC20AdapterLib.liquidate(SimpleBurnLiquidationModuleLib.getExternalIsolate(moduleAddress).erc20Module)) return false;
+    if (!ERC20AdapterLib.liquidate(proxyIsolate)) return false;
     SimpleBurnLiquidationModuleLib.Isolate storage isolate = SimpleBurnLiquidationModuleLib.getIsolatePointer();
-    IUniswapFactory factory = IUniswapFactory(isolate.factoryAddress);
     address liquidateTo = address(uint160(proxyIsolate.token));
+    IUniswapV2Router01 router = IUniswapV2Router01(isolate.routerAddress);
+    address liquidityToken = ShifterPool(proxyIsolate.masterAddress).getLiquidityTokenForTokenHandler(liquidateTo);
+    address WETH = router.WETH();
     uint256 i;
     uint256 received = 0;
     for (i = isolate.liquidated; i < isolate.toLiquidate.set.length; i++) {
@@ -40,20 +44,17 @@ contract SimpleBurnLiquidationModule {
         return false;
       }
       uint256 tokenBalance = IERC20(tokenAddress).balanceOf(address(this));
-      address payable exchangeAddress = factory.getExchange(tokenAddress);
-      tokenAddress.approveForMaxIfNeeded(exchangeAddress);
-      received += IUniswapExchange(exchangeAddress).tokenToTokenSwapInput(tokenBalance, 0, 0, block.number + 1, liquidateTo);
+      address[] memory path = UniswapV2AdapterLib.generatePathForToken(tokenAddress, WETH, liquidateTo);
+      tokenAddress.approveForMaxIfNeeded(address(router));
+      router.swapExactTokensForTokens(tokenBalance, 1, path, liquidityToken, block.timestamp + 1);
     }
-    received += IUniswapExchange(factory.getExchange(liquidateTo)).ethToTokenSwapInput{ value: address(this).balance }(0, block.number + 1);
     isolate.liquidated = i;
-    bool success = liquidateTo.sendToken(proxyIsolate.masterAddress, received);
-    require(success, "liquidated token transfer failed");
     return true;
   }
   function getExternalIsolateHandler() external view returns (SimpleBurnLiquidationModuleLib.ExternalIsolate memory) {
     SimpleBurnLiquidationModuleLib.Isolate storage isolate = SimpleBurnLiquidationModuleLib.getIsolatePointer();
     return SimpleBurnLiquidationModuleLib.ExternalIsolate({
-      factoryAddress: isolate.factoryAddress,
+      routerAddress: isolate.routerAddress,
       erc20Module: isolate.erc20Module
     });
   }

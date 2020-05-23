@@ -3,8 +3,6 @@ pragma experimental ABIEncoderV2;
 
 import { AddressSetLib } from "../../utils/AddressSetLib.sol";
 import { BorrowProxyLib } from "../../BorrowProxyLib.sol";
-import { IUniswapV2Exchange } from "@uniswap/v2-core/contracts/interfaces/IUniswapExchange.sol";
-import { IUniswapV2Factory } from "@uniswap/v2-core/contracts/interfaces/IUniswapFactory.sol";
 import { IERC20 } from "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ModuleLib } from "../lib/ModuleLib.sol";
@@ -12,13 +10,13 @@ import { SimpleBurnLiquidationModule } from "./SimpleBurnLiquidationModule.sol";
 
 library SimpleBurnLiquidationModuleLib {
   struct Isolate {
-    address factoryAddress;
+    address routerAddress;
     address erc20Module;
     uint256 liquidated;
     AddressSetLib.AddressSet toLiquidate;
   }
   struct ExternalIsolate {
-    address factoryAddress;
+    address routerAddress;
     address erc20Module;
   }
   function computeIsolatePointer() public pure returns (uint256) {

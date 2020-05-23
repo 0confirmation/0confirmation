@@ -17,6 +17,8 @@ import { SandboxLib } from "./utils/sandbox/SandboxLib.sol";
 import { SafeViewExecutor } from "./utils/sandbox/SafeViewExecutor.sol";
 import { FactoryLib } from "./FactoryLib.sol";
 import { NullCloneConstructor } from "./NullCloneConstructor.sol";
+import { AssetForwarderLib } from "./adapters/lib/AssetForwarderLib.sol";
+import { AssetForwarder } from "./adapters/lib/AssetForwarder.sol";
 
 contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
   using SandboxLib for *;
@@ -42,9 +44,25 @@ contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
       isolate.tokenToLiquidityToken[launch.token] = launch.liqToken;
     }
   }
+  function getLiquidityTokenForTokenHandler(address token) public view returns (address) {
+    return isolate.tokenToLiquidityToken[token];
+  }
   bytes32 constant BORROW_PROXY_IMPLEMENTATION_SALT = 0xfe1e3164ba4910db3c9afd049cd8feb4552390569c846692e6df4ac68aeaa90e;
   function deployBorrowProxyImplementation() public {
     isolate.borrowProxyImplementation = isolate.makeBorrowProxy(BORROW_PROXY_IMPLEMENTATION_SALT);
+  }
+  function deployAssetForwarderImplementation() public {
+    isolate.assetForwarderImplementation = AssetForwarderLib.deployAssetForwarder();
+  }
+  modifier onlyBorrowProxy {
+    require(isolate.borrowProxyController.isInitialized(msg.sender), "only borrow proxy can call function");
+    _;
+  }
+  function deployAssetForwarderClone(bytes32 salt) public onlyBorrowProxy returns (address created) {
+    created = AssetForwarderLib.deployAssetForwarderClone(isolate.assetForwarderImplementation, keccak256(abi.encodePacked(AssetForwarderLib.GET_ASSET_FORWARDER_IMPLEMENTATION_SALT(), salt)));
+  }
+  function getAssetForwarderImplementationHandler() public returns (address implementation) {
+    return isolate.assetForwarderImplementation;
   }
   function deployBorrowProxyClone(bytes32 salt) internal returns (address payable created) {
     created = address(uint160(FactoryLib.create2Clone(isolate.borrowProxyImplementation, uint256(salt))));

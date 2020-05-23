@@ -25,6 +25,9 @@ library FactoryLib {
   function deriveInstanceAddress(address target, bytes32 salt) internal view returns (address) {
     return Create2.computeAddress(salt, keccak256(computeCreationCode(target)));
   }
+  function deriveInstanceAddress(address from, address target, bytes32 salt) internal view returns (address) {
+     return Create2.computeAddress(salt, keccak256(computeCreationCode(target)), from);
+  }
   function create2Clone(address target, uint saltNonce) internal returns (address result) {
     bytes memory clone = computeCreationCode(target);
     bytes32 salt = bytes32(saltNonce);

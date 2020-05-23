@@ -11,6 +11,8 @@ import { LiquidityToken } from "./LiquidityToken.sol";
 import { ShifterBorrowProxy } from "./ShifterBorrowProxy.sol";
 import { ShifterBorrowProxyLib } from "./ShifterBorrowProxyLib.sol";
 import { ShifterBorrowProxyFactoryLib } from "./ShifterBorrowProxyFactoryLib.sol";
+import { FactoryLib } from "./FactoryLib.sol";
+import { ShifterPool } from "./ShifterPool.sol";
 
 library ShifterPoolLib {
   using BorrowProxyLib for *;
@@ -21,6 +23,7 @@ library ShifterPoolLib {
   struct Isolate {
     uint256 genesis;
     address borrowProxyImplementation;
+    address assetForwarderImplementation;
     address shifterRegistry;
     uint256 minTimeout;
     uint256 poolFee;
@@ -29,6 +32,17 @@ library ShifterPoolLib {
     mapping (address => address) tokenToLiquidityToken;
     BorrowProxyLib.ControllerIsolate borrowProxyController;
     BorrowProxyLib.ModuleRegistry registry;
+  }
+  bytes32 constant ASSET_FORWARDER_IMPLEMENTATION_SALT = 0x547c714bc15831c4a5fc7c91d35b0c6e69e7277fa19cd7e3a2ccaf940ff441fd;
+  function GET_ASSET_FORWARDER_IMPLEMENTATION_SALT() internal pure returns (bytes32) {
+    return ASSET_FORWARDER_IMPLEMENTATION_SALT;
+  }
+  function deriveAssetForwarderAddress(BorrowProxyLib.ProxyIsolate storage isolate, bytes32 salt) internal returns (address) {
+    address masterAddress = isolate.masterAddress;
+    return FactoryLib.deriveInstanceAddress(masterAddress, ShifterPool(masterAddress).getAssetForwarderImplementationHandler(), keccak256(abi.encodePacked(ASSET_FORWARDER_IMPLEMENTATION_SALT, salt)));
+  }
+  function deployAssetForwarder(BorrowProxyLib.ProxyIsolate storage isolate, bytes32 salt) public returns (address created) {
+    return ShifterPool(isolate.masterAddress).deployAssetForwarderClone(salt);
   }
   function makeBorrowProxy(Isolate storage isolate, bytes32 salt) internal returns (address payable proxyAddress) {
     proxyAddress = address(uint160(isolate.deployBorrowProxy(salt)));

@@ -7,8 +7,13 @@ import { ModuleLib } from "../../lib/ModuleLib.sol";
 import { AssetForwarder } from "../../lib/AssetForwarder.sol";
 import { AssetForwarderLib } from "../../lib/AssetForwarderLib.sol";
 import { ERC20Adapter } from "./ERC20Adapter.sol";
+import { BorrowProxyLib } from "../../../BorrowProxyLib.sol";
+import { ShifterPoolLib } from "../../../ShifterPoolLib.sol";
+import { TokenUtils } from "../../../utils/TokenUtils.sol";
 
 library ERC20AdapterLib {
+  using ShifterPoolLib for *;
+  using TokenUtils for *;
   struct EscrowRecord {
     address recipient;
     address token;
@@ -17,15 +22,6 @@ library ERC20AdapterLib {
     EscrowRecord[] payments;
     bool isProcessing;
     uint256 processed;
-    address assetForwarderImplementation;
-  }
-  struct ExternalIsolate {
-    address assetForwarderImplementation;
-  }
-  function toExternal(Isolate storage isolate) internal view returns (ExternalIsolate memory result) {
-    result = ExternalIsolate({
-      assetForwarderImplementation: isolate.assetForwarderImplementation
-    });
   }
   function isDone(Isolate storage isolate) internal view returns (bool) {
     return !isolate.isProcessing && isolate.payments.length == isolate.processed;
@@ -36,12 +32,11 @@ library ERC20AdapterLib {
   function computeForwarderSalt(uint256 index) internal pure returns (bytes32) {
     return keccak256(abi.encodePacked(index));
   }
-  function computeForwarderAddress(address moduleAddress, uint256 index) internal view returns (address) {
-    return AssetForwarderLib.deriveAssetForwarderAddress(ERC20Adapter(moduleAddress).getExternalIsolateHandler().assetForwarderImplementation, computeForwarderSalt(index));
+  function computeForwarderAddress(BorrowProxyLib.ProxyIsolate storage proxyIsolate, uint256 index) internal returns (address) {
+    return proxyIsolate.deriveAssetForwarderAddress(computeForwarderSalt(index));
   }
-  function liquidate(address moduleAddress) internal returns (bool) {
-    ERC20AdapterLib.Isolate storage isolate = getIsolatePointer();
-    return processEscrowReturns(isolate, moduleAddress);
+  function liquidate(BorrowProxyLib.ProxyIsolate storage proxyIsolate) internal returns (bool) {
+    return processEscrowReturns(proxyIsolate);
   }
   struct TransferInputs {
     address recipient;
@@ -54,39 +49,58 @@ library ERC20AdapterLib {
       amount: amount
     });
   }
-  function forwardEscrow(address moduleAddress, EscrowRecord memory record, uint256 index) internal {
-    address forwarder = AssetForwarderLib.deployAssetForwarderClone(ERC20Adapter(moduleAddress).getExternalIsolateHandler().assetForwarderImplementation, computeForwarderSalt(index));
+  function forwardEscrow(BorrowProxyLib.ProxyIsolate storage proxyIsolate, EscrowRecord memory record, uint256 index) internal {
+    address forwarder = proxyIsolate.deployAssetForwarder(computeForwarderSalt(index));
     AssetForwarder(forwarder).forwardAsset(address(uint160(record.recipient)), record.token);
   }
-  function returnEscrow(address moduleAddress, EscrowRecord memory record, uint256 index) internal {
-    address forwarder = AssetForwarderLib.deployAssetForwarderClone(ERC20Adapter(moduleAddress).getExternalIsolateHandler().assetForwarderImplementation, computeForwarderSalt(index));
+  function returnEscrow(BorrowProxyLib.ProxyIsolate storage proxyIsolate, EscrowRecord memory record, uint256 index) internal {
+    address forwarder = proxyIsolate.deployAssetForwarder(computeForwarderSalt(index));
     AssetForwarder(forwarder).forwardAsset(address(uint160(address(this))), record.token);
   }
   uint256 constant MINIMUM_GAS_TO_PROCESS = 5e5;
   uint256 constant MAX_RECORDS = 100;
-  function processEscrowForwards(Isolate storage isolate, address moduleAddress) internal returns (bool) {
+  function processEscrowForwards(BorrowProxyLib.ProxyIsolate storage proxyIsolate) internal returns (bool) {
+    Isolate storage isolate = getIsolatePointer();
     if (!isolate.isProcessing) isolate.isProcessing = true;
     for (uint256 i = isolate.processed; i < isolate.payments.length; i++) {
       if (gasleft() < MINIMUM_GAS_TO_PROCESS) {
         isolate.processed = i;
         return false;
       } else {
-        forwardEscrow(moduleAddress, isolate.payments[i], i);
+        forwardEscrow(proxyIsolate, isolate.payments[i], i);
       }
     }
     return true;
   }
-  function processEscrowReturns(Isolate storage isolate, address moduleAddress) internal returns (bool) {
+  function processEscrowReturns(BorrowProxyLib.ProxyIsolate storage proxyIsolate) internal returns (bool) {
+    Isolate storage isolate = getIsolatePointer();
     if (!isolate.isProcessing) isolate.isProcessing = true;
     for (uint256 i = isolate.processed; i < isolate.payments.length; i++) {
       if (gasleft() < MINIMUM_GAS_TO_PROCESS) {
         isolate.processed = i;
         return false;
       } else {
-        returnEscrow(moduleAddress, isolate.payments[i], i);
+        returnEscrow(proxyIsolate, isolate.payments[i], i);
       }
     }
     return true;
+  }
+  function sendToEscrow(BorrowProxyLib.ProxyIsolate storage proxyIsolate, address recipient, address token, uint256 amount) internal returns (bool) {
+     Isolate storage isolate = getIsolatePointer();
+     address escrowWallet = proxyIsolate.deriveAssetForwarderAddress(keccak256(abi.encodePacked(address(this), isolate.payments.length)));
+     installEscrowRecord(recipient, token);
+     return token.sendToken(escrowWallet, amount);
+  }
+  function installEscrowRecord(address recipient, address token) internal {
+    Isolate storage isolate = getIsolatePointer();
+    isolate.payments.push(EscrowRecord({
+      recipient: recipient,
+      token: token
+    }));
+  }
+  function deriveNextForwarderAddress(BorrowProxyLib.ProxyIsolate storage proxyIsolate) internal returns (address) {
+    Isolate storage isolate = getIsolatePointer();
+    return proxyIsolate.deriveAssetForwarderAddress(keccak256(abi.encodePacked(address(this), isolate.payments.length)));
   }
   function getCastStorageType() internal pure returns (function (uint256) internal pure returns (Isolate storage) swap) {
     function (uint256) internal returns (uint256) cast = ModuleLib.cast;

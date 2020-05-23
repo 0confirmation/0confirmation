@@ -4,7 +4,6 @@ pragma experimental ABIEncoderV2;
 import { BorrowProxyLib } from "./BorrowProxyLib.sol";
 import { RevertCaptureLib } from "./utils/RevertCaptureLib.sol";
 import { SliceLib } from "./utils/SliceLib.sol";
-import { ViewExecutor } from "./utils/ViewExecutor.sol";
 import { IShifter } from "./interfaces/IShifter.sol";
 import { IBorrowProxyController } from "./interfaces/IBorrowProxyController.sol";
 import { AddressSetLib } from "./utils/AddressSetLib.sol";
