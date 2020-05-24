@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
@@ -8,12 +9,16 @@ import { AssetForwarder } from "../../lib/AssetForwarder.sol";
 import { AssetForwarderLib } from "../../lib/AssetForwarderLib.sol";
 import { ERC20Adapter } from "./ERC20Adapter.sol";
 import { BorrowProxyLib } from "../../../BorrowProxyLib.sol";
+import { StringLib } from "../../../utils/StringLib.sol";
 import { ShifterPoolLib } from "../../../ShifterPoolLib.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { FactoryLib } from "../../../FactoryLib.sol";
+import { ShifterPool } from "../../../ShifterPool.sol";
 
 library ERC20AdapterLib {
   using ShifterPoolLib for *;
   using TokenUtils for *;
+  using StringLib for *;
   struct EscrowRecord {
     address recipient;
     address token;
@@ -33,7 +38,7 @@ library ERC20AdapterLib {
     return keccak256(abi.encodePacked(index));
   }
   function computeForwarderAddress(BorrowProxyLib.ProxyIsolate storage proxyIsolate, uint256 index) internal view returns (address) {
-    return proxyIsolate.deriveAssetForwarderAddress(computeForwarderSalt(index));
+    return FactoryLib.deriveInstanceAddress(proxyIsolate.masterAddress, ShifterPool(proxyIsolate.masterAddress).getAssetForwarderImplementationHandler(), keccak256(abi.encodePacked(AssetForwarderLib.GET_ASSET_FORWARDER_IMPLEMENTATION_SALT(), address(this), computeForwarderSalt(index))));
   }
   function liquidate(BorrowProxyLib.ProxyIsolate storage proxyIsolate) internal returns (bool) {
     return processEscrowReturns(proxyIsolate);
@@ -49,8 +54,11 @@ library ERC20AdapterLib {
       amount: amount
     });
   }
+  event Log(address indexed data);
   function forwardEscrow(BorrowProxyLib.ProxyIsolate storage proxyIsolate, EscrowRecord memory record, uint256 index) internal {
     address forwarder = proxyIsolate.deployAssetForwarder(computeForwarderSalt(index));
+    emit Log(forwarder);
+    emit Log(computeForwarderAddress(proxyIsolate, index));
     AssetForwarder(forwarder).forwardAsset(address(uint160(record.recipient)), record.token);
   }
   function returnEscrow(BorrowProxyLib.ProxyIsolate storage proxyIsolate, EscrowRecord memory record, uint256 index) internal {
@@ -87,7 +95,7 @@ library ERC20AdapterLib {
   }
   function sendToEscrow(BorrowProxyLib.ProxyIsolate storage proxyIsolate, address recipient, address token, uint256 amount) internal returns (bool) {
      Isolate storage isolate = getIsolatePointer();
-     address escrowWallet = proxyIsolate.deriveAssetForwarderAddress(keccak256(abi.encodePacked(address(this), isolate.payments.length)));
+     address escrowWallet = computeForwarderAddress(proxyIsolate, isolate.payments.length);
      installEscrowRecord(recipient, token);
      return token.sendToken(escrowWallet, amount);
   }
@@ -100,7 +108,7 @@ library ERC20AdapterLib {
   }
   function deriveNextForwarderAddress(BorrowProxyLib.ProxyIsolate storage proxyIsolate) internal view returns (address) {
     Isolate storage isolate = getIsolatePointer();
-    return proxyIsolate.deriveAssetForwarderAddress(keccak256(abi.encodePacked(address(this), isolate.payments.length)));
+    return computeForwarderAddress(proxyIsolate, isolate.payments.length);
   }
   function getCastStorageType() internal pure returns (function (uint256) internal pure returns (Isolate storage) swap) {
     function (uint256) internal returns (uint256) cast = ModuleLib.cast;

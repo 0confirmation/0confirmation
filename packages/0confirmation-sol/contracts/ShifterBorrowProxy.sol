@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
@@ -72,7 +73,6 @@ contract ShifterBorrowProxy is BorrowProxy, SafeViewExecutor, NullCloneConstruct
     }
     return false;
   }
-/*
   function defaultLoan(bytes memory data) public returns (bool) {
     (bool success, ShifterBorrowProxyLib.ProxyRecord memory record, address pool, uint256 postBalance) = _defaultLoan(data);
     return maybeRelayResolveLoan(success, record, pool, postBalance);
@@ -81,7 +81,7 @@ contract ShifterBorrowProxy is BorrowProxy, SafeViewExecutor, NullCloneConstruct
     require(!isolate.isRepaying, "loan being repaid");
     require(!isolate.unbound, "loan already repaid");
     require(validateProxyRecord(data), "proxy record invalid");
-    ShifterBorrowProxyLib.ProxyRecord memory record; // = data.decodeProxyRecord();
+    record = data.decodeProxyRecord();
     address[] memory set = isolate.liquidationSet.set;
     if (record.loan.params.timeoutExpiry >= block.number) {
       isolate.isLiquidating = true;
@@ -107,7 +107,6 @@ contract ShifterBorrowProxy is BorrowProxy, SafeViewExecutor, NullCloneConstruct
       success = false;
     }
   }
-*/
   function receiveInitializationActions(ShifterBorrowProxyLib.InitializationAction[] memory actions) public {
     require(msg.sender == address(isolate.masterAddress), "must be called from shifter pool");
     actions.processActions();

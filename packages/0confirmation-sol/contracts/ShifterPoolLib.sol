@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
@@ -13,6 +14,7 @@ import { ShifterBorrowProxyLib } from "./ShifterBorrowProxyLib.sol";
 import { ShifterBorrowProxyFactoryLib } from "./ShifterBorrowProxyFactoryLib.sol";
 import { FactoryLib } from "./FactoryLib.sol";
 import { ShifterPool } from "./ShifterPool.sol";
+import { AssetForwarderLib } from "./adapters/lib/AssetForwarderLib.sol";
 
 library ShifterPoolLib {
   using BorrowProxyLib for *;
@@ -32,14 +34,6 @@ library ShifterPoolLib {
     mapping (address => address) tokenToLiquidityToken;
     BorrowProxyLib.ControllerIsolate borrowProxyController;
     BorrowProxyLib.ModuleRegistry registry;
-  }
-  bytes32 constant ASSET_FORWARDER_IMPLEMENTATION_SALT = 0x547c714bc15831c4a5fc7c91d35b0c6e69e7277fa19cd7e3a2ccaf940ff441fd;
-  function GET_ASSET_FORWARDER_IMPLEMENTATION_SALT() internal pure returns (bytes32) {
-    return ASSET_FORWARDER_IMPLEMENTATION_SALT;
-  }
-  function deriveAssetForwarderAddress(BorrowProxyLib.ProxyIsolate storage isolate, bytes32 salt) internal view returns (address) {
-    address masterAddress = isolate.masterAddress;
-    return FactoryLib.deriveInstanceAddress(masterAddress, ShifterPool(masterAddress).getAssetForwarderImplementationHandler(), keccak256(abi.encodePacked(ASSET_FORWARDER_IMPLEMENTATION_SALT, salt)));
   }
   function deployAssetForwarder(BorrowProxyLib.ProxyIsolate storage isolate, bytes32 salt) internal returns (address created) {
     return ShifterPool(isolate.masterAddress).deployAssetForwarderClone(salt);

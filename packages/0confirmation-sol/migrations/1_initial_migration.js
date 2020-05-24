@@ -18,6 +18,7 @@ const SwapEntireLoan = artifacts.require('SwapEntireLoan');
 const UniswapV2Factory = artifacts.require('UniswapV2Factory');
 const UniswapV2Pair = artifacts.require('UniswapV2Pair');
 const UniswapV2Router01 = artifacts.require('UniswapV2Router01');
+const V2SwapAndDrop = artifacts.require('V2SwapAndDrop');
 const WETH9 = artifacts.require('WETH9');
 
 const { mapSeries } = require('bluebird');
@@ -51,6 +52,7 @@ module.exports = async function(deployer) {
   await deployer.link(ShifterBorrowProxyFactoryLib, ShifterPool);
   await deployer.deploy(ShifterPool);
   await deployer.deploy(ERC20Adapter);
+  await deployer.deploy(V2SwapAndDrop);
   const erc20Adapter = await ERC20Adapter.deployed();
   const provider = new ethers.providers.Web3Provider(ShifterPool.currentProvider);
   const [ fromAddress ] = await provider.send('eth_accounts', []);

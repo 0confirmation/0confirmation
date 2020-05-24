@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
@@ -60,14 +61,10 @@ contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
   function deployAssetForwarderImplementation() public {
     isolate.assetForwarderImplementation = AssetForwarderLib.deployAssetForwarder();
   }
-  modifier onlyBorrowProxy {
-    require(isolate.borrowProxyController.isInitialized(msg.sender), "only borrow proxy can call function");
-    _;
-  }
 
-  function deployAssetForwarderClone(bytes32 salt) public onlyBorrowProxy returns (address created) {
+  function deployAssetForwarderClone(bytes32 salt) public returns (address created) {
 
-    created = AssetForwarderLib.deployAssetForwarderClone(isolate.assetForwarderImplementation, keccak256(abi.encodePacked(AssetForwarderLib.GET_ASSET_FORWARDER_IMPLEMENTATION_SALT(), salt)));
+    created = FactoryLib.create2Clone(isolate.assetForwarderImplementation, uint256(keccak256(abi.encodePacked(AssetForwarderLib.GET_ASSET_FORWARDER_IMPLEMENTATION_SALT(), msg.sender, salt))));
 
   }
   function getAssetForwarderImplementationHandler() public view returns (address implementation) {
@@ -76,11 +73,12 @@ contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
   function deployBorrowProxyClone(bytes32 salt) internal returns (address payable created) {
     created = address(uint160(FactoryLib.create2Clone(isolate.borrowProxyImplementation, uint256(salt))));
   }
-  function _executeBorrow(ShifterBorrowProxyLib.LiquidityRequestParcel memory liquidityRequestParcel, uint256 bond, uint256 timeoutExpiry) internal returns (bytes32 borrowerSalt) {
+  function _executeBorrow(ShifterBorrowProxyLib.LiquidityRequestParcel memory liquidityRequestParcel, uint256 bond, uint256 timeoutExpiry) internal returns (address payable proxyAddress) {
     require(liquidityRequestParcel.request.forbidLoan == false, "is not a loan request, try using executeShiftSansBorrow");
     require(
       liquidityRequestParcel.gasRequested == msg.value,
       "supplied ether is not equal to gas requested"
+  
     );
     require(
       liquidityRequestParcel.validateSignature(
@@ -89,9 +87,7 @@ contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
       "liquidity request signature rejected"
     );
     ShifterBorrowProxyLib.LiquidityRequest memory liquidityRequest = liquidityRequestParcel.request;
-    borrowerSalt = liquidityRequest.computeBorrowerSalt();
-    address payable proxyAddress = address(uint160(isolate.borrowProxyImplementation.deriveBorrowerAddress(borrowerSalt)));
-    require(!isolate.borrowProxyController.isInitialized(proxyAddress), "proxy has already been initialized");
+    bytes32 borrowerSalt = liquidityRequest.computeBorrowerSalt();
     liquidityRequest.actions = new ShifterBorrowProxyLib.InitializationAction[](0);
     ShifterBorrowProxyLib.ProxyRecord memory proxyRecord = ShifterBorrowProxyLib.ProxyRecord({
       request: liquidityRequest,
@@ -100,15 +96,14 @@ contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
         isolate.computeLoanParams(liquidityRequest.amount, bond, timeoutExpiry)
       )
     });
+    proxyAddress = address(uint160(deployBorrowProxyClone(borrowerSalt)));
     ShifterPoolLib.mapBorrowProxy(isolate, proxyAddress, proxyRecord);
     isolate.issueLoan(liquidityRequest.token, proxyAddress, proxyRecord.computePostFee());
     require(liquidityRequest.token.transferTokenFrom(msg.sender, address(this), bond), "bond submission failed");
-    return borrowerSalt;
   }
   function executeBorrow(ShifterBorrowProxyLib.LiquidityRequestParcel memory liquidityRequestParcel, uint256 bond, uint256 timeoutExpiry) public payable {
     ShifterBorrowProxyLib.InitializationAction[] memory actions = liquidityRequestParcel.request.actions;
-    bytes32 salt = _executeBorrow(liquidityRequestParcel, bond, timeoutExpiry);
-    address payable proxyAddress = deployBorrowProxyClone(salt);
+    address payable proxyAddress = _executeBorrow(liquidityRequestParcel, bond, timeoutExpiry);
     proxyAddress.setupBorrowProxy(liquidityRequestParcel.request.borrower, liquidityRequestParcel.request.token, false);
     proxyAddress.sendInitializationActions(actions);
   }

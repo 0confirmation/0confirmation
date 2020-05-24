@@ -1,15 +1,17 @@
 'use strict';
 
 const UniswapV2Router01 = artifacts.require('UniswapV2Router01');
+const AssetForwarderLib = artifacts.require('AssetForwarderLib');
 const UniswapV2Factory = artifacts.require('UniswapV2Factory');
 const ShifterPool = artifacts.require('ShifterPool');
 const ShifterERC20Mock = artifacts.require('ShifterERC20Mock');
 const randomBytes = require('random-bytes').sync;
 const SandboxLib = artifacts.require('SandboxLib');
-const UniswapAdapter = artifacts.require('UniswapAdapter');
 const BorrowProxy = artifacts.require('BorrowProxy');
 const SimpleBurnLiquidationModule = artifacts.require('SimpleBurnLiquidationModule');
+const expect = require('chai').expect;
 const ERC20Adapter = artifacts.require('ERC20Adapter');
+const ERC20AdapterLib = artifacts.require('ERC20AdapterLib');
 const LiquidityToken = artifacts.require('LiquidityToken');
 const CurveAdapter = artifacts.require('CurveAdapter');
 const ShifterRegistryMock = artifacts.require('ShifterRegistryMock');
@@ -19,10 +21,7 @@ const Curvefi = artifacts.require('Curvefi');
 const CurveToken = artifacts.require('CurveToken');
 const DAI = artifacts.require('DAI');
 const WBTC = artifacts.require('WBTC');
-const Exchange = artifacts.require('Exchange');
-const TransferAll = artifacts.require('TransferAll');
-const Factory = artifacts.require('Factory');
-const SwapEntireLoan = artifacts.require('SwapEntireLoan');
+const V2SwapAndDrop = artifacts.require('V2SwapAndDrop');
 const ethers = require('ethers');
 const Zero = require('@0confirmation/sdk');
 const { ZeroMock } = Zero;
@@ -34,6 +33,8 @@ const providerFromEngine = require('eth-json-rpc-middleware/providerFromEngine')
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 const asMiddleware = require('json-rpc-engine/src/asMiddleware');
 
+const Interface = ethers.utils.Interface;
+
 const makeZero = async (provider, contracts) => {
   const zero = new ZeroMock(provider);
   zero.setEnvironment(contracts);
@@ -42,7 +43,7 @@ const makeZero = async (provider, contracts) => {
 
 const getAddress = async (artifact) => (await artifact.deployed()).address;
 
-const encodeAddressPair = (a, b) => ethers.utils.defaultAbiCoder.encode(['bytes'], [ ethers.utils.defaultAbiCoder.encode(['address', 'address' ], [ a, b ]) ]);
+const encodeAddressTriple = (a, b, c) => ethers.utils.defaultAbiCoder.encode(['bytes'], [ ethers.utils.defaultAbiCoder.encode(['address', 'address', 'address' ], [ a, b, c ]) ]);
 
 const bluebird = require('bluebird');
 
@@ -107,6 +108,7 @@ contract('ShifterPool', () => {
       ShifterPool: await ShifterPool.deployed(),
       ShifterBorrowProxyFactoryLib: await ShifterBorrowProxyFactoryLib.deployed(),
       Curvefi: await Curvefi.deployed(),
+      V2SwapAndDrop: await V2SwapAndDrop.deployed(),
       CurveToken: await CurveToken.deployed(),
       DAI: await DAI.deployed(),
       WBTC: await WBTC.deployed(),
@@ -181,7 +183,7 @@ contract('ShifterPool', () => {
       }
     });
     const actions = [
-    //  Zero.staticPreprocessor(fixtures.SwapEntireLoan.address, encodeAddressPair(fixtures.Factory.address, fixtures.DAI.address)),
+      Zero.staticPreprocessor(fixtures.V2SwapAndDrop.address, encodeAddressTriple(fixtures.UniswapV2Router01.address, fixtures.DAI.address, borrowerAddress)),
       
     //  Zero.staticPreprocessor(fixtures.TransferAll.address, encodeAddressPair(fixtures.DAI.address, borrowerAddress))
     ];
@@ -195,10 +197,11 @@ contract('ShifterPool', () => {
     const liquidityRequestParcel = await liquidityRequest.sign();
     await liquidityRequestParcel.broadcast();
     const proxy = await deferred.promise;
-    console.log('woop');
     await new Promise((resolve) => setTimeout(resolve, 5000));
-    await (await proxy.repayLoan({ gasLimit: ethers.utils.hexlify(6e6) })).wait();
+    const receipt = await (await proxy.repayLoan({ gasLimit: ethers.utils.hexlify(6e6) })).wait();
+    const iface = new Interface(ShifterBorrowProxy.abi.concat(AssetForwarderLib.abi).concat(ERC20Adapter.abi).concat(ERC20AdapterLib.abi));
     const daiWrapped = new ethers.Contract(fixtures.DAI.address, fixtures.DAI.abi, fixtures.borrower.getProvider().asEthers());
+    expect(Number(ethers.utils.formatUnits(await daiWrapped.balanceOf(borrowerAddress), 18)) > 15000).to.be.true;
     //console.log(await proxy.queryTransfers());
     await fixtures.keeper.stopListeningForLiquidityRequests();
   });

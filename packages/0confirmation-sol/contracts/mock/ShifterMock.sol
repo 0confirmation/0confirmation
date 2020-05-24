@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.6.0;
 
 import { ShifterERC20Mock } from "./ShifterERC20Mock.sol";

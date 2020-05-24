@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
@@ -115,6 +116,12 @@ library SandboxLib {
         } else {
           execution[0].returnData = safeViewResult.data;
           execution[0].success = safeViewResult.success;
+/* for debugging
+          bytes memory data = execution[0].returnData;
+          assembly {
+            revert(add(data, 0x20), mload(data))
+          }
+*/
           continue;
         }
       }
@@ -122,6 +129,14 @@ library SandboxLib {
       for (uint256 j = 0; j < execution.length; j++) {
         (bool success, bytes memory returnData) = address(this).call(encodeProxyCall(execution[j]));
         execution[j].success = success;
+/*
+ * for debugging
+        if (!execution[j].success) {
+          assembly {
+            revert(add(0x20, returnData), mload(returnData))
+          }
+        }
+*/
         execution[j].returnData = returnData;
       }
     }
