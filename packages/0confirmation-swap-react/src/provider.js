@@ -14,7 +14,6 @@ const makeWalletSelectorFromProvider = require('@0confirmation/providers/selecto
 const Migrations = require('@0confirmation/sol/build/Migrations');
 const ShifterPool = require('@0confirmation/sol/build/ShifterPool');
 const SandboxLib = require('@0confirmation/sol/build/SandboxLib');
-const UniswapAdapter = require('@0confirmation/sol/build/UniswapAdapter');
 const SimpleBurnLiquidationModule = require('@0confirmation/sol/build/SimpleBurnLiquidationModule');
 const ShifterERC20Mock = require('@0confirmation/sol/build/ShifterERC20Mock');
 const ERC20Adapter = require('@0confirmation/sol/build/ERC20Adapter');
@@ -28,8 +27,12 @@ const DAI = require('@0confirmation/sol/build/DAI');
 const WBTC = require('@0confirmation/sol/build/WBTC');
 const Exchange = require('@0confirmation/sol/build/Exchange');
 const Factory = require('@0confirmation/sol/build/Factory');
-const TransferAll = require('@0confirmation/sol/build/TransferAll');
-const SwapEntireLoan = require('@0confirmation/sol/build/SwapEntireLoan');
+const UniswapV2Router01 = require('@0confirmation/sol/build/UniswapV2Router01');
+const UniswapV2Factory = require('@0confirmation/sol/build/UniswapV2Factory');
+
+const UniswapV2Adapter = require('@0confirmation/sol/build/UniswapV2Adapter');
+const V2SwapAndDrop = require('@0confirmation/sol/build/V2SwapAndDrop');
+const WETH9 = require('@0confirmation/sol/build/WETH9');
 
 const ethers = require('ethers');
 const environments = require('@0confirmation/sdk/environments');
@@ -68,7 +71,10 @@ const builds = {
   Migrations,
   ShifterPool,
   SandboxLib,
-  UniswapAdapter,
+  V2SwapAndDrop,
+  UniswapV2Adapter,
+  UniswapV2Factory,
+  UniswapV2Router01,
   SimpleBurnLiquidationModule,
   ShifterERC20Mock,
   ERC20Adapter,
@@ -80,10 +86,9 @@ const builds = {
   CurveToken,
   DAI,
   WBTC,
+  WETH9,
   Exchange,
   Factory,
-  TransferAll,
-  SwapEntireLoan
 };
 
 let makeGanacheProvider = () => fromEthers(new ethers.providers.JsonRpcProvider('http://localhost:8545')), setupEmbeddedMocks = () => Promise.resolve();
@@ -98,6 +103,7 @@ if (CHAIN === 'embedded' || CHAIN === 'test') {
     const artifacts = makeArtifacts(setupProvider, builds);
     await artifacts.runMigration(migrationSource, {
       ethers,
+      bluebird: require('bluebird'),
       fs: {},
       '@0confirmation/sdk/environments': require('@0confirmation/sdk/environments'),
       '@0confirmation/sdk': require('@0confirmation/sdk'),

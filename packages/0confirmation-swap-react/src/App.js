@@ -26,6 +26,8 @@ import eosIcon from '@iconify/icons-cryptocurrency/eos';
 import btgIcon from '@iconify/icons-cryptocurrency/btg';
 import Alert from './alert'
 import provider from './provider';
+import Web3Modal from 'web3modal';
+import Fortmatic from 'fortmatic';
 const makePersonalSignProviderFromGanache = require('@0confirmation/providers/ganache');
 const makePersonalSignProviderFromPrivate = require('@0confirmation/providers/private-key-or-seed');
 const randomBytes = require('random-bytes').sync;
@@ -43,45 +45,60 @@ const uniswapConstants = require('@uniswap/sdk/dist/constants');
 const BTCBackend = require('@0confirmation/sdk/backends/btc');
 let Zero = require('@0confirmation/sdk');
 const { staticPreprocessor } = Zero;
+const { ChainId, Token, fetchData, Trade, TokenAmount, TradeType } = require('@uniswap/sdk');
+
+const web3Modal = new Web3Modal({
+  providerOptions: {
+    fortmatic: {
+      package: Fortmatic,
+      options: {
+        key: ''
+      }
+    }
+  }
+});
 
 if (CHAIN === 'embedded' || CHAIN === 'test') Zero = Zero.ZeroMock;
 
 const setupTestUniswapSDK = async (provider) => {
   const ethersProvider = new ethers.providers.Web3Provider(provider);
   const chainId = await ethersProvider.send('net_version', []);
+  ChainId.MAINNET = Number(chainId);
   uniswapConstants.FACTORY_ADDRESS[Number(chainId)] = contracts.factory;
   uniswapConstants.SUPPORTED_CHAIN_ID[Number(chainId)] = 'Lendnet';
   uniswapConstants.SUPPORTED_CHAIN_ID.Lendnet = Number(chainId);
   uniswapConstants._CHAIN_ID_NAME[Number(chainId)] = 'lendnet';
 };
 
-const encodeAddressPair = (a, b) => ethers.utils.defaultAbiCoder.encode([ 'bytes' ], [ ethers.utils.defaultAbiCoder.encode(['address', 'address'], [ a, b ]) ]);
+const encodeAddressTriple = (a, b, c) => ethers.utils.defaultAbiCoder.encode([ 'bytes' ], [ ethers.utils.defaultAbiCoder.encode(['address', 'address', 'address'], [ a, b, c ]) ]);
 
 const createSwapActions = ({
   dai,
-  factory,
+  router,
   borrower,
-  swapEntireLoan,
-  transferAll
+  swapAndDrop
 }) => [
-  staticPreprocessor(swapEntireLoan.address, encodeAddressPair(factory, dai)),
-    
-  staticPreprocessor(transferAll.address, encodeAddressPair(dai, borrower))
+  staticPreprocessor(swapAndDrop.address, encodeAddressTriple(router, dai, borrower))
 ];
 
 const getRenBTCAddress = async () => {
   return contracts.renbtc || (contracts.renbtc = await getMockRenBTCAddress(new ethers.providers.Web3Provider(provider)));
 };
 
+const getDAIToken = () => new Token(ChainId.MAINNET, contracts.dai, DECIMALS.dai, 'DAI', 'DAI Stablecoin');
+const getRenBTCToken = () => new Token(ChainId.MAINNET, contracts.renbtc, DECIMALS.btc, 'RenBTC', 'RenBTC');
+const getWETHToken = () => new Token(ChainId.MAINNET, contracts.weth, DECIMALS.weth, 'WETH', 'WETH');
+const coerceToProvider = (provider) => provider.asEthers && provider.asEthers() || provider;
+
+
 const getDAIBTCMarket = async (provider) => {
-  const ethersProvider = new ethers.providers.Web3Provider(provider);
-  const daiReserves = await uniswap.getTokenReserves(contracts.dai, ethersProvider);
-  const btcReserves = await uniswap.getTokenReserves(contracts.renbtc, ethersProvider);
-  return await uniswap.getMarketDetails(btcReserves, daiReserves);
+  const route = new Route([ await fetchData(getRenBTCToken(), getWETHToken(), coerceToProvider(provider)), await fetchData(getDAIToken(), getWETHToken(), coerceToProvider(provider)) ], getRenBTCToken());
+  return route;
 };
 
-const getTradeExecution = async (provider, details, amount) => {
-  return await uniswap.getTradeDetails(uniswap.TRADE_EXACT.INPUT, amount, details || await getDAIBTCMarket(provider));
+
+const getTradeExecution = async (provider, route, amount) => {
+  return new Trade(route || await getDAIBTCMarket(provider), new TokenAmount(getRenBTCToken(), amount), TradeType.EXACT_INPUT);
 };
 
 const getBorrows = async (zero) => {
@@ -99,7 +116,7 @@ const mpkh = contracts.mpkh;
 const USE_TESTNET_BTC = process.env.USE_TESTNET_BTC || process.env.REACT_APP_USE_TESTNET_BTC;
 
 const makeZero = (provider) => {
-  const zero = new Zero(provider, CHAIN === '42' ? 'testnet' : CHAIN === '1' ? 'mainnet' : 'ganache');
+  const zero = ['test', 'external'].includes(CHAIN) ? new Zero.ZeroMock(provider) : new Zero(provider, CHAIN === '42' ? 'testnet' : CHAIN === '1' ? 'mainnet' : 'ganache');
   if (USE_TESTNET_BTC) zero.driver.registerBackend(new BTCBackend({
     network: 'testnet'
   }));
@@ -113,14 +130,14 @@ const getMockRenBTCAddress = async (provider, contracts) => {
 
 const getContractsFromArtifacts = async (artifacts) => ({
   dai: artifacts.require('DAI').address,
-  factory: artifacts.require('Factory').address,
+  router: artifacts.require('UniswapV2Router01').address,
+  factory: artifacts.require('UniswapV2Factory').address,
   shifterRegistry: artifacts.require('ShifterRegistryMock').address,
   renbtc: await getMockRenBTCAddress(new ethers.providers.Web3Provider(provider), {
     shifterRegistry: artifacts.require('ShifterRegistryMock').address
   }),
   shifterPool: artifacts.require('ShifterPool').address,
-  transferAll: artifacts.require('TransferAll'),
-  swapEntireLoan: artifacts.require('SwapEntireLoan'),
+  swapAndDrop: artifacts.require('V2SwapAndDrop').address,
   mpkh,
   isTestnet: true
 });
@@ -184,14 +201,15 @@ const defer = () => {
 };
 
 const contractsDeferred = defer();
+const pvt = randomBytes(32).toString('hex');
+const makeTestWallet = (proxyTarget) => provider.makeFauxMetamaskSigner(makePersonalSignProviderFromPrivate(pvt, provider.dataProvider), proxyTarget);
 
 class TradeRoom extends React.Component {
     async setup() {
       if (provider.migrate) {
         artifacts = await provider.migrate();
         contracts = await getContractsFromArtifacts(artifacts);
-        const pvt = randomBytes(32).toString('hex');
-        provider.setSigningProvider(provider.makeFauxMetamaskSigner(makePersonalSignProviderFromPrivate(pvt, provider.dataProvider), window.ethereum));
+        provider.setSigningProvider(makeTestWallet(window.ethereum));
         zero = makeZero(provider);
       }
       zero.setEnvironment(contracts);
@@ -267,14 +285,19 @@ class TradeRoom extends React.Component {
           provider.setSigningProvider(window.ethereum);
           await zero.initializeDriver();
           contractsDeferred.resolve(contracts);
-          contracts.transferAll = {
-            address: contracts.transferAll
-          };
-          contracts.swapEntireLoan = {
-            address: contracts.swapEntireLoan
+          contracts.swapAndDrop = {
+            address: contracts.swapAndDrop
           };
           console.log('libp2p: bootstrapped');
         }
+        const provider = zero.getProvider().asEthers();
+        provider.on('block', () => {
+          this.getPendingTransfers().catch((err) => console.error(err));
+        });
+    }
+    async getPendingTransfers() {
+      const borrows = await getBorrows(zero);
+      console.log(borrows);
     }
     constructor(props) {
         super(props)
@@ -339,15 +362,15 @@ class TradeRoom extends React.Component {
       const trade = await getTradeExecution(provider, this.state.market, toParsed(this.state.value, 'btc'));
       this.setState({
         trade,
-        calcValue: toFormat(trade.outputAmount.amount.toString(10), 'dai'),
-        rate: util.truncateDecimals(trade.executionRate.rate.toString(10), 2),
-        slippage: util.truncateDecimals(trade.marketRateSlippage.toString(10), 4)
+        calcValue: toFormat(String(trade.outputAmount.amount).toString(10), 'dai'),
+        rate: util.truncateDecimals(String(trade.executionPrice), 2),
+        slippage: util.truncateDecimals(String(trade.slippage), 4)
       });
     }
     async requestLoan(evt) {
       evt.preventDefault();
       const contracts = await contractsDeferred.promise;
-      const liquidityRequest = zero.createLiquidityRequest({
+      const liquidityRequest = this.saveLoan(zero.createLiquidityRequest({
         token: await getRenBTCAddress(),
         amount: ethers.utils.parseUnits(String(this.state.value), 8),
         nonce: '0x' + randomBytes(32).toString('hex'),
@@ -355,13 +378,11 @@ class TradeRoom extends React.Component {
         actions: createSwapActions({
           borrower: (await (new ethers.providers.Web3Provider(provider)).send('eth_accounts', []))[0],
           dai: contracts.dai,
-          factory: contracts.factory,
-          transferAll: contracts.transferAll,
-          swapEntireLoan: contracts.swapEntireLoan
+          router: contracts.router,
+          swapAndDrop: contracts.swapAndDrop
         })
-      });
+      }));
       const parcel = await liquidityRequest.sign();
-      console.log(parcel.proxyAddress);
       await parcel.broadcast();
       this.setState({
         parcel,
@@ -372,6 +393,14 @@ class TradeRoom extends React.Component {
     }
     async getDepositedParcel(parcel) {
       return await parcel.waitForDeposit();
+    }
+    saveLoan(loan) {
+      try {
+        const i = String(Number((String(localStorage.getItem('index')) || -1)) + 1);
+        localStorage.setItem(i, JSON.stringify(loan));
+        localStorage.setItem('index', String(i));
+      } catch (e) {}
+      return loan;
     }
     async waitOnResult(parcel) {
       (async () => {
@@ -422,6 +451,11 @@ class TradeRoom extends React.Component {
         { coin: <Fragment><InlineIcon color="#ffffff" style={{fontSize:"1.5em"}} className="mr-2" icon={eosIcon} /></Fragment>,id:5, name: "EOS" },
         { coin: <Fragment><InlineIcon color="#ffffff" style={{fontSize:"1.5em"}} className="mr-2" icon={btgIcon} /></Fragment>,id:6, name: "BTG" },
     ];
+    async connectWeb3Modal() {
+      const signingProvider = await web3Modal.connect();
+      if (['test', 'embedded'].includes(CHAIN)) provider.setSigningProvider(makeTestWallet(signingProvider));
+      else provider.setSigningProvider(signingProvider);
+    }
     render() {
         const closeBtn = <button className="btn" style={{ color: "#317333" }} onClick={ async ()=> await this.setState({modal:!this.state.modal})}>&times;</button>;
         return (
@@ -511,7 +545,7 @@ class TradeRoom extends React.Component {
                 </Modal>
                 <div className="justify-content-center align-content-center pt-5" style={{zIndex: "1", overflowX:"hidden", position:"relative"}} >
                     <div className="justify-content-center align-content-center text-center mx-auto my-auto pb-4 pt-5">
-                        <button className="btn text-light button-small btn-sm py-2 px-3 button-text" style={{ backgroundColor: "#317333", borderRadius: "13px" }} onClick={ (evt) => { evt.preventDefault(); if (window.ethereum) window.ethereum.enable() } }>Connect Wallet</button>
+                        <button className="btn text-light button-small btn-sm py-2 px-3 button-text" style={{ backgroundColor: "#317333", borderRadius: "13px" }} onClick={ (evt) => { evt.preventDefault(); this.connectWeb3Modal().catch((err) => console.error(err)); } }>Connect Wallet</button>
                         </div>
                         <div className="alert-box">
                         {(this.state.showAlert)? <Alert delay={2000} boldText="Transaction Detail" detailText={this.state.message}        alertType="alert-green" />:null}

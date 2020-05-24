@@ -34,8 +34,6 @@ const ModuleTypes = {
   BY_ADDRESS: 2
 };
 
-const kovan = environments.getAddresses('testnet');
-
 const getAddress = (artifact, network_id) => {
   if (network_id) return artifact.networks[network_id].address;
   const highest = Math.max(...Object.keys(artifact.networks).map((v) => Number(v)));
@@ -71,13 +69,24 @@ module.exports = async function(deployer) {
     router = await UniswapV2Router01.deployed();
     await factory.createPair(weth.address, renbtc.address); // { gasLimit: ethers.utils.hexlify(6e6) });
     await factory.createPair(weth.address, dai.address); //, { gasLimit: ethers.utils.hexlify(6e6) });
-    console.log('created pairs');
-  } else {
+  } else if (isNetworkOrFork(deployer.network, 'kovan')) {
+    const kovan = environment.getAddresses('testnet');
     renbtc = { address: kovan.renbtc };
     shifterRegistry = { address: kovan.shifterRegistry };
-    factory = { address: kovan.factory };
-    const uniswapContract = new ethers.Contract(factory.address, UniswapV2Factory.abi, new ethers.providers.InfuraProvider('kovan'));
-  } 
+    router = { address: kovan.router };
+    dai = {
+      address: kovan.dai
+    };
+  } else if (isNetworkOrFork(deployer.network, 'mainnet')) {
+    const mainnet = environment.getAddresses('mainnet');
+    renbtc = { address: mainnet.renbtc };
+    shifterRegistry = { address: mainnet.shifterRegistry };
+    router = { address: mainnet.router };
+    dai = {
+      address: mainnet.dai
+    };
+  }
+/*
   await deployer.deploy(CurveToken, 'Curve.fi wBTC/renBTC', 'wBTC+renBTC', 8, 0)
   await deployer.deploy(WBTC);
   const wbtc = await WBTC.deployed();
@@ -85,14 +94,19 @@ module.exports = async function(deployer) {
   await deployer.deploy(Curvefi, [ wbtc.address, renbtc.address ], [ wbtc.address, renbtc.address ], curveToken.address, '100', ethers.utils.parseEther('0').toString())
   const curve = await Curvefi.deployed();
   await curveToken.set_minter(curve.address);
+*/
   const shifterPool = await ShifterPool.deployed();
+/*
   await deployer.deploy(CurveAdapter, getAddress(Curvefi, deployer.network_id));
+*/
   await deployer.deploy(UniswapV2Adapter, erc20Adapter.address, (deployer.network === 'test' || deployer.network === 'ganache' || deployer.network === 'kovan') ? ethers.utils.parseEther('1').toString() : ethers.utils.parseEther('100').toString());
   await deployer.deploy(SimpleBurnLiquidationModule, router.address, erc20Adapter.address);
   await deployer.deploy(LiquidityToken, shifterPool.address, renbtc.address, 'zeroBTC', 'zeroBTC', 8);
   const liquidityToken = await LiquidityToken.deployed();
   const uniswapAdapter = await UniswapV2Adapter.deployed();
+/*
   const curveAdapter = await CurveAdapter.deployed();
+*/
   const simpleBurnLiquidationModule = await SimpleBurnLiquidationModule.deployed();
   await shifterPool.deployBorrowProxyImplementation();
   await shifterPool.deployAssetForwarderImplementation();
@@ -116,7 +130,7 @@ module.exports = async function(deployer) {
       repaymentSubmodule: '0x' + Array(40).fill('0').join(''),
       liquidationSubmodule: simpleBurnLiquidationModule.address
     }
-  }, {
+  }, /* {
     moduleType: ModuleTypes.BY_ADDRESS,
     target: getAddress(Curvefi),
     sigs: Zero.getSignatures(Curvefi.abi),
@@ -126,9 +140,9 @@ module.exports = async function(deployer) {
       repaymentSubmodule: NO_SUBMODULE,
       liquidationSubmodule: simpleBurnLiquidationModule.address
     }
-  }, {
+  }, */ {
     moduleType: ModuleTypes.BY_ADDRESS,
-    target: (await DAI.deployed()).address,
+    target: renbtc.address,
     sigs: Zero.getSignatures(DAI.abi),
     module: {
       isPrecompiled: false,

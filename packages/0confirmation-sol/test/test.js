@@ -197,12 +197,14 @@ contract('ShifterPool', () => {
     const liquidityRequestParcel = await liquidityRequest.sign();
     await liquidityRequestParcel.broadcast();
     const proxy = await deferred.promise;
+    console.log(await proxy.queryTransfers());
     await new Promise((resolve) => setTimeout(resolve, 5000));
+    
     const receipt = await (await proxy.repayLoan({ gasLimit: ethers.utils.hexlify(6e6) })).wait();
     const iface = new Interface(ShifterBorrowProxy.abi.concat(AssetForwarderLib.abi).concat(ERC20Adapter.abi).concat(ERC20AdapterLib.abi));
     const daiWrapped = new ethers.Contract(fixtures.DAI.address, fixtures.DAI.abi, fixtures.borrower.getProvider().asEthers());
     expect(Number(ethers.utils.formatUnits(await daiWrapped.balanceOf(borrowerAddress), 18)) > 15000).to.be.true;
-    //console.log(await proxy.queryTransfers());
+    console.log(await proxy.queryTransfers());
     await fixtures.keeper.stopListeningForLiquidityRequests();
   });
 });
