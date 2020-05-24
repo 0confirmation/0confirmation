@@ -1,5 +1,7 @@
 'use strict';
 
+const UniswapV2Router01 = artifacts.require('UniswapV2Router01');
+const UniswapV2Factory = artifacts.require('UniswapV2Factory');
 const ShifterPool = artifacts.require('ShifterPool');
 const ShifterERC20Mock = artifacts.require('ShifterERC20Mock');
 const randomBytes = require('random-bytes').sync;
@@ -31,8 +33,6 @@ const providerAsMiddleware = require('eth-json-rpc-middleware/providerAsMiddlewa
 const providerFromEngine = require('eth-json-rpc-middleware/providerFromEngine');
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 const asMiddleware = require('json-rpc-engine/src/asMiddleware');
-
-ShifterPool.currentProvider.setMaxListeners(100);
 
 const makeZero = async (provider, contracts) => {
   const zero = new ZeroMock(provider);
@@ -195,6 +195,8 @@ contract('ShifterPool', () => {
     const liquidityRequestParcel = await liquidityRequest.sign();
     await liquidityRequestParcel.broadcast();
     const proxy = await deferred.promise;
+    console.log('woop');
+    await new Promise((resolve) => setTimeout(resolve, 5000));
     await (await proxy.repayLoan({ gasLimit: ethers.utils.hexlify(6e6) })).wait();
     const daiWrapped = new ethers.Contract(fixtures.DAI.address, fixtures.DAI.abi, fixtures.borrower.getProvider().asEthers());
     //console.log(await proxy.queryTransfers());

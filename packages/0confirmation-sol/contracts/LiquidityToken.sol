@@ -13,7 +13,7 @@ contract LiquidityToken is ERC20, ERC20Burnable {
   address public asset;
   uint256 public offset;
   mapping (address => uint256) public outstandingLoans;
-  constructor(address shifterPool, address underlyingAsset, string memory name, string memory symbol, uint8 decimals) ERC20(name, symbol) public override {
+  constructor(address shifterPool, address underlyingAsset, string memory name, string memory symbol, uint8 decimals) ERC20(name, symbol) public {
     pool = shifterPool;
     asset = underlyingAsset;
     _setupDecimals(decimals);

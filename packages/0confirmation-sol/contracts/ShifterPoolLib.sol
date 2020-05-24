@@ -41,7 +41,7 @@ library ShifterPoolLib {
     address masterAddress = isolate.masterAddress;
     return FactoryLib.deriveInstanceAddress(masterAddress, ShifterPool(masterAddress).getAssetForwarderImplementationHandler(), keccak256(abi.encodePacked(ASSET_FORWARDER_IMPLEMENTATION_SALT, salt)));
   }
-  function deployAssetForwarder(BorrowProxyLib.ProxyIsolate storage isolate, bytes32 salt) public returns (address created) {
+  function deployAssetForwarder(BorrowProxyLib.ProxyIsolate storage isolate, bytes32 salt) internal returns (address created) {
     return ShifterPool(isolate.masterAddress).deployAssetForwarderClone(salt);
   }
   function makeBorrowProxy(Isolate storage isolate, bytes32 salt) internal returns (address payable proxyAddress) {

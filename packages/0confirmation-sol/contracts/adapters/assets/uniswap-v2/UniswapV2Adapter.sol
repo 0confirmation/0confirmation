@@ -1,8 +1,7 @@
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
-import { IUniswapV2Router01 } from "@uniswap/v2-periphery/contracts/UniswapV2Router01.sol";
-import { UniswapV2Library } from "@uniswap/v2-periphery/contracts/libraries/UniswapV2Library.sol";
+import { IUniswapV2Router01 } from "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router01.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { ModuleLib } from "../../lib/ModuleLib.sol";
 import { UniswapV2AdapterLib } from "./UniswapV2AdapterLib.sol";

@@ -4,7 +4,7 @@ import { ERC20Burnable } from "openzeppelin-solidity/contracts/token/ERC20/ERC20
 import { ERC20 } from "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 
 contract TestToken is ERC20, ERC20Burnable {
-  constructor(string memory name, string memory symbol, uint8 decimals) ERC20(name, symbol) public override {
+  constructor(string memory name, string memory symbol, uint8 decimals) ERC20(name, symbol) public {
     _setupDecimals(decimals);
   }
   function mint(address user, uint256 amount) public {
