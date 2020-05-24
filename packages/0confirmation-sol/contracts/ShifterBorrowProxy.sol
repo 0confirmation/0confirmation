@@ -18,13 +18,14 @@ contract ShifterBorrowProxy is BorrowProxy, SafeViewExecutor, NullCloneConstruct
   using SandboxLib for *;
   using TokenUtils for *;
   uint256 constant MINIMUM_GAS_CONTINUE = 5e5;
+/*
   function repayLoan(bytes memory data) public returns (bool) {
     (ShifterBorrowProxyLib.TriggerParcel memory parcel) = data.decodeTriggerParcel();
     parcel.record.request.actions = new ShifterBorrowProxyLib.InitializationAction[](0);
     require(validateProxyRecord(parcel.record.encodeProxyRecord()), "proxy record invalid");
     require(!isolate.isLiquidating, "proxy is being liquidated");
     uint256 fee = parcel.record.computeAdjustedKeeperFee(parcel.record.request.amount);
-    LiquidityToken liquidityToken = ShifterPool(isolate.masterAddress).getLiquidityTokenHandler(parcel.record.request.token);
+    LiquidityToken liquidityToken; // = ShifterPool(isolate.masterAddress).getLiquidityTokenHandler(parcel.record.request.token);
     uint256 amount;
     if (!isolate.isRepaying) {
       isolate.isRepaying = true;
@@ -44,6 +45,8 @@ contract ShifterBorrowProxy is BorrowProxy, SafeViewExecutor, NullCloneConstruct
     ShifterBorrowProxyLib.emitShifterBorrowProxyRepaid(parcel.record.request.borrower, parcel.record);
     return true;
   }
+*/
+/*
   function defaultLoan(bytes memory data) public returns (bool) {
     require(!isolate.isRepaying, "loan being repaid");
     require(!isolate.unbound, "loan already repaid");
@@ -76,6 +79,7 @@ contract ShifterBorrowProxy is BorrowProxy, SafeViewExecutor, NullCloneConstruct
     }
     return false;
   }
+*/
   function receiveInitializationActions(ShifterBorrowProxyLib.InitializationAction[] memory actions) public {
     require(msg.sender == address(isolate.masterAddress), "must be called from shifter pool");
     actions.processActions();

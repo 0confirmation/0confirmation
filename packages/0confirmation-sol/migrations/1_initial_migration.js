@@ -13,10 +13,11 @@ const Curvefi = artifacts.require('Curvefi');
 const CurveToken = artifacts.require('CurveToken');
 const DAI = artifacts.require('DAI');
 const WBTC = artifacts.require('WBTC');
-const Exchange = artifacts.require('Exchange');
-const Factory = artifacts.require('Factory');
 const TransferAll = artifacts.require('TransferAll');
 const SwapEntireLoan = artifacts.require('SwapEntireLoan');
+const UniswapV2Factory = artifacts.require('UniswapV2Factory');
+const UniswapV2Router01 = artifacts.require('UniswapV2Router01');
+const WETH9 = artifacts.require('WETH9');
 
 const ethers = require('ethers');
 const environments = require('@0confirmation/sdk/environments');
@@ -48,28 +49,22 @@ module.exports = async function(deployer) {
   await deployer.link(ShifterBorrowProxyFactoryLib, ShifterPool);
   await deployer.deploy(ShifterPool);
   await deployer.deploy(ERC20Adapter);
-  await deployer.deploy(DAI);
-  await deployer.deploy(TransferAll);
-  await deployer.deploy(SwapEntireLoan);
-  const dai = await DAI.deployed();
-  let shifterRegistry, renbtc, factory, renbtcExchange, daiExchange;
+  const erc20Adapter = await ERC20Adapter.deployed();
+  let weth, shifterRegistry, dai, renbtc, factory, router;
   if (['ganache', 'test'].find((v) => v === isNetworkOrFork(deployer.network))) {
+    await deployer.deploy(WETH9);
+    weth = await WETH.deployed();
+    await deployer.deploy(DAI);
+    dai = await DAI.deployed();
     await deployer.deploy(ShifterRegistryMock);
     shifterRegistry = await ShifterRegistryMock.deployed();
     renbtc = { address: await shifterRegistry.token() };
-    await deployer.deploy(Factory);
-    await deployer.deploy(Exchange);
-    factory = await Factory.deployed();
-    let template = await Exchange.deployed();
-    await factory.initializeFactory(template.address);//, { gasLimit: ethers.utils.hexlify(6e6) });
-    await factory.createExchange(renbtc.address); // { gasLimit: ethers.utils.hexlify(6e6) });
-    renbtcExchange = {
-      address: await factory.getExchange(renbtc.address)
-    };
-    await factory.createExchange(dai.address); //, { gasLimit: ethers.utils.hexlify(6e6) });
-    daiExchange = {
-      address: await factory.getExchange(dai.address)
-    };
+    await UniswapV2Factory.deploy(ethers.constants.AddressZero);
+    factory = await UniswapV2Factory.deployed()
+    await deployer.deploy(UniswapV2Router01, factory.address, weth.address);
+    router = await UniswapV2Router01.deployed();
+    await factory.createPair(weth.address, renbtc.address); // { gasLimit: ethers.utils.hexlify(6e6) });
+    await factory.createPair(weth.address, dai.address); //, { gasLimit: ethers.utils.hexlify(6e6) });
   } else {
     renbtc = { address: kovan.renbtc };
     shifterRegistry = { address: kovan.shifterRegistry };
@@ -86,9 +81,8 @@ module.exports = async function(deployer) {
   await curveToken.set_minter(curve.address);
   const shifterPool = await ShifterPool.deployed();
   await deployer.deploy(CurveAdapter, getAddress(Curvefi, deployer.network_id));
-  await deployer.deploy(UniswapAdapter, factory.address, (deployer.network === 'test' || deployer.network === 'ganache' || deployer.network === 'kovan') ? ethers.utils.parseEther('1').toString() : ethers.utils.parseEther('100').toString());
-  const erc20Adapter = await ERC20Adapter.deployed();
-  await deployer.deploy(SimpleBurnLiquidationModule, factory.address, erc20Adapter.address);
+  await deployer.deploy(UniswapAdapter, erc20Adapter.address, (deployer.network === 'test' || deployer.network === 'ganache' || deployer.network === 'kovan') ? ethers.utils.parseEther('1').toString() : ethers.utils.parseEther('100').toString());
+  await deployer.deploy(SimpleBurnLiquidationModule, router.address, erc20Adapter.address);
   await deployer.deploy(LiquidityToken, shifterPool.address, renbtc.address, 'zeroBTC', 'zeroBTC', 8);
   await deployer;
   const liquidityToken = await LiquidityToken.deployed();
@@ -96,7 +90,8 @@ module.exports = async function(deployer) {
   const curveAdapter = await CurveAdapter.deployed();
   const simpleBurnLiquidationModule = await SimpleBurnLiquidationModule.deployed();
   await shifterPool.deployBorrowProxyImplementation();
-  await shifterPool.setup(shifterRegistry.address, '1000', ethers.utils.parseEther('0.01'), [{
+  await shifterPool.deployAssetForwarderImplementation();
+  await shifterPool.setup(shifterRegistry.address, '1000', ethers.utils.parseEther('0.01'), ...((v) => [ v.map((v) => ({ moduleType: v.moduleType, target: v.target, sigs: v.sigs })), v.map((v) => v.module) ])([{
     moduleType: ModuleTypes.BY_ADDRESS,
     target: renbtc.address,
     sigs: Zero.getSignatures(DAI.abi),
@@ -107,9 +102,9 @@ module.exports = async function(deployer) {
       liquidationSubmodule: NO_SUBMODULE
     }
   }, {
-    moduleType: ModuleTypes.BY_CODEHASH,
-    target: renbtcExchange.address,
-    sigs: Zero.getSignatures(Exchange.abi),
+    moduleType: ModuleTypes.BY_ADDRESS,
+    target: router.address,
+    sigs: Zero.getSignatures(UniswapV2Router01.abi),
     module: {
       isPrecompiled: false,
       assetSubmodule: uniswapAdapter.address,
@@ -136,7 +131,7 @@ module.exports = async function(deployer) {
       repaymentSubmodule: erc20Adapter.address,
       liquidationSubmodule: NO_SUBMODULE
     }
-  }],
+  }]),
   [{
     token: renbtc.address,
     liqToken: liquidityToken.address
@@ -147,14 +142,13 @@ module.exports = async function(deployer) {
     const provider = new ethers.providers.Web3Provider(dai.contract.currentProvider);
     const [ truffleAddress ] = await provider.send('eth_accounts', []);
     from = truffleAddress;
-    await Promise.all([ [ renbtc.address, renbtcExchange.address, 8, '1000' ], [ dai.address, daiExchange.address, 18, '7724680' ] ].map(async ([ token, exchange, decimals, amount ]) => {
+    await Promise.all([ [ renbtc.address, 8, '1000' ], [ dai.address, 18, '7724680' ] ].map(async ([ token, decimals, amount ]) => {
       const tokenWrapped = new ethers.Contract(token, DAI.abi, provider.getSigner());
       await (await tokenWrapped.mint(from, ethers.utils.parseUnits(amount, decimals))).wait();
-      const exchangeWrapped = new ethers.Contract(exchange, Exchange.abi, provider.getSigner());
-      await (await tokenWrapped.approve(exchangeWrapped.address, ethers.utils.parseUnits(amount, decimals))).wait();
-      await (await exchangeWrapped.addLiquidity(ethers.utils.parseUnits(amount, decimals), ethers.utils.parseUnits(amount, decimals), String(Date.now() * 2), {
-        value: ethers.utils.hexlify(ethers.utils.parseEther('10')),
-        gasLimit: ethers.utils.hexlify(6e6)
+      const routerWrapped = new ethers.Contract(router.address, UniswapV2Router01.abi, provider.getSigner());
+      await (await tokenWrapped.approve(router.address, ethers.utils.parseUnits(amount, decimals))).wait();
+      await (await routerWrapped.addLiquidityETH(tokenWrapped.address, ethers.utils.parseUnits(amount, decimals), '1', ethers.utils.parseEther('10'), truffleAddress, String(Date.now() * 2), {
+        value: ethers.utils.hexlify(ethers.utils.parseEther('10'))
       })).wait();
     }));
     const renbtcWrapped = new ethers.Contract(renbtc.address, ShifterERC20Mock.abi, provider.getSigner());

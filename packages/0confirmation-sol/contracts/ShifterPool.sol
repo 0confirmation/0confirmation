@@ -31,12 +31,18 @@ contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
   constructor() Ownable() public {
     isolate.genesis = block.number;
   }
-  function setup(address shifterRegistry, uint256 minTimeout, uint256 poolFee, BorrowProxyLib.ModuleRegistration[] memory modules, ShifterPoolLib.LiquidityTokenLaunch[] memory tokenLaunches) public onlyOwner {
+  function setup(address shifterRegistry, uint256 minTimeout, uint256 poolFee, BorrowProxyLib.ModuleDetails[] memory moduleDetails, BorrowProxyLib.Module[] memory modules, ShifterPoolLib.LiquidityTokenLaunch[] memory tokenLaunches) public onlyOwner {
+    require(modules.length == moduleDetails.length, "can't zip module registations: modules.length != moduleDetails.length");
     isolate.shifterRegistry = shifterRegistry;
     isolate.minTimeout = minTimeout;
     isolate.poolFee = poolFee;
     for (uint256 i = 0; i < modules.length; i++) {
-      BorrowProxyLib.ModuleRegistration memory registration = modules[i];
+      BorrowProxyLib.ModuleRegistration memory registration = BorrowProxyLib.ModuleRegistration({
+        module: modules[i],
+        target: moduleDetails[i].target,
+        sigs: moduleDetails[i].sigs,
+        moduleType: moduleDetails[i].moduleType
+      });
       isolate.registry.registryRegisterModule(registration);
     }
     for (uint256 i = 0; i < tokenLaunches.length; i++) {
@@ -58,10 +64,13 @@ contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
     require(isolate.borrowProxyController.isInitialized(msg.sender), "only borrow proxy can call function");
     _;
   }
+
   function deployAssetForwarderClone(bytes32 salt) public onlyBorrowProxy returns (address created) {
+
     created = AssetForwarderLib.deployAssetForwarderClone(isolate.assetForwarderImplementation, keccak256(abi.encodePacked(AssetForwarderLib.GET_ASSET_FORWARDER_IMPLEMENTATION_SALT(), salt)));
+
   }
-  function getAssetForwarderImplementationHandler() public returns (address implementation) {
+  function getAssetForwarderImplementationHandler() public view returns (address implementation) {
     return isolate.assetForwarderImplementation;
   }
   function deployBorrowProxyClone(bytes32 salt) internal returns (address payable created) {

@@ -1,0 +1,3429 @@
+{
+  "contractName": "CurveAdapterLib",
+  "abi": [],
+  "metadata": "{\"compiler\":{\"version\":\"0.6.6+commit.6c089d02\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/home/ray/0confirmation/packages/0confirmation-sol/contracts/adapters/assets/curve/CurveAdapterLib.sol\":\"CurveAdapterLib\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/ray/0confirmation/packages/0confirmation-sol/contracts/adapters/assets/curve/CurveAdapterLib.sol\":{\"keccak256\":\"0x862d0283f937756dd5118796b619768fc6f5b9ba7d3df0611489a76e407c4d58\",\"urls\":[\"bzz-raw://0bbbe1ad37ff61a509843d0943e618ee086f084de8b28f01605b36d7edf73c68\",\"dweb:/ipfs/QmPC67h1y7KM4ocwAdigZWQFd2vaCyUcqNr23UwtvMW1Dz\"]},\"/home/ray/0confirmation/packages/0confirmation-sol/contracts/adapters/lib/ModuleLib.sol\":{\"keccak256\":\"0xc935cfeb1a419c02b983a7d848349421d6389bfe8f16ccb86f26cdb5a8b4f17d\",\"urls\":[\"bzz-raw://65d7d48d6be1829d8e29af8f6cae310a498e1307232c7e63b593217e536f7b78\",\"dweb:/ipfs/QmSv6ZxFJonYjPjMGxerE9raDjDurq9gDLQ4eUy5uKFpsZ\"]},\"/home/ray/0confirmation/packages/0confirmation-sol/contracts/utils/MemcpyLib.sol\":{\"keccak256\":\"0xb11fc7883a74c3dc229560c1c2fbb241b99b484ed97c1297f35e2a7704ec9e15\",\"urls\":[\"bzz-raw://736bccbbfc0543db4abce36d4525bf9bc50eab8a4c8d5a882dbbb9fa770182d4\",\"dweb:/ipfs/QmcnrS6gR8B9mmsHx9AN1PTzGtwC5ARqjU79CZvW6XxC9P\"]},\"/home/ray/0confirmation/packages/0confirmation-sol/contracts/utils/SliceLib.sol\":{\"keccak256\":\"0x9d2996f7c3ee7e32e55a1b92956b0fc71980eb23c3b94d0f79c9b57bea27e7e7\",\"urls\":[\"bzz-raw://d4d4fbaec5b96ea0caae8e1a164bfb1834306882a8f0f2fb31b23feee422525f\",\"dweb:/ipfs/QmakHvtP7PngHB5KKxWRV3sJjMYSFUAgMvi4Zg7Rb3NdBe\"]}},\"version\":1}",
+  "bytecode": "0x60566023600b82828239805160001a607314601657fe5b30600052607381538281f3fe73000000000000000000000000000000000000000030146080604052600080fdfea2646970667358221220b86ba9c6572418a98149f43852d820f9dec6b2e54f31823a4f0fe623b5cb5d3864736f6c63430006060033",
+  "deployedBytecode": "0x73000000000000000000000000000000000000000030146080604052600080fdfea2646970667358221220b86ba9c6572418a98149f43852d820f9dec6b2e54f31823a4f0fe623b5cb5d3864736f6c63430006060033",
+  "immutableReferences": {},
+  "sourceMap": "113:1169:13:-:0;;132:2:-1;166:7;155:9;146:7;137:37;255:7;249:14;246:1;241:23;235:4;232:33;222:2;;269:9;222:2;293:9;290:1;283:20;323:4;314:7;306:22;347:7;338;331:24",
+  "deployedSourceMap": "113:1169:13:-:0;;;;;;12:1:-1;9;2:12",
+  "source": "pragma solidity ^0.6.0;\npragma experimental ABIEncoderV2;\n\nimport { ModuleLib } from \"../../lib/ModuleLib.sol\";\n\nlibrary CurveAdapterLib {\n  struct Isolate {\n    address curveAddress;\n  }\n  function getCastStorageType() internal pure returns (function (uint256) internal pure returns (Isolate storage) swap) {\n    function (uint256) internal returns (uint256) cast = ModuleLib.cast;\n    assembly {\n      swap := cast\n    }\n  }\n  function toIsolatePointer(uint256 key) internal pure returns (Isolate storage) {\n    return getCastStorageType()(key);\n  }\n  function computeIsolatePointer(address instance) internal pure returns (uint256) {\n    return uint256(keccak256(abi.encodePacked(\"isolate.curve-adapter\", instance)));\n  }\n  function getIsolatePointer(address instance) internal pure returns (Isolate storage) {\n    return toIsolatePointer(computeIsolatePointer(instance));\n  }\n  struct ExchangeInputs {\n    int128 i;\n    int128 j;\n    uint256 dx;\n    uint256 min_dy;\n  }\n  function decodeExchangeInputs(bytes memory args) internal pure returns (ExchangeInputs memory) {\n    (int128 i, int128 j, uint256 dx, uint256 min_dy) = abi.decode(args, (int128, int128, uint256, uint256));\n    return ExchangeInputs({\n      i: i,\n      j: j,\n      dx: dx,\n      min_dy: min_dy\n    });\n  }\n}\n",
+  "sourcePath": "/home/ray/0confirmation/packages/0confirmation-sol/contracts/adapters/assets/curve/CurveAdapterLib.sol",
+  "ast": {
+    "absolutePath": "/home/ray/0confirmation/packages/0confirmation-sol/contracts/adapters/assets/curve/CurveAdapterLib.sol",
+    "exportedSymbols": {
+      "CurveAdapterLib": [
+        4007
+      ]
+    },
+    "id": 4008,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 3884,
+        "literals": [
+          "solidity",
+          "^",
+          "0.6",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:13"
+      },
+      {
+        "id": 3885,
+        "literals": [
+          "experimental",
+          "ABIEncoderV2"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "24:33:13"
+      },
+      {
+        "absolutePath": "/home/ray/0confirmation/packages/0confirmation-sol/contracts/adapters/lib/ModuleLib.sol",
+        "file": "../../lib/ModuleLib.sol",
+        "id": 3887,
+        "nodeType": "ImportDirective",
+        "scope": 4008,
+        "sourceUnit": 8493,
+        "src": "59:52:13",
+        "symbolAliases": [
+          {
+            "foreign": {
+              "argumentTypes": null,
+              "id": 3886,
+              "name": "ModuleLib",
+              "nodeType": "Identifier",
+              "overloadedDeclarations": [],
+              "referencedDeclaration": null,
+              "src": "68:9:13",
+              "typeDescriptions": {
+                "typeIdentifier": null,
+                "typeString": null
+              }
+            },
+            "local": null
+          }
+        ],
+        "unitAlias": ""
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "library",
+        "documentation": null,
+        "fullyImplemented": true,
+        "id": 4007,
+        "linearizedBaseContracts": [
+          4007
+        ],
+        "name": "CurveAdapterLib",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "canonicalName": "CurveAdapterLib.Isolate",
+            "id": 3890,
+            "members": [
+              {
+                "constant": false,
+                "id": 3889,
+                "mutability": "mutable",
+                "name": "curveAddress",
+                "nodeType": "VariableDeclaration",
+                "overrides": null,
+                "scope": 3890,
+                "src": "162:20:13",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                },
+                "typeName": {
+                  "id": 3888,
+                  "name": "address",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "162:7:13",
+                  "stateMutability": "nonpayable",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              }
+            ],
+            "name": "Isolate",
+            "nodeType": "StructDefinition",
+            "scope": 4007,
+            "src": "141:46:13",
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 3913,
+              "nodeType": "Block",
+              "src": "308:118:13",
+              "statements": [
+                {
+                  "assignments": [
+                    3908
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 3908,
+                      "mutability": "mutable",
+                      "name": "cast",
+                      "nodeType": "VariableDeclaration",
+                      "overrides": null,
+                      "scope": 3913,
+                      "src": "314:50:13",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_nonpayable$_t_uint256_$returns$_t_uint256_$",
+                        "typeString": "function (uint256) returns (uint256)"
+                      },
+                      "typeName": {
+                        "id": 3907,
+                        "nodeType": "FunctionTypeName",
+                        "parameterTypes": {
+                          "id": 3903,
+                          "nodeType": "ParameterList",
+                          "parameters": [
+                            {
+                              "constant": false,
+                              "id": 3902,
+                              "mutability": "mutable",
+                              "name": "",
+                              "nodeType": "VariableDeclaration",
+                              "overrides": null,
+                              "scope": 3907,
+                              "src": "324:7:13",
+                              "stateVariable": false,
+                              "storageLocation": "default",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_uint256",
+                                "typeString": "uint256"
+                              },
+                              "typeName": {
+                                "id": 3901,
+                                "name": "uint256",
+                                "nodeType": "ElementaryTypeName",
+                                "src": "324:7:13",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_uint256",
+                                  "typeString": "uint256"
+                                }
+                              },
+                              "value": null,
+                              "visibility": "internal"
+                            }
+                          ],
+                          "src": "323:9:13"
+                        },
+                        "returnParameterTypes": {
+                          "id": 3906,
+                          "nodeType": "ParameterList",
+                          "parameters": [
+                            {
+                              "constant": false,
+                              "id": 3905,
+                              "mutability": "mutable",
+                              "name": "",
+                              "nodeType": "VariableDeclaration",
+                              "overrides": null,
+                              "scope": 3907,
+                              "src": "351:7:13",
+                              "stateVariable": false,
+                              "storageLocation": "default",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_uint256",
+                                "typeString": "uint256"
+                              },
+                              "typeName": {
+                                "id": 3904,
+                                "name": "uint256",
+                                "nodeType": "ElementaryTypeName",
+                                "src": "351:7:13",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_uint256",
+                                  "typeString": "uint256"
+                                }
+                              },
+                              "value": null,
+                              "visibility": "internal"
+                            }
+                          ],
+                          "src": "350:9:13"
+                        },
+                        "src": "314:50:13",
+                        "stateMutability": "nonpayable",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_function_internal_nonpayable$_t_uint256_$returns$_t_uint256_$",
+                          "typeString": "function (uint256) returns (uint256)"
+                        },
+                        "visibility": "internal"
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 3911,
+                  "initialValue": {
+                    "argumentTypes": null,
+                    "expression": {
+                      "argumentTypes": null,
+                      "id": 3909,
+                      "name": "ModuleLib",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 8492,
+                      "src": "367:9:13",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_type$_t_contract$_ModuleLib_$8492_$",
+                        "typeString": "type(library ModuleLib)"
+                      }
+                    },
+                    "id": 3910,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "memberName": "cast",
+                    "nodeType": "MemberAccess",
+                    "referencedDeclaration": 8405,
+                    "src": "367:14:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_function_internal_pure$_t_uint256_$returns$_t_uint256_$",
+                      "typeString": "function (uint256) pure returns (uint256)"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "314:67:13"
+                },
+                {
+                  "AST": {
+                    "nodeType": "YulBlock",
+                    "src": "396:26:13",
+                    "statements": [
+                      {
+                        "nodeType": "YulAssignment",
+                        "src": "404:12:13",
+                        "value": {
+                          "name": "cast",
+                          "nodeType": "YulIdentifier",
+                          "src": "412:4:13"
+                        },
+                        "variableNames": [
+                          {
+                            "name": "swap",
+                            "nodeType": "YulIdentifier",
+                            "src": "404:4:13"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "evmVersion": "istanbul",
+                  "externalReferences": [
+                    {
+                      "declaration": 3908,
+                      "isOffset": false,
+                      "isSlot": false,
+                      "src": "412:4:13",
+                      "valueSize": 1
+                    },
+                    {
+                      "declaration": 3899,
+                      "isOffset": false,
+                      "isSlot": false,
+                      "src": "404:4:13",
+                      "valueSize": 1
+                    }
+                  ],
+                  "id": 3912,
+                  "nodeType": "InlineAssembly",
+                  "src": "387:35:13"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 3914,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getCastStorageType",
+            "nodeType": "FunctionDefinition",
+            "overrides": null,
+            "parameters": {
+              "id": 3891,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "217:2:13"
+            },
+            "returnParameters": {
+              "id": 3900,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3899,
+                  "mutability": "mutable",
+                  "name": "swap",
+                  "nodeType": "VariableDeclaration",
+                  "overrides": null,
+                  "scope": 3914,
+                  "src": "243:63:13",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_function_internal_pure$_t_uint256_$returns$_t_struct$_Isolate_$3890_storage_ptr_$",
+                    "typeString": "function (uint256) pure returns (struct CurveAdapterLib.Isolate)"
+                  },
+                  "typeName": {
+                    "id": 3898,
+                    "nodeType": "FunctionTypeName",
+                    "parameterTypes": {
+                      "id": 3894,
+                      "nodeType": "ParameterList",
+                      "parameters": [
+                        {
+                          "constant": false,
+                          "id": 3893,
+                          "mutability": "mutable",
+                          "name": "",
+                          "nodeType": "VariableDeclaration",
+                          "overrides": null,
+                          "scope": 3898,
+                          "src": "253:7:13",
+                          "stateVariable": false,
+                          "storageLocation": "default",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          },
+                          "typeName": {
+                            "id": 3892,
+                            "name": "uint256",
+                            "nodeType": "ElementaryTypeName",
+                            "src": "253:7:13",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          },
+                          "value": null,
+                          "visibility": "internal"
+                        }
+                      ],
+                      "src": "252:9:13"
+                    },
+                    "returnParameterTypes": {
+                      "id": 3897,
+                      "nodeType": "ParameterList",
+                      "parameters": [
+                        {
+                          "constant": false,
+                          "id": 3896,
+                          "mutability": "mutable",
+                          "name": "",
+                          "nodeType": "VariableDeclaration",
+                          "overrides": null,
+                          "scope": 3898,
+                          "src": "285:15:13",
+                          "stateVariable": false,
+                          "storageLocation": "storage",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_struct$_Isolate_$3890_storage_ptr",
+                            "typeString": "struct CurveAdapterLib.Isolate"
+                          },
+                          "typeName": {
+                            "contractScope": null,
+                            "id": 3895,
+                            "name": "Isolate",
+                            "nodeType": "UserDefinedTypeName",
+                            "referencedDeclaration": 3890,
+                            "src": "285:7:13",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_struct$_Isolate_$3890_storage_ptr",
+                              "typeString": "struct CurveAdapterLib.Isolate"
+                            }
+                          },
+                          "value": null,
+                          "visibility": "internal"
+                        }
+                      ],
+                      "src": "284:17:13"
+                    },
+                    "src": "243:63:13",
+                    "stateMutability": "pure",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_function_internal_pure$_t_uint256_$returns$_t_struct$_Isolate_$3890_storage_ptr_$",
+                      "typeString": "function (uint256) pure returns (struct CurveAdapterLib.Isolate)"
+                    },
+                    "visibility": "internal"
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "242:65:13"
+            },
+            "scope": 4007,
+            "src": "190:236:13",
+            "stateMutability": "pure",
+            "virtual": false,
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 3926,
+              "nodeType": "Block",
+              "src": "508:43:13",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 3923,
+                        "name": "key",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 3916,
+                        "src": "542:3:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "arguments": [],
+                      "expression": {
+                        "argumentTypes": [],
+                        "id": 3921,
+                        "name": "getCastStorageType",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 3914,
+                        "src": "521:18:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_function_internal_pure$__$returns$_t_function_internal_pure$_t_uint256_$returns$_t_struct$_Isolate_$3890_storage_ptr_$_$",
+                          "typeString": "function () pure returns (function (uint256) pure returns (struct CurveAdapterLib.Isolate storage pointer))"
+                        }
+                      },
+                      "id": 3922,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "kind": "functionCall",
+                      "lValueRequested": false,
+                      "names": [],
+                      "nodeType": "FunctionCall",
+                      "src": "521:20:13",
+                      "tryCall": false,
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_pure$_t_uint256_$returns$_t_struct$_Isolate_$3890_storage_ptr_$",
+                        "typeString": "function (uint256) pure returns (struct CurveAdapterLib.Isolate storage pointer)"
+                      }
+                    },
+                    "id": 3924,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "521:25:13",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Isolate_$3890_storage_ptr",
+                      "typeString": "struct CurveAdapterLib.Isolate storage pointer"
+                    }
+                  },
+                  "functionReturnParameters": 3920,
+                  "id": 3925,
+                  "nodeType": "Return",
+                  "src": "514:32:13"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 3927,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "toIsolatePointer",
+            "nodeType": "FunctionDefinition",
+            "overrides": null,
+            "parameters": {
+              "id": 3917,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3916,
+                  "mutability": "mutable",
+                  "name": "key",
+                  "nodeType": "VariableDeclaration",
+                  "overrides": null,
+                  "scope": 3927,
+                  "src": "455:11:13",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 3915,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "455:7:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "454:13:13"
+            },
+            "returnParameters": {
+              "id": 3920,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3919,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "overrides": null,
+                  "scope": 3927,
+                  "src": "491:15:13",
+                  "stateVariable": false,
+                  "storageLocation": "storage",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_Isolate_$3890_storage_ptr",
+                    "typeString": "struct CurveAdapterLib.Isolate"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 3918,
+                    "name": "Isolate",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 3890,
+                    "src": "491:7:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Isolate_$3890_storage_ptr",
+                      "typeString": "struct CurveAdapterLib.Isolate"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "490:17:13"
+            },
+            "scope": 4007,
+            "src": "429:122:13",
+            "stateMutability": "pure",
+            "virtual": false,
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 3945,
+              "nodeType": "Block",
+              "src": "635:89:13",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "arguments": [
+                          {
+                            "argumentTypes": null,
+                            "arguments": [
+                              {
+                                "argumentTypes": null,
+                                "hexValue": "69736f6c6174652e63757276652d61646170746572",
+                                "id": 3939,
+                                "isConstant": false,
+                                "isLValue": false,
+                                "isPure": true,
+                                "kind": "string",
+                                "lValueRequested": false,
+                                "nodeType": "Literal",
+                                "src": "683:23:13",
+                                "subdenomination": null,
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_stringliteral_d94cf02a4dccf9da687aaac9a5d7ae2649df6a3f23acdc04ce5f2375d42f1d33",
+                                  "typeString": "literal_string \"isolate.curve-adapter\""
+                                },
+                                "value": "isolate.curve-adapter"
+                              },
+                              {
+                                "argumentTypes": null,
+                                "id": 3940,
+                                "name": "instance",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 3929,
+                                "src": "708:8:13",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_address",
+                                  "typeString": "address"
+                                }
+                              }
+                            ],
+                            "expression": {
+                              "argumentTypes": [
+                                {
+                                  "typeIdentifier": "t_stringliteral_d94cf02a4dccf9da687aaac9a5d7ae2649df6a3f23acdc04ce5f2375d42f1d33",
+                                  "typeString": "literal_string \"isolate.curve-adapter\""
+                                },
+                                {
+                                  "typeIdentifier": "t_address",
+                                  "typeString": "address"
+                                }
+                              ],
+                              "expression": {
+                                "argumentTypes": null,
+                                "id": 3937,
+                                "name": "abi",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": -1,
+                                "src": "666:3:13",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_magic_abi",
+                                  "typeString": "abi"
+                                }
+                              },
+                              "id": 3938,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "lValueRequested": false,
+                              "memberName": "encodePacked",
+                              "nodeType": "MemberAccess",
+                              "referencedDeclaration": null,
+                              "src": "666:16:13",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_function_abiencodepacked_pure$__$returns$_t_bytes_memory_ptr_$",
+                                "typeString": "function () pure returns (bytes memory)"
+                              }
+                            },
+                            "id": 3941,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "kind": "functionCall",
+                            "lValueRequested": false,
+                            "names": [],
+                            "nodeType": "FunctionCall",
+                            "src": "666:51:13",
+                            "tryCall": false,
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_bytes_memory_ptr",
+                              "typeString": "bytes memory"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_bytes_memory_ptr",
+                              "typeString": "bytes memory"
+                            }
+                          ],
+                          "id": 3936,
+                          "name": "keccak256",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": -8,
+                          "src": "656:9:13",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_keccak256_pure$_t_bytes_memory_ptr_$returns$_t_bytes32_$",
+                            "typeString": "function (bytes memory) pure returns (bytes32)"
+                          }
+                        },
+                        "id": 3942,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "656:62:13",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        }
+                      ],
+                      "id": 3935,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "lValueRequested": false,
+                      "nodeType": "ElementaryTypeNameExpression",
+                      "src": "648:7:13",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_type$_t_uint256_$",
+                        "typeString": "type(uint256)"
+                      },
+                      "typeName": {
+                        "id": 3934,
+                        "name": "uint256",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "648:7:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": null,
+                          "typeString": null
+                        }
+                      }
+                    },
+                    "id": 3943,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "typeConversion",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "648:71:13",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "functionReturnParameters": 3933,
+                  "id": 3944,
+                  "nodeType": "Return",
+                  "src": "641:78:13"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 3946,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "computeIsolatePointer",
+            "nodeType": "FunctionDefinition",
+            "overrides": null,
+            "parameters": {
+              "id": 3930,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3929,
+                  "mutability": "mutable",
+                  "name": "instance",
+                  "nodeType": "VariableDeclaration",
+                  "overrides": null,
+                  "scope": 3946,
+                  "src": "585:16:13",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 3928,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "585:7:13",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "584:18:13"
+            },
+            "returnParameters": {
+              "id": 3933,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3932,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "overrides": null,
+                  "scope": 3946,
+                  "src": "626:7:13",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 3931,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "626:7:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "625:9:13"
+            },
+            "scope": 4007,
+            "src": "554:170:13",
+            "stateMutability": "pure",
+            "virtual": false,
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 3959,
+              "nodeType": "Block",
+              "src": "812:67:13",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "arguments": [
+                          {
+                            "argumentTypes": null,
+                            "id": 3955,
+                            "name": "instance",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 3948,
+                            "src": "864:8:13",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_address",
+                              "typeString": "address"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_address",
+                              "typeString": "address"
+                            }
+                          ],
+                          "id": 3954,
+                          "name": "computeIsolatePointer",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 3946,
+                          "src": "842:21:13",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_internal_pure$_t_address_$returns$_t_uint256_$",
+                            "typeString": "function (address) pure returns (uint256)"
+                          }
+                        },
+                        "id": 3956,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "842:31:13",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "id": 3953,
+                      "name": "toIsolatePointer",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 3927,
+                      "src": "825:16:13",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_pure$_t_uint256_$returns$_t_struct$_Isolate_$3890_storage_ptr_$",
+                        "typeString": "function (uint256) pure returns (struct CurveAdapterLib.Isolate storage pointer)"
+                      }
+                    },
+                    "id": 3957,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "825:49:13",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Isolate_$3890_storage_ptr",
+                      "typeString": "struct CurveAdapterLib.Isolate storage pointer"
+                    }
+                  },
+                  "functionReturnParameters": 3952,
+                  "id": 3958,
+                  "nodeType": "Return",
+                  "src": "818:56:13"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 3960,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getIsolatePointer",
+            "nodeType": "FunctionDefinition",
+            "overrides": null,
+            "parameters": {
+              "id": 3949,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3948,
+                  "mutability": "mutable",
+                  "name": "instance",
+                  "nodeType": "VariableDeclaration",
+                  "overrides": null,
+                  "scope": 3960,
+                  "src": "754:16:13",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 3947,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "754:7:13",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "753:18:13"
+            },
+            "returnParameters": {
+              "id": 3952,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3951,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "overrides": null,
+                  "scope": 3960,
+                  "src": "795:15:13",
+                  "stateVariable": false,
+                  "storageLocation": "storage",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_Isolate_$3890_storage_ptr",
+                    "typeString": "struct CurveAdapterLib.Isolate"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 3950,
+                    "name": "Isolate",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 3890,
+                    "src": "795:7:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Isolate_$3890_storage_ptr",
+                      "typeString": "struct CurveAdapterLib.Isolate"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "794:17:13"
+            },
+            "scope": 4007,
+            "src": "727:152:13",
+            "stateMutability": "pure",
+            "virtual": false,
+            "visibility": "internal"
+          },
+          {
+            "canonicalName": "CurveAdapterLib.ExchangeInputs",
+            "id": 3969,
+            "members": [
+              {
+                "constant": false,
+                "id": 3962,
+                "mutability": "mutable",
+                "name": "i",
+                "nodeType": "VariableDeclaration",
+                "overrides": null,
+                "scope": 3969,
+                "src": "910:8:13",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_int128",
+                  "typeString": "int128"
+                },
+                "typeName": {
+                  "id": 3961,
+                  "name": "int128",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "910:6:13",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_int128",
+                    "typeString": "int128"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 3964,
+                "mutability": "mutable",
+                "name": "j",
+                "nodeType": "VariableDeclaration",
+                "overrides": null,
+                "scope": 3969,
+                "src": "924:8:13",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_int128",
+                  "typeString": "int128"
+                },
+                "typeName": {
+                  "id": 3963,
+                  "name": "int128",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "924:6:13",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_int128",
+                    "typeString": "int128"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 3966,
+                "mutability": "mutable",
+                "name": "dx",
+                "nodeType": "VariableDeclaration",
+                "overrides": null,
+                "scope": 3969,
+                "src": "938:10:13",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 3965,
+                  "name": "uint256",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "938:7:13",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 3968,
+                "mutability": "mutable",
+                "name": "min_dy",
+                "nodeType": "VariableDeclaration",
+                "overrides": null,
+                "scope": 3969,
+                "src": "954:14:13",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 3967,
+                  "name": "uint256",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "954:7:13",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              }
+            ],
+            "name": "ExchangeInputs",
+            "nodeType": "StructDefinition",
+            "scope": 4007,
+            "src": "882:91:13",
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 4005,
+              "nodeType": "Block",
+              "src": "1071:209:13",
+              "statements": [
+                {
+                  "assignments": [
+                    3977,
+                    3979,
+                    3981,
+                    3983
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 3977,
+                      "mutability": "mutable",
+                      "name": "i",
+                      "nodeType": "VariableDeclaration",
+                      "overrides": null,
+                      "scope": 4005,
+                      "src": "1078:8:13",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_int128",
+                        "typeString": "int128"
+                      },
+                      "typeName": {
+                        "id": 3976,
+                        "name": "int128",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "1078:6:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_int128",
+                          "typeString": "int128"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    },
+                    {
+                      "constant": false,
+                      "id": 3979,
+                      "mutability": "mutable",
+                      "name": "j",
+                      "nodeType": "VariableDeclaration",
+                      "overrides": null,
+                      "scope": 4005,
+                      "src": "1088:8:13",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_int128",
+                        "typeString": "int128"
+                      },
+                      "typeName": {
+                        "id": 3978,
+                        "name": "int128",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "1088:6:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_int128",
+                          "typeString": "int128"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    },
+                    {
+                      "constant": false,
+                      "id": 3981,
+                      "mutability": "mutable",
+                      "name": "dx",
+                      "nodeType": "VariableDeclaration",
+                      "overrides": null,
+                      "scope": 4005,
+                      "src": "1098:10:13",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 3980,
+                        "name": "uint256",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "1098:7:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    },
+                    {
+                      "constant": false,
+                      "id": 3983,
+                      "mutability": "mutable",
+                      "name": "min_dy",
+                      "nodeType": "VariableDeclaration",
+                      "overrides": null,
+                      "scope": 4005,
+                      "src": "1110:14:13",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 3982,
+                        "name": "uint256",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "1110:7:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 3997,
+                  "initialValue": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 3986,
+                        "name": "args",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 3971,
+                        "src": "1139:4:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "components": [
+                          {
+                            "argumentTypes": null,
+                            "id": 3988,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "lValueRequested": false,
+                            "nodeType": "ElementaryTypeNameExpression",
+                            "src": "1146:6:13",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_type$_t_int128_$",
+                              "typeString": "type(int128)"
+                            },
+                            "typeName": {
+                              "id": 3987,
+                              "name": "int128",
+                              "nodeType": "ElementaryTypeName",
+                              "src": "1146:6:13",
+                              "typeDescriptions": {
+                                "typeIdentifier": null,
+                                "typeString": null
+                              }
+                            }
+                          },
+                          {
+                            "argumentTypes": null,
+                            "id": 3990,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "lValueRequested": false,
+                            "nodeType": "ElementaryTypeNameExpression",
+                            "src": "1154:6:13",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_type$_t_int128_$",
+                              "typeString": "type(int128)"
+                            },
+                            "typeName": {
+                              "id": 3989,
+                              "name": "int128",
+                              "nodeType": "ElementaryTypeName",
+                              "src": "1154:6:13",
+                              "typeDescriptions": {
+                                "typeIdentifier": null,
+                                "typeString": null
+                              }
+                            }
+                          },
+                          {
+                            "argumentTypes": null,
+                            "id": 3992,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "lValueRequested": false,
+                            "nodeType": "ElementaryTypeNameExpression",
+                            "src": "1162:7:13",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_type$_t_uint256_$",
+                              "typeString": "type(uint256)"
+                            },
+                            "typeName": {
+                              "id": 3991,
+                              "name": "uint256",
+                              "nodeType": "ElementaryTypeName",
+                              "src": "1162:7:13",
+                              "typeDescriptions": {
+                                "typeIdentifier": null,
+                                "typeString": null
+                              }
+                            }
+                          },
+                          {
+                            "argumentTypes": null,
+                            "id": 3994,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "lValueRequested": false,
+                            "nodeType": "ElementaryTypeNameExpression",
+                            "src": "1171:7:13",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_type$_t_uint256_$",
+                              "typeString": "type(uint256)"
+                            },
+                            "typeName": {
+                              "id": 3993,
+                              "name": "uint256",
+                              "nodeType": "ElementaryTypeName",
+                              "src": "1171:7:13",
+                              "typeDescriptions": {
+                                "typeIdentifier": null,
+                                "typeString": null
+                              }
+                            }
+                          }
+                        ],
+                        "id": 3995,
+                        "isConstant": false,
+                        "isInlineArray": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "lValueRequested": false,
+                        "nodeType": "TupleExpression",
+                        "src": "1145:34:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_tuple$_t_type$_t_int128_$_$_t_type$_t_int128_$_$_t_type$_t_uint256_$_$_t_type$_t_uint256_$_$",
+                          "typeString": "tuple(type(int128),type(int128),type(uint256),type(uint256))"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        },
+                        {
+                          "typeIdentifier": "t_tuple$_t_type$_t_int128_$_$_t_type$_t_int128_$_$_t_type$_t_uint256_$_$_t_type$_t_uint256_$_$",
+                          "typeString": "tuple(type(int128),type(int128),type(uint256),type(uint256))"
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": null,
+                        "id": 3984,
+                        "name": "abi",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": -1,
+                        "src": "1128:3:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_magic_abi",
+                          "typeString": "abi"
+                        }
+                      },
+                      "id": 3985,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "lValueRequested": false,
+                      "memberName": "decode",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": null,
+                      "src": "1128:10:13",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_abidecode_pure$__$returns$__$",
+                        "typeString": "function () pure"
+                      }
+                    },
+                    "id": 3996,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1128:52:13",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$_t_int128_$_t_int128_$_t_uint256_$_t_uint256_$",
+                      "typeString": "tuple(int128,int128,uint256,uint256)"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "1077:103:13"
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 3999,
+                        "name": "i",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 3977,
+                        "src": "1219:1:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_int128",
+                          "typeString": "int128"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "id": 4000,
+                        "name": "j",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 3979,
+                        "src": "1231:1:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_int128",
+                          "typeString": "int128"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "id": 4001,
+                        "name": "dx",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 3981,
+                        "src": "1244:2:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "id": 4002,
+                        "name": "min_dy",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 3983,
+                        "src": "1262:6:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_int128",
+                          "typeString": "int128"
+                        },
+                        {
+                          "typeIdentifier": "t_int128",
+                          "typeString": "int128"
+                        },
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "id": 3998,
+                      "name": "ExchangeInputs",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 3969,
+                      "src": "1193:14:13",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_type$_t_struct$_ExchangeInputs_$3969_storage_ptr_$",
+                        "typeString": "type(struct CurveAdapterLib.ExchangeInputs storage pointer)"
+                      }
+                    },
+                    "id": 4003,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "structConstructorCall",
+                    "lValueRequested": false,
+                    "names": [
+                      "i",
+                      "j",
+                      "dx",
+                      "min_dy"
+                    ],
+                    "nodeType": "FunctionCall",
+                    "src": "1193:82:13",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_ExchangeInputs_$3969_memory_ptr",
+                      "typeString": "struct CurveAdapterLib.ExchangeInputs memory"
+                    }
+                  },
+                  "functionReturnParameters": 3975,
+                  "id": 4004,
+                  "nodeType": "Return",
+                  "src": "1186:89:13"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 4006,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "decodeExchangeInputs",
+            "nodeType": "FunctionDefinition",
+            "overrides": null,
+            "parameters": {
+              "id": 3972,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3971,
+                  "mutability": "mutable",
+                  "name": "args",
+                  "nodeType": "VariableDeclaration",
+                  "overrides": null,
+                  "scope": 4006,
+                  "src": "1006:17:13",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 3970,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1006:5:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1005:19:13"
+            },
+            "returnParameters": {
+              "id": 3975,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3974,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "overrides": null,
+                  "scope": 4006,
+                  "src": "1048:21:13",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_ExchangeInputs_$3969_memory_ptr",
+                    "typeString": "struct CurveAdapterLib.ExchangeInputs"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 3973,
+                    "name": "ExchangeInputs",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 3969,
+                    "src": "1048:14:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_ExchangeInputs_$3969_storage_ptr",
+                      "typeString": "struct CurveAdapterLib.ExchangeInputs"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1047:23:13"
+            },
+            "scope": 4007,
+            "src": "976:304:13",
+            "stateMutability": "pure",
+            "virtual": false,
+            "visibility": "internal"
+          }
+        ],
+        "scope": 4008,
+        "src": "113:1169:13"
+      }
+    ],
+    "src": "0:1283:13"
+  },
+  "legacyAST": {
+    "absolutePath": "/home/ray/0confirmation/packages/0confirmation-sol/contracts/adapters/assets/curve/CurveAdapterLib.sol",
+    "exportedSymbols": {
+      "CurveAdapterLib": [
+        4007
+      ]
+    },
+    "id": 4008,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 3884,
+        "literals": [
+          "solidity",
+          "^",
+          "0.6",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:13"
+      },
+      {
+        "id": 3885,
+        "literals": [
+          "experimental",
+          "ABIEncoderV2"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "24:33:13"
+      },
+      {
+        "absolutePath": "/home/ray/0confirmation/packages/0confirmation-sol/contracts/adapters/lib/ModuleLib.sol",
+        "file": "../../lib/ModuleLib.sol",
+        "id": 3887,
+        "nodeType": "ImportDirective",
+        "scope": 4008,
+        "sourceUnit": 8493,
+        "src": "59:52:13",
+        "symbolAliases": [
+          {
+            "foreign": {
+              "argumentTypes": null,
+              "id": 3886,
+              "name": "ModuleLib",
+              "nodeType": "Identifier",
+              "overloadedDeclarations": [],
+              "referencedDeclaration": null,
+              "src": "68:9:13",
+              "typeDescriptions": {
+                "typeIdentifier": null,
+                "typeString": null
+              }
+            },
+            "local": null
+          }
+        ],
+        "unitAlias": ""
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "library",
+        "documentation": null,
+        "fullyImplemented": true,
+        "id": 4007,
+        "linearizedBaseContracts": [
+          4007
+        ],
+        "name": "CurveAdapterLib",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "canonicalName": "CurveAdapterLib.Isolate",
+            "id": 3890,
+            "members": [
+              {
+                "constant": false,
+                "id": 3889,
+                "mutability": "mutable",
+                "name": "curveAddress",
+                "nodeType": "VariableDeclaration",
+                "overrides": null,
+                "scope": 3890,
+                "src": "162:20:13",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                },
+                "typeName": {
+                  "id": 3888,
+                  "name": "address",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "162:7:13",
+                  "stateMutability": "nonpayable",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              }
+            ],
+            "name": "Isolate",
+            "nodeType": "StructDefinition",
+            "scope": 4007,
+            "src": "141:46:13",
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 3913,
+              "nodeType": "Block",
+              "src": "308:118:13",
+              "statements": [
+                {
+                  "assignments": [
+                    3908
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 3908,
+                      "mutability": "mutable",
+                      "name": "cast",
+                      "nodeType": "VariableDeclaration",
+                      "overrides": null,
+                      "scope": 3913,
+                      "src": "314:50:13",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_nonpayable$_t_uint256_$returns$_t_uint256_$",
+                        "typeString": "function (uint256) returns (uint256)"
+                      },
+                      "typeName": {
+                        "id": 3907,
+                        "nodeType": "FunctionTypeName",
+                        "parameterTypes": {
+                          "id": 3903,
+                          "nodeType": "ParameterList",
+                          "parameters": [
+                            {
+                              "constant": false,
+                              "id": 3902,
+                              "mutability": "mutable",
+                              "name": "",
+                              "nodeType": "VariableDeclaration",
+                              "overrides": null,
+                              "scope": 3907,
+                              "src": "324:7:13",
+                              "stateVariable": false,
+                              "storageLocation": "default",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_uint256",
+                                "typeString": "uint256"
+                              },
+                              "typeName": {
+                                "id": 3901,
+                                "name": "uint256",
+                                "nodeType": "ElementaryTypeName",
+                                "src": "324:7:13",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_uint256",
+                                  "typeString": "uint256"
+                                }
+                              },
+                              "value": null,
+                              "visibility": "internal"
+                            }
+                          ],
+                          "src": "323:9:13"
+                        },
+                        "returnParameterTypes": {
+                          "id": 3906,
+                          "nodeType": "ParameterList",
+                          "parameters": [
+                            {
+                              "constant": false,
+                              "id": 3905,
+                              "mutability": "mutable",
+                              "name": "",
+                              "nodeType": "VariableDeclaration",
+                              "overrides": null,
+                              "scope": 3907,
+                              "src": "351:7:13",
+                              "stateVariable": false,
+                              "storageLocation": "default",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_uint256",
+                                "typeString": "uint256"
+                              },
+                              "typeName": {
+                                "id": 3904,
+                                "name": "uint256",
+                                "nodeType": "ElementaryTypeName",
+                                "src": "351:7:13",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_uint256",
+                                  "typeString": "uint256"
+                                }
+                              },
+                              "value": null,
+                              "visibility": "internal"
+                            }
+                          ],
+                          "src": "350:9:13"
+                        },
+                        "src": "314:50:13",
+                        "stateMutability": "nonpayable",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_function_internal_nonpayable$_t_uint256_$returns$_t_uint256_$",
+                          "typeString": "function (uint256) returns (uint256)"
+                        },
+                        "visibility": "internal"
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 3911,
+                  "initialValue": {
+                    "argumentTypes": null,
+                    "expression": {
+                      "argumentTypes": null,
+                      "id": 3909,
+                      "name": "ModuleLib",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 8492,
+                      "src": "367:9:13",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_type$_t_contract$_ModuleLib_$8492_$",
+                        "typeString": "type(library ModuleLib)"
+                      }
+                    },
+                    "id": 3910,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "memberName": "cast",
+                    "nodeType": "MemberAccess",
+                    "referencedDeclaration": 8405,
+                    "src": "367:14:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_function_internal_pure$_t_uint256_$returns$_t_uint256_$",
+                      "typeString": "function (uint256) pure returns (uint256)"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "314:67:13"
+                },
+                {
+                  "AST": {
+                    "nodeType": "YulBlock",
+                    "src": "396:26:13",
+                    "statements": [
+                      {
+                        "nodeType": "YulAssignment",
+                        "src": "404:12:13",
+                        "value": {
+                          "name": "cast",
+                          "nodeType": "YulIdentifier",
+                          "src": "412:4:13"
+                        },
+                        "variableNames": [
+                          {
+                            "name": "swap",
+                            "nodeType": "YulIdentifier",
+                            "src": "404:4:13"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "evmVersion": "istanbul",
+                  "externalReferences": [
+                    {
+                      "declaration": 3908,
+                      "isOffset": false,
+                      "isSlot": false,
+                      "src": "412:4:13",
+                      "valueSize": 1
+                    },
+                    {
+                      "declaration": 3899,
+                      "isOffset": false,
+                      "isSlot": false,
+                      "src": "404:4:13",
+                      "valueSize": 1
+                    }
+                  ],
+                  "id": 3912,
+                  "nodeType": "InlineAssembly",
+                  "src": "387:35:13"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 3914,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getCastStorageType",
+            "nodeType": "FunctionDefinition",
+            "overrides": null,
+            "parameters": {
+              "id": 3891,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "217:2:13"
+            },
+            "returnParameters": {
+              "id": 3900,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3899,
+                  "mutability": "mutable",
+                  "name": "swap",
+                  "nodeType": "VariableDeclaration",
+                  "overrides": null,
+                  "scope": 3914,
+                  "src": "243:63:13",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_function_internal_pure$_t_uint256_$returns$_t_struct$_Isolate_$3890_storage_ptr_$",
+                    "typeString": "function (uint256) pure returns (struct CurveAdapterLib.Isolate)"
+                  },
+                  "typeName": {
+                    "id": 3898,
+                    "nodeType": "FunctionTypeName",
+                    "parameterTypes": {
+                      "id": 3894,
+                      "nodeType": "ParameterList",
+                      "parameters": [
+                        {
+                          "constant": false,
+                          "id": 3893,
+                          "mutability": "mutable",
+                          "name": "",
+                          "nodeType": "VariableDeclaration",
+                          "overrides": null,
+                          "scope": 3898,
+                          "src": "253:7:13",
+                          "stateVariable": false,
+                          "storageLocation": "default",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          },
+                          "typeName": {
+                            "id": 3892,
+                            "name": "uint256",
+                            "nodeType": "ElementaryTypeName",
+                            "src": "253:7:13",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          },
+                          "value": null,
+                          "visibility": "internal"
+                        }
+                      ],
+                      "src": "252:9:13"
+                    },
+                    "returnParameterTypes": {
+                      "id": 3897,
+                      "nodeType": "ParameterList",
+                      "parameters": [
+                        {
+                          "constant": false,
+                          "id": 3896,
+                          "mutability": "mutable",
+                          "name": "",
+                          "nodeType": "VariableDeclaration",
+                          "overrides": null,
+                          "scope": 3898,
+                          "src": "285:15:13",
+                          "stateVariable": false,
+                          "storageLocation": "storage",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_struct$_Isolate_$3890_storage_ptr",
+                            "typeString": "struct CurveAdapterLib.Isolate"
+                          },
+                          "typeName": {
+                            "contractScope": null,
+                            "id": 3895,
+                            "name": "Isolate",
+                            "nodeType": "UserDefinedTypeName",
+                            "referencedDeclaration": 3890,
+                            "src": "285:7:13",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_struct$_Isolate_$3890_storage_ptr",
+                              "typeString": "struct CurveAdapterLib.Isolate"
+                            }
+                          },
+                          "value": null,
+                          "visibility": "internal"
+                        }
+                      ],
+                      "src": "284:17:13"
+                    },
+                    "src": "243:63:13",
+                    "stateMutability": "pure",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_function_internal_pure$_t_uint256_$returns$_t_struct$_Isolate_$3890_storage_ptr_$",
+                      "typeString": "function (uint256) pure returns (struct CurveAdapterLib.Isolate)"
+                    },
+                    "visibility": "internal"
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "242:65:13"
+            },
+            "scope": 4007,
+            "src": "190:236:13",
+            "stateMutability": "pure",
+            "virtual": false,
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 3926,
+              "nodeType": "Block",
+              "src": "508:43:13",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 3923,
+                        "name": "key",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 3916,
+                        "src": "542:3:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "arguments": [],
+                      "expression": {
+                        "argumentTypes": [],
+                        "id": 3921,
+                        "name": "getCastStorageType",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 3914,
+                        "src": "521:18:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_function_internal_pure$__$returns$_t_function_internal_pure$_t_uint256_$returns$_t_struct$_Isolate_$3890_storage_ptr_$_$",
+                          "typeString": "function () pure returns (function (uint256) pure returns (struct CurveAdapterLib.Isolate storage pointer))"
+                        }
+                      },
+                      "id": 3922,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "kind": "functionCall",
+                      "lValueRequested": false,
+                      "names": [],
+                      "nodeType": "FunctionCall",
+                      "src": "521:20:13",
+                      "tryCall": false,
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_pure$_t_uint256_$returns$_t_struct$_Isolate_$3890_storage_ptr_$",
+                        "typeString": "function (uint256) pure returns (struct CurveAdapterLib.Isolate storage pointer)"
+                      }
+                    },
+                    "id": 3924,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "521:25:13",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Isolate_$3890_storage_ptr",
+                      "typeString": "struct CurveAdapterLib.Isolate storage pointer"
+                    }
+                  },
+                  "functionReturnParameters": 3920,
+                  "id": 3925,
+                  "nodeType": "Return",
+                  "src": "514:32:13"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 3927,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "toIsolatePointer",
+            "nodeType": "FunctionDefinition",
+            "overrides": null,
+            "parameters": {
+              "id": 3917,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3916,
+                  "mutability": "mutable",
+                  "name": "key",
+                  "nodeType": "VariableDeclaration",
+                  "overrides": null,
+                  "scope": 3927,
+                  "src": "455:11:13",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 3915,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "455:7:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "454:13:13"
+            },
+            "returnParameters": {
+              "id": 3920,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3919,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "overrides": null,
+                  "scope": 3927,
+                  "src": "491:15:13",
+                  "stateVariable": false,
+                  "storageLocation": "storage",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_Isolate_$3890_storage_ptr",
+                    "typeString": "struct CurveAdapterLib.Isolate"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 3918,
+                    "name": "Isolate",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 3890,
+                    "src": "491:7:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Isolate_$3890_storage_ptr",
+                      "typeString": "struct CurveAdapterLib.Isolate"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "490:17:13"
+            },
+            "scope": 4007,
+            "src": "429:122:13",
+            "stateMutability": "pure",
+            "virtual": false,
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 3945,
+              "nodeType": "Block",
+              "src": "635:89:13",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "arguments": [
+                          {
+                            "argumentTypes": null,
+                            "arguments": [
+                              {
+                                "argumentTypes": null,
+                                "hexValue": "69736f6c6174652e63757276652d61646170746572",
+                                "id": 3939,
+                                "isConstant": false,
+                                "isLValue": false,
+                                "isPure": true,
+                                "kind": "string",
+                                "lValueRequested": false,
+                                "nodeType": "Literal",
+                                "src": "683:23:13",
+                                "subdenomination": null,
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_stringliteral_d94cf02a4dccf9da687aaac9a5d7ae2649df6a3f23acdc04ce5f2375d42f1d33",
+                                  "typeString": "literal_string \"isolate.curve-adapter\""
+                                },
+                                "value": "isolate.curve-adapter"
+                              },
+                              {
+                                "argumentTypes": null,
+                                "id": 3940,
+                                "name": "instance",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 3929,
+                                "src": "708:8:13",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_address",
+                                  "typeString": "address"
+                                }
+                              }
+                            ],
+                            "expression": {
+                              "argumentTypes": [
+                                {
+                                  "typeIdentifier": "t_stringliteral_d94cf02a4dccf9da687aaac9a5d7ae2649df6a3f23acdc04ce5f2375d42f1d33",
+                                  "typeString": "literal_string \"isolate.curve-adapter\""
+                                },
+                                {
+                                  "typeIdentifier": "t_address",
+                                  "typeString": "address"
+                                }
+                              ],
+                              "expression": {
+                                "argumentTypes": null,
+                                "id": 3937,
+                                "name": "abi",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": -1,
+                                "src": "666:3:13",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_magic_abi",
+                                  "typeString": "abi"
+                                }
+                              },
+                              "id": 3938,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "lValueRequested": false,
+                              "memberName": "encodePacked",
+                              "nodeType": "MemberAccess",
+                              "referencedDeclaration": null,
+                              "src": "666:16:13",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_function_abiencodepacked_pure$__$returns$_t_bytes_memory_ptr_$",
+                                "typeString": "function () pure returns (bytes memory)"
+                              }
+                            },
+                            "id": 3941,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "kind": "functionCall",
+                            "lValueRequested": false,
+                            "names": [],
+                            "nodeType": "FunctionCall",
+                            "src": "666:51:13",
+                            "tryCall": false,
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_bytes_memory_ptr",
+                              "typeString": "bytes memory"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_bytes_memory_ptr",
+                              "typeString": "bytes memory"
+                            }
+                          ],
+                          "id": 3936,
+                          "name": "keccak256",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": -8,
+                          "src": "656:9:13",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_keccak256_pure$_t_bytes_memory_ptr_$returns$_t_bytes32_$",
+                            "typeString": "function (bytes memory) pure returns (bytes32)"
+                          }
+                        },
+                        "id": 3942,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "656:62:13",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        }
+                      ],
+                      "id": 3935,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "lValueRequested": false,
+                      "nodeType": "ElementaryTypeNameExpression",
+                      "src": "648:7:13",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_type$_t_uint256_$",
+                        "typeString": "type(uint256)"
+                      },
+                      "typeName": {
+                        "id": 3934,
+                        "name": "uint256",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "648:7:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": null,
+                          "typeString": null
+                        }
+                      }
+                    },
+                    "id": 3943,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "typeConversion",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "648:71:13",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "functionReturnParameters": 3933,
+                  "id": 3944,
+                  "nodeType": "Return",
+                  "src": "641:78:13"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 3946,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "computeIsolatePointer",
+            "nodeType": "FunctionDefinition",
+            "overrides": null,
+            "parameters": {
+              "id": 3930,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3929,
+                  "mutability": "mutable",
+                  "name": "instance",
+                  "nodeType": "VariableDeclaration",
+                  "overrides": null,
+                  "scope": 3946,
+                  "src": "585:16:13",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 3928,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "585:7:13",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "584:18:13"
+            },
+            "returnParameters": {
+              "id": 3933,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3932,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "overrides": null,
+                  "scope": 3946,
+                  "src": "626:7:13",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 3931,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "626:7:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "625:9:13"
+            },
+            "scope": 4007,
+            "src": "554:170:13",
+            "stateMutability": "pure",
+            "virtual": false,
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 3959,
+              "nodeType": "Block",
+              "src": "812:67:13",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "arguments": [
+                          {
+                            "argumentTypes": null,
+                            "id": 3955,
+                            "name": "instance",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 3948,
+                            "src": "864:8:13",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_address",
+                              "typeString": "address"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_address",
+                              "typeString": "address"
+                            }
+                          ],
+                          "id": 3954,
+                          "name": "computeIsolatePointer",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 3946,
+                          "src": "842:21:13",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_internal_pure$_t_address_$returns$_t_uint256_$",
+                            "typeString": "function (address) pure returns (uint256)"
+                          }
+                        },
+                        "id": 3956,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "842:31:13",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "id": 3953,
+                      "name": "toIsolatePointer",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 3927,
+                      "src": "825:16:13",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_pure$_t_uint256_$returns$_t_struct$_Isolate_$3890_storage_ptr_$",
+                        "typeString": "function (uint256) pure returns (struct CurveAdapterLib.Isolate storage pointer)"
+                      }
+                    },
+                    "id": 3957,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "825:49:13",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Isolate_$3890_storage_ptr",
+                      "typeString": "struct CurveAdapterLib.Isolate storage pointer"
+                    }
+                  },
+                  "functionReturnParameters": 3952,
+                  "id": 3958,
+                  "nodeType": "Return",
+                  "src": "818:56:13"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 3960,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getIsolatePointer",
+            "nodeType": "FunctionDefinition",
+            "overrides": null,
+            "parameters": {
+              "id": 3949,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3948,
+                  "mutability": "mutable",
+                  "name": "instance",
+                  "nodeType": "VariableDeclaration",
+                  "overrides": null,
+                  "scope": 3960,
+                  "src": "754:16:13",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 3947,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "754:7:13",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "753:18:13"
+            },
+            "returnParameters": {
+              "id": 3952,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3951,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "overrides": null,
+                  "scope": 3960,
+                  "src": "795:15:13",
+                  "stateVariable": false,
+                  "storageLocation": "storage",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_Isolate_$3890_storage_ptr",
+                    "typeString": "struct CurveAdapterLib.Isolate"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 3950,
+                    "name": "Isolate",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 3890,
+                    "src": "795:7:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Isolate_$3890_storage_ptr",
+                      "typeString": "struct CurveAdapterLib.Isolate"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "794:17:13"
+            },
+            "scope": 4007,
+            "src": "727:152:13",
+            "stateMutability": "pure",
+            "virtual": false,
+            "visibility": "internal"
+          },
+          {
+            "canonicalName": "CurveAdapterLib.ExchangeInputs",
+            "id": 3969,
+            "members": [
+              {
+                "constant": false,
+                "id": 3962,
+                "mutability": "mutable",
+                "name": "i",
+                "nodeType": "VariableDeclaration",
+                "overrides": null,
+                "scope": 3969,
+                "src": "910:8:13",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_int128",
+                  "typeString": "int128"
+                },
+                "typeName": {
+                  "id": 3961,
+                  "name": "int128",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "910:6:13",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_int128",
+                    "typeString": "int128"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 3964,
+                "mutability": "mutable",
+                "name": "j",
+                "nodeType": "VariableDeclaration",
+                "overrides": null,
+                "scope": 3969,
+                "src": "924:8:13",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_int128",
+                  "typeString": "int128"
+                },
+                "typeName": {
+                  "id": 3963,
+                  "name": "int128",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "924:6:13",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_int128",
+                    "typeString": "int128"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 3966,
+                "mutability": "mutable",
+                "name": "dx",
+                "nodeType": "VariableDeclaration",
+                "overrides": null,
+                "scope": 3969,
+                "src": "938:10:13",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 3965,
+                  "name": "uint256",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "938:7:13",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 3968,
+                "mutability": "mutable",
+                "name": "min_dy",
+                "nodeType": "VariableDeclaration",
+                "overrides": null,
+                "scope": 3969,
+                "src": "954:14:13",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 3967,
+                  "name": "uint256",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "954:7:13",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              }
+            ],
+            "name": "ExchangeInputs",
+            "nodeType": "StructDefinition",
+            "scope": 4007,
+            "src": "882:91:13",
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 4005,
+              "nodeType": "Block",
+              "src": "1071:209:13",
+              "statements": [
+                {
+                  "assignments": [
+                    3977,
+                    3979,
+                    3981,
+                    3983
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 3977,
+                      "mutability": "mutable",
+                      "name": "i",
+                      "nodeType": "VariableDeclaration",
+                      "overrides": null,
+                      "scope": 4005,
+                      "src": "1078:8:13",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_int128",
+                        "typeString": "int128"
+                      },
+                      "typeName": {
+                        "id": 3976,
+                        "name": "int128",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "1078:6:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_int128",
+                          "typeString": "int128"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    },
+                    {
+                      "constant": false,
+                      "id": 3979,
+                      "mutability": "mutable",
+                      "name": "j",
+                      "nodeType": "VariableDeclaration",
+                      "overrides": null,
+                      "scope": 4005,
+                      "src": "1088:8:13",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_int128",
+                        "typeString": "int128"
+                      },
+                      "typeName": {
+                        "id": 3978,
+                        "name": "int128",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "1088:6:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_int128",
+                          "typeString": "int128"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    },
+                    {
+                      "constant": false,
+                      "id": 3981,
+                      "mutability": "mutable",
+                      "name": "dx",
+                      "nodeType": "VariableDeclaration",
+                      "overrides": null,
+                      "scope": 4005,
+                      "src": "1098:10:13",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 3980,
+                        "name": "uint256",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "1098:7:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    },
+                    {
+                      "constant": false,
+                      "id": 3983,
+                      "mutability": "mutable",
+                      "name": "min_dy",
+                      "nodeType": "VariableDeclaration",
+                      "overrides": null,
+                      "scope": 4005,
+                      "src": "1110:14:13",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 3982,
+                        "name": "uint256",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "1110:7:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 3997,
+                  "initialValue": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 3986,
+                        "name": "args",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 3971,
+                        "src": "1139:4:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "components": [
+                          {
+                            "argumentTypes": null,
+                            "id": 3988,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "lValueRequested": false,
+                            "nodeType": "ElementaryTypeNameExpression",
+                            "src": "1146:6:13",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_type$_t_int128_$",
+                              "typeString": "type(int128)"
+                            },
+                            "typeName": {
+                              "id": 3987,
+                              "name": "int128",
+                              "nodeType": "ElementaryTypeName",
+                              "src": "1146:6:13",
+                              "typeDescriptions": {
+                                "typeIdentifier": null,
+                                "typeString": null
+                              }
+                            }
+                          },
+                          {
+                            "argumentTypes": null,
+                            "id": 3990,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "lValueRequested": false,
+                            "nodeType": "ElementaryTypeNameExpression",
+                            "src": "1154:6:13",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_type$_t_int128_$",
+                              "typeString": "type(int128)"
+                            },
+                            "typeName": {
+                              "id": 3989,
+                              "name": "int128",
+                              "nodeType": "ElementaryTypeName",
+                              "src": "1154:6:13",
+                              "typeDescriptions": {
+                                "typeIdentifier": null,
+                                "typeString": null
+                              }
+                            }
+                          },
+                          {
+                            "argumentTypes": null,
+                            "id": 3992,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "lValueRequested": false,
+                            "nodeType": "ElementaryTypeNameExpression",
+                            "src": "1162:7:13",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_type$_t_uint256_$",
+                              "typeString": "type(uint256)"
+                            },
+                            "typeName": {
+                              "id": 3991,
+                              "name": "uint256",
+                              "nodeType": "ElementaryTypeName",
+                              "src": "1162:7:13",
+                              "typeDescriptions": {
+                                "typeIdentifier": null,
+                                "typeString": null
+                              }
+                            }
+                          },
+                          {
+                            "argumentTypes": null,
+                            "id": 3994,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "lValueRequested": false,
+                            "nodeType": "ElementaryTypeNameExpression",
+                            "src": "1171:7:13",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_type$_t_uint256_$",
+                              "typeString": "type(uint256)"
+                            },
+                            "typeName": {
+                              "id": 3993,
+                              "name": "uint256",
+                              "nodeType": "ElementaryTypeName",
+                              "src": "1171:7:13",
+                              "typeDescriptions": {
+                                "typeIdentifier": null,
+                                "typeString": null
+                              }
+                            }
+                          }
+                        ],
+                        "id": 3995,
+                        "isConstant": false,
+                        "isInlineArray": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "lValueRequested": false,
+                        "nodeType": "TupleExpression",
+                        "src": "1145:34:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_tuple$_t_type$_t_int128_$_$_t_type$_t_int128_$_$_t_type$_t_uint256_$_$_t_type$_t_uint256_$_$",
+                          "typeString": "tuple(type(int128),type(int128),type(uint256),type(uint256))"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        },
+                        {
+                          "typeIdentifier": "t_tuple$_t_type$_t_int128_$_$_t_type$_t_int128_$_$_t_type$_t_uint256_$_$_t_type$_t_uint256_$_$",
+                          "typeString": "tuple(type(int128),type(int128),type(uint256),type(uint256))"
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": null,
+                        "id": 3984,
+                        "name": "abi",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": -1,
+                        "src": "1128:3:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_magic_abi",
+                          "typeString": "abi"
+                        }
+                      },
+                      "id": 3985,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "lValueRequested": false,
+                      "memberName": "decode",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": null,
+                      "src": "1128:10:13",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_abidecode_pure$__$returns$__$",
+                        "typeString": "function () pure"
+                      }
+                    },
+                    "id": 3996,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1128:52:13",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$_t_int128_$_t_int128_$_t_uint256_$_t_uint256_$",
+                      "typeString": "tuple(int128,int128,uint256,uint256)"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "1077:103:13"
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 3999,
+                        "name": "i",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 3977,
+                        "src": "1219:1:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_int128",
+                          "typeString": "int128"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "id": 4000,
+                        "name": "j",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 3979,
+                        "src": "1231:1:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_int128",
+                          "typeString": "int128"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "id": 4001,
+                        "name": "dx",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 3981,
+                        "src": "1244:2:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "id": 4002,
+                        "name": "min_dy",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 3983,
+                        "src": "1262:6:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_int128",
+                          "typeString": "int128"
+                        },
+                        {
+                          "typeIdentifier": "t_int128",
+                          "typeString": "int128"
+                        },
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "id": 3998,
+                      "name": "ExchangeInputs",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 3969,
+                      "src": "1193:14:13",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_type$_t_struct$_ExchangeInputs_$3969_storage_ptr_$",
+                        "typeString": "type(struct CurveAdapterLib.ExchangeInputs storage pointer)"
+                      }
+                    },
+                    "id": 4003,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "structConstructorCall",
+                    "lValueRequested": false,
+                    "names": [
+                      "i",
+                      "j",
+                      "dx",
+                      "min_dy"
+                    ],
+                    "nodeType": "FunctionCall",
+                    "src": "1193:82:13",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_ExchangeInputs_$3969_memory_ptr",
+                      "typeString": "struct CurveAdapterLib.ExchangeInputs memory"
+                    }
+                  },
+                  "functionReturnParameters": 3975,
+                  "id": 4004,
+                  "nodeType": "Return",
+                  "src": "1186:89:13"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 4006,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "decodeExchangeInputs",
+            "nodeType": "FunctionDefinition",
+            "overrides": null,
+            "parameters": {
+              "id": 3972,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3971,
+                  "mutability": "mutable",
+                  "name": "args",
+                  "nodeType": "VariableDeclaration",
+                  "overrides": null,
+                  "scope": 4006,
+                  "src": "1006:17:13",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 3970,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1006:5:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1005:19:13"
+            },
+            "returnParameters": {
+              "id": 3975,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3974,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "overrides": null,
+                  "scope": 4006,
+                  "src": "1048:21:13",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_ExchangeInputs_$3969_memory_ptr",
+                    "typeString": "struct CurveAdapterLib.ExchangeInputs"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 3973,
+                    "name": "ExchangeInputs",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 3969,
+                    "src": "1048:14:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_ExchangeInputs_$3969_storage_ptr",
+                      "typeString": "struct CurveAdapterLib.ExchangeInputs"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1047:23:13"
+            },
+            "scope": 4007,
+            "src": "976:304:13",
+            "stateMutability": "pure",
+            "virtual": false,
+            "visibility": "internal"
+          }
+        ],
+        "scope": 4008,
+        "src": "113:1169:13"
+      }
+    ],
+    "src": "0:1283:13"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.6.6+commit.6c089d02.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.1.0",
+  "updatedAt": "2020-05-24T01:32:42.573Z",
+  "devdoc": {
+    "methods": {}
+  },
+  "userdoc": {
+    "methods": {}
+  }
+}

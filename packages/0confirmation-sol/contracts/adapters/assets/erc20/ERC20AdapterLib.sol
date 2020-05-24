@@ -32,7 +32,7 @@ library ERC20AdapterLib {
   function computeForwarderSalt(uint256 index) internal pure returns (bytes32) {
     return keccak256(abi.encodePacked(index));
   }
-  function computeForwarderAddress(BorrowProxyLib.ProxyIsolate storage proxyIsolate, uint256 index) internal returns (address) {
+  function computeForwarderAddress(BorrowProxyLib.ProxyIsolate storage proxyIsolate, uint256 index) internal view returns (address) {
     return proxyIsolate.deriveAssetForwarderAddress(computeForwarderSalt(index));
   }
   function liquidate(BorrowProxyLib.ProxyIsolate storage proxyIsolate) internal returns (bool) {
@@ -98,7 +98,7 @@ library ERC20AdapterLib {
       token: token
     }));
   }
-  function deriveNextForwarderAddress(BorrowProxyLib.ProxyIsolate storage proxyIsolate) internal returns (address) {
+  function deriveNextForwarderAddress(BorrowProxyLib.ProxyIsolate storage proxyIsolate) internal view returns (address) {
     Isolate storage isolate = getIsolatePointer();
     return proxyIsolate.deriveAssetForwarderAddress(keccak256(abi.encodePacked(address(this), isolate.payments.length)));
   }

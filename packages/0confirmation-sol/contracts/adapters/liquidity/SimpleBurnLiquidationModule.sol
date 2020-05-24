@@ -27,15 +27,24 @@ contract SimpleBurnLiquidationModule {
     isolate.toLiquidate.insert(token);
     return true;
   }
+  function fetchExternals(address moduleAddress) internal view returns (address routerAddress, address erc20Module) {
+    (routerAddress, erc20Module) = SimpleBurnLiquidationModule(moduleAddress).getExternalIsolateHandler();
+  }
+  function fetchLiquidityToken(address liquidateTo) internal view returns (address) {
+    return ShifterPool(proxyIsolate.masterAddress).getLiquidityTokenForTokenHandler(liquidateTo);
+  }
+  function getWETH(IUniswapV2Router01 router) internal pure returns (address) {
+    return router.WETH();
+  }
   function liquidate(address moduleAddress) public returns (bool) {
     if (!ERC20AdapterLib.liquidate(proxyIsolate)) return false;
     SimpleBurnLiquidationModuleLib.Isolate storage isolate = SimpleBurnLiquidationModuleLib.getIsolatePointer();
     address liquidateTo = address(uint160(proxyIsolate.token));
-    IUniswapV2Router01 router = IUniswapV2Router01(isolate.routerAddress);
-    address liquidityToken = ShifterPool(proxyIsolate.masterAddress).getLiquidityTokenForTokenHandler(liquidateTo);
-    address WETH = router.WETH();
+    address liquidityToken = fetchLiquidityToken(liquidateTo);
+    (address routerAddress, /* address erc20Module */) = fetchExternals(moduleAddress);
+    IUniswapV2Router01 router = IUniswapV2Router01(routerAddress);
+    address WETH = getWETH(router);
     uint256 i;
-    uint256 received = 0;
     for (i = isolate.liquidated; i < isolate.toLiquidate.set.length; i++) {
       address tokenAddress = isolate.toLiquidate.set[i];
       if (liquidateTo == tokenAddress) continue;
@@ -51,11 +60,8 @@ contract SimpleBurnLiquidationModule {
     isolate.liquidated = i;
     return true;
   }
-  function getExternalIsolateHandler() external view returns (SimpleBurnLiquidationModuleLib.ExternalIsolate memory) {
+  function getExternalIsolateHandler() external view returns (address, address) {
     SimpleBurnLiquidationModuleLib.Isolate storage isolate = SimpleBurnLiquidationModuleLib.getIsolatePointer();
-    return SimpleBurnLiquidationModuleLib.ExternalIsolate({
-      routerAddress: isolate.routerAddress,
-      erc20Module: isolate.erc20Module
-    });
+    return (isolate.routerAddress, isolate.erc20Module);
   }
 }

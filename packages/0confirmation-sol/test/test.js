@@ -110,21 +110,13 @@ contract('ShifterPool', () => {
       CurveToken: await CurveToken.deployed(),
       DAI: await DAI.deployed(),
       WBTC: await WBTC.deployed(),
-      Exchange: await Exchange.deployed(),
-      Factory: await Factory.deployed(),
-      ShifterRegistry: await ShifterRegistryMock.deployed(),
-      TransferAll: await TransferAll.deployed(),
-      SwapEntireLoan: await SwapEntireLoan.deployed()
+      UniswapV2Router01: await UniswapV2Router01.deployed(),
+      UniswapV2Factory: await UniswapV2Factory.deployed(),
+      ShifterRegistry: await ShifterRegistryMock.deployed()
     };
     fixtures.provider = fromTruffleProvider(fixtures.ShifterPool.contract.currentProvider);
     fixtures.renbtc = {
       address: await fixtures.ShifterRegistry.token()
-    };
-    fixtures.renbtcExchange = {
-      address: await fixtures.Factory.getExchange(fixtures.renbtc.address)
-    };
-    fixtures.daiExchange = {
-      address: await fixtures.Factory.getExchange(fixtures.DAI.address)
     };
     const keeperProvider = makePrivateKeyWalletWithPersonalSign(randomBytes(32).toString('hex'), fixtures.provider);
     const borrowerProvider = makePrivateKeyWalletWithPersonalSign(randomBytes(32).toString('hex'), fixtures.provider);
@@ -189,9 +181,9 @@ contract('ShifterPool', () => {
       }
     });
     const actions = [
-      Zero.staticPreprocessor(fixtures.SwapEntireLoan.address, encodeAddressPair(fixtures.Factory.address, fixtures.DAI.address)),
+    //  Zero.staticPreprocessor(fixtures.SwapEntireLoan.address, encodeAddressPair(fixtures.Factory.address, fixtures.DAI.address)),
       
-      Zero.staticPreprocessor(fixtures.TransferAll.address, encodeAddressPair(fixtures.DAI.address, borrowerAddress))
+    //  Zero.staticPreprocessor(fixtures.TransferAll.address, encodeAddressPair(fixtures.DAI.address, borrowerAddress))
     ];
     const liquidityRequest = fixtures.borrower.createLiquidityRequest({
       token: fixtures.renbtc.address,

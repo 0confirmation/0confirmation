@@ -189,12 +189,12 @@ library UniswapV2AdapterLib {
   function computeIsolatePointer(address instance) public pure returns (uint256) {
     return uint256(keccak256(abi.encodePacked("isolate.uniswap-v2-adapter", instance)));
   }
-  function validatePath(address[] memory path, address WETH) internal returns (address begin, address destination) {
+  function validatePath(address[] memory path, address WETH) internal pure returns (address begin, address destination) {
     if (path.length < 2) revert("path too short, must be 3 elements");
     if (path.length > 3 || !(path[0] == WETH || path[1] == WETH)) revert("path must be 2 or 3 items and include WETH");
     return (path[0], path[path.length - 1]);
   }
-  function generatePathForToken(address startToken, address WETH, address token) internal returns (address[] memory path) {
+  function generatePathForToken(address startToken, address WETH, address token) internal pure returns (address[] memory path) {
     path = new address[](3);
     path[0] = startToken;
     path[1] = WETH;

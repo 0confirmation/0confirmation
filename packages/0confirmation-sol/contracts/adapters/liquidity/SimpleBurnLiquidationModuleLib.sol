@@ -34,7 +34,4 @@ library SimpleBurnLiquidationModuleLib {
   function getIsolatePointer() internal pure returns (Isolate storage) {
     return toIsolatePointer(computeIsolatePointer());
   }
-  function getExternalIsolate(address moduleAddress) internal view returns (ExternalIsolate memory) {
-    return SimpleBurnLiquidationModule(moduleAddress).getExternalIsolateHandler();
-  }
 }

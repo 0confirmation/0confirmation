@@ -36,6 +36,11 @@ library BorrowProxyLib {
     address liquidationSubmodule;
     address repaymentSubmodule;
   }
+  struct ModuleDetails {
+    ModuleRegistrationType moduleType;
+    address target;
+    bytes4[] sigs;
+  }
   struct ModuleRegistration {
     ModuleRegistrationType moduleType;
     address target;
