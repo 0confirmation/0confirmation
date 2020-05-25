@@ -25,6 +25,7 @@ import usdtIcon from '@iconify/icons-cryptocurrency/usdt';
 import eosIcon from '@iconify/icons-cryptocurrency/eos';
 import btgIcon from '@iconify/icons-cryptocurrency/btg';
 import Alert from './alert'
+import { Web3Provider } from '@ethersproject/providers';
 import provider from './provider';
 import Web3Modal from 'web3modal';
 import Fortmatic from 'fortmatic';
@@ -44,7 +45,7 @@ const util = require('./util');
 const BTCBackend = require('@0confirmation/sdk/backends/btc');
 let Zero = require('@0confirmation/sdk');
 const { staticPreprocessor } = Zero;
-const { ChainId, Token, fetchData, Trade, TokenAmount, TradeType } = require('@uniswap/sdk');
+const { ChainId, Pair, Route: UniRoute, Token, Trade, TokenAmount, TradeType, INIT_CODE_HASH } = require('@uniswap/sdk');
 
 const web3Modal = new Web3Modal({
   providerOptions: {
@@ -63,7 +64,14 @@ const setupTestUniswapSDK = async (provider) => {
   const ethersProvider = new ethers.providers.Web3Provider(provider);
   const chainId = await ethersProvider.send('net_version', []);
   ChainId.MAINNET = Number(chainId);
-  uniswap.FACTORY_ADDRESS = contracts.factory;
+  Pair.getAddress = (tokenA, tokenB) => {
+    const tokens = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA] // does safety checks
+    return ethers.utils.getCreate2Address({
+      from: contracts.factory,
+      salt: ethers.utils.arrayify(ethers.utils.solidityKeccak256(['address', 'address'], [tokens[0].address, tokens[1].address])),
+      initCodeHash: ethers.utils.arrayify(INIT_CODE_HASH)
+    });
+  };
 };
 
 const encodeAddressTriple = (a, b, c) => ethers.utils.defaultAbiCoder.encode([ 'bytes' ], [ ethers.utils.defaultAbiCoder.encode(['address', 'address', 'address'], [ a, b, c ]) ]);
@@ -74,7 +82,7 @@ const createSwapActions = ({
   borrower,
   swapAndDrop
 }) => [
-  staticPreprocessor(swapAndDrop.address, encodeAddressTriple(router, dai, borrower))
+  staticPreprocessor(swapAndDrop, encodeAddressTriple(router, dai, borrower))
 ];
 
 const getRenBTCAddress = async () => {
@@ -84,11 +92,9 @@ const getRenBTCAddress = async () => {
 const getDAIToken = () => new Token(ChainId.MAINNET, contracts.dai, DECIMALS.dai, 'DAI', 'DAI Stablecoin');
 const getRenBTCToken = () => new Token(ChainId.MAINNET, contracts.renbtc, DECIMALS.btc, 'RenBTC', 'RenBTC');
 const getWETHToken = () => new Token(ChainId.MAINNET, contracts.weth, DECIMALS.weth, 'WETH', 'WETH');
-const coerceToProvider = (provider) => provider.asEthers && provider.asEthers() || provider;
-
 
 const getDAIBTCMarket = async (provider) => {
-  const route = new Route([ await fetchData(getRenBTCToken(), getWETHToken(), coerceToProvider(provider)), await fetchData(getDAIToken(), getWETHToken(), coerceToProvider(provider)) ], getRenBTCToken());
+  const route = new UniRoute([ await Pair.fetchData(getRenBTCToken(), getWETHToken(), provider), await Pair.fetchData(getDAIToken(), getWETHToken(), provider) ], getRenBTCToken());
   return route;
 };
 
@@ -100,7 +106,7 @@ const getTradeExecution = async (provider, route, amount) => {
 const getBorrows = async (zero) => {
   const borrowProxies = await zero.getBorrowProxies();
   for (const borrowProxy of borrowProxies) {
-    borrowProxy.pendingTransfers = await borrowProxy.queryPendingTransfers();
+    borrowProxy.pendingTransfers = await borrowProxy.queryTransfers();
   }
   return borrowProxies;
 };
@@ -134,6 +140,7 @@ const getContractsFromArtifacts = async (artifacts) => ({
   }),
   shifterPool: artifacts.require('ShifterPool').address,
   swapAndDrop: artifacts.require('V2SwapAndDrop').address,
+  weth: artifacts.require('WETH9').address,
   mpkh,
   isTestnet: true
 });
@@ -141,7 +148,8 @@ const getContractsFromArtifacts = async (artifacts) => ({
 let zero = makeZero(provider);
 const DECIMALS = {
   btc: 8,
-  dai: 18
+  dai: 18,
+  weth: 18
 };
 
 
@@ -334,7 +342,7 @@ class TradeRoom extends React.Component {
     async initializeMarket() {
       await this.updateMarket();
       this.setState({
-        rate: util.truncateDecimals(this.state.market.marketRate.rate.toString(10), 2)
+        rate: 'N/A'
       });
     }
     async updateAmount(e) {
@@ -346,7 +354,8 @@ class TradeRoom extends React.Component {
       await this.getTradeDetails();
     }
     async updateMarket() {
-      const market = await getDAIBTCMarket(provider);
+      const market = await getDAIBTCMarket(new Web3Provider(zero.getProvider()));
+      console.log(market);
       this.setState({
         market
       });
@@ -355,12 +364,13 @@ class TradeRoom extends React.Component {
       if (!this.state.value || !String(this.state.value).trim()) return await this.initializeMarket();
       await this.updateMarket();
 //    if (isNaN(toParsed(this.state.value, 'btc'))) return; // just stop here if we have to for some reason
-      const trade = await getTradeExecution(provider, this.state.market, toParsed(this.state.value, 'btc'));
+      const trade = await getTradeExecution(new Web3Provider(zero.getProvider()), this.state.market, toParsed(this.state.value, 'btc'));
+      console.log(trade);
       this.setState({
         trade,
-        calcValue: toFormat(String(trade.outputAmount.amount).toString(10), 'dai'),
-        rate: util.truncateDecimals(String(trade.executionPrice), 2),
-        slippage: util.truncateDecimals(String(trade.slippage), 4)
+        calcValue: util.truncateDecimals(trade.outputAmount.toExact(), 2),
+        rate: trade.executionPrice.toFixed(2),
+        slippage: trade.slippage.toFixed(2)
       });
     }
     async requestLoan(evt) {
@@ -410,10 +420,10 @@ class TradeRoom extends React.Component {
         this.setState({
           modal: false
         });
-        let amount = getSwapAmountFromBorrowReceipt(receipt, deposited.proxyAddress);
+        let amount = String((await proxy.queryTransfers())[0].sendEvent.values.value);
         if (amount) {
           amount = toFormat(amount, 'dai');          
-          await this.setState({showAlert:true, message:`BTC/DAI swap executed: ${util.truncateDecimals(amount, 6)} DAI locked -- await RenVM message to release`});
+          await this.setState({showAlert:true, message:`BTC/DAI swap executed: ${amount} DAI locked -- await RenVM message to release`});
           // window.alert('BTC/DAI swap executed: ' + util.truncateDecimals(amount, 6) + ' DAI locked -- await RenVM message to release');
         } else {
           // window.alert('something went wrong');
