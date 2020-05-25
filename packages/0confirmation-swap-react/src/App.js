@@ -48,11 +48,12 @@ const { staticPreprocessor } = Zero;
 const { ChainId, Pair, Route: UniRoute, Token, Trade, TokenAmount, TradeType, INIT_CODE_HASH } = require('@uniswap/sdk');
 
 const web3Modal = new Web3Modal({
+  network: 'mainnet',
   providerOptions: {
     fortmatic: {
       package: Fortmatic,
       options: {
-        key: ''
+        key: 'pk_live_1964E7E877AC78B1'
       }
     }
   }
