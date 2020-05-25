@@ -41,7 +41,6 @@ const web3ProviderFromEthers = require('@0confirmation/providers/from-ethers');
 const ethers = require('ethers');
 const uniswap = require('@uniswap/sdk');
 const util = require('./util');
-const uniswapConstants = require('@uniswap/sdk/dist/constants');
 const BTCBackend = require('@0confirmation/sdk/backends/btc');
 let Zero = require('@0confirmation/sdk');
 const { staticPreprocessor } = Zero;
@@ -64,10 +63,7 @@ const setupTestUniswapSDK = async (provider) => {
   const ethersProvider = new ethers.providers.Web3Provider(provider);
   const chainId = await ethersProvider.send('net_version', []);
   ChainId.MAINNET = Number(chainId);
-  uniswapConstants.FACTORY_ADDRESS[Number(chainId)] = contracts.factory;
-  uniswapConstants.SUPPORTED_CHAIN_ID[Number(chainId)] = 'Lendnet';
-  uniswapConstants.SUPPORTED_CHAIN_ID.Lendnet = Number(chainId);
-  uniswapConstants._CHAIN_ID_NAME[Number(chainId)] = 'lendnet';
+  uniswap.FACTORY_ADDRESS = contracts.factory;
 };
 
 const encodeAddressTriple = (a, b, c) => ethers.utils.defaultAbiCoder.encode([ 'bytes' ], [ ethers.utils.defaultAbiCoder.encode(['address', 'address', 'address'], [ a, b, c ]) ]);
