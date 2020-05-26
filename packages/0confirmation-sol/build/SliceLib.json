@@ -1,16 +1,16 @@
 {
   "contractName": "SliceLib",
   "abi": [],
-  "metadata": "{\"compiler\":{\"version\":\"0.6.6+commit.6c089d02\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/home/ray/0confirmation/packages/0confirmation-sol/contracts/utils/SliceLib.sol\":\"SliceLib\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/ray/0confirmation/packages/0confirmation-sol/contracts/utils/MemcpyLib.sol\":{\"keccak256\":\"0xb11fc7883a74c3dc229560c1c2fbb241b99b484ed97c1297f35e2a7704ec9e15\",\"urls\":[\"bzz-raw://736bccbbfc0543db4abce36d4525bf9bc50eab8a4c8d5a882dbbb9fa770182d4\",\"dweb:/ipfs/QmcnrS6gR8B9mmsHx9AN1PTzGtwC5ARqjU79CZvW6XxC9P\"]},\"/home/ray/0confirmation/packages/0confirmation-sol/contracts/utils/SliceLib.sol\":{\"keccak256\":\"0x9d2996f7c3ee7e32e55a1b92956b0fc71980eb23c3b94d0f79c9b57bea27e7e7\",\"urls\":[\"bzz-raw://d4d4fbaec5b96ea0caae8e1a164bfb1834306882a8f0f2fb31b23feee422525f\",\"dweb:/ipfs/QmakHvtP7PngHB5KKxWRV3sJjMYSFUAgMvi4Zg7Rb3NdBe\"]}},\"version\":1}",
-  "bytecode": "0x60566023600b82828239805160001a607314601657fe5b30600052607381538281f3fe73000000000000000000000000000000000000000030146080604052600080fdfea2646970667358221220436ed9c34b8e114797deba019d9efdc62089f862bbc369fe251d832f320c316764736f6c63430006060033",
-  "deployedBytecode": "0x73000000000000000000000000000000000000000030146080604052600080fdfea2646970667358221220436ed9c34b8e114797deba019d9efdc62089f862bbc369fe251d832f320c316764736f6c63430006060033",
+  "metadata": "{\"compiler\":{\"version\":\"0.6.6+commit.6c089d02\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/root/0confirmation/packages/0confirmation-sol/contracts/utils/SliceLib.sol\":\"SliceLib\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/root/0confirmation/packages/0confirmation-sol/contracts/utils/MemcpyLib.sol\":{\"keccak256\":\"0xb11fc7883a74c3dc229560c1c2fbb241b99b484ed97c1297f35e2a7704ec9e15\",\"urls\":[\"bzz-raw://736bccbbfc0543db4abce36d4525bf9bc50eab8a4c8d5a882dbbb9fa770182d4\",\"dweb:/ipfs/QmcnrS6gR8B9mmsHx9AN1PTzGtwC5ARqjU79CZvW6XxC9P\"]},\"/root/0confirmation/packages/0confirmation-sol/contracts/utils/SliceLib.sol\":{\"keccak256\":\"0x9d2996f7c3ee7e32e55a1b92956b0fc71980eb23c3b94d0f79c9b57bea27e7e7\",\"urls\":[\"bzz-raw://d4d4fbaec5b96ea0caae8e1a164bfb1834306882a8f0f2fb31b23feee422525f\",\"dweb:/ipfs/QmakHvtP7PngHB5KKxWRV3sJjMYSFUAgMvi4Zg7Rb3NdBe\"]}},\"version\":1}",
+  "bytecode": "0x60566023600b82828239805160001a607314601657fe5b30600052607381538281f3fe73000000000000000000000000000000000000000030146080604052600080fdfea2646970667358221220ac1df85033e70d8c09955bd86b9dcb22c8a075bab046e95023471b7e66c51c7264736f6c63430006060033",
+  "deployedBytecode": "0x73000000000000000000000000000000000000000030146080604052600080fdfea2646970667358221220ac1df85033e70d8c09955bd86b9dcb22c8a075bab046e95023471b7e66c51c7264736f6c63430006060033",
   "immutableReferences": {},
   "sourceMap": "105:2960:45:-:0;;132:2:-1;166:7;155:9;146:7;137:37;255:7;249:14;246:1;241:23;235:4;232:33;222:2;;269:9;222:2;293:9;290:1;283:20;323:4;314:7;306:22;347:7;338;331:24",
   "deployedSourceMap": "105:2960:45:-:0;;;;;;12:1:-1;9;2:12",
   "source": "pragma solidity ^0.6.0;\npragma experimental ABIEncoderV2;\n\nimport { MemcpyLib } from \"./MemcpyLib.sol\";\n\nlibrary SliceLib {\n  struct Slice {\n    uint256 data;\n    uint256 length;\n    uint256 offset;\n  }\n  function toPtr(bytes memory input, uint256 offset) internal pure returns (uint256 data) {\n    assembly {\n      data := add(input, add(offset, 0x20))\n    }\n  }\n  function toSlice(bytes memory input, uint256 offset, uint256 length) internal pure returns (Slice memory retval) {\n    retval.data = toPtr(input, offset);\n    retval.length = length;\n    retval.offset = offset;\n  }\n  function toSlice(bytes memory input) internal pure returns (Slice memory) {\n    return toSlice(input, 0);\n  }\n  function toSlice(bytes memory input, uint256 offset) internal pure returns (Slice memory) {\n    if (input.length < offset) offset = input.length;\n    return toSlice(input, offset, input.length - offset);\n  }\n  function toSlice(Slice memory input, uint256 offset, uint256 length) internal pure returns (Slice memory) {\n    return Slice({\n      data: input.data + offset,\n      offset: input.offset + offset,\n      length: length\n    });\n  }\n  function toSlice(Slice memory input, uint256 offset) internal pure returns (Slice memory) {\n    return toSlice(input, offset, input.length - offset);\n  }\n  function toSlice(Slice memory input) internal pure returns (Slice memory) {\n    return toSlice(input, 0);\n  }\n  function maskLastByteOfWordAt(uint256 data) internal pure returns (uint8 lastByte) {\n    assembly {\n      lastByte := and(mload(data), 0xff)\n    }\n  }\n  function get(Slice memory slice, uint256 index) internal pure returns (bytes1 result) {\n    return bytes1(maskLastByteOfWordAt(slice.data - 0x1f + index));\n  }\n  function setByteAt(uint256 ptr, uint8 value) internal pure {\n    assembly {\n      mstore8(ptr, value)\n    }\n  }\n  function set(Slice memory slice, uint256 index, uint8 value) internal pure {\n    setByteAt(slice.data + index, value);\n  }\n  function wordAt(uint256 ptr, uint256 length) internal pure returns (bytes32 word) {\n    assembly {\n      let mask := sub(shl(mul(length, 0x8), 0x1), 0x1)\n      word := and(mload(sub(ptr, sub(0x20, length))), mask)\n    }\n  }\n  function asWord(Slice memory slice) internal pure returns (bytes32 word) {\n    uint256 data = slice.data;\n    uint256 length = slice.length;\n    return wordAt(data, length);\n  }\n  function toDataStart(bytes memory input) internal pure returns (bytes32 start) {\n    assembly {\n      start := add(input, 0x20)\n    }\n  }\n  function copy(Slice memory slice) internal pure returns (bytes memory retval) {\n    uint256 length = slice.length;\n    retval = new bytes(length);\n    bytes32 src = bytes32(slice.data);\n    bytes32 dest = toDataStart(retval);\n    MemcpyLib.memcpy(dest, src, length);\n  }\n  function keccakAt(uint256 data, uint256 length) internal pure returns (bytes32 result) {\n    assembly {\n      result := keccak256(data, length)\n    }\n  }\n  function toKeccak(Slice memory slice) internal pure returns (bytes32 result) {\n    return keccakAt(slice.data, slice.length);\n  }\n}\n",
-  "sourcePath": "/home/ray/0confirmation/packages/0confirmation-sol/contracts/utils/SliceLib.sol",
+  "sourcePath": "/root/0confirmation/packages/0confirmation-sol/contracts/utils/SliceLib.sol",
   "ast": {
-    "absolutePath": "/home/ray/0confirmation/packages/0confirmation-sol/contracts/utils/SliceLib.sol",
+    "absolutePath": "/root/0confirmation/packages/0confirmation-sol/contracts/utils/SliceLib.sol",
     "exportedSymbols": {
       "SliceLib": [
         8873
@@ -40,7 +40,7 @@
         "src": "24:33:45"
       },
       {
-        "absolutePath": "/home/ray/0confirmation/packages/0confirmation-sol/contracts/utils/MemcpyLib.sol",
+        "absolutePath": "/root/0confirmation/packages/0confirmation-sol/contracts/utils/MemcpyLib.sol",
         "file": "./MemcpyLib.sol",
         "id": 8554,
         "nodeType": "ImportDirective",
@@ -4721,7 +4721,7 @@
     "src": "0:3066:45"
   },
   "legacyAST": {
-    "absolutePath": "/home/ray/0confirmation/packages/0confirmation-sol/contracts/utils/SliceLib.sol",
+    "absolutePath": "/root/0confirmation/packages/0confirmation-sol/contracts/utils/SliceLib.sol",
     "exportedSymbols": {
       "SliceLib": [
         8873
@@ -4751,7 +4751,7 @@
         "src": "24:33:45"
       },
       {
-        "absolutePath": "/home/ray/0confirmation/packages/0confirmation-sol/contracts/utils/MemcpyLib.sol",
+        "absolutePath": "/root/0confirmation/packages/0confirmation-sol/contracts/utils/MemcpyLib.sol",
         "file": "./MemcpyLib.sol",
         "id": 8554,
         "nodeType": "ImportDirective",
@@ -9437,7 +9437,7 @@
   },
   "networks": {},
   "schemaVersion": "3.1.0",
-  "updatedAt": "2020-04-27T02:16:27.983Z",
+  "updatedAt": "2020-04-27T04:30:15.848Z",
   "devdoc": {
     "methods": {}
   },

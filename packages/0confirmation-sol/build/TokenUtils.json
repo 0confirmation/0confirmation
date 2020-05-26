@@ -1,16 +1,16 @@
 {
   "contractName": "TokenUtils",
   "abi": [],
-  "metadata": "{\"compiler\":{\"version\":\"0.6.6+commit.6c089d02\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/home/ray/0confirmation/packages/0confirmation-sol/contracts/utils/TokenUtils.sol\":\"TokenUtils\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/ray/0confirmation/packages/0confirmation-sol/contracts/utils/TokenUtils.sol\":{\"keccak256\":\"0xc52f8ee03eec3e844ca31ad99a90c14a533bacd7189f7123ac69520ec8d71eb8\",\"urls\":[\"bzz-raw://d56ee55db4e05718c7ed03a92e44775aaa5d92767300e81dddfbf9988e80e342\",\"dweb:/ipfs/QmNeemkjgr5Rd5nwUBpx3fobCPkzCj99R5PwfTC83XGFUH\"]},\"openzeppelin-solidity/contracts/token/ERC20/IERC20.sol\":{\"keccak256\":\"0x708ae901e214e044a5c922748462157b9be162b3620aa56d7c0e7258f66aee1d\",\"urls\":[\"bzz-raw://c287ed9989e5f16114553a30f4ba3794be657f90598f101f7b92ce5859f46978\",\"dweb:/ipfs/QmeFeDCzfhhBTaY9NE9wREmrBRETvn4k3mo2FejqskVMtg\"]}},\"version\":1}",
-  "bytecode": "0x60566023600b82828239805160001a607314601657fe5b30600052607381538281f3fe73000000000000000000000000000000000000000030146080604052600080fdfea264697066735822122039be7d7dbb5688085bf0b84897e008eabc446fb2fb04c158824ab452a2dd5b1f64736f6c63430006060033",
-  "deployedBytecode": "0x73000000000000000000000000000000000000000030146080604052600080fdfea264697066735822122039be7d7dbb5688085bf0b84897e008eabc446fb2fb04c158824ab452a2dd5b1f64736f6c63430006060033",
+  "metadata": "{\"compiler\":{\"version\":\"0.6.6+commit.6c089d02\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/root/0confirmation/packages/0confirmation-sol/contracts/utils/TokenUtils.sol\":\"TokenUtils\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/root/0confirmation/packages/0confirmation-sol/contracts/utils/TokenUtils.sol\":{\"keccak256\":\"0xc52f8ee03eec3e844ca31ad99a90c14a533bacd7189f7123ac69520ec8d71eb8\",\"urls\":[\"bzz-raw://d56ee55db4e05718c7ed03a92e44775aaa5d92767300e81dddfbf9988e80e342\",\"dweb:/ipfs/QmNeemkjgr5Rd5nwUBpx3fobCPkzCj99R5PwfTC83XGFUH\"]},\"openzeppelin-solidity/contracts/token/ERC20/IERC20.sol\":{\"keccak256\":\"0x708ae901e214e044a5c922748462157b9be162b3620aa56d7c0e7258f66aee1d\",\"urls\":[\"bzz-raw://c287ed9989e5f16114553a30f4ba3794be657f90598f101f7b92ce5859f46978\",\"dweb:/ipfs/QmeFeDCzfhhBTaY9NE9wREmrBRETvn4k3mo2FejqskVMtg\"]}},\"version\":1}",
+  "bytecode": "0x60566023600b82828239805160001a607314601657fe5b30600052607381538281f3fe73000000000000000000000000000000000000000030146080604052600080fdfea26469706673582212209c3ca49d1ebb98c4424b34be7fabb223139d1f3fed54d054780bd3e6bf4417d264736f6c63430006060033",
+  "deployedBytecode": "0x73000000000000000000000000000000000000000030146080604052600080fdfea26469706673582212209c3ca49d1ebb98c4424b34be7fabb223139d1f3fed54d054780bd3e6bf4417d264736f6c63430006060033",
   "immutableReferences": {},
   "sourceMap": "141:2313:47:-:0;;132:2:-1;166:7;155:9;146:7;137:37;255:7;249:14;246:1;241:23;235:4;232:33;222:2;;269:9;222:2;293:9;290:1;283:20;323:4;314:7;306:22;347:7;338;331:24",
   "deployedSourceMap": "141:2313:47:-:0;;;;;;12:1:-1;9;2:12",
   "source": "pragma solidity ^0.6.0;\npragma experimental ABIEncoderV2;\n\nimport { IERC20 } from \"openzeppelin-solidity/contracts/token/ERC20/IERC20.sol\";\n\nlibrary TokenUtils {\n  function encodeTransfer(address target, uint256 amount) internal pure returns (bytes memory retval) {\n    retval = abi.encodeWithSelector(IERC20.transfer.selector, target, amount);\n  }\n  function sendToken(address token, address target, uint256 amount) internal returns (bool) {\n    (bool success,) = token.call(encodeTransfer(target, amount));\n    return success;\n  }\n  function encodeTransferFrom(address from, address to, uint256 amount) internal pure returns (bytes memory retval) {\n    retval = abi.encodeWithSelector(IERC20.transferFrom.selector, from, to, amount);\n  }\n  function transferTokenFrom(address token, address from, address to, uint256 amount) internal returns (bool) {\n    (bool success,) = token.call(encodeTransferFrom(from, to, amount));\n    return success;\n  }\n  function encodeApproval(address target, uint256 amount) internal pure returns (bytes memory retval) {\n    retval = abi.encodeWithSelector(IERC20.approve.selector, target, amount);\n  }\n  function approveToken(address token, address target, uint256 amount) internal returns (bool) {\n    (bool success,) = token.call(encodeApproval(target, amount));\n    return success;\n  }\n  uint256 constant THRESHOLD = 0x3fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;\n  uint256 constant MAX_UINT256 = 0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;\n  function approveForMaxIfNeeded(address token, address target) internal returns (bool) {\n    uint256 approved = getApproved(token, address(this), target);\n    if (approved > THRESHOLD) return true;\n    if (approved != 0 && !approveToken(token, address(this), 0)) return false;\n    return approveToken(token, target, MAX_UINT256);\n  }\n  function encodeAllowance(address source, address target) internal pure returns (bytes memory retval) {\n    retval = abi.encodeWithSelector(IERC20.allowance.selector, source, target);\n  }\n  function decodeUint(bytes memory input) internal pure returns (uint256 retval) {\n    (retval) = abi.decode(input, (uint256));\n  }\n  function getApproved(address token, address source, address target) internal returns (uint256) {\n    (bool success, bytes memory retval) = token.call(encodeAllowance(source, target));\n    if (!success || retval.length != 0x20) return 0x1;\n    return decodeUint(retval);\n  }\n}\n",
-  "sourcePath": "/home/ray/0confirmation/packages/0confirmation-sol/contracts/utils/TokenUtils.sol",
+  "sourcePath": "/root/0confirmation/packages/0confirmation-sol/contracts/utils/TokenUtils.sol",
   "ast": {
-    "absolutePath": "/home/ray/0confirmation/packages/0confirmation-sol/contracts/utils/TokenUtils.sol",
+    "absolutePath": "/root/0confirmation/packages/0confirmation-sol/contracts/utils/TokenUtils.sol",
     "exportedSymbols": {
       "TokenUtils": [
         9458
@@ -3903,7 +3903,7 @@
     "src": "0:2455:47"
   },
   "legacyAST": {
-    "absolutePath": "/home/ray/0confirmation/packages/0confirmation-sol/contracts/utils/TokenUtils.sol",
+    "absolutePath": "/root/0confirmation/packages/0confirmation-sol/contracts/utils/TokenUtils.sol",
     "exportedSymbols": {
       "TokenUtils": [
         9458
@@ -7801,7 +7801,7 @@
   },
   "networks": {},
   "schemaVersion": "3.1.0",
-  "updatedAt": "2020-04-27T02:16:27.992Z",
+  "updatedAt": "2020-04-27T04:30:15.873Z",
   "devdoc": {
     "methods": {}
   },
