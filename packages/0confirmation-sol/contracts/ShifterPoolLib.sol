@@ -2,9 +2,9 @@
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
-import { ECDSA } from "openzeppelin-solidity/contracts/cryptography/ECDSA.sol";
+import { ECDSA } from "@openzeppelin/contracts/cryptography/ECDSA.sol";
 import { TokenUtils } from "./utils/TokenUtils.sol";
-import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
 import { BorrowProxyLib } from "./BorrowProxyLib.sol";
 import { IShifter } from "./interfaces/IShifter.sol";
 import { IShifterRegistry } from "./interfaces/IShifterRegistry.sol";

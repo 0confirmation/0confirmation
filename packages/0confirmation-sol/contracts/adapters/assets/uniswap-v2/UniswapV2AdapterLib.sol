@@ -6,7 +6,7 @@ import { UniswapV2Adapter } from "./UniswapV2Adapter.sol";
 import { IUniswapV2Router01 } from "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router01.sol";
 import { BorrowProxyLib } from "../../../BorrowProxyLib.sol";
 import { ShifterBorrowProxyLib } from "../../../ShifterBorrowProxyLib.sol";
-import { Create2 } from "openzeppelin-solidity/contracts/utils/Create2.sol";
+import { Create2 } from "@openzeppelin/contracts/utils/Create2.sol";
 import { ModuleLib } from "../../lib/ModuleLib.sol";
 import { AddressSetLib } from "../../../utils/AddressSetLib.sol";
 

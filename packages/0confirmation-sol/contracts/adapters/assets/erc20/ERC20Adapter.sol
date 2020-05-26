@@ -3,7 +3,7 @@ pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import { ModuleLib } from "../../lib/ModuleLib.sol";
-import { ERC20 } from "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
+import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { ERC20AdapterLib } from "./ERC20AdapterLib.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { BorrowProxyLib } from "../../../BorrowProxyLib.sol";

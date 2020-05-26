@@ -3,7 +3,7 @@ pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import { ISafeView } from "./ISafeView.sol";
-import { Create2 } from "openzeppelin-solidity/contracts/utils/Create2.sol";
+import { Create2 } from "@openzeppelin/contracts/utils/Create2.sol";
 
 library SafeViewLib {
   struct SafeViewResult {

@@ -8,7 +8,7 @@ import { IUniswapFactory } from "../interfaces/IUniswapFactory.sol";
 import { ShifterBorrowProxyLib } from "../ShifterBorrowProxyLib.sol";
 import { SandboxLib } from "../utils/sandbox/SandboxLib.sol";
 import { BorrowProxyLib } from "../BorrowProxyLib.sol";
-import { IERC20 } from "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { StringLib } from "../utils/StringLib.sol";
 
 contract SwapEntireLoan {

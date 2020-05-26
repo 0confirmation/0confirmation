@@ -3,8 +3,8 @@ pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import { IInitializationActionsReceiver } from "./interfaces/IInitializationActionsReceiver.sol";
-import { ECDSA } from "openzeppelin-solidity/contracts/cryptography/ECDSA.sol";
-import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import { ECDSA } from "@openzeppelin/contracts/cryptography/ECDSA.sol";
+import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
 import { BorrowProxy } from "./BorrowProxy.sol";
 import { BorrowProxyLib } from "./BorrowProxyLib.sol";
 import { TokenUtils } from "./utils/TokenUtils.sol";

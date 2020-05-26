@@ -4,7 +4,7 @@ pragma experimental ABIEncoderV2;
 
 import { AddressSetLib } from "../../utils/AddressSetLib.sol";
 import { BorrowProxyLib } from "../../BorrowProxyLib.sol";
-import { IERC20 } from "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { SimpleBurnLiquidationModuleLib } from "./SimpleBurnLiquidationModuleLib.sol";
 import { ERC20AdapterLib } from "../assets/erc20/ERC20AdapterLib.sol";

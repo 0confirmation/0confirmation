@@ -6,12 +6,12 @@ import { PreprocessorLib } from "./lib/PreprocessorLib.sol";
 import { ShifterBorrowProxyLib } from "../ShifterBorrowProxyLib.sol";
 import { SandboxLib } from "../utils/sandbox/SandboxLib.sol";
 import { BorrowProxyLib } from "../BorrowProxyLib.sol";
-import { IERC20 } from "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { StringLib } from "../utils/StringLib.sol";
 import { IUniswapV2Router01 } from "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router01.sol";
 import { IUniswapV2Pair } from "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol";
 import { UniswapV2AdapterLib } from "../adapters/assets/uniswap-v2/UniswapV2AdapterLib.sol";
-import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
 
 contract V2SwapAndDrop {
   using SafeMath for uint256;

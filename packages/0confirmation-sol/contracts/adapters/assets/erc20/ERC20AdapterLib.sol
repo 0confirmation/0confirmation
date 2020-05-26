@@ -2,8 +2,8 @@
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
-import { Create2 } from "openzeppelin-solidity/contracts/utils/Create2.sol";
-import { IERC20 } from "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
+import { Create2 } from "@openzeppelin/contracts/utils/Create2.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { ModuleLib } from "../../lib/ModuleLib.sol";
 import { AssetForwarder } from "../../lib/AssetForwarder.sol";
 import { AssetForwarderLib } from "../../lib/AssetForwarderLib.sol";

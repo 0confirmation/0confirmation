@@ -2,7 +2,7 @@
 pragma solidity ^0.6.0;
 
 import { AssetForwarder } from "./AssetForwarder.sol";
-import { Create2 } from "openzeppelin-solidity/contracts/utils/Create2.sol";
+import { Create2 } from "@openzeppelin/contracts/utils/Create2.sol";
 import { FactoryLib } from "../../FactoryLib.sol";
 import { ShifterPool } from "../../ShifterPool.sol";
 

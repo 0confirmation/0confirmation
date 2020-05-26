@@ -2,7 +2,7 @@
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
-import { Create2 } from "openzeppelin-solidity/contracts/utils/Create2.sol";
+import { Create2 } from "@openzeppelin/contracts/utils/Create2.sol";
 import { MemcpyLib } from "./MemcpyLib.sol";
 
 library RStoreLib {
