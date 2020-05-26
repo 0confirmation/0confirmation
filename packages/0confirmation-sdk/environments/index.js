@@ -32,6 +32,7 @@ const fromArtifact = (network, artifact) => ((artifact.networks || {})[chainIdFr
 const renNetworkFromNetwork = (network) => {
   switch (network) {
     case 'testnet':
+    case 'ganache':
       return 'testnet';
     case 'mainnet':
       return 'chaosnet';
@@ -40,7 +41,7 @@ const renNetworkFromNetwork = (network) => {
 };
 
 const renvmFromEnvironment = (network) => {
-  if (network === 'ganache') {
+  if (network === 'ganache' || network === 'test') {
     return {
       shifterRegistry: fromArtifact(network, ShifterRegistryMock),
       mpkh: '0x' + randomBytes(32).toString('hex')

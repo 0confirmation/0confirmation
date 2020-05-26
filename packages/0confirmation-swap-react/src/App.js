@@ -35,8 +35,6 @@ import Fortmatic from 'fortmatic';
 const makePersonalSignProviderFromGanache = require('@0confirmation/providers/ganache');
 const makePersonalSignProviderFromPrivate = require('@0confirmation/providers/private-key-or-seed');
 const randomBytes = require('random-bytes').sync;
-const TransferAll = require('@0confirmation/sol/build/TransferAll');
-const SwapEntireLoan = require('@0confirmation/sol/build/SwapEntireLoan');
 const ShifterERC20Mock = require('@0confirmation/sol/build/ShifterERC20Mock')
 const ShifterRegistryMock = require('@0confirmation/sol/build/ShifterRegistryMock');
 const CHAIN = process.env.REACT_APP_CHAIN;
@@ -221,7 +219,7 @@ class TradeRoom extends React.Component {
         zero = makeZero(provider);
       }
       zero.setEnvironment(contracts);
-      await setupTestUniswapSDK(provider);
+      await setupTestUniswapSDK(nrovider);
       if (!['embedded', 'test'].includes(CHAIN)) return;
       const ganacheAddress = (await (provider.dataProvider.asEthers()).send('eth_accounts', []))[0];
       const keeperPvt = ethers.utils.solidityKeccak256(['address'], [ ganacheAddress ]).substr(2);
@@ -298,8 +296,8 @@ class TradeRoom extends React.Component {
           };
           console.log('libp2p: bootstrapped');
         }
-        const provider = zero.getProvider().asEthers();
-        provider.on('block', () => {
+        const ethersProvider = zero.getProvider().asEthers();
+        ethersProvider.on('block', () => {
           this.getPendingTransfers().catch((err) => console.error(err));
         });
     }
@@ -307,7 +305,7 @@ class TradeRoom extends React.Component {
       const borrows = await getBorrows(zero);
       console.log(borrows);
     }
-  _history = [{
+  static _history = [{
       created: "05/06/20 10:15",
       address: "xfekdjj39jsgahshjebah3i393jandbbrrb",
       confirmations: 1,
@@ -648,6 +646,8 @@ class TradeRoom extends React.Component {
             showdetail: true,
             sendOpen:false,
             showAlert:false,
+            transactionDetails: 0,
+            _history: TradeRoom._history,
             getOpen: false,
             send: 0,
             gets: 0,
@@ -838,7 +838,7 @@ class TradeRoom extends React.Component {
                                     logoHeight={30}
                                     logoWidth={30}
                                     logoOpacity={0.5}
-                                    logoImage={require("../images/0cf.svg")}
+                                    logoImage={require("./images/0cf.svg")}
                                     size={100} bgColor="transparent"
                                     qrStyle="squares" />
                                 {/* <img src={require("../images/barcode.svg")} alt="0CF" className="img-fluid" /> */}
@@ -866,7 +866,7 @@ class TradeRoom extends React.Component {
                                                         navigator.clipboard.writeText(this.state.wallet);
                                                         this.setState({ copied: true })
                                                     }}
-                                                    style={{ cursor: "pointer" }} className="img-fluid" src={require("../images/copy.svg")} alt="Copy" />}</span>
+                                                    style={{ cursor: "pointer" }} className="img-fluid" src={require("./images/copy.svg")} alt="Copy" />}</span>
                                     </Col>
                                     <Col lg="12" md="12" sm="12" className="text-light my-3 mx-1 text-center align-content-center justify-content-center">
                                         <span style={{ fontSize: "0.7em" }}>Time Left To Pay: 12:34 mins</span>
@@ -889,9 +889,6 @@ class TradeRoom extends React.Component {
                         <button className="btn text-light button-small btn-sm" style={{ fontSize: "24dp", backgroundColor: "#317333", width: "248dp", borderRadius: "10px" }}>Connect Wallet</button>
                     </div>
                     <div className="alert-box">
-                        <Alert delay={2000} boldText="Test Green" detailText="Test Detail" alertType="alert-green" />
-                        <Alert delay={3000} boldText="Test Yellow" detailText="Test Detail" alertType="alert-yellow" />
-                        <Alert boldText="Test Red" detailText="Test Detail" alertType="alert-red" />
                     </div>
                     <Row className="justify-content-center align-content-center text-center mx-auto">
                         <Col lg="2" md="2" sm="6" className="justify-content-center align-content-center mx-auto w-50" style={{ backgroundColor: "#1F2820", borderRadius: "10px" }}>
@@ -1036,7 +1033,7 @@ class TradeRoom extends React.Component {
                                         </InputGroup>
                                     </Col>
                                     <Col lg="2" md="6" sm="6" className="mt-2">
-                                        <img className="img-fluid" src={require("../images/swapicon.svg")} alt="Swap" />
+                                        <img className="img-fluid" src={require("./images/swapicon.svg")} alt="Swap" />
                                     </Col>
                                     <Col lg="4" md="12" sm="12" className="mt-2">
                                         <InputGroup style={{ height: "52px" }}>
@@ -1204,7 +1201,7 @@ class TradeRoom extends React.Component {
                                                                     eleos.address.substr(0, 6) + "..." + eleos.address.substr(eleos.address.length - 5, eleos.address.length)
                                                                 }</td>
                                                                 <td className="text-light justify-content-center align-content-center text-center my-auto">
-                                                                    <img alt={`${eleos.confirmations} of 6`} width="30%" height="30%" src={require(`../images/${eleos.confirmations}.svg`)} className="img-fluid" /></td>
+                                                                    <img alt={`${eleos.confirmations} of 6`} width="30%" height="30%" src={require(`./images/${'0cf' || eleos.confirmations}.svg`)} className="img-fluid" /></td>
                                                                 <td className="text-light justify-content-center align-content-center text-center my-auto">{eleos.sent} {eleos.sentname}</td>
                                                                 <td className="text-light justify-content-center align-content-center text-center my-auto">{eleos.received} {eleos.receivedname}</td>
                                                                 <td>
@@ -1243,29 +1240,29 @@ class TradeRoom extends React.Component {
                         </Col></Row>
                         <Row className="justify-content-center align-content-center">
                             <Col lg="5" md="9" sm="9" className="justify-content-center align-content-center text-center text-light">
-                                <p style={{ fontWeight: "normal", fontFamily: "PT Sans",fontSize:"0.9em"}}>Sent: {this._history[`${this.state.transactionDetails}`].created}</p> 
+                                <p style={{ fontWeight: "normal", fontFamily: "PT Sans",fontSize:"0.9em"}}>Sent: {this.state._history[`${this.state.transactionDetails}`].created}</p> 
                             </Col>
                         </Row>
                         <Row className="justify-content-center align-content-center">
                             <Col lg="9" md="9" sm="9" className="justify-content-center align-content-center text-center text-light">
-                                <p className="mx-auto" style={{ color: "#000000", width:"10em", borderRadius: "5px", backgroundColor: (this._history[`${this.state.transactionDetails}`].status === "Liquidated") ? "#D4533B" : (this._history[`${this.state.transactionDetails}`].status === "Completed") ? "#317333" : "#DAA520" }}>
-                                    {this._history[`${this.state.transactionDetails}`].status}</p>
+                                <p className="mx-auto" style={{ color: "#000000", width:"10em", borderRadius: "5px", backgroundColor: (this.state._history[`${this.state.transactionDetails}`].status === "Liquidated") ? "#D4533B" : (this.state._history[`${this.state.transactionDetails}`].status === "Completed") ? "#317333" : "#DAA520" }}>
+                                    {this.state._history[`${this.state.transactionDetails}`].status}</p>
                             </Col>
                         </Row>
                         <Row className="justify-content-center align-content-center">
                             <Col lg="6" md="9" sm="9" className="justify-content-center align-content-center text-light  my-3">
                                 <Col className="w-100 h-100 py-3" style={{backgroundColor:"#354737", boxShadow:"0px 4px 4px rgba(0, 0, 0, 0.2005)", borderRadius:"20px"}}>
                                     <p className="text-center" style={{ fontWeight: "normal", fontFamily: "PT Sans",fontSize:"0.9em"}}>
-                                        Sent {this._history[`${this.state.transactionDetails}`].sentname} ({this._history[`${this.state.transactionDetails}`].sentfullname})</p>
+                                        Sent {this.state._history[`${this.state.transactionDetails}`].sentname} ({this.state._history[`${this.state.transactionDetails}`].sentfullname})</p>
                                     <Row className="justify-content-center align-content-center text-center text-light">
                                         <Col lg="4" md="4" sm="4" className="justify-content-center align-content-center text-center text-light">
-                                            {this._history[`${this.state.transactionDetails}`].sentcoin}
+                                            {this.state._history[`${this.state.transactionDetails}`].sentcoin}
                                         </Col>
                                     </Row>
                                     <Row className="justify-content-center align-content-center text-center text-light">
                                         <Col lg="4" sm="4" md="4" className="align-content-center justify-content-center text-center text-light my-2">
                                             <p style={{fontFamily:"PT Sans", fontStyle:"normal", fontWeight:"bold", fontSize:"1.2em"}}>
-                                                {this._history[`${this.state.transactionDetails}`].sent}
+                                                {this.state._history[`${this.state.transactionDetails}`].sent}
                                             </p>
                                         </Col>
                                     </Row>
@@ -1276,10 +1273,10 @@ class TradeRoom extends React.Component {
                                         <Col lg="6" md="6" sm="6">
                                             <p style={{color:"#ffffff", fontFamily:"PT Sans", fontStyle:"normal", fontWeight:"normal", fontSize:"0.9em"}}>
                                                 {
-                                                    this._history[`${this.state.transactionDetails}`].target.substr(0, 6) + "..." +
-                                                    this._history[`${this.state.transactionDetails}`].target.substr(
-                                                        this._history[`${this.state.transactionDetails}`].target.length - 5,
-                                                        this._history[`${this.state.transactionDetails}`].target.length)
+                                                    this.state._history[`${this.state.transactionDetails}`].target.substr(0, 6) + "..." +
+                                                    this.state._history[`${this.state.transactionDetails}`].target.substr(
+                                                        this.state._history[`${this.state.transactionDetails}`].target.length - 5,
+                                                        this.state._history[`${this.state.transactionDetails}`].target.length)
                                                 }
                                             </p>
                                         </Col>
@@ -1292,9 +1289,9 @@ class TradeRoom extends React.Component {
                                         </Col>
                                         <Col lg="6" md="6" sm="6">
                                             <p style={{color:"#ffffff", fontFamily:"PT Sans", fontStyle:"normal", fontWeight:"normal", fontSize:"0.9em"}}>
-                                                {this._history[`${this.state.transactionDetails}`].fees}{this._history[`${this.state.transactionDetails}`].sentname}
+                                                {this.state._history[`${this.state.transactionDetails}`].fees}{this.state._history[`${this.state.transactionDetails}`].sentname}
                                                 <span><i id="liquidity"><img alt="i" width="20px" className="img-fluid ml-2"
-                                                    src={require("../images/infoicon.svg")} /></i><Tooltip placement="top"
+                                                    src={require('./images/0cf.svg' || "./images/info.svg")} /></i><Tooltip placement="top"
                                                         isOpen={this.state.feetooltip} target="liquidity" toggle={async (e) => await this.setState({ feetooltip: !this.state.feetooltip })} >
                                                         info
                                                 </Tooltip></span> 
@@ -1308,10 +1305,10 @@ class TradeRoom extends React.Component {
                                         <Col lg="6" md="6" sm="6">
                                             <p style={{color:"#ffffff", fontFamily:"PT Sans", fontStyle:"normal", fontWeight:"normal", fontSize:"0.9em"}}>
                                                 {
-                                                    this._history[`${this.state.transactionDetails}`].target.substr(0, 6) + "..." +
-                                                    this._history[`${this.state.transactionDetails}`].target.substr(
-                                                        this._history[`${this.state.transactionDetails}`].target.length - 5,
-                                                            this._history[`${this.state.transactionDetails}`].target.length)
+                                                    this.state._history[`${this.state.transactionDetails}`].target.substr(0, 6) + "..." +
+                                                    this.state._history[`${this.state.transactionDetails}`].target.substr(
+                                                        this.state._history[`${this.state.transactionDetails}`].target.length - 5,
+                                                            this.state._history[`${this.state.transactionDetails}`].target.length)
                                                 }
                                             </p>
                                         </Col>
@@ -1322,7 +1319,7 @@ class TradeRoom extends React.Component {
                                         </Col>
                                         <Col lg="6" md="6" sm="6">
                                             <p style={{color:"#ffffff", fontFamily:"PT Sans", fontStyle:"normal", fontWeight:"normal", fontSize:"0.7em"}}>
-                                                <img alt={`${this._history[`${this.state.transactionDetails}`].confirmations} of 6`} width="30%" height="30%" src={require(`../images/${this._history[`${this.state.transactionDetails}`].confirmations}.svg`)} className="img-fluid" />
+                                                <img alt={`${this.state._history[`${this.state.transactionDetails}`].confirmations} of 6`} width="30%" height="30%" src={require(`./images/${'info' || this.state._history[`${this.state.transactionDetails}`].confirmations}.svg`)} className="img-fluid" />
                                             </p>
                                         </Col>
                                     </Row>
@@ -1331,16 +1328,16 @@ class TradeRoom extends React.Component {
                             <Col lg="6" md="9" sm="9" className="justify-content-center align-content-center text-light my-3">
                                 <Col className="w-100 h-100 py-3" style={{backgroundColor:"#354737", boxShadow:"0px 4px 4px rgba(0, 0, 0, 0.2005)", borderRadius:"20px"}}>
                                     <p className="text-center" style={{ fontWeight: "normal", fontFamily: "PT Sans",fontSize:"0.9em"}}>
-                                        Received {this._history[`${this.state.transactionDetails}`].receivedname} ({this._history[`${this.state.transactionDetails}`].receivedfullname})</p>
+                                        Received {this.state._history[`${this.state.transactionDetails}`].receivedname} ({this.state._history[`${this.state.transactionDetails}`].receivedfullname})</p>
                                     <Row className="justify-content-center align-content-center text-center text-light">
                                         <Col lg="4" md="4" sm="4" className="justify-content-center align-content-center text-center text-light">
-                                            {this._history[`${this.state.transactionDetails}`].receivedcoin}
+                                            {this.state._history[`${this.state.transactionDetails}`].receivedcoin}
                                         </Col>
                                     </Row>
                                     <Row className="justify-content-center align-content-center text-center text-light">
                                         <Col lg="4" sm="4" md="4" className="align-content-center justify-content-center text-center text-light my-2">
                                             <p style={{fontFamily:"PT Sans", fontStyle:"normal", fontWeight:"bold", fontSize:"1.2em"}}>
-                                                {this._history[`${this.state.transactionDetails}`].received}
+                                                {this.state._history[`${this.state.transactionDetails}`].received}
                                             </p>
                                         </Col>
                                     </Row>
@@ -1351,10 +1348,10 @@ class TradeRoom extends React.Component {
                                         <Col lg="6" md="6" sm="6">
                                             <p style={{color:"#ffffff", fontFamily:"PT Sans", fontStyle:"normal", fontWeight:"normal", fontSize:"0.9em"}}>
                                                 {
-                                                    this._history[`${this.state.transactionDetails}`].address.substr(0, 6) + "..." +
-                                                    this._history[`${this.state.transactionDetails}`].address.substr(
-                                                        this._history[`${this.state.transactionDetails}`].address.length - 5,
-                                                        this._history[`${this.state.transactionDetails}`].address.length)
+                                                    this.state._history[`${this.state.transactionDetails}`].address.substr(0, 6) + "..." +
+                                                    this.state._history[`${this.state.transactionDetails}`].address.substr(
+                                                        this.state._history[`${this.state.transactionDetails}`].address.length - 5,
+                                                        this.state._history[`${this.state.transactionDetails}`].address.length)
                                                 }
                                             </p>
                                         </Col>
@@ -1366,10 +1363,10 @@ class TradeRoom extends React.Component {
                                         <Col lg="6" md="6" sm="6">
                                             <p style={{color:"#ffffff", fontFamily:"PT Sans", fontStyle:"normal", fontWeight:"normal", fontSize:"0.9em"}}>
                                                 {
-                                                    this._history[`${this.state.transactionDetails}`].address.substr(0, 6) + "..." +
-                                                    this._history[`${this.state.transactionDetails}`].address.substr(
-                                                        this._history[`${this.state.transactionDetails}`].address.length - 5,
-                                                        this._history[`${this.state.transactionDetails}`].address.length)
+                                                    this.state._history[`${this.state.transactionDetails}`].address.substr(0, 6) + "..." +
+                                                    this.state._history[`${this.state.transactionDetails}`].address.substr(
+                                                        this.state._history[`${this.state.transactionDetails}`].address.length - 5,
+                                                        this.state._history[`${this.state.transactionDetails}`].address.length)
                                                 }
                                             </p>
                                         </Col>
@@ -1381,10 +1378,10 @@ class TradeRoom extends React.Component {
                                         <Col lg="6" md="6" sm="6">
                                             <p style={{color:"#ffffff", fontFamily:"PT Sans", fontStyle:"normal", fontWeight:"normal", fontSize:"0.9em"}}>
                                                 {
-                                                    this._history[`${this.state.transactionDetails}`].address.substr(0, 6) + "..." +
-                                                    this._history[`${this.state.transactionDetails}`].address.substr(
-                                                        this._history[`${this.state.transactionDetails}`].address.length - 5,
-                                                        this._history[`${this.state.transactionDetails}`].address.length)
+                                                    this.state._history[`${this.state.transactionDetails}`].address.substr(0, 6) + "..." +
+                                                    this.state._history[`${this.state.transactionDetails}`].address.substr(
+                                                        this.state._history[`${this.state.transactionDetails}`].address.length - 5,
+                                                        this.state._history[`${this.state.transactionDetails}`].address.length)
                                                 }
                                             </p>
                                         </Col>
@@ -1393,7 +1390,7 @@ class TradeRoom extends React.Component {
                                         <Col lg="12" md="12" sm="12">
                                             <p style={{ color: "#757975", fontFamily: "PT Sans", fontStyle: "normal", fontWeight: "normal", fontSize: "0.7em" }}>Blocks Until Liquidation
                                                 <span><i id="liquidity"><img alt="i" width="18px" className="img-fluid ml-2"
-                                                    src={require("../images/infoicondark.svg")} /></i><Tooltip placement="top"
+                                                    src={require('./images/0cf.svg' || "./images/info.svg")} /></i><Tooltip placement="top"
                                                         isOpen={this.state.blocktooltip} target="liquidity" toggle={async (e) => await this.setState({ blocktooltip: !this.state.blocktooltip })} >
                                                         info
                                                 </Tooltip></span> 
@@ -1401,7 +1398,7 @@ class TradeRoom extends React.Component {
                                         </Col>
                                         <Col lg="12" md="12" sm="12" className="mt-n4">
                                             <p className="mt-2 text-center" style={{color:"#ffffff", fontFamily:"PT Sans", fontStyle:"normal", fontWeight:"normal", fontSize:"1.8em"}}>
-                                                {this._history[`${this.state.transactionDetails}`].blocks}
+                                                {this.state._history[`${this.state.transactionDetails}`].blocks}
                                             </p>
                                             <p style={{ color: "#757975", fontFamily: "PT Sans", fontStyle: "normal", fontWeight: "normal", fontSize: "0.8em" }}
                                                 className="mt-n4 text-center">out of 10,000</p>
