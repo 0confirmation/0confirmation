@@ -54,7 +54,7 @@ const web3Modal = new Web3Modal({
     fortmatic: {
       package: Fortmatic,
       options: {
-        key: 'pk_live_1964E7E877AC78B1'
+        key: 'pk_live_0B4E40B1BB9C11E7'
       }
     }
   }
@@ -219,7 +219,7 @@ class TradeRoom extends React.Component {
         zero = makeZero(provider);
       }
       zero.setEnvironment(contracts);
-      await setupTestUniswapSDK(nrovider);
+      await setupTestUniswapSDK(provider);
       if (!['embedded', 'test'].includes(CHAIN)) return;
       const ganacheAddress = (await (provider.dataProvider.asEthers()).send('eth_accounts', []))[0];
       const keeperPvt = ethers.utils.solidityKeccak256(['address'], [ ganacheAddress ]).substr(2);
