@@ -53,7 +53,7 @@ const web3Modal = new Web3Modal({
     fortmatic: {
       package: Fortmatic,
       options: {
-        key: 'pk_live_1964E7E877AC78B1'
+        key: 'pk_live_719C8E73C6DC2149'
       }
     }
   }
