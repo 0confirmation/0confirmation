@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.6.0;
 
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { Ownable } from "@openzeppelin/contracts/ownership/Ownable.sol";
 import { ShifterPoolLib } from "../ShifterPoolLib.sol";
 
 contract ShifterPoolQuery is Ownable {

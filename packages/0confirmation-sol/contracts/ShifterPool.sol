@@ -2,7 +2,7 @@
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { Ownable } from "@openzeppelin/contracts/ownership/Ownable.sol";
 import { IShifterRegistry } from "./interfaces/IShifterRegistry.sol";
 import { IShifter } from "./interfaces/IShifter.sol";
 import { ShifterPoolLib } from "./ShifterPoolLib.sol";
