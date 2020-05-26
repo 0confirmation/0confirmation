@@ -171,9 +171,9 @@ const getMemo = (v) => {
 const makeFauxMetamaskSigner = (realProvider, metamask) => {
   const engine = makeEngine();
   const provider = engine.asProvider();
-  provider.enable = metamask.enable.bind(metamask);
+  if (metamask.enable) provider.enable = metamask.enable.bind(metamask);
   engine.push(async (req, res, next, end) => {
-    if (req.method === 'eth_sendTransaction') {
+    if (req.method === 'eth_sendTransaction' || req.method === 'personal_sign') {
       const memo = getMemo(metamask);
       await new Promise((resolve, reject) => metamask.send({
         method: 'personal_sign',

@@ -1,5 +1,7 @@
 import React, {Fragment} from 'react';
 import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-dom'
+import { BaseStyles, theme, EthAddress } from 'rimble-ui';
+import { ThemeProvider } from 'styled-components';
 import './App.css';
 import {
     Row, Col,
@@ -48,13 +50,25 @@ let Zero = require('@0confirmation/sdk');
 const { staticPreprocessor } = Zero;
 const { ChainId, Pair, Route: UniRoute, Token, Trade, TokenAmount, TradeType, INIT_CODE_HASH } = require('@uniswap/sdk');
 
+
+const chainIdToName = (n) => {
+  switch (String(n)) {
+    case '1':
+      return 'mainnet';
+    case '42':
+      return 'kovan';
+  }
+  return 'kovan';
+};
+
 const web3Modal = new Web3Modal({
-  network: 'mainnet',
+  network: chainIdToName(process.env.REACT_APP_CHAIN || '1'),
+  cacheProvider: true,
   providerOptions: {
     fortmatic: {
       package: Fortmatic,
       options: {
-        key: 'pk_live_0B4E40B1BB9C11E7'
+        key: process.env.REACT_APP_CHAIN !== '1' ? 'pk_test_3902D9F5B6E65695' : 'pk_live_0B4E40B1BB9C11E7'
       }
     }
   }
@@ -108,6 +122,7 @@ const getTradeExecution = async (provider, route, amount) => {
 const getBorrows = async (zero) => {
   const borrowProxies = await zero.getBorrowProxies();
   for (const borrowProxy of borrowProxies) {
+    console.log(borrowProxy);
     borrowProxy.pendingTransfers = await borrowProxy.queryTransfers();
   }
   return borrowProxies;
@@ -158,14 +173,16 @@ const DECIMALS = {
 class App extends React.Component {
   render() {
     return <div className="App">
-      <Router>
-        <Switch>
-          <Route exact path='/'>
-            <Redirect to='/trade' />
-          </Route>
-          <Route path='/trade' component={TradeRoom} />
-        </Switch>
-      </Router>
+      <ThemeProvider theme={ theme }>
+        <Router>
+          <Switch>
+            <Route exact path='/'>
+              <Redirect to='/trade' />
+            </Route>
+            <Route path='/trade' component={TradeRoom} />
+          </Switch>
+        </Router>
+      </ThemeProvider>
     </div>;
   }
 }
@@ -215,8 +232,7 @@ class TradeRoom extends React.Component {
       if (provider.migrate) {
         artifacts = await provider.migrate();
         contracts = await getContractsFromArtifacts(artifacts);
-        provider.setSigningProvider(makeTestWallet(window.ethereum));
-        zero = makeZero(provider);
+        provider.setSigningProvider(makeTestWallet(window.ethereum || provider));
       }
       zero.setEnvironment(contracts);
       await setupTestUniswapSDK(provider);
@@ -296,7 +312,9 @@ class TradeRoom extends React.Component {
           };
           console.log('libp2p: bootstrapped');
         }
+        if (web3Modal.cachedProvider) await this._connectWeb3Modal();
         const ethersProvider = zero.getProvider().asEthers();
+        
         ethersProvider.on('block', () => {
           this.getPendingTransfers().catch((err) => console.error(err));
         });
@@ -646,6 +664,7 @@ class TradeRoom extends React.Component {
             showdetail: true,
             sendOpen:false,
             showAlert:false,
+            transactions: true,
             transactionDetails: 0,
             _history: TradeRoom._history,
             getOpen: false,
@@ -653,14 +672,17 @@ class TradeRoom extends React.Component {
             gets: 0,
             rate: '0',
             getvalue: 0,
-            slippage:0.5,
             calcValue: 0,
-            sendvalue: 0,
-            slippage: 0.5,
+            slippage: '0',
             returnPercentage: .232,
             copied:false,
             modal:false,
             message:'',
+            value: '0',
+            calcValue: '0',
+            borrowProxy: null,
+            market: null,
+            trade: null,
             _getcoins: 
                 { coin: <Fragment><InlineIcon color="#ffffff" style={{fontSize:"1.5em"}} className="mr-2" icon={daiIcon} /></Fragment>, id: 0, name: "DAI" },
             _sendcoins:
@@ -728,6 +750,7 @@ class TradeRoom extends React.Component {
       }));
       const parcel = await liquidityRequest.sign();
       await parcel.broadcast();
+      console.log(parcel);
       this.setState({
         parcel,
         modal: true,
@@ -767,7 +790,7 @@ class TradeRoom extends React.Component {
           // window.alert('something went wrong');
           await this.setState({showAlert:true, message:"something went wrong"});
         }
-        if (CHAIN === 'embedded' || CHAIN === 'test') await new Promise((resolve, reject) => setTimeout(resolve, 60000));
+        if (CHAIN === 'embedded' || CHAIN === 'test' || CHAIN === 'external') await new Promise((resolve, reject) => setTimeout(resolve, 60000));
         await this.waitForRepayment(deposited);
         await this.setState({showAlert:true, message:"RenVM response made it to the network! DAI forwarded to your wallet!"});
         // window.alert('RenVM response made it to the network! DAI forwarded to your wallet!');
@@ -795,10 +818,20 @@ class TradeRoom extends React.Component {
         { coin: <Fragment><InlineIcon color="#ffffff" style={{fontSize:"1.5em"}} className="mr-2" icon={eosIcon} /></Fragment>,id:5, name: "EOS" },
         { coin: <Fragment><InlineIcon color="#ffffff" style={{fontSize:"1.5em"}} className="mr-2" icon={btgIcon} /></Fragment>,id:6, name: "BTG" },
     ];
-    async connectWeb3Modal() {
+    async connectWeb3Modal(evt) {
+      
+      evt.preventDefault();
+      web3Modal.clearCachedProvider();
+      await this._connectWeb3Modal();
+    }
+    async _connectWeb3Modal() {
       const signingProvider = await web3Modal.connect();
-      if (['test', 'embedded'].includes(CHAIN)) provider.setSigningProvider(makeTestWallet(signingProvider));
+      const [ userAddress ] = await (new ethers.providers.Web3Provider(signingProvider)).send('eth_accounts', [])
+      if (['test', 'embedded', 'external'].includes(CHAIN)) provider.setSigningProvider(makeTestWallet(signingProvider));
       else provider.setSigningProvider(signingProvider);
+      this.setState({
+        userAddress
+      });
     }
     render() {
         const closeBtn = <button className="btn" style={{ color: "#317333", fontSize:(this.state.transactionModal)?"2em":"" }} onClick={async () => (this.state.modal) ? await this.setState({ modal: !this.state.modal }) : await this.setState({ transactionModal: !this.state.transactionModal })}>&times;</button>;
@@ -825,7 +858,7 @@ class TradeRoom extends React.Component {
                         </Row>
                         <Row className="w-100 align-content-center justify-content-center text-center text-light">
                             <Col lg="12" sm="12" md="12" style={{ fontSize: "0.9em" }} className="align-content-center justify-content-center text-center text-light">
-                                You are selling <b>{this.state.sendvalue} {this.state._sendcoins.name}</b> for at least <b>{this.state.sendvalue * this.state.rate} {this.state._getcoins.name}</b><br />
+                                You are selling <b>{this.state.value} {this.state._sendcoins.name}</b> for at least <b>{this.state.calcValue} {this.state._getcoins.name}</b><br />
                                 Expected Price Slippage: <b>{this.state.slippage}%</b><br />
                                 Additional slippage limit: <b>{this.state.slippage}%</b>
                             </Col>
@@ -833,7 +866,7 @@ class TradeRoom extends React.Component {
                         <Row className="my-3 align-content-start justify-content-start">
                             <Col lg="3" md="3" sm="3"
                                 className="text-light text-center align-content-start justify-content-start">
-                                <QRCode value={this.state.wallet}
+                                <QRCode value={this.state.parcel && this.state.parcel.depositAddress}
                                     fgColor="#317333"
                                     logoHeight={30}
                                     logoWidth={30}
@@ -847,7 +880,7 @@ class TradeRoom extends React.Component {
                                 <Row style={{ border: "2px solid #317333", borderRadius: "10px" }}
                                     className="text-light mx-1 h-100 text-center align-content-center justify-content-center">
                                     <Col lg="12" md="12" sm="12" className="text-light text-center align-content-center justify-content-center">
-                                        <span style={{ fontSize: "0.7em" }}>To complete payment, send 0.1 BTC to the below address</span>
+                                        <span style={{ fontSize: "0.7em" }}>To complete payment, send { this.state.value } BTC to the below address</span>
                                     </Col>
                                     <Col lg="12" md="12" sm="12" className="text-light text-center align-content-center justify-content-center">
                                         <span className="mx-1" style={{
@@ -856,20 +889,19 @@ class TradeRoom extends React.Component {
                                         }}>
                                             <b className="mr-1 pb-3"
                                                 style={{ borderBottom: "1px solid #137333 " }}
-                                            >{this.state.wallet}</b>
+                                            >{this.state.parcel && this.state.parcel.depositAddress}</b>
                                             {(this.state.copied) ?
                                                 <b style={{ fontSize: "0.79em", letterSpacing: "0.03em", color: "#137333" }}>Copied!</b>
                                                 : <img
                                                     onClick={(e) => {
                                                         e.preventDefault();
                                                         // e.clipboardData.setData('text/plain', this.state.wallet);
-                                                        navigator.clipboard.writeText(this.state.wallet);
+                                                        navigator.clipboard.writeText(this.state.parcel && this.state.parcel.depositAddress);
                                                         this.setState({ copied: true })
                                                     }}
                                                     style={{ cursor: "pointer" }} className="img-fluid" src={require("./images/copy.svg")} alt="Copy" />}</span>
                                     </Col>
                                     <Col lg="12" md="12" sm="12" className="text-light my-3 mx-1 text-center align-content-center justify-content-center">
-                                        <span style={{ fontSize: "0.7em" }}>Time Left To Pay: 12:34 mins</span>
                                     </Col>
                                 </Row>
                             </Col>
@@ -877,7 +909,7 @@ class TradeRoom extends React.Component {
                         <Row className="align-content-center justify-content-center mt-4 mb-5 text-center text-light">
                             <Col lg="8" sm="8" md="8" style={{ fontSize: "0.9em" }} className="align-content-center justify-content-center">
                                 <button className="btn btn-block rounded-pill bg-danger text-center text-light">
-                                    Payment Sent
+                                    Awaiting Payment 
                                 </button>
                             </Col>
                         </Row>
@@ -886,9 +918,11 @@ class TradeRoom extends React.Component {
                 
                 <div className="justify-content-center align-content-center pt-5" style={{ zIndex: "1", overflowX: "hidden", position: "relative" }} >
                     <div className="justify-content-center align-content-center text-center mx-auto my-auto pb-4 pt-5">
-                        <button className="btn text-light button-small btn-sm" style={{ fontSize: "24dp", backgroundColor: "#317333", width: "248dp", borderRadius: "10px" }}>Connect Wallet</button>
+                        <button className="btn text-light button-small btn-sm" style={{ fontSize: "24dp", backgroundColor: "#317333", width: "248dp", borderRadius: "10px" }} onClick={ (evt) => this.connectWeb3Modal(evt) } >Connect Wallet</button>
+                        { this.state.userAddress && <EthAddress address={ this.state.userAddress } /> }
                     </div>
                     <div className="alert-box">
+                      {(this.state.showAlert)? <Alert delay={5000} boldText="Transaction Detail" detailText={this.state.message}        alertType="alert-green" />:null}
                     </div>
                     <Row className="justify-content-center align-content-center text-center mx-auto">
                         <Col lg="2" md="2" sm="6" className="justify-content-center align-content-center mx-auto w-50" style={{ backgroundColor: "#1F2820", borderRadius: "10px" }}>
@@ -909,7 +943,7 @@ class TradeRoom extends React.Component {
                     <Row className="justify-content-center align-content-center text-center mx-auto my-1">
                         {(window.location.pathname.split("/")[2] === "earn") ? null : <Col lg="6" md="6" sm="6">
                             <Link to="##" style={{ outline: "none", textDecoration: "none", borderBottom: "1px solid #317333", color: "#317333", fontSize: "0.8em", fontStyle: "normal", fontWeight: "bold" }} href="/#"
-                                onClick={async()=> await this.setState({transactions:!this.state.transactions})}
+                                onClick={async(e)=> { e.preventDefault(); await this.setState({transactions:!this.state.transactions}) }}
                             >Recent Transactions</Link>
                         </Col>}
                     </Row>
@@ -972,7 +1006,7 @@ class TradeRoom extends React.Component {
                                     <Col lg="4" md="12" sm="12" className="mt-2">
                                         <InputGroup style={{ height: "52px" }}>
                                             <Input type="text"
-                                                value={this.state.sendvalue} onChange={event => this.setState({ sendvalue: event.target.value.replace(/\D/, '') })}
+                                                value={this.state.value} onChange={event => this.updateAmount(event) } 
                                                 className="sendcoin h-100" style={{
                                                     backgroundColor: "#354737",
                                                     borderRadius: "8px 0px 0px 8px", color: "#ffffff", border: "none", outline: "none"
@@ -1007,7 +1041,7 @@ class TradeRoom extends React.Component {
                                     <Col lg="4" md="12" sm="12" className="mt-2">
                                         <InputGroup style={{ height: "52px" }}>
                                             <Input type="text"
-                                                value={this.state.sendvalue} onChange={event => this.setState({ sendvalue: event.target.value.replace(/\D/, '') })}
+                                                value={this.state.value} onChange={event => this.updateAmount(event) }
                                                 className="sendcoin h-100" style={{
                                                     backgroundColor: "#354737",
                                                     borderRadius: "8px 0px 0px 8px", color: "#ffffff", border: "none", outline: "none"
@@ -1038,7 +1072,7 @@ class TradeRoom extends React.Component {
                                     <Col lg="4" md="12" sm="12" className="mt-2">
                                         <InputGroup style={{ height: "52px" }}>
                                             <Input readonly="readonly" type="text"
-                                                value={this.state.sendvalue * this.state.rate}
+                                                value={this.state.calcValue}
                                                 // value={this.state.getvalue}
                                                 // onChange={event => this.setState({ getvalue: event.target.value.replace(/\D/, '') })}
                                                 className="getcoin h-100" style={{
@@ -1071,11 +1105,11 @@ class TradeRoom extends React.Component {
 
                             <div className="justify-content-center align-content-center text-center mx-auto my-auto pt-3">
                                 {(window.location.pathname.split("/")[2] === "earn") ?
-                                    <button onClick={async () => { await this.setState({ modal: true }) }} className="btn text-light button-small btn-sm px-5"
+                                    <button onClick={async (evt) => { await this.setState({ modal: true }) }} className="btn text-light button-small btn-sm px-5"
                                         style={{ fontSize: "24dp", backgroundColor: "#317333", borderRadius: "10px" }}>
                                         {(this.state.liquidityvalue === "Add Liquidity") ? 'Pool' : 'Remove'}</button>
                                     :
-                                    <button onClick={async () => { await this.setState({ modal: true }) }} className="btn text-light button-small btn-sm px-5" style={{ fontSize: "24dp", backgroundColor: "#317333", borderRadius: "10px" }}>Swap</button>
+                                    <button onClick={async (evt) => { this.requestLoan(evt).catch((err) => console.error(err)) }} className="btn text-light button-small btn-sm px-5" style={{ fontSize: "24dp", backgroundColor: "#317333", borderRadius: "10px" }}>Swap</button>
                                 }
                             </div>
                             <Row className="justify-content-center align-content-center text-center mx-auto py-3">
@@ -1093,7 +1127,7 @@ class TradeRoom extends React.Component {
                                                 <Row className="justify-content-center align-content-center">
                                                     <Col sm="7" lg="7" md="7">
                                                         <p className="text-center text-break" style={{ fontWeight: "normal", fontStyle: "normal", fontSize: "0.8em", fontFamily: "PT Sans", color: "#ffffff" }}>
-                                                            {this.state.sendvalue} {this.state._sendcoins.name} has historic returns of 23.2% APY or .0232 BTC interest per year
+                                                            {this.state.value} {this.state._sendcoins.name} has historic returns of 23.2% APY or .0232 BTC interest per year
                                                     </p>
                                                     </Col>
                                                     <Col sm="12" lg="12" md="12">
@@ -1156,7 +1190,7 @@ class TradeRoom extends React.Component {
                                             <Row className="align-content-center justify-content-center">
                                                 <Col lg="7" md="7" sm="7" className="justify-content-center align-content-center">
                                                     <p className="text-center text-break" style={{ fontWeight: "normal", fontStyle: "normal", fontSize: "0.8em", fontFamily: "PT Sans", color: "#ffffff" }}>
-                                                        You are selling <b>{this.state.sendvalue} {this.state._sendcoins.name}</b> for at least <b>{this.state.sendvalue * this.state.rate} {this.state._getcoins.name}</b> Expected Price Slippage: <b>{this.state.slippage}%</b>  Additional slippage limit: <b>{this.state.slippage}%</b> fee disclosures
+                                                        You are selling <b>{this.state.value} {this.state._sendcoins.name}</b> for at least <b>{this.state.calcValue} {this.state._getcoins.name}</b> Expected Price Slippage: <b>{this.state.slippage}%</b>  Additional slippage limit: <b>{this.state.slippage}%</b> fee disclosures
                                                     </p>
                                                 </Col>
                                             </Row>
@@ -1175,7 +1209,7 @@ class TradeRoom extends React.Component {
                                         <Col lg="12" sm="12" md="12" className="min-vh-100 mt-5 pt-5">
                                             <p className="text-light" style={{ fontWeight: "bolder", fontSize: "2em", fontFamily: "PT Sans",}}>Your Recent Transactions</p>
                                             <span className="text-light" style={{ fontSize: "0.8em", fontFamily: "PT Sans", }}><b>Connected Address:</b> {
-                                                this.state.wallet.substr(0, 6) + "..." + this.state.wallet.substr(this.state.wallet.length - 5, this.state.wallet.length)
+                                                this.state.userAddress && (this.state.userAddress.substr(0, 6) + "..." + this.state.userAddress.substr(this.state.userAddress.length - 5, this.state.userAddress.length))
                                             }</span>
                                             <Table responsive hover borderless className="mt-4">
                                                 <thead  style={{
@@ -1192,7 +1226,7 @@ class TradeRoom extends React.Component {
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {this._history.map((eleos, i)=>{
+                                                    {this.state._history.map((eleos, i)=>{
                                                         return (
                                                             <tr key={i} className="dhover justify-content-center align-content-center text-center"
                                                              onClick={async ()=>await this.setState({transactionDetails:i, transactionModal:!this.state.transactionModal})}>
