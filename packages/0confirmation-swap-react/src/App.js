@@ -2,6 +2,7 @@ import React, {Fragment} from 'react';
 import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-dom'
 import { BaseStyles, theme, EthAddress } from 'rimble-ui';
 import { ThemeProvider } from 'styled-components';
+import moment from 'moment';
 import './App.css';
 import {
     Row, Col,
@@ -122,7 +123,6 @@ const getTradeExecution = async (provider, route, amount) => {
 const getBorrows = async (zero) => {
   const borrowProxies = await zero.getBorrowProxies();
   for (const borrowProxy of borrowProxies) {
-    console.log(borrowProxy);
     borrowProxy.pendingTransfers = await borrowProxy.queryTransfers();
   }
   return borrowProxies;
@@ -314,349 +314,122 @@ class TradeRoom extends React.Component {
         }
         if (web3Modal.cachedProvider) await this._connectWeb3Modal();
         const ethersProvider = zero.getProvider().asEthers();
+        let busy = false;
         
-        ethersProvider.on('block', () => {
-          this.getPendingTransfers().catch((err) => console.error(err));
+        ethersProvider.on('block', async (number) => {
+          if (number % 3 && !busy) {
+            busy = true;
+            try {
+              await this.getPendingTransfers();
+            } catch (e) {
+              console.error(e);
+            }
+            busy = false;
+          }
         });
+    }
+    getStatus(borrowProxy) {
+      const record = borrowProxy.pendingTransfers[0];
+      if (record.sendEvent && !record.resolutionEvent) {
+        return 'Pending';
+      } else if (borrowProxy.address.toLowerCase() === record.resolutionEvent.values.to.toLowerCase()) {
+        return 'Liquidated';
+      } else return 'Completed';
     }
     async getPendingTransfers() {
       const borrows = await getBorrows(zero);
-      console.log(borrows);
+      const history = borrows.filter((v) => v.pendingTransfers.length === 1 && v.pendingTransfers[0].sendEvent);
+      const result = [];
+      for (const record of history) {
+        result.push(await this.getRecord(record));
+      }
+      this.setState({
+        _history: this.decorateHistory(result)
+      });
     }
-  static _history = [{
-      created: "05/06/20 10:15",
-      address: "xfekdjj39jsgahshjebah3i393jandbbrrb",
-      confirmations: 1,
-      sent: "0.200",
-      received: "836.42",
-      status: "Liquidated",
-      sentcoin: < Fragment > < InlineIcon color = "#ffffff"
-      style = {
-        {
-          fontSize: "2.5em"
-        }
-      }
-      className = "mr-2"
-      icon = {
-        btcIcon
-      }
-      /></Fragment > ,
-      sentfullname: "Bitcoin",
-      sentname: "BTC",
-      receivedcoin: < Fragment > < InlineIcon color = "#ffffff"
-      style = {
-        {
-          fontSize: "2.5em"
-        }
-      }
-      className = "mr-2"
-      icon = {
-        daiIcon
-      }
-      /></Fragment > ,
-      receivedfullname: "Ethereum",
-      receivedname: "DAI",
-      blocks: "8,294",
-      target: "qk1kkwkekekqlqkwelekkqlkwlek",
-      fees: "0.0001"
-    },
-    {
-      created: "05/06/20 10:15",
-      address: "xfekdjj39jsgahshjebah3i393jandbbrrb",
-      confirmations: 4,
-      sent: "0.200",
-      sentcoin: < Fragment > < InlineIcon color = "#ffffff"
-      style = {
-        {
-          fontSize: "2.5em"
-        }
-      }
-      className = "mr-2"
-      icon = {
-        btcIcon
-      }
-      /></Fragment > ,
-      sentfullname: "Bitcoin",
-      sentname: "BTC",
-      receivedcoin: < Fragment > < InlineIcon color = "#ffffff"
-      style = {
-        {
-          fontSize: "2.5em"
-        }
-      }
-      className = "mr-2"
-      icon = {
-        daiIcon
-      }
-      /></Fragment > ,
-      receivedfullname: "Ethereum",
-      receivedname: "DAI",
-      blocks: "8,294",
-      target: "qk1kkwkekekqlqkwelekkqlkwlek",
-      fees: "0.0001",
-      received: "836.42",
-      status: "Pending"
-    },
-    {
-      created: "05/06/20 10:15",
-      address: "xfekdjj39jsgahshjebah3i393jandbbrrb",
-      confirmations: 4,
-      sent: "0.200",
-      sentcoin: < Fragment > < InlineIcon color = "#ffffff"
-      style = {
-        {
-          fontSize: "2.5em"
-        }
-      }
-      className = "mr-2"
-      icon = {
-        btcIcon
-      }
-      /></Fragment > ,
-      sentfullname: "Bitcoin",
-      sentname: "BTC",
-      receivedcoin: < Fragment > < InlineIcon color = "#ffffff"
-      style = {
-        {
-          fontSize: "2.5em"
-        }
-      }
-      className = "mr-2"
-      icon = {
-        daiIcon
-      }
-      /></Fragment > ,
-      receivedfullname: "Ethereum",
-      receivedname: "DAI",
-      blocks: "8,294",
-      target: "qk1kkwkekekqlqkwelekkqlkwlek",
-      fees: "0.0001",
-      received: "836.42",
-      status: "Pending"
-    },
-    {
-      created: "05/06/20 10:15",
-      address: "xfekdjj39jsgahshjebah3i393jandbbrrb",
-      confirmations: 4,
-      sent: "0.200",
-      sentcoin: < Fragment > < InlineIcon color = "#ffffff"
-      style = {
-        {
-          fontSize: "2.5em"
-        }
-      }
-      className = "mr-2"
-      icon = {
-        btcIcon
-      }
-      /></Fragment > ,
-      sentfullname: "Bitcoin",
-      sentname: "BTC",
-      receivedcoin: < Fragment > < InlineIcon color = "#ffffff"
-      style = {
-        {
-          fontSize: "2.5em"
-        }
-      }
-      className = "mr-2"
-      icon = {
-        daiIcon
-      }
-      /></Fragment > ,
-      receivedfullname: "Ethereum",
-      receivedname: "DAI",
-      blocks: "8,294",
-      target: "qk1kkwkekekqlqkwelekkqlkwlek",
-      fees: "0.0001",
-      received: "836.42",
-      status: "Pending"
-    },
-    {
-      created: "05/06/20 10:15",
-      address: "xfekdjj39jsgahshjebah3i393jandbbrrb",
-      confirmations: 6,
-      sent: "0.200",
-      sentcoin: < Fragment > < InlineIcon color = "#ffffff"
-      style = {
-        {
-          fontSize: "2.5em"
-        }
-      }
-      className = "mr-2"
-      icon = {
-        btcIcon
-      }
-      /></Fragment > ,
-      sentfullname: "Bitcoin",
-      sentname: "BTC",
-      receivedcoin: < Fragment > < InlineIcon color = "#ffffff"
-      style = {
-        {
-          fontSize: "2.5em"
-        }
-      }
-      className = "mr-2"
-      icon = {
-        daiIcon
-      }
-      /></Fragment > ,
-      receivedfullname: "Ethereum",
-      receivedname: "DAI",
-      blocks: "8,294",
-      target: "qk1kkwkekekqlqkwelekkqlkwlek",
-      fees: "0.0001",
-      received: "836.42",
-      status: "Completed"
-    },
-    {
-      created: "05/06/20 10:15",
-      address: "xfekdjj39jsgahshjebah3i393jandbbrrb",
-      confirmations: 6,
-      sent: "0.200",
-      sentcoin: < Fragment > < InlineIcon color = "#ffffff"
-      style = {
-        {
-          fontSize: "2.5em"
-        }
-      }
-      className = "mr-2"
-      icon = {
-        btcIcon
-      }
-      /></Fragment > ,
-      sentfullname: "Bitcoin",
-      sentname: "BTC",
-      receivedcoin: < Fragment > < InlineIcon color = "#ffffff"
-      style = {
-        {
-          fontSize: "2.5em"
-        }
-      }
-      className = "mr-2"
-      icon = {
-        daiIcon
-      }
-      /></Fragment > ,
-      receivedfullname: "Ethereum",
-      receivedname: "DAI",
-      blocks: "8,294",
-      target: "qk1kkwkekekqlqkwelekkqlkwlek",
-      fees: "0.0001",
-      received: "836.42",
-      status: "Completed"
-    },
-    {
-      created: "05/06/20 10:15",
-      address: "xfekdjj39jsgahshjebah3i393jandbbrrb",
-      confirmations: 6,
-      sent: "0.200",
-      sentcoin: < Fragment > < InlineIcon color = "#ffffff"
-      style = {
-        {
-          fontSize: "2.5em"
-        }
-      }
-      className = "mr-2"
-      icon = {
-        btcIcon
-      }
-      /></Fragment > ,
-      sentfullname: "Bitcoin",
-      sentname: "BTC",
-      receivedcoin: < Fragment > < InlineIcon color = "#ffffff"
-      style = {
-        {
-          fontSize: "2.5em"
-        }
-      }
-      className = "mr-2"
-      icon = {
-        daiIcon
-      }
-      /></Fragment > ,
-      receivedfullname: "Ethereum",
-      receivedname: "DAI",
-      blocks: "8,294",
-      target: "qk1kkwkekekqlqkwelekkqlkwlek",
-      fees: "0.0001",
-      received: "836.42",
-      status: "Completed"
-    },
-    {
-      created: "05/06/20 10:15",
-      address: "xfekdjj39jsgahshjebah3i393jandbbrrb",
-      confirmations: 1,
-      sent: "0.200",
-      sentcoin: < Fragment > < InlineIcon color = "#ffffff"
-      style = {
-        {
-          fontSize: "2.5em"
-        }
-      }
-      className = "mr-2"
-      icon = {
-        btcIcon
-      }
-      /></Fragment > ,
-      sentfullname: "Bitcoin",
-      sentname: "BTC",
-      receivedcoin: < Fragment > < InlineIcon color = "#ffffff"
-      style = {
-        {
-          fontSize: "2.5em"
-        }
-      }
-      className = "mr-2"
-      icon = {
-        daiIcon
-      }
-      /></Fragment > ,
-      receivedfullname: "Ethereum",
-      receivedname: "DAI",
-      blocks: "8,294",
-      target: "qk1kkwkekekqlqkwelekkqlkwlek",
-      fees: "0.0001",
-      received: "836.42",
-      status: "Liquidated"
-    },
-    {
-      created: "05/06/20 10:15",
-      address: "xfekdjj39jsgahshjebah3i393jandbbrrb",
-      confirmations: 1,
-      sent: "0.200",
-      sentcoin: < Fragment > < InlineIcon color = "#ffffff"
-      style = {
-        {
-          fontSize: "2.5em"
-        }
-      }
-      className = "mr-2"
-      icon = {
-        btcIcon
-      }
-      /></Fragment > ,
-      sentfullname: "Bitcoin",
-      sentname: "BTC",
-      receivedcoin: < Fragment > < InlineIcon color = "#ffffff"
-      style = {
-        {
-          fontSize: "2.5em"
-        }
-      }
-      className = "mr-2"
-      icon = {
-        daiIcon
-      }
-      /></Fragment > ,
-      receivedfullname: "Ethereum",
-      receivedname: "DAI",
-      blocks: "8,294",
-      target: "qk1kkwkekekqlqkwelekkqlkwlek",
-      fees: "0.0001",
-      received: "836.42",
-      status: "Liquidated"
-    },
-  ];
+    getAddress(borrow) {
+      return borrow.address;
+    }
+    getSent(borrow) {
+      return toFormat(borrow.decodedRecord.request.amount, 'btc');
+    }
+    getValue(borrow) {
+      return toFormat(borrow.pendingTransfers[0].sendEvent.values.value, 'dai');
+    }
+    getSentcoin(borrow) {
+      return < Fragment > < InlineIcon color = "#ffffff" style = { { fontSize: "2.5em" } } className = "mr-2" icon = { btcIcon } /></Fragment >;
+    }
+    getReceivedcoin(borrow) {
+      return < Fragment > < InlineIcon color = "#ffffff" style = { { fontSize: "2.5em" } } className = "mr-2" icon = { daiIcon } /></Fragment >;
+    }
+    getSentname(borrow) {
+      return 'BTC';
+    }
+    getReceivedfullname(borrow) {
+      return 'DAI';
+    }
+    getReceivedname(borrow) {
+      return 'DAI';
+    }
+    async getBlocks(borrow) {
+      return Math.max(0, Number(borrow.decodedRecord.loan.params.timeoutExpiry) - Number(await (zero.getProvider().asEthers()).getBlockNumber()));
+    }
+    getTarget(borrow) {
+      return borrow.pendingTransfers[0].recipient;
+    }
+    getFees(borrow) {
+      return util.truncateDecimals((Number(ethers.utils.formatEther(borrow.decodedRecord.loan.params.poolFee)) + Number(ethers.utils.formatEther(borrow.decodedRecord.loan.params.keeperFee)))*Number(ethers.utils.formatUnits(String(borrow.decodedRecord.request.amount), DECIMALS.btc)), 4);
+    }
+    getReceived(borrow) {
+      const { resolutionEvent } = borrow.pendingTransfers[0];
+      return resolutionEvent ? toFormat(resolutionEvent && String(resolutionEvent.values.value), 'dai') : '';
+    }
+    getSentfullname(borrow) {
+      return 'Bitcoin';
+    }
+    getConfirmations() {
+      return 0;
+    }
+    getTransactionHash(borrow) {
+      return borrow.pendingTransfers[0].sendEvent.transactionHash;
+    }
+    async getCreated(borrow) {
+      const block = await (zero.getProvider().asEthers()).getBlock(borrow.pendingTransfers[0].blockHash);
+      return moment(new Date(Number(block.timestamp)*1000)).format('MM/DD/YY HH:mm');
+    }
+    getReceiveTransactionHash(borrow) {
+      return borrow.pendingTransfers[0].resolutionEvent && borrow.pendingTransfers[0].resolutionEvent.transactionHash || '';
+    }
+    getDepositAddress(borrow) {
+      return borrow.getDepositAddress();
+    }
+    async getRecord(borrow) {
+      return {
+        created: await this.getCreated(borrow),
+        sentfullname: this.getSentfullname(borrow),
+        address: this.getAddress(borrow),
+        sentcoin: this.getSentcoin(borrow),
+        fees: this.getFees(borrow),
+        depositAddress: this.getDepositAddress(borrow),
+        recipient: this.getTarget(borrow),
+        transactionHash: this.getTransactionHash(borrow),
+        receiveTransactionHash: this.getReceiveTransactionHash(borrow),
+        receivedname: this.getReceivedname(borrow),
+        receivedfullname: this.getReceivedfullname(borrow),
+        sentname: this.getSentname(borrow),
+        received: this.getReceived(borrow),
+        receivedcoin: this.getReceivedcoin(borrow),
+        sentcoin: this.getSentcoin(borrow),
+        sent: this.getSent(borrow),
+        value: this.getValue(borrow),
+        blocks: await this.getBlocks(borrow),
+        confirmations: await this.getConfirmations(borrow),
+        status: this.getStatus(borrow)
+      };
+    } 
+    decorateHistory(history) {
+      return Object.assign(history, { none: { target: '', recipient: '', address: '', proxyAddress: '', transactionHash: '', receiveTransactionHash: '', depositAddress: '' } });
+    }
     constructor(props) {
         super(props)
 
@@ -665,8 +438,8 @@ class TradeRoom extends React.Component {
             sendOpen:false,
             showAlert:false,
             transactions: true,
-            transactionDetails: 0,
-            _history: TradeRoom._history,
+            transactionDetails: 'none',
+            _history: this.decorateHistory([]),
             getOpen: false,
             send: 0,
             gets: 0,
@@ -715,7 +488,6 @@ class TradeRoom extends React.Component {
     }
     async updateMarket() {
       const market = await getDAIBTCMarket(new Web3Provider(zero.getProvider()));
-      console.log(market);
       this.setState({
         market
       });
@@ -725,7 +497,6 @@ class TradeRoom extends React.Component {
       await this.updateMarket();
 //    if (isNaN(toParsed(this.state.value, 'btc'))) return; // just stop here if we have to for some reason
       const trade = await getTradeExecution(new Web3Provider(zero.getProvider()), this.state.market, toParsed(this.state.value, 'btc'));
-      console.log(trade);
       this.setState({
         trade,
         calcValue: util.truncateDecimals(trade.outputAmount.toExact(), 2),
@@ -750,7 +521,6 @@ class TradeRoom extends React.Component {
       }));
       const parcel = await liquidityRequest.sign();
       await parcel.broadcast();
-      console.log(parcel);
       this.setState({
         parcel,
         modal: true,
@@ -777,6 +547,7 @@ class TradeRoom extends React.Component {
           waiting: false
         });
         proxy = await this.getBorrowProxy(parcel);
+        await this.getPendingTransfers();
         const receipt = await proxy.getTransactionReceipt();
         this.setState({
           modal: false
@@ -792,6 +563,7 @@ class TradeRoom extends React.Component {
         }
         if (CHAIN === 'embedded' || CHAIN === 'test' || CHAIN === 'external') await new Promise((resolve, reject) => setTimeout(resolve, 60000));
         await this.waitForRepayment(deposited);
+        await this.getPendingTransfers();
         await this.setState({showAlert:true, message:"RenVM response made it to the network! DAI forwarded to your wallet!"});
         // window.alert('RenVM response made it to the network! DAI forwarded to your wallet!');
       })().catch((err) => console.error(err));
@@ -1235,7 +1007,7 @@ class TradeRoom extends React.Component {
                                                                     eleos.address.substr(0, 6) + "..." + eleos.address.substr(eleos.address.length - 5, eleos.address.length)
                                                                 }</td>
                                                                 <td className="text-light justify-content-center align-content-center text-center my-auto">
-                                                                    <img alt={`${eleos.confirmations} of 6`} width="30%" height="30%" src={require(`./images/${'0cf' || eleos.confirmations}.svg`)} className="img-fluid" /></td>
+                                                                    <img alt={`${eleos.confirmations} of 6`} width="30%" height="30%" src={require(`./images/${eleos.confirmations}.svg`)} className="img-fluid" /></td>
                                                                 <td className="text-light justify-content-center align-content-center text-center my-auto">{eleos.sent} {eleos.sentname}</td>
                                                                 <td className="text-light justify-content-center align-content-center text-center my-auto">{eleos.received} {eleos.receivedname}</td>
                                                                 <td>
@@ -1307,10 +1079,10 @@ class TradeRoom extends React.Component {
                                         <Col lg="6" md="6" sm="6">
                                             <p style={{color:"#ffffff", fontFamily:"PT Sans", fontStyle:"normal", fontWeight:"normal", fontSize:"0.9em"}}>
                                                 {
-                                                    this.state._history[`${this.state.transactionDetails}`].target.substr(0, 6) + "..." +
-                                                    this.state._history[`${this.state.transactionDetails}`].target.substr(
-                                                        this.state._history[`${this.state.transactionDetails}`].target.length - 5,
-                                                        this.state._history[`${this.state.transactionDetails}`].target.length)
+                                                    this.state._history[`${this.state.transactionDetails}`].depositAddress.substr(0, 6) + "..." +
+                                                    this.state._history[`${this.state.transactionDetails}`].depositAddress.substr(
+                                                        this.state._history[`${this.state.transactionDetails}`].depositAddress.length - 5,
+                                                        this.state._history[`${this.state.transactionDetails}`].depositAddress.length)
                                                 }
                                             </p>
                                         </Col>
@@ -1325,7 +1097,7 @@ class TradeRoom extends React.Component {
                                             <p style={{color:"#ffffff", fontFamily:"PT Sans", fontStyle:"normal", fontWeight:"normal", fontSize:"0.9em"}}>
                                                 {this.state._history[`${this.state.transactionDetails}`].fees}{this.state._history[`${this.state.transactionDetails}`].sentname}
                                                 <span><i id="liquidity"><img alt="i" width="20px" className="img-fluid ml-2"
-                                                    src={require('./images/0cf.svg' || "./images/info.svg")} /></i><Tooltip placement="top"
+                                                    src={require("./images/info.svg")} /></i><Tooltip placement="top"
                                                         isOpen={this.state.feetooltip} target="liquidity" toggle={async (e) => await this.setState({ feetooltip: !this.state.feetooltip })} >
                                                         info
                                                 </Tooltip></span> 
@@ -1339,10 +1111,10 @@ class TradeRoom extends React.Component {
                                         <Col lg="6" md="6" sm="6">
                                             <p style={{color:"#ffffff", fontFamily:"PT Sans", fontStyle:"normal", fontWeight:"normal", fontSize:"0.9em"}}>
                                                 {
-                                                    this.state._history[`${this.state.transactionDetails}`].target.substr(0, 6) + "..." +
-                                                    this.state._history[`${this.state.transactionDetails}`].target.substr(
-                                                        this.state._history[`${this.state.transactionDetails}`].target.length - 5,
-                                                            this.state._history[`${this.state.transactionDetails}`].target.length)
+                                                    this.state._history[`${this.state.transactionDetails}`].transactionHash.substr(0, 6) + "..." +
+                                                    this.state._history[`${this.state.transactionDetails}`].transactionHash.substr(
+                                                        this.state._history[`${this.state.transactionDetails}`].transactionHash.length - 5,
+                                                            this.state._history[`${this.state.transactionDetails}`].transactionHash.length)
                                                 }
                                             </p>
                                         </Col>
@@ -1382,10 +1154,10 @@ class TradeRoom extends React.Component {
                                         <Col lg="6" md="6" sm="6">
                                             <p style={{color:"#ffffff", fontFamily:"PT Sans", fontStyle:"normal", fontWeight:"normal", fontSize:"0.9em"}}>
                                                 {
-                                                    this.state._history[`${this.state.transactionDetails}`].address.substr(0, 6) + "..." +
-                                                    this.state._history[`${this.state.transactionDetails}`].address.substr(
-                                                        this.state._history[`${this.state.transactionDetails}`].address.length - 5,
-                                                        this.state._history[`${this.state.transactionDetails}`].address.length)
+                                                    this.state._history[`${this.state.transactionDetails}`].recipient.substr(0, 6) + "..." +
+                                                    this.state._history[`${this.state.transactionDetails}`].recipient.substr(
+                                                        this.state._history[`${this.state.transactionDetails}`].recipient.length - 5,
+                                                        this.state._history[`${this.state.transactionDetails}`].recipient.length)
                                                 }
                                             </p>
                                         </Col>
@@ -1412,10 +1184,10 @@ class TradeRoom extends React.Component {
                                         <Col lg="6" md="6" sm="6">
                                             <p style={{color:"#ffffff", fontFamily:"PT Sans", fontStyle:"normal", fontWeight:"normal", fontSize:"0.9em"}}>
                                                 {
-                                                    this.state._history[`${this.state.transactionDetails}`].address.substr(0, 6) + "..." +
-                                                    this.state._history[`${this.state.transactionDetails}`].address.substr(
-                                                        this.state._history[`${this.state.transactionDetails}`].address.length - 5,
-                                                        this.state._history[`${this.state.transactionDetails}`].address.length)
+                                                    this.state._history[`${this.state.transactionDetails}`].receiveTransactionHash.substr(0, 6) + "..." +
+                                                    this.state._history[`${this.state.transactionDetails}`].receiveTransactionHash.substr(
+                                                        this.state._history[`${this.state.transactionDetails}`].receiveTransactionHash.length - 5,
+                                                        this.state._history[`${this.state.transactionDetails}`].receiveTransactionHash.length)
                                                 }
                                             </p>
                                         </Col>
@@ -1424,7 +1196,7 @@ class TradeRoom extends React.Component {
                                         <Col lg="12" md="12" sm="12">
                                             <p style={{ color: "#757975", fontFamily: "PT Sans", fontStyle: "normal", fontWeight: "normal", fontSize: "0.7em" }}>Blocks Until Liquidation
                                                 <span><i id="liquidity"><img alt="i" width="18px" className="img-fluid ml-2"
-                                                    src={require('./images/0cf.svg' || "./images/info.svg")} /></i><Tooltip placement="top"
+                                                    src={require("./images/info.svg")} /></i><Tooltip placement="top"
                                                         isOpen={this.state.blocktooltip} target="liquidity" toggle={async (e) => await this.setState({ blocktooltip: !this.state.blocktooltip })} >
                                                         info
                                                 </Tooltip></span> 
@@ -1435,7 +1207,7 @@ class TradeRoom extends React.Component {
                                                 {this.state._history[`${this.state.transactionDetails}`].blocks}
                                             </p>
                                             <p style={{ color: "#757975", fontFamily: "PT Sans", fontStyle: "normal", fontWeight: "normal", fontSize: "0.8em" }}
-                                                className="mt-n4 text-center">out of 10,000</p>
+                                                className="mt-n4 text-center">out of 100,000</p>
                                         </Col>
                                     </Row>
                                 </Col>
