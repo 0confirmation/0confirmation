@@ -1,7 +1,5 @@
 import React, {Fragment} from 'react';
 import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-dom'
-import { BaseStyles, theme, EthAddress } from 'rimble-ui';
-import { ThemeProvider } from 'styled-components';
 import moment from 'moment';
 import './App.css';
 import {
@@ -60,6 +58,15 @@ const chainIdToName = (n) => {
       return 'kovan';
   }
   return 'kovan';
+};
+
+const createEtherscanLinkFor = (s) => s ? (s.length === 66 || s.length === 42) ? ('https://' + chainIdToName(s) + '.etherscan.io/' + (s.length === 66 ? 'tx/' : 'address/') + s) : ('https://blockchain.info/btc/address/' + s) : '';
+
+
+const createEtherscanLink = (s, text) => {
+  const link = createEtherscanLinkFor(s);
+  if (!link) return text;
+  return <a style={ { color: 'white' } } target="_blank" href={ link }>{ text }</a>
 };
 
 const web3Modal = new Web3Modal({
@@ -173,7 +180,6 @@ const DECIMALS = {
 class App extends React.Component {
   render() {
     return <div className="App">
-      <ThemeProvider theme={ theme }>
         <Router>
           <Switch>
             <Route exact path='/'>
@@ -182,7 +188,6 @@ class App extends React.Component {
             <Route path='/trade' component={TradeRoom} />
           </Switch>
         </Router>
-      </ThemeProvider>
     </div>;
   }
 }
@@ -403,17 +408,20 @@ class TradeRoom extends React.Component {
     getDepositAddress(borrow) {
       return borrow.getDepositAddress();
     }
+    wrapLink(s) {
+      return (fn) => createEtherscanLink(s, fn(s))
+    }
     async getRecord(borrow) {
       return {
         created: await this.getCreated(borrow),
         sentfullname: this.getSentfullname(borrow),
-        address: this.getAddress(borrow),
+        address: this.wrapLink(this.getAddress(borrow)),
         sentcoin: this.getSentcoin(borrow),
         fees: this.getFees(borrow),
-        depositAddress: this.getDepositAddress(borrow),
-        recipient: this.getTarget(borrow),
-        transactionHash: this.getTransactionHash(borrow),
-        receiveTransactionHash: this.getReceiveTransactionHash(borrow),
+        depositAddress: this.wrapLink(this.getDepositAddress(borrow)),
+        recipient: this.wrapLink(this.getTarget(borrow)),
+        transactionHash: this.wrapLink(this.getTransactionHash(borrow)),
+        receiveTransactionHash: this.wrapLink(this.getReceiveTransactionHash(borrow)),
         receivedname: this.getReceivedname(borrow),
         receivedfullname: this.getReceivedfullname(borrow),
         sentname: this.getSentname(borrow),
@@ -428,7 +436,7 @@ class TradeRoom extends React.Component {
       };
     } 
     decorateHistory(history) {
-      return Object.assign(history, { none: { target: '', recipient: '', address: '', proxyAddress: '', transactionHash: '', receiveTransactionHash: '', depositAddress: '' } });
+      return Object.assign(history, { none: { target: '', recipient: this.wrapLink(''), address: this.wrapLink(''), proxyAddress: this.wrapLink(''), transactionHash: this.wrapLink(''), receiveTransactionHash: this.wrapLink(''), depositAddress: this.wrapLink('') } });
     }
     constructor(props) {
         super(props)
@@ -691,7 +699,6 @@ class TradeRoom extends React.Component {
                 <div className="justify-content-center align-content-center pt-5" style={{ zIndex: "1", overflowX: "hidden", position: "relative" }} >
                     <div className="justify-content-center align-content-center text-center mx-auto my-auto pb-4 pt-5">
                         <button className="btn text-light button-small btn-sm" style={{ fontSize: "24dp", backgroundColor: "#317333", width: "248dp", borderRadius: "10px" }} onClick={ (evt) => this.connectWeb3Modal(evt) } >Connect Wallet</button>
-                        { this.state.userAddress && <EthAddress address={ this.state.userAddress } /> }
                     </div>
                     <div className="alert-box">
                       {(this.state.showAlert)? <Alert delay={5000} boldText="Transaction Detail" detailText={this.state.message}        alertType="alert-green" />:null}
@@ -1004,7 +1011,7 @@ class TradeRoom extends React.Component {
                                                              onClick={async ()=>await this.setState({transactionDetails:i, transactionModal:!this.state.transactionModal})}>
                                                                 <td className="text-light justify-content-center align-content-center text-center my-auto">{eleos.created}</td>
                                                                 <td className="text-light justify-content-center align-content-center text-center my-auto">{
-                                                                    eleos.address.substr(0, 6) + "..." + eleos.address.substr(eleos.address.length - 5, eleos.address.length)
+                                                                    eleos.address((v) => v.substr(0, 6) + "..." + v.substr(v.length - 5, v.length))
                                                                 }</td>
                                                                 <td className="text-light justify-content-center align-content-center text-center my-auto">
                                                                     <img alt={`${eleos.confirmations} of 6`} width="30%" height="30%" src={require(`./images/${eleos.confirmations}.svg`)} className="img-fluid" /></td>
@@ -1079,10 +1086,10 @@ class TradeRoom extends React.Component {
                                         <Col lg="6" md="6" sm="6">
                                             <p style={{color:"#ffffff", fontFamily:"PT Sans", fontStyle:"normal", fontWeight:"normal", fontSize:"0.9em"}}>
                                                 {
-                                                    this.state._history[`${this.state.transactionDetails}`].depositAddress.substr(0, 6) + "..." +
-                                                    this.state._history[`${this.state.transactionDetails}`].depositAddress.substr(
-                                                        this.state._history[`${this.state.transactionDetails}`].depositAddress.length - 5,
-                                                        this.state._history[`${this.state.transactionDetails}`].depositAddress.length)
+                                                    this.state._history[this.state.transactionDetails].depositAddress((v) => v.substr(0, 6) + "..." +
+                                                    v.substr(
+                                                        v.length - 5,
+                                                        v.length))
                                                 }
                                             </p>
                                         </Col>
@@ -1111,10 +1118,7 @@ class TradeRoom extends React.Component {
                                         <Col lg="6" md="6" sm="6">
                                             <p style={{color:"#ffffff", fontFamily:"PT Sans", fontStyle:"normal", fontWeight:"normal", fontSize:"0.9em"}}>
                                                 {
-                                                    this.state._history[`${this.state.transactionDetails}`].transactionHash.substr(0, 6) + "..." +
-                                                    this.state._history[`${this.state.transactionDetails}`].transactionHash.substr(
-                                                        this.state._history[`${this.state.transactionDetails}`].transactionHash.length - 5,
-                                                            this.state._history[`${this.state.transactionDetails}`].transactionHash.length)
+                                                    this.state._history[`${this.state.transactionDetails}`].transactionHash((v) => v.substr(0, 6) + "..." + v.substr(v.length - 5, v.length))
                                                 }
                                             </p>
                                         </Col>
@@ -1154,10 +1158,9 @@ class TradeRoom extends React.Component {
                                         <Col lg="6" md="6" sm="6">
                                             <p style={{color:"#ffffff", fontFamily:"PT Sans", fontStyle:"normal", fontWeight:"normal", fontSize:"0.9em"}}>
                                                 {
-                                                    this.state._history[`${this.state.transactionDetails}`].recipient.substr(0, 6) + "..." +
-                                                    this.state._history[`${this.state.transactionDetails}`].recipient.substr(
-                                                        this.state._history[`${this.state.transactionDetails}`].recipient.length - 5,
-                                                        this.state._history[`${this.state.transactionDetails}`].recipient.length)
+                                                    this.state._history[`${this.state.transactionDetails}`].recipient((v) => v.substr(0, 6) + "..." + v.substr(
+                                                        v.length - 5,
+                                                        v.length))
                                                 }
                                             </p>
                                         </Col>
@@ -1169,10 +1172,7 @@ class TradeRoom extends React.Component {
                                         <Col lg="6" md="6" sm="6">
                                             <p style={{color:"#ffffff", fontFamily:"PT Sans", fontStyle:"normal", fontWeight:"normal", fontSize:"0.9em"}}>
                                                 {
-                                                    this.state._history[`${this.state.transactionDetails}`].address.substr(0, 6) + "..." +
-                                                    this.state._history[`${this.state.transactionDetails}`].address.substr(
-                                                        this.state._history[`${this.state.transactionDetails}`].address.length - 5,
-                                                        this.state._history[`${this.state.transactionDetails}`].address.length)
+                                                    this.state._history[`${this.state.transactionDetails}`].address((v) => v.substr(0, 6) + "..." + v.substr(v.length - 5, v.length))
                                                 }
                                             </p>
                                         </Col>
@@ -1184,10 +1184,10 @@ class TradeRoom extends React.Component {
                                         <Col lg="6" md="6" sm="6">
                                             <p style={{color:"#ffffff", fontFamily:"PT Sans", fontStyle:"normal", fontWeight:"normal", fontSize:"0.9em"}}>
                                                 {
-                                                    this.state._history[`${this.state.transactionDetails}`].receiveTransactionHash.substr(0, 6) + "..." +
-                                                    this.state._history[`${this.state.transactionDetails}`].receiveTransactionHash.substr(
-                                                        this.state._history[`${this.state.transactionDetails}`].receiveTransactionHash.length - 5,
-                                                        this.state._history[`${this.state.transactionDetails}`].receiveTransactionHash.length)
+                                                    this.state._history[this.state.transactionDetails].receiveTransactionHash((v) => v.substr(0, 6) + "..." +
+                                                    v.substr(
+                                                        v.length - 5,
+                                                        v.length))
                                                 }
                                             </p>
                                         </Col>
