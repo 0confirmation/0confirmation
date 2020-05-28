@@ -52,7 +52,7 @@ const renvmFromEnvironment = (network) => {
   const renbtcShifter = renvm.network.addresses.gateways.BTCGateway._address;
   const renbtc = renvm.network.addresses.tokens.BTC.address;
   const shifterRegistry = renvm.network.addresses.gateways.GatewayRegistry.address;
-  const mpkh = '0xc998b2a88ac96676e14f07739003419799a6823a';
+  const mpkh = network === 'mainnet' ? '0x5faa9576e45acbc9662b6abf323229b748a9495d' : '0xc998b2a88ac96676e14f07739003419799a6823a';
   return {
     renbtcShifter,
     renbtc,
@@ -71,8 +71,8 @@ const zeroContractsFromNetwork = (network) => {
 };
 
 const uniswapFromNetwork = (network) => ({
-  factory: network === 'ganache' ? fromArtifact(network, Factory) : uniswap.FACTORY_ADDRESS[chainIdFromNetwork(network)],
-  template: network === 'ganache' ? fromArtifact(network, Exchange) : '0x68Da056feB1158B8c4726830cF76B23905A7eb1D',
+  factory: uniswap.FACTORY_ADDRESS,
+  router: '0xf164fC0Ec4E93095b804a4795bBe1e041497b92a'
 });
 
 const curveFromNetwork = (network) => ({
