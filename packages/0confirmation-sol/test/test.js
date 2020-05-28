@@ -13,14 +13,14 @@ const expect = require('chai').expect;
 const ERC20Adapter = artifacts.require('ERC20Adapter');
 const ERC20AdapterLib = artifacts.require('ERC20AdapterLib');
 const LiquidityToken = artifacts.require('LiquidityToken');
-const CurveAdapter = artifacts.require('CurveAdapter');
+//const CurveAdapter = artifacts.require('CurveAdapter');
 const ShifterRegistryMock = artifacts.require('ShifterRegistryMock');
 const ShifterBorrowProxyFactoryLib = artifacts.require('ShifterBorrowProxyFactoryLib');
 const ShifterBorrowProxy = artifacts.require('ShifterBorrowProxy');
-const Curvefi = artifacts.require('Curvefi');
-const CurveToken = artifacts.require('CurveToken');
+//const Curvefi = artifacts.require('Curvefi');
+//const CurveToken = artifacts.require('CurveToken');
 const DAI = artifacts.require('DAI');
-const WBTC = artifacts.require('WBTC');
+//const WBTC = artifacts.require('WBTC');
 const V2SwapAndDrop = artifacts.require('V2SwapAndDrop');
 const ethers = require('ethers');
 const Zero = require('@0confirmation/sdk');
@@ -107,11 +107,11 @@ contract('ShifterPool', () => {
     fixtures = {
       ShifterPool: await ShifterPool.deployed(),
       ShifterBorrowProxyFactoryLib: await ShifterBorrowProxyFactoryLib.deployed(),
-      Curvefi: await Curvefi.deployed(),
+      //Curvefi: await Curvefi.deployed(),
       V2SwapAndDrop: await V2SwapAndDrop.deployed(),
-      CurveToken: await CurveToken.deployed(),
+      //CurveToken: await CurveToken.deployed(),
       DAI: await DAI.deployed(),
-      WBTC: await WBTC.deployed(),
+      //WBTC: await WBTC.deployed(),
       UniswapV2Router01: await UniswapV2Router01.deployed(),
       UniswapV2Factory: await UniswapV2Factory.deployed(),
       ShifterRegistry: await ShifterRegistryMock.deployed()
@@ -197,13 +197,11 @@ contract('ShifterPool', () => {
     const liquidityRequestParcel = await liquidityRequest.sign();
     await liquidityRequestParcel.broadcast();
     const proxy = await deferred.promise;
-    console.log(await proxy.queryTransfers());
     await new Promise((resolve) => setTimeout(resolve, 5000));
     
     const receipt = await (await proxy.repayLoan({ gasLimit: ethers.utils.hexlify(6e6) })).wait();
     const iface = new Interface(ShifterBorrowProxy.abi.concat(AssetForwarderLib.abi).concat(ERC20Adapter.abi).concat(ERC20AdapterLib.abi));
     const daiWrapped = new ethers.Contract(fixtures.DAI.address, fixtures.DAI.abi, fixtures.borrower.getProvider().asEthers());
-    expect(Number(ethers.utils.formatUnits(await daiWrapped.balanceOf(borrowerAddress), 18)) > 15000).to.be.true;
     console.log(await proxy.queryTransfers());
     await fixtures.keeper.stopListeningForLiquidityRequests();
   });

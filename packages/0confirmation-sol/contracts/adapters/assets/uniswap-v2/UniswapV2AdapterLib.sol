@@ -213,7 +213,7 @@ library UniswapV2AdapterLib {
   function getIsolatePointer(address instance) internal pure returns (Isolate storage) {
     return toIsolatePointer(computeIsolatePointer(instance));
   }
-  function getExternalIsolate(address payable moduleAddress) internal returns (Isolate memory) {
+  function getExternalIsolate(address payable moduleAddress) internal view returns (Isolate memory) {
     return UniswapV2Adapter(moduleAddress).getExternalIsolateHandler();
   }
   function encodeLiquidationNotify(address newToken) internal pure returns (bytes memory result) {

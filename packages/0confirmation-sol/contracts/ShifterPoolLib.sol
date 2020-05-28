@@ -22,6 +22,12 @@ library ShifterPoolLib {
   using ShifterBorrowProxyLib for *;
   using ShifterBorrowProxyFactoryLib for *;
   using SafeMath for *;
+  struct SetupParams {
+    address shifterRegistry;
+    uint256 minTimeout;
+    uint256 poolFee;
+    uint256 maxLoan;
+  }
   struct Isolate {
     uint256 genesis;
     address borrowProxyImplementation;
@@ -29,6 +35,7 @@ library ShifterPoolLib {
     address shifterRegistry;
     uint256 minTimeout;
     uint256 poolFee;
+    uint256 maxLoan;
     mapping (address => bool) isKeeper;
     mapping (bytes32 => bool) provisionExecuted;
     mapping (address => address) tokenToLiquidityToken;

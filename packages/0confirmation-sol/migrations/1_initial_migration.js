@@ -99,7 +99,7 @@ module.exports = async function(deployer) {
 /*
   await deployer.deploy(CurveAdapter, getAddress(Curvefi, deployer.network_id));
 */
-  await deployer.deploy(UniswapV2Adapter, erc20Adapter.address, (deployer.network === 'test' || deployer.network === 'ganache' || deployer.network === 'kovan') ? ethers.utils.parseEther('1').toString() : ethers.utils.parseEther('100').toString());
+  await deployer.deploy(UniswapV2Adapter, erc20Adapter.address);
   await deployer.deploy(SimpleBurnLiquidationModule, router.address, erc20Adapter.address);
   await deployer.deploy(LiquidityToken, shifterPool.address, renbtc.address, 'zeroBTC', 'zeroBTC', 8);
   const liquidityToken = await LiquidityToken.deployed();
@@ -110,7 +110,12 @@ module.exports = async function(deployer) {
   const simpleBurnLiquidationModule = await SimpleBurnLiquidationModule.deployed();
   await shifterPool.deployBorrowProxyImplementation();
   await shifterPool.deployAssetForwarderImplementation();
-  await shifterPool.setup(shifterRegistry.address, '1000', ethers.utils.parseEther('0.01'), ...((v) => [ v.map((v) => ({ moduleType: v.moduleType, target: v.target, sigs: v.sigs })), v.map((v) => v.module) ])([{
+  await shifterPool.setup({
+    shifterRegistry: shifterRegistry.address,
+    minTimeout: '1000',
+    poolFee: ethers.utils.parseEther('0.01'),
+    maxLoan: deployer.network === 'mainnet' ? ethers.utils.parseEther('0.1') : ethers.utils.parseEther('10')
+  }, ...((v) => [ v.map((v) => ({ moduleType: v.moduleType, target: v.target, sigs: v.sigs })), v.map((v) => v.module) ])([{
     moduleType: ModuleTypes.BY_ADDRESS,
     target: renbtc.address,
     sigs: Zero.getSignatures(DAI.abi),
@@ -142,7 +147,7 @@ module.exports = async function(deployer) {
     }
   }, */ {
     moduleType: ModuleTypes.BY_ADDRESS,
-    target: renbtc.address,
+    target: dai.address,
     sigs: Zero.getSignatures(DAI.abi),
     module: {
       isPrecompiled: false,

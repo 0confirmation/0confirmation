@@ -2,7 +2,7 @@
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
-import { Ownable } from "@openzeppelin/contracts/ownership/Ownable.sol";
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { IShifterRegistry } from "./interfaces/IShifterRegistry.sol";
 import { IShifter } from "./interfaces/IShifter.sol";
 import { ShifterPoolLib } from "./ShifterPoolLib.sol";
@@ -20,6 +20,7 @@ import { FactoryLib } from "./FactoryLib.sol";
 import { NullCloneConstructor } from "./NullCloneConstructor.sol";
 import { AssetForwarderLib } from "./adapters/lib/AssetForwarderLib.sol";
 import { AssetForwarder } from "./adapters/lib/AssetForwarder.sol";
+import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
   using SandboxLib for *;
@@ -32,11 +33,12 @@ contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
   constructor() Ownable() public {
     isolate.genesis = block.number;
   }
-  function setup(address shifterRegistry, uint256 minTimeout, uint256 poolFee, BorrowProxyLib.ModuleDetails[] memory moduleDetails, BorrowProxyLib.Module[] memory modules, ShifterPoolLib.LiquidityTokenLaunch[] memory tokenLaunches) public onlyOwner {
+  function setup(ShifterPoolLib.SetupParams memory params, BorrowProxyLib.ModuleDetails[] memory moduleDetails, BorrowProxyLib.Module[] memory modules, ShifterPoolLib.LiquidityTokenLaunch[] memory tokenLaunches) public onlyOwner {
     require(modules.length == moduleDetails.length, "can't zip module registations: modules.length != moduleDetails.length");
-    isolate.shifterRegistry = shifterRegistry;
-    isolate.minTimeout = minTimeout;
-    isolate.poolFee = poolFee;
+    isolate.shifterRegistry = params.shifterRegistry;
+    isolate.maxLoan = params.maxLoan;
+    isolate.minTimeout = params.minTimeout;
+    isolate.poolFee = params.poolFee;
     for (uint256 i = 0; i < modules.length; i++) {
       BorrowProxyLib.ModuleRegistration memory registration = BorrowProxyLib.ModuleRegistration({
         module: modules[i],
@@ -73,6 +75,11 @@ contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
   function deployBorrowProxyClone(bytes32 salt) internal returns (address payable created) {
     created = address(uint160(FactoryLib.create2Clone(isolate.borrowProxyImplementation, uint256(salt))));
   }
+  function validateUnderMaxLoan(ShifterBorrowProxyLib.LiquidityRequestParcel memory parcel) internal view returns (bool) {
+    uint8 decimals = ERC20(parcel.request.token).decimals();
+    require(decimals <= 18, "the token supplied is not a shifter token -- decimals too high");
+    require(parcel.request.amount / 10**(18 - uint256(decimals)) <= isolate.maxLoan, "loan exceeds maximum");
+  }
   function _executeBorrow(ShifterBorrowProxyLib.LiquidityRequestParcel memory liquidityRequestParcel, uint256 bond, uint256 timeoutExpiry) internal returns (address payable proxyAddress) {
     require(liquidityRequestParcel.request.forbidLoan == false, "is not a loan request, try using executeShiftSansBorrow");
     require(
@@ -103,6 +110,7 @@ contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
   }
   function executeBorrow(ShifterBorrowProxyLib.LiquidityRequestParcel memory liquidityRequestParcel, uint256 bond, uint256 timeoutExpiry) public payable {
     ShifterBorrowProxyLib.InitializationAction[] memory actions = liquidityRequestParcel.request.actions;
+    validateUnderMaxLoan(liquidityRequestParcel);
     address payable proxyAddress = _executeBorrow(liquidityRequestParcel, bond, timeoutExpiry);
     proxyAddress.setupBorrowProxy(liquidityRequestParcel.request.borrower, liquidityRequestParcel.request.token, false);
     proxyAddress.sendInitializationActions(actions);
