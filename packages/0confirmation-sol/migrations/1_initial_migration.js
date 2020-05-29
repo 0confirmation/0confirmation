@@ -113,6 +113,7 @@ module.exports = async function(deployer) {
   await shifterPool.setup({
     shifterRegistry: shifterRegistry.address,
     minTimeout: '1000',
+    daoFee: ethers.utils.parseEther('0.01'),
     poolFee: ethers.utils.parseEther('0.01'),
     maxLoan: deployer.network === 'mainnet' ? ethers.utils.parseEther('0.1') : ethers.utils.parseEther('10')
   }, ...((v) => [ v.map((v) => ({ moduleType: v.moduleType, target: v.target, sigs: v.sigs })), v.map((v) => v.module) ])([{
