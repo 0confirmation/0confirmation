@@ -447,6 +447,7 @@ class TradeRoom extends React.Component {
             showAlert:false,
             transactions: true,
             transactionDetails: 'none',
+            transactionModal: false,
             _history: this.decorateHistory([]),
             getOpen: false,
             send: 0,
@@ -696,7 +697,7 @@ class TradeRoom extends React.Component {
                     </ModalBody>
                 </Modal>
                 
-                <div className="justify-content-center align-content-center pt-5" style={{ zIndex: "1", overflowX: "hidden", position: "relative" }} >
+                <div className="justify-content-center align-content-center pt-5" style={{ zIndex: "1", overflowX: "hidden", position: "relative", opacity: (this.state.modal || this.state.transactionModal) ? "0.1":"1"}} >
                     <div className="justify-content-center align-content-center text-center mx-auto my-auto pb-4 pt-5">
                         <button className="btn text-light button-small btn-sm" style={{ fontSize: "24dp", backgroundColor: "#317333", width: "248dp", borderRadius: "10px" }} onClick={ (evt) => this.connectWeb3Modal(evt) } >Connect Wallet</button>
                     </div>
