@@ -68,7 +68,7 @@ contract ShifterBorrowProxy is BorrowProxy, SafeViewExecutor, NullCloneConstruct
   function maybeRelayResolveLoan(bool success, ShifterBorrowProxyLib.ProxyRecord memory record, address pool, uint256 postBalance) internal returns (bool) {
     if (success) {
       address liqToken = getLiquidityToken(pool, record.request.token);
-      require(ShifterPool(pool).relayResolveLoan(record.request.token, liqToken, record.loan.keeper, record.loan.params.bond, postBalance - record.loan.params.bond), "loan resolution failure");
+      require(ShifterPool(pool).relayResolveLoan(record.request.token, liqToken, record.loan.keeper, record.loan.params.bond, postBalance - record.loan.params.bond, record.request.amount), "loan resolution failure");
       return true;
     }
     return false;
@@ -86,9 +86,9 @@ contract ShifterBorrowProxy is BorrowProxy, SafeViewExecutor, NullCloneConstruct
     if (record.loan.params.timeoutExpiry >= block.number) {
       isolate.isLiquidating = true;
       for (uint256 i = isolate.liquidationIndex; i < set.length; i++) {
-        if (gasleft() < MINIMUM_GAS_CONTINUE) { //|| !set[i].delegateLiquidate()) {
+        if (gasleft() < MINIMUM_GAS_CONTINUE || !set[i].delegateLiquidate()) {
           isolate.liquidationIndex = i;
-          return (false, record, pool, postBalance); //|| !set[i].delegateLiquidate()) 
+          return (false, record, pool, postBalance);
         }
       }
       isolate.liquidationIndex = set.length;

@@ -39,6 +39,7 @@ contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
     isolate.maxLoan = params.maxLoan;
     isolate.minTimeout = params.minTimeout;
     isolate.poolFee = params.poolFee;
+    isolate.daoFee = params.daoFee;
     for (uint256 i = 0; i < modules.length; i++) {
       BorrowProxyLib.ModuleRegistration memory registration = BorrowProxyLib.ModuleRegistration({
         module: modules[i],
@@ -174,10 +175,14 @@ contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
   function fetchModuleHandler(address to, bytes4 sig) public view returns (BorrowProxyLib.Module memory) {
     return isolate.registry.resolveModule(to, sig);
   }
-  function relayResolveLoan(address token, address liquidityToken, address keeper, uint256 bond, uint256 repay) public returns (bool) {
+  function relayResolveLoan(address token, address liquidityToken, address keeper, uint256 bond, uint256 repay, uint256 originalAmount) public returns (bool) {
     require(isolate.borrowProxyController.proxyInitializerRecord[msg.sender] != bytes32(0x0), "not a registered borrow proxy");
     if (bond != 0) require(token.sendToken(keeper, bond), "failed to return bond to keeper");
-    if (repay != 0) require(token.sendToken(liquidityToken, repay), "failed to repay lost funds");
+    if (repay != 0) {
+       (uint256 amount, uint256 daoFee) = ShifterPoolLib.splitForDAO(originalAmount, repay, isolate.daoFee);
+       require(token.sendToken(liquidityToken, amount), "failed to repay lost funds");
+       require(token.sendToken(owner(), daoFee), "failed to repay the governing DAO");
+    }
     require(LiquidityToken(liquidityToken).resolveLoan(msg.sender), "loan resolution failure");
     return true;
   }

@@ -26,6 +26,7 @@ library ShifterPoolLib {
     address shifterRegistry;
     uint256 minTimeout;
     uint256 poolFee;
+    uint256 daoFee;
     uint256 maxLoan;
   }
   struct Isolate {
@@ -35,12 +36,19 @@ library ShifterPoolLib {
     address shifterRegistry;
     uint256 minTimeout;
     uint256 poolFee;
+    uint256 daoFee;
     uint256 maxLoan;
     mapping (address => bool) isKeeper;
     mapping (bytes32 => bool) provisionExecuted;
     mapping (address => address) tokenToLiquidityToken;
     BorrowProxyLib.ControllerIsolate borrowProxyController;
     BorrowProxyLib.ModuleRegistry registry;
+  }
+  function splitForDAO(uint256 actualAmount, uint256 originalAmount, uint256 daoFee) internal pure returns (uint256 amount, uint256 daoAmount) {
+    daoAmount = originalAmount.mul(uint256(daoFee)).div(daoFee);
+    if (daoAmount < actualAmount) {
+      amount = actualAmount - daoAmount;
+    } else daoAmount = 0;
   }
   function deployAssetForwarder(BorrowProxyLib.ProxyIsolate storage isolate, bytes32 salt) internal returns (address created) {
     return ShifterPool(isolate.masterAddress).deployAssetForwarderClone(salt);
