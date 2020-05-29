@@ -3,7 +3,7 @@
 const genesisQuery = require('./queries/query-genesis');
 const ShifterPoolArtifact = require('@0confirmation/sol/build/ShifterPool');
 const BorrowProxyLib = require('@0confirmation/sol/build/BorrowProxyLib');
-const { makeManagerClass } = require('./manager');
+const { makeManagerClass } = require('@0confirmation/eth-manager');
 const ethers = require('ethers');
 
 const { safeViewExecutorMixin } = require('./mixins');
