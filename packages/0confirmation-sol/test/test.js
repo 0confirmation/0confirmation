@@ -123,7 +123,7 @@ contract('ShifterPool', () => {
     const keeperProvider = makePrivateKeyWalletWithPersonalSign(randomBytes(32).toString('hex'), fixtures.provider);
     const borrowerProvider = makePrivateKeyWalletWithPersonalSign(randomBytes(32).toString('hex'), fixtures.provider);
     const daoProvider = makePrivateKeyWalletWithPersonalSign(randomBytes(32).toString('hex'), fixtures.provider);
-    const daoAddress = (await (daoProvider.asEthers()).listAccounts())[0]
+    const daoAddress = (await (new ethers.providers.Web3Provider(daoProvider)).listAccounts())[0]
     const network = {
       shifterPool: fixtures.ShifterPool.address,
       mpkh: '0x' + randomBytes(32).toString('hex')
@@ -163,10 +163,9 @@ contract('ShifterPool', () => {
     
     await (await renbtcWrapped.mint(fixtures.keeperAddress, ethers.utils.parseUnits('10', 8))).wait();
     await (await fixtures.keeper.approvePool(fixtures.renbtc.address)).wait();
-    const providerZero = makeZero(provider
     fixtures.providerZero = makeZero(provider, network);
     fixtures.daoZero = makeZero(daoProvider, network);
-    await fixtures.providerZero.shifterPool.setOwner(daoAddress, true);
+    await fixtures.providerZero.shifterPool.transferOwnership(daoAddress);
   });
   it('should execute a payment', async () => {
     const outputLogs = (v) => v.logs.map((log) => {
@@ -209,8 +208,8 @@ contract('ShifterPool', () => {
     const receipt = await (await proxy.repayLoan({ gasLimit: ethers.utils.hexlify(6e6) })).wait();
     const iface = new Interface(ShifterBorrowProxy.abi.concat(AssetForwarderLib.abi).concat(ERC20Adapter.abi).concat(ERC20AdapterLib.abi));
     const daiWrapped = new ethers.Contract(fixtures.DAI.address, fixtures.DAI.abi, fixtures.borrower.getProvider().asEthers());
-    const renbtcWrapped = new ethers.Contract(fixtures.renbtc.address, fixtures.DAI.abi, fixtures.
-    console.log(await proxy.queryTransfers());
+    const renbtcWrapped = new ethers.Contract(fixtures.renbtc.address, fixtures.DAI.abi, fixtures.daoZero.getProvider.asEthers());
+    console.log(await proxy.queryTransfers())
     await fixtures.keeper.stopListeningForLiquidityRequests();
     console.log(await renbtcWrapped.balanceOf((await (fixtures.daoZero.getProvider().asEthers()).listAccounts())[0]));
   });
