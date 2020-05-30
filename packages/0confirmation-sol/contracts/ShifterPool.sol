@@ -21,11 +21,13 @@ import { NullCloneConstructor } from "./NullCloneConstructor.sol";
 import { AssetForwarderLib } from "./adapters/lib/AssetForwarderLib.sol";
 import { AssetForwarder } from "./adapters/lib/AssetForwarder.sol";
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import { StringLib } from "./utils/StringLib.sol";
 
 contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
   using SandboxLib for *;
   using ShifterPoolLib for *;
   using TokenUtils for *;
+  using StringLib for *;
   using ShifterBorrowProxyLib for *;
   using ShifterBorrowProxyFactoryLib for *;
   using BorrowProxyLib for *;
@@ -175,13 +177,13 @@ contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
   function fetchModuleHandler(address to, bytes4 sig) public view returns (BorrowProxyLib.Module memory) {
     return isolate.registry.resolveModule(to, sig);
   }
-  function relayResolveLoan(address token, address liquidityToken, address keeper, uint256 bond, uint256 repay, uint256 originalAmount) public returns (bool) {
+  function relayResolveLoan(address token, address liquidityToken, address keeper, uint256 bond, uint256 repay) public returns (bool) {
     require(isolate.borrowProxyController.proxyInitializerRecord[msg.sender] != bytes32(0x0), "not a registered borrow proxy");
     if (bond != 0) require(token.sendToken(keeper, bond), "failed to return bond to keeper");
     if (repay != 0) {
-       (uint256 amount, uint256 daoFee) = ShifterPoolLib.splitForDAO(originalAmount, repay, isolate.daoFee);
-       require(token.sendToken(liquidityToken, amount), "failed to repay lost funds");
-       require(token.sendToken(owner(), daoFee), "failed to repay the governing DAO");
+       (uint256 amount, uint256 daoAmount) = ShifterPoolLib.splitForDAO(repay - bond, isolate.daoFee);
+       require(token.transferTokenFrom(msg.sender, liquidityToken, amount), "failed to repay lost funds");
+       require(token.transferTokenFrom(msg.sender, owner(), daoAmount), "failed to repay the governing DAO");
     }
     require(LiquidityToken(liquidityToken).resolveLoan(msg.sender), "loan resolution failure");
     return true;

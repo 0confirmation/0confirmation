@@ -27,13 +27,13 @@ contract ShifterBorrowProxy is BorrowProxy, SafeViewExecutor, NullCloneConstruct
     amount = getShifter(parcel.record.request.token).mint(parcel.shiftParameters.pHash, parcel.record.request.amount, parcel.computeNHash(), parcel.shiftParameters.darknodeSignature);
   }
   function repayLoan(bytes memory data) public returns (bool) {
-    (bool success, ShifterBorrowProxyLib.ProxyRecord memory record, address pool) = _repayLoan(data);
-    if (maybeRelayResolveLoan(success, record, pool, record.loan.params.bond)) {
+    (bool success, ShifterBorrowProxyLib.ProxyRecord memory record, address pool, uint256 repayAmount) = _repayLoan(data);
+    if (maybeRelayResolveLoan(success, record, pool, repayAmount)) {
       ShifterBorrowProxyLib.emitShifterBorrowProxyRepaid(record.request.borrower, record);
       return true;
     } else return false;
   }
-  function _repayLoan(bytes memory data) internal returns (bool success, ShifterBorrowProxyLib.ProxyRecord memory record, address pool) {
+  function _repayLoan(bytes memory data) internal returns (bool success, ShifterBorrowProxyLib.ProxyRecord memory record, address pool, uint256 repayAmount) {
     (ShifterBorrowProxyLib.TriggerParcel memory parcel) = data.decodeTriggerParcel();
     record = parcel.record;
     parcel.record.request.actions = new ShifterBorrowProxyLib.InitializationAction[](0);
@@ -41,22 +41,21 @@ contract ShifterBorrowProxy is BorrowProxy, SafeViewExecutor, NullCloneConstruct
     require(!isolate.isLiquidating, "proxy is being liquidated");
     uint256 fee = parcel.record.computeAdjustedKeeperFee(parcel.record.request.amount);
     pool = isolate.masterAddress;
-    address liquidityToken = getLiquidityToken(pool, parcel.record.request.token);
     uint256 amount;
     if (!isolate.isRepaying) {
       isolate.isRepaying = true;
       isolate.actualizedShift = amount = mint(parcel);
-      require(parcel.record.request.token.sendToken(liquidityToken, amount - fee), "token transfer failed");
     } else amount = isolate.actualizedShift;
     address[] memory set = isolate.repaymentSet.set;
     for (uint256 i = isolate.repaymentIndex; i < set.length; i++) {
       if (gasleft() < MINIMUM_GAS_CONTINUE || !set[i].delegateRepay()) {
         isolate.repaymentIndex = i;
-        return (false, record, pool);
+        return (false, record, pool, 0);
       }
     }
     isolate.unbound = true;
     require(parcel.record.request.token.sendToken(parcel.record.loan.keeper, fee), "keeper payout failed");
+    repayAmount = amount - fee;
     success = true;
   }
   function getBalanceOf(address token, address user) internal view returns (uint256) {
@@ -65,10 +64,11 @@ contract ShifterBorrowProxy is BorrowProxy, SafeViewExecutor, NullCloneConstruct
   function getLiquidityToken(address pool, address token) internal view returns (address liqToken) {
     liqToken = address(ShifterPool(pool).getLiquidityTokenHandler(token));
   }
-  function maybeRelayResolveLoan(bool success, ShifterBorrowProxyLib.ProxyRecord memory record, address pool, uint256 postBalance) internal returns (bool) {
+  function maybeRelayResolveLoan(bool success, ShifterBorrowProxyLib.ProxyRecord memory record, address pool, uint256 repayPool) internal returns (bool) {
     if (success) {
       address liqToken = getLiquidityToken(pool, record.request.token);
-      require(ShifterPool(pool).relayResolveLoan(record.request.token, liqToken, record.loan.keeper, record.loan.params.bond, postBalance - record.loan.params.bond, record.request.amount), "loan resolution failure");
+      require(record.request.token.approveForMaxIfNeeded(pool), "failed to approve pool for token transfer");
+      require(ShifterPool(pool).relayResolveLoan(record.request.token, liqToken, record.loan.keeper, record.loan.params.bond, repayPool), "loan resolution failure");
       return true;
     }
     return false;
@@ -93,8 +93,7 @@ contract ShifterBorrowProxy is BorrowProxy, SafeViewExecutor, NullCloneConstruct
       }
       isolate.liquidationIndex = set.length;
       pool = isolate.masterAddress;
-      postBalance = getBalanceOf(record.request.token, pool);
-      require(record.request.token.sendToken(pool, postBalance), "failed to transfer reclaimed funds to pool");
+      postBalance = getBalanceOf(record.request.token, address(this));
       if (postBalance < record.request.amount) {
         if (record.loan.params.bond > postBalance - record.request.amount) {
           record.loan.params.bond -= (postBalance - record.request.amount);

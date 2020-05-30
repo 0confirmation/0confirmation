@@ -24,8 +24,8 @@ class ShifterPool extends makeManagerClass(Object.assign({}, ShifterPoolArtifact
   static getDefault() {
     return ShifterPool.fromAddressAndProvider(ethers.constants.AddressZero, new ethers.providers.InfuraProvider('kovan'));
   }
-  constructor(zero) {
-    super(zero.network.shifterPool, zero.getProvider().asEthers());
+  constructor(address, provider, zero) {
+    super(address, provider);
     this.zero = zero;
   }
   async getGenesis() {

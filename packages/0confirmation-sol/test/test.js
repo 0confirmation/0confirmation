@@ -35,7 +35,7 @@ const asMiddleware = require('json-rpc-engine/src/asMiddleware');
 
 const Interface = ethers.utils.Interface;
 
-const makeZero = async (provider, contracts) => {
+const makeZero = (provider, contracts) => {
   const zero = new ZeroMock(provider);
   zero.setEnvironment(contracts);
   return zero;
@@ -116,7 +116,7 @@ contract('ShifterPool', () => {
       UniswapV2Factory: await UniswapV2Factory.deployed(),
       ShifterRegistry: await ShifterRegistryMock.deployed()
     };
-    fixtures.provider = fromTruffleProvider(fixtures.ShifterPool.contract.currentProvider);
+    fixtures.provider = fromTruffleProvider(ShifterPool.currentProvider);
     fixtures.renbtc = {
       address: await fixtures.ShifterRegistry.token()
     };
@@ -129,10 +129,10 @@ contract('ShifterPool', () => {
       mpkh: '0x' + randomBytes(32).toString('hex')
     };
     fixtures.daoAddress = daoAddress;
-    const [ borrower, keeper ] = await Promise.all([
+    const [ borrower, keeper ] = [
       makeZero(borrowerProvider, network),
       makeZero(keeperProvider, network)
-    ]);
+    ];
     borrower.connectMock(keeper);
     Object.assign(fixtures, {
       borrower,
@@ -163,7 +163,7 @@ contract('ShifterPool', () => {
     
     await (await renbtcWrapped.mint(fixtures.keeperAddress, ethers.utils.parseUnits('10', 8))).wait();
     await (await fixtures.keeper.approvePool(fixtures.renbtc.address)).wait();
-    fixtures.providerZero = makeZero(provider, network);
+    fixtures.providerZero = makeZero(fixtures.provider, network);
     fixtures.daoZero = makeZero(daoProvider, network);
     await fixtures.providerZero.shifterPool.transferOwnership(daoAddress);
   });
@@ -208,9 +208,7 @@ contract('ShifterPool', () => {
     const receipt = await (await proxy.repayLoan({ gasLimit: ethers.utils.hexlify(6e6) })).wait();
     const iface = new Interface(ShifterBorrowProxy.abi.concat(AssetForwarderLib.abi).concat(ERC20Adapter.abi).concat(ERC20AdapterLib.abi));
     const daiWrapped = new ethers.Contract(fixtures.DAI.address, fixtures.DAI.abi, fixtures.borrower.getProvider().asEthers());
-    const renbtcWrapped = new ethers.Contract(fixtures.renbtc.address, fixtures.DAI.abi, fixtures.daoZero.getProvider.asEthers());
-    console.log(await proxy.queryTransfers())
+    const renbtcWrapped = new ethers.Contract(fixtures.renbtc.address, fixtures.DAI.abi, fixtures.daoZero.getProvider().asEthers());
     await fixtures.keeper.stopListeningForLiquidityRequests();
-    console.log(await renbtcWrapped.balanceOf((await (fixtures.daoZero.getProvider().asEthers()).listAccounts())[0]));
   });
 });

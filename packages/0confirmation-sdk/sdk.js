@@ -65,12 +65,7 @@ class Zero {
   setEnvironment(env) {
     this.network = env;
     this.network.shifterPool = this.network.shifterPool || ethers.constants.AddressZero;
-    this.shifterPool = new ShifterPool({
-      getProvider: this.getProvider.bind(this),
-      network: {
-        shifterPool: env.shifterPool || this.network.shifterPool || ethers.constants.AddressZero
-      }
-    });
+    this.shifterPool = new ShifterPool(this.network.shifterPool, this.getProvider().asEthers(), this);
   }
   constructor(o, ...args) {
     if (o.send) {
