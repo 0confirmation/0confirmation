@@ -1,6 +1,6 @@
+pragma experimental ABIEncoderV2;
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.6.0;
-pragma experimental ABIEncoderV2;
 
 import { IUniswapV2Router01 } from "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router01.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";

@@ -1,6 +1,6 @@
+pragma experimental ABIEncoderV2;
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.6.0;
-pragma experimental ABIEncoderV2;
 
 import { SafeViewLib } from "./SafeViewLib.sol";
 import { Create2 } from "@openzeppelin/contracts/utils/Create2.sol";

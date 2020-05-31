@@ -1,6 +1,6 @@
+pragma experimental ABIEncoderV2;
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.6.0;
-pragma experimental ABIEncoderV2;
 
 import { UniswapV2Adapter } from "./UniswapV2Adapter.sol";
 import { IUniswapV2Router01 } from "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router01.sol";

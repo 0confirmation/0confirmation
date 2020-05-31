@@ -35,7 +35,7 @@ const renNetworkFromNetwork = (network) => {
     case 'ganache':
       return 'testnet';
     case 'mainnet':
-      return 'chaosnet';
+      return 'mainnet';
   }
   return network;
 };
@@ -96,12 +96,17 @@ const daiFromNetwork = (network) => {
   }
 };
 
+const wethFromNetwork = (network) => ({
+  weth: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
+});
+
 const getAddresses = (network) => ({
   ...curveFromNetwork(network),
   ...uniswapFromNetwork(network),
   ...zeroContractsFromNetwork(network),
   ...renvmFromEnvironment(network),
-  ...daiFromNetwork(network)
+  ...daiFromNetwork(network),
+  ...wethFromNetwork(network)
 });
 
 const getEnvironment = (provider, network, backends) => ({

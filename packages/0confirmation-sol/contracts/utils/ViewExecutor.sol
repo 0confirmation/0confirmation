@@ -1,6 +1,6 @@
+pragma experimental ABIEncoderV2;
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.6.0;
-pragma experimental ABIEncoderV2;
 
 contract ViewExecutor {
   function encodeExecuteQuery(address viewLogic, bytes memory payload) internal pure returns (bytes memory retval) {

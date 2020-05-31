@@ -1,6 +1,6 @@
+pragma experimental ABIEncoderV2;
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.6.0;
-pragma experimental ABIEncoderV2;
 
 import { SandboxLib } from "../../utils/sandbox/SandboxLib.sol";
 import { ShifterBorrowProxyLib } from "../../ShifterBorrowProxyLib.sol";

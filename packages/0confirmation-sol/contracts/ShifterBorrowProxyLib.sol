@@ -1,6 +1,6 @@
+pragma experimental ABIEncoderV2;
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.6.0;
-pragma experimental ABIEncoderV2;
 
 import { IInitializationActionsReceiver } from "./interfaces/IInitializationActionsReceiver.sol";
 import { ECDSA } from "@openzeppelin/contracts/cryptography/ECDSA.sol";

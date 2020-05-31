@@ -1,6 +1,6 @@
+pragma experimental ABIEncoderV2;
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.6.0;
-pragma experimental ABIEncoderV2;
 
 import { ERC20AdapterLib } from "../../adapters/assets/erc20/ERC20AdapterLib.sol";
 

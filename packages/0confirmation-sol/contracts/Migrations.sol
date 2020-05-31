@@ -1,6 +1,6 @@
+pragma experimental ABIEncoderV2;
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.4.21 <0.7.0;
-pragma experimental ABIEncoderV2;
 
 contract Migrations {
   address public owner;
