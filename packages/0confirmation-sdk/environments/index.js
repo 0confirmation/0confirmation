@@ -15,6 +15,7 @@ const Factory = require('@0confirmation/sol/build/Factory');
 const DAI = require('@0confirmation/sol/build/DAI');
 const SwapEntireLoan = require('@0confirmation/sol/build/SwapEntireLoan');
 const TransferAll = require('@0confirmation/sol/build/TransferAll');
+const V2SwapAndDrop = require('@0confirmation/sol/build/V2SwapAndDrop');
 
 const chainIdFromNetwork = (network) => {
   switch (network) {
@@ -65,8 +66,7 @@ const zeroContractsFromNetwork = (network) => {
   const chainId = chainIdFromNetwork(network);
   return {
     shifterPool: fromArtifact(network, ShifterPool),
-    transferAll: fromArtifact(network, TransferAll),
-    swapEntireLoan: fromArtifact(network, SwapEntireLoan)
+    swapAndDrop: fromArtifact(network, V2SwapAndDrop)
   };
 };
 
