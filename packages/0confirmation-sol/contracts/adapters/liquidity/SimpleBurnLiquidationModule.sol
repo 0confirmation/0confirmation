@@ -43,7 +43,6 @@ contract SimpleBurnLiquidationModule {
     if (!ERC20AdapterLib.liquidate(proxyIsolate)) return false;
     SimpleBurnLiquidationModuleLib.Isolate storage isolate = SimpleBurnLiquidationModuleLib.getIsolatePointer();
     address liquidateTo = address(uint160(proxyIsolate.token));
-    address liquidityToken = fetchLiquidityToken(liquidateTo);
     (address routerAddress, /* address erc20Module */) = fetchExternals(moduleAddress);
     IUniswapV2Router01 router = IUniswapV2Router01(routerAddress);
     address WETH = getWETH(router);
