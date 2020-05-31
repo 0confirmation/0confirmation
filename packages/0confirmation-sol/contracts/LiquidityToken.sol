@@ -39,7 +39,7 @@ contract LiquidityToken is ERC20, ERC20Burnable {
   function addLiquidity(uint256 value) public returns (uint256) {
     uint256 totalLiquidity = totalSupply();
     uint256 reserve = getReserve();
-    uint256 totalMinted = value * totalLiquidity / (reserve + 1);
+    uint256 totalMinted = value * (totalLiquidity == 0 ? 1 : totalLiquidity) / (reserve + 1);
     require(asset.transferTokenFrom(msg.sender, address(this), value), "transfer token failed");
     _mint(msg.sender, totalMinted);
     return totalMinted;
@@ -47,8 +47,8 @@ contract LiquidityToken is ERC20, ERC20Burnable {
   function removeLiquidity(uint256 value) public returns (uint256) {
     uint256 totalLiquidity = totalSupply();
     uint256 reserve = getReserve();
-    uint256 totalBurned = value * reserve / totalLiquidity;
-    _burn(msg.sender, totalBurned);
-    require(asset.sendToken(msg.sender, totalBurned));
+    uint256 totalReturned = value * (reserve + 1) / (totalLiquidity == 0 ? 1 : totalLiquidity);
+    _burn(msg.sender, value);
+    require(asset.sendToken(msg.sender, totalReturned), "failed to send back token");
   }
 }

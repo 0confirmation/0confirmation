@@ -11,8 +11,10 @@ import { ERC20AdapterLib } from "../assets/erc20/ERC20AdapterLib.sol";
 import { UniswapV2AdapterLib } from "../assets/uniswap-v2/UniswapV2AdapterLib.sol";
 import { IUniswapV2Router01 } from "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router01.sol";
 import { ShifterPool } from "../../ShifterPool.sol";
+import { StringLib } from "../../utils/StringLib.sol";
 
 contract SimpleBurnLiquidationModule {
+  using StringLib for *;
   using AddressSetLib for *;
   using TokenUtils for *;
   using UniswapV2AdapterLib for *;
@@ -56,7 +58,7 @@ contract SimpleBurnLiquidationModule {
       uint256 tokenBalance = IERC20(tokenAddress).balanceOf(address(this));
       address[] memory path = UniswapV2AdapterLib.generatePathForToken(tokenAddress, WETH, liquidateTo);
       tokenAddress.approveForMaxIfNeeded(address(router));
-      router.swapExactTokensForTokens(tokenBalance, 1, path, liquidityToken, block.timestamp + 1);
+      router.swapExactTokensForTokens(tokenBalance, 1, path, address(this), block.timestamp + 1);
     }
     isolate.liquidated = i;
     return true;

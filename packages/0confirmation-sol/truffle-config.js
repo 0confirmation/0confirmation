@@ -36,6 +36,15 @@ module.exports = {
       network_id: '42',
       timeoutBlocks: 1e4
     },
+    mainnet: {
+      provider: () => new HDWalletProvider(fromV3(require('./deploy/mainnet-deploy'), validateHasPassword(process.env.PASSWORD)).getPrivateKeyString().substr(2), fromEthers(new ethers.providers.InfuraProvider('mainnet', '2f1de898efb74331bf933d3ac469b98d'))),
+      from: '0x' + require('./deploy/mainnet-deploy').address,
+      gasPrice: ethers.utils.parseUnits('25', 9).toString(),
+      gas: 4000000,
+      skipDryRun: true,
+      network_id: '1',
+      timeoutBlocks: 1e4
+    },
     ganache: {
       host: 'localhost',
       port: 8545,

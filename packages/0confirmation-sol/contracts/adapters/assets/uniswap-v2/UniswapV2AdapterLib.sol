@@ -222,6 +222,5 @@ library UniswapV2AdapterLib {
   function triggerERC20Handlers(BorrowProxyLib.ProxyIsolate storage proxyIsolate, address moduleAddress) internal {
     Isolate memory isolate = UniswapV2Adapter(moduleAddress).getExternalIsolateHandler();
     proxyIsolate.repaymentSet.insert(isolate.erc20Module);
-    proxyIsolate.liquidationSet.insert(isolate.erc20Module);
   }
 }

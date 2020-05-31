@@ -314,7 +314,7 @@ class Zero {
   }
   async removeLiquidity(token, value, overrides) {
     const liquidityToken = await this.getLiquidityTokenFor(token);
-    return await liquidityToken.removeLiquidityToken(value, overrides || {});
+    return await liquidityToken.removeLiquidity(value, overrides || {});
   }
   async executeBorrow(liquidityRequest, bond, timeoutExpiry, overrides) {
     const { 

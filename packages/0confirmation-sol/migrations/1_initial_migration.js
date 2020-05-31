@@ -70,7 +70,7 @@ module.exports = async function(deployer) {
     await factory.createPair(weth.address, renbtc.address); // { gasLimit: ethers.utils.hexlify(6e6) });
     await factory.createPair(weth.address, dai.address); //, { gasLimit: ethers.utils.hexlify(6e6) });
   } else if (isNetworkOrFork(deployer.network, 'kovan')) {
-    const kovan = environment.getAddresses('testnet');
+    const kovan = environments.getAddresses('testnet');
     renbtc = { address: kovan.renbtc };
     shifterRegistry = { address: kovan.shifterRegistry };
     router = { address: kovan.router };
@@ -78,7 +78,7 @@ module.exports = async function(deployer) {
       address: kovan.dai
     };
   } else if (isNetworkOrFork(deployer.network, 'mainnet')) {
-    const mainnet = environment.getAddresses('mainnet');
+    const mainnet = environments.getAddresses('mainnet');
     renbtc = { address: mainnet.renbtc };
     shifterRegistry = { address: mainnet.shifterRegistry };
     router = { address: mainnet.router };
@@ -112,7 +112,7 @@ module.exports = async function(deployer) {
   await shifterPool.deployAssetForwarderImplementation();
   await shifterPool.setup({
     shifterRegistry: shifterRegistry.address,
-    minTimeout: '1000',
+    minTimeout: deployer.network === 'test' ? '1' :'10000',
     daoFee: ethers.utils.parseEther('0.01'),
     poolFee: ethers.utils.parseEther('0.01'),
     maxLoan: deployer.network === 'mainnet' ? ethers.utils.parseEther('0.1') : ethers.utils.parseEther('10')
