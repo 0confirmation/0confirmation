@@ -22,7 +22,7 @@ class RenVMBackend extends RPCWrapper {
   }) {
     return resultToJsonRpc(id, async () => await promiseRetry(async (retry) => {
       try {
-        return await this.ren.renVM.network.sendMessage(method, params);
+        return await this.ren.renVM.sendMessage(method, params);
       } catch (e) {
         retry(e);
       }
