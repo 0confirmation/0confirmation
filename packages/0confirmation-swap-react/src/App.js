@@ -312,9 +312,6 @@ class TradeRoom extends React.Component {
           provider.setSigningProvider(window.ethereum);
           await zero.initializeDriver();
           contractsDeferred.resolve(contracts);
-          contracts.swapAndDrop = {
-            address: contracts.swapAndDrop
-          };
           console.log('libp2p: bootstrapped');
         }
         if (web3Modal.cachedProvider) await this._connectWeb3Modal();
