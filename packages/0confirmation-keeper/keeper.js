@@ -8,6 +8,7 @@ const NETWORK = CHAIN === '1' ? 'mainnet' : CHAIN === '42' ? 'testnet' : 'mainne
 const ETH_NETWORK = NETWORK === 'testnet' ? 'kovan' : NETWORK;
 const Zero = require('@0confirmation/sdk');
 const environments = require('@0confirmation/sdk/environments');
+const env = environments.getAddresses(ETH_NETWORK);
 
 const provider = fromPrivate(process.env.PRIVATE_KEY, fromEthers(new ethers.providers.InfuraProvider(ETH_NETWORK)));
 
