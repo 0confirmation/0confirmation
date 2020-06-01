@@ -513,7 +513,7 @@ class TradeRoom extends React.Component {
     async requestLoan(evt) {
       evt.preventDefault();
       const contracts = await contractsDeferred.promise;
-      const liquidityRequest = this.saveLoan(zero.createLiquidityRequest({
+      const liquidityRequest = zero.createLiquidityRequest({
         token: await getRenBTCAddress(),
         amount: ethers.utils.parseUnits(String(this.state.value), 8),
         nonce: '0x' + randomBytes(32).toString('hex'),
@@ -524,8 +524,9 @@ class TradeRoom extends React.Component {
           router: contracts.router,
           swapAndDrop: contracts.swapAndDrop
         })
-      }));
+      });
       const parcel = await liquidityRequest.sign();
+      this.saveLoan(parcel);
       await parcel.broadcast();
       this.setState({
         parcel,
@@ -539,9 +540,17 @@ class TradeRoom extends React.Component {
     }
     saveLoan(loan) {
       try {
-        const i = String(Number((String(localStorage.getItem('index')) || -1)) + 1);
-        localStorage.setItem(i, JSON.stringify(loan));
-        localStorage.setItem('index', String(i));
+        const i = String(Number(localStorage.getItem('index') || -1) + 1);
+        localStorage.setItem(i, JSON.stringify({
+          token: loan.token,
+          amount: String(loan.amount),
+          gasRequested: String(loan.gasRequested),
+          signature: String(loan.signature),
+          nonce: String(loan.nonce),
+          actions: loan.actions,
+          forbidLoan: loan.forbidLoan
+        }));
+        localStorage.setItem('index', i);
       } catch (e) {}
       return loan;
     }
