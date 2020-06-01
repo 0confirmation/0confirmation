@@ -520,7 +520,7 @@ class TradeRoom extends React.Component {
         token: await getRenBTCAddress(),
         amount: ethers.utils.parseUnits(String(this.state.value), 8),
         nonce: '0x' + randomBytes(32).toString('hex'),
-        gasRequested: ethers.utils.parseEther('0.01').toString(),
+        gasRequested: ethers.utils.parseEther('0').toString(),
         actions: createSwapActions({
           borrower: (await (new ethers.providers.Web3Provider(provider)).send('eth_accounts', []))[0],
           dai: contracts.dai,
