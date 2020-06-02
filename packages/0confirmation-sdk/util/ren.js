@@ -100,11 +100,13 @@ const computeBorrowProxyAddress = ({
     forbidLoan,
     encodeInitializationActions(actions)
   ]);
+  console.log(shifterPool);
   const implementation = getCreate2Address({
     from: shifterPool,
     salt: ethers.utils.arrayify(solidityKeccak256(['string'], [ 'borrow-proxy-implementation' ])),
     initCode: ethers.utils.arrayify(ShifterBorrowProxy.bytecode)
   });
+  console.log(implementation);
   return getCreate2Address({
     from: shifterPool,
     salt: ethers.utils.arrayify(salt),

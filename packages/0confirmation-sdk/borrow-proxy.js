@@ -36,6 +36,7 @@ class BorrowProxy extends makeManagerClass(ShifterBorrowProxy) {
     this.borrowProxyCreationCode = borrowProxyCreationCode;
     this.borrower = user;
     this.proxyAddress = proxyAddress;
+    console.log(proxyAddress);
     this.record = record;
     this.decodedRecord = decodedRecord || decodeProxyRecord(record);
     Object.assign(this, this.decodedRecord.request);
@@ -84,7 +85,7 @@ class BorrowProxy extends makeManagerClass(ShifterBorrowProxy) {
         confirmations: num,
         address: this.getDepositAddress()
       }]));
-      if (utxos.length === 0) await timeout(UTXO_POLL_INTERVAL);
+      if (utxos.length === 0) await timeout(constants.UTXO_POLL_INTERVAL);
       else break;
     }
     const utxo = utxos[0];

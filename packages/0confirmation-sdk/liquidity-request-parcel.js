@@ -37,7 +37,7 @@ class LiquidityRequestParcel extends LiquidityRequest {
       gasRequested
     });
     this.signature = this.signature || signature;
-    this.borrower = borrower || ethers.utils.verifyMessage(Buffer.from(utils.computeLiquidityRequestHash(this).substr(2), 'hex'), this.signature);
+    this.borrower = borrower || ethers.utils.verifyMessage(ethers.utils.arrayify(utils.computeLiquidityRequestHash(this)), ethers.utils.arrayify(this.signature));
     this.proxyAddress = proxyAddress || utils.computeBorrowProxyAddress(this);
     this.depositAddress = depositAddress || utils.computeGatewayAddress({
       isTestnet: this.zero.network.isTestnet,
@@ -51,8 +51,9 @@ class LiquidityRequestParcel extends LiquidityRequest {
     });
   }
   async getBorrowProxy() {
+    console.log(this.borrower);
     const proxies = await this.zero.getBorrowProxies(this.borrower);
-    return proxies[proxies.length - 1] || null;
+    return proxies.find((v) => v.contract.address === this.proxyAddress) || null;
   }
   getBroadcastMessage() {
     return {
@@ -78,11 +79,13 @@ class LiquidityRequestParcel extends LiquidityRequest {
   }
   async waitForDeposit(confirmations = 0) {
     let utxos;
+    console.log(this.depositAddress);
     while (true) {
       utxos = await (this.zero.driver.sendWrapped('btc_getUTXOs', [{
         confirmations,
         address: this.depositAddress
       }]));
+      console.log(utxos);
       if (utxos.length === 0) await timeout(constants.UTXO_POLL_INTERVAL);
       else break;
     }

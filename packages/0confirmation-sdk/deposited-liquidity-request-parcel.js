@@ -68,7 +68,7 @@ class DepositedLiquidityRequestParcel extends LiquidityRequestParcel {
           r: toHex(r),
           s: toHex(s)
         });
-      } else await timeout(DARKNODE_QUERY_TX_INTERVAL);
+      } else await timeout(constants.DARKNODE_QUERY_TX_INTERVAL);
     }
   }
   computeShiftInTxHash() {
