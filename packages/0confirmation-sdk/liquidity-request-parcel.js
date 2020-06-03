@@ -50,9 +50,11 @@ class LiquidityRequestParcel extends LiquidityRequest {
       }
     });
   }
-  async getBorrowProxy() {
+  async getBorrowProxy(utxo) {
     const proxies = await this.zero.getBorrowProxies(this.borrower);
-    return proxies.find((v) => v.contract.address === this.proxyAddress) || null;
+    const proxy = proxies.find((v) => v.contract.address === this.proxyAddress) || null;
+    proxy.utxo = utxo;
+    return proxy;
   }
   getBroadcastMessage() {
     return {
@@ -78,13 +80,11 @@ class LiquidityRequestParcel extends LiquidityRequest {
   }
   async waitForDeposit(confirmations = 0) {
     let utxos;
-    console.log(this.depositAddress);
     while (true) {
       utxos = await (this.zero.driver.sendWrapped('btc_getUTXOs', [{
         address: this.depositAddress,
-        confirmations: 6
+        confirmations: 0
       }]));
-      console.log(utxos);
       if (utxos.length === 0) await timeout(constants.UTXO_POLL_INTERVAL);
       else break;
     }

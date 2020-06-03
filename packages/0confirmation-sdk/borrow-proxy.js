@@ -25,6 +25,7 @@ class BorrowProxy extends makeManagerClass(ShifterBorrowProxy) {
     borrowProxyCreationCode,
     decodedRecord,
     user,
+    utxo,
     proxyAddress,
     record
   }) {
@@ -36,7 +37,7 @@ class BorrowProxy extends makeManagerClass(ShifterBorrowProxy) {
     this.borrowProxyCreationCode = borrowProxyCreationCode;
     this.borrower = user;
     this.proxyAddress = proxyAddress;
-    console.log(proxyAddress);
+    this.utxo = utxo;
     this.record = record;
     this.decodedRecord = decodedRecord || decodeProxyRecord(record);
     Object.assign(this, this.decodedRecord.request);
@@ -62,7 +63,8 @@ class BorrowProxy extends makeManagerClass(ShifterBorrowProxy) {
     return await deposited.waitForSignature();
   }
   async repayLoan(overrides) {
-    const deposited = await (this.getLiquidityRequestParcel()).waitForDeposit();
+    const parcel = this.getLiquidityRequestParcel();
+    const deposited = this.utxo ? parcel.toDeposit(this.utxo) : await parcel.waitForDeposit();
     const darknodeSignature = await deposited.waitForSignature();
     const record = this.decodedRecord;
     return await super.repayLoan(encodeTriggerParcel({

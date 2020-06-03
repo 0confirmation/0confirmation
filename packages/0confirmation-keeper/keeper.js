@@ -44,7 +44,7 @@ console.logKeeper = (v) => console.logBold(chalk.magenta('keeper: ') + v);
     const result = await deposited.submitToRenVM();
     const sig = await deposited.waitForSignature();
     try {
-      const borrowProxy = await deposited.getBorrowProxy();
+      const borrowProxy = await deposited.getBorrowProxy(deposited.utxo);
       console.logKeeper('repaying loan for ' + deposited.proxyAddress + ' !');
       await borrowProxy.repayLoan({ gasLimit: ethers.utils.hexlify(2e6), gasPrice: ethers.utils.parseUnits('62', 9) });
       await db.markLoanComplete(zero, deposited);
