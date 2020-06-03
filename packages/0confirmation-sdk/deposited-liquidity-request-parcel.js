@@ -97,8 +97,8 @@ class DepositedLiquidityRequestParcel extends LiquidityRequestParcel {
 LiquidityRequestParcel.prototype.toDeposit = function (utxo) {
   return new DepositedLiquidityRequestParcel(Object.assign({
     utxo: {
-      txHash: '0x' + utxo.txid,
-      vOut: utxo.output_no
+      txHash: utxo.txHash || '0x' + utxo.txid,
+      vOut: utxo.vOut || utxo.output_no
     }
   }, this));
 };
