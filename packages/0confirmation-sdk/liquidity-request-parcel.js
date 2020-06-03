@@ -50,10 +50,11 @@ class LiquidityRequestParcel extends LiquidityRequest {
       }
     });
   }
-  async getBorrowProxy(utxo) {
+  async getBorrowProxy() {
     const proxies = await this.zero.getBorrowProxies(this.borrower);
     const proxy = proxies.find((v) => v.contract.address === this.proxyAddress) || null;
-    proxy.utxo = utxo;
+    proxy.utxo = this.utxo;
+    console.log(proxy.utxo);
     return proxy;
   }
   getBroadcastMessage() {

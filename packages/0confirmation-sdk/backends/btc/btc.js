@@ -12,10 +12,6 @@ class BTCBackend extends RPCWrapper {
     this.name = 'btc';
     this.prefixes = [ 'btc' ];
   }
-  ln(v) {
-    console.log(require('util').inspect(v, { colors: true, depth: 15 }));
-    return v;
-  }
   async sendPromise({
     id,
     method,
@@ -23,7 +19,7 @@ class BTCBackend extends RPCWrapper {
   }) {
     switch (method) {
       case 'btc_getUTXOs':
-        return await resultToJsonRpc(id, async() => this.ln(await this.handler.getUTXOs(...this.ln([this.testnet, ...params]))));
+        return await resultToJsonRpc(id, async() => await this.handler.getUTXOs(this.testnet, ...params));
       case 'btc_broadcastTransaction':
         return await resultToJsonRpc(id, () => this.handler._apiFallbacks.broadcastTransaction(this.testnet, ...params));
     }

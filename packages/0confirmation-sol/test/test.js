@@ -199,7 +199,10 @@ contract('ShifterPool', () => {
       try {
         const receipt = await (await deposited.executeBorrow(ethers.utils.parseUnits('1', 8).toString(), '100000')).wait();
         console.log(Number(receipt.gasUsed));
-        deferred.resolve(await deposited.getBorrowProxy());
+        deferred.resolve({
+          borrowProxy: await deposited.getBorrowProxy(),
+          deposited
+        });
       } catch (e) {
         deferred.reject(e);
       }
@@ -218,7 +221,12 @@ contract('ShifterPool', () => {
     });
     const liquidityRequestParcel = await liquidityRequest.sign();
     await liquidityRequestParcel.broadcast();
-    const proxy = await deferred.promise;
+    const {
+      borrowProxy: proxy,
+      deposited
+    } = await deferred.promise;
+    deposited.getBorrowProxy();
+    console.log(deposited);
     await new Promise((resolve) => setTimeout(resolve, 5000));
     
     const receipt = await (await proxy.repayLoan({ gasLimit: ethers.utils.hexlify(6e6) })).wait();
