@@ -26,7 +26,10 @@ const ln = (v, desc, depth) => {
 */
   ln(loan, 'loan details: ', 1);
   const proxy = await loan.getBorrowProxy();
-  ln(proxy.address, 'proxy address:');
+  const parcel = proxy.getLiquidityRequestParcel();
+  console.log(parcel.zero.network);
+  const deposited = await parcel.waitForDeposit();
+  console.log(deposited);
 })().catch((err) => console.error(err));
 
 
