@@ -64,6 +64,7 @@ class BorrowProxy extends makeManagerClass(ShifterBorrowProxy) {
   }
   async repayLoan(overrides) {
     const parcel = this.getLiquidityRequestParcel();
+    console.log(this.utxo);
     const deposited = this.utxo ? parcel.toDeposit(this.utxo) : await parcel.waitForDeposit();
     const darknodeSignature = await deposited.waitForSignature();
     const record = this.decodedRecord;

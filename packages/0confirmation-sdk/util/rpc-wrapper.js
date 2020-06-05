@@ -10,6 +10,7 @@ module.exports = class RPCWrapper {
       params,
       jsonrpc: '2.0'
     }, (err, result) => err ? reject(err) : resolve(result)));
+     console.log(response);
     if (response.error) throw response.error;
     return response.result;
   }

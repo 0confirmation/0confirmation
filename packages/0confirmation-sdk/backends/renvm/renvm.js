@@ -20,13 +20,14 @@ class RenVMBackend extends RPCWrapper {
     id,
     params
   }) {
-    return resultToJsonRpc(id, async () => await promiseRetry(async (retry) => {
-      try {
-        return await this.ren.renVM.sendMessage(method, params);
-      } catch (e) {
-        retry(e);
-      }
-    }));
+   console.log(method);
+   console.log(require('util').inspect(params, { colors: true, depth: 15 }));
+   switch (method) {
+     case 'ren_submitTx':
+       return resultToJsonRpc(id, async () => await this.ren.renVM.submitTx(params[0].tx, 10));
+     case 'ren_queryTx':
+       return resultToJsonRpc(id, async () => await this.ren.renVM.queryTx(params[0].txHash, 10));
+    }
   }
   send(o, cb) {
     this.sendPromise(o).then((result) => cb(null, result)).catch((err) => cb(err));

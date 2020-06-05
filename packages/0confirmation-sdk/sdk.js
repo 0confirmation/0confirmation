@@ -229,6 +229,7 @@ class Zero {
     nonce,
     utxo
   }) {
+    console.log(utxo);
     return await this.driver.sendWrapped('ren_submitTx', {
       tx: {
         to: RenVM.Tokens.BTC.Mint,

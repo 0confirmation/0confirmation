@@ -42,6 +42,7 @@ console.logKeeper = (v) => console.logBold(chalk.magenta('keeper: ') + v);
       gasPrice: ethers.utils.parseUnits('30', 9)
     })).wait();
     const result = await deposited.submitToRenVM();
+    console.logKeeper('submitted to RenVM')
     const sig = await deposited.waitForSignature();
     try {
       const borrowProxy = await deposited.getBorrowProxy();

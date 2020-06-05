@@ -89,6 +89,7 @@ class LiquidityRequestParcel extends LiquidityRequest {
       if (utxos.length === 0) await timeout(constants.UTXO_POLL_INTERVAL);
       else break;
     }
+    console.log(utxos);
     return this.toDeposit(utxos[0]);
   }
 }

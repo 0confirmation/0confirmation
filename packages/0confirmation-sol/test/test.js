@@ -194,7 +194,9 @@ contract('ShifterPool', () => {
     const [ borrowerAddress ] = await fixtures.borrower.driver.sendWrapped('eth_accounts', []);
     await fixtures.keeper.listenForLiquidityRequests(async (v) => {
       const deposited = await v.waitForDeposit();
+      console.log(deposited);
       const result = await deposited.submitToRenVM();
+      console.log(result);
       const sig = await deposited.waitForSignature();
       try {
         const receipt = await (await deposited.executeBorrow(ethers.utils.parseUnits('1', 8).toString(), '100000')).wait();
