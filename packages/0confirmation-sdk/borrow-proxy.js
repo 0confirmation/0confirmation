@@ -1,6 +1,7 @@
 'use strict';
 
 const ethers = require('ethers');
+const addHexPrefix = (s) => s.substr(0, 2) === '0x' ? s : '0x' + s;
 const { defaultAbiCoder: abi } = ethers.utils;
 const { makeManagerClass } = require('./manager');
 const { safeViewExecutorMixin } = require('./mixins');
@@ -64,7 +65,6 @@ class BorrowProxy extends makeManagerClass(ShifterBorrowProxy) {
   }
   async repayLoan(overrides) {
     const parcel = this.getLiquidityRequestParcel();
-    console.log(this.utxo);
     const deposited = this.utxo ? parcel.toDeposit(this.utxo) : await parcel.waitForDeposit();
     const darknodeSignature = await deposited.waitForSignature();
     const record = this.decodedRecord;
@@ -73,7 +73,7 @@ class BorrowProxy extends makeManagerClass(ShifterBorrowProxy) {
       shiftParameters: {
         pHash: constants.CONST_PHASH,
         vout: deposited.utxo.vOut,
-        txhash: deposited.utxo.txHash,
+        txhash: addHexPrefix(deposited.utxo.txHash),
         darknodeSignature
       }
     }), overrides || {});

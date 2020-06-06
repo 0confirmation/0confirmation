@@ -88,6 +88,7 @@ const setupTestUniswapSDK = async (provider) => {
   const ethersProvider = new ethers.providers.Web3Provider(provider);
   const chainId = await ethersProvider.send('net_version', []);
   ChainId.MAINNET = Number(chainId);
+  console.log('uniswap', contracts.factory);
   Pair.getAddress = (tokenA, tokenB) => {
     const tokens = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA] // does safety checks
     return ethers.utils.getCreate2Address({
@@ -240,7 +241,6 @@ class TradeRoom extends React.Component {
         provider.setSigningProvider(makeTestWallet(window.ethereum || provider));
       }
       zero.setEnvironment(contracts);
-      await setupTestUniswapSDK(provider);
       if (!['embedded', 'test'].includes(CHAIN)) return;
       const ganacheAddress = (await (provider.dataProvider.asEthers()).send('eth_accounts', []))[0];
       const keeperPvt = ethers.utils.solidityKeccak256(['address'], [ ganacheAddress ]).substr(2);
@@ -309,6 +309,7 @@ class TradeRoom extends React.Component {
     async componentDidMount() {
         if (CHAIN === 'test' || CHAIN === 'embedded') await this.setup();
         else {
+          if (CHAIN === '42') await setupTestUniswapSDK(zero.getProvider());
           provider.setSigningProvider(window.ethereum);
           await zero.initializeDriver();
           contractsDeferred.resolve(contracts);

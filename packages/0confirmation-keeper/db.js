@@ -64,13 +64,13 @@ class DB {
         ...loan
       });
       const index = toNumber((await this._get(toBuffer(parcel.proxyAddress))) || Buffer.from([0x0]));
-      const loan = toAscii((await this._get(toBuffer(index))) || Buffer.from([]));
-      if (loan) {
-        const parsed = JSON.parse(loan);
+      const decodedLoan = toAscii((await this._get(toBuffer(index))) || Buffer.from([]));
+      if (decodedLoan) {
+        const parsed = JSON.parse(decodedLoan);
         parsed.resolved = true;
         await this._put(toBuffer(index), JSON.stringify(parsed));
       }
-      return loan;
+      return decodedLoan;
     });
   }
   _get(v) {

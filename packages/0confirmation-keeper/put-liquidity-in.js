@@ -5,7 +5,7 @@ const path = require('path');
 const DB = require('./db');
 const makeZero = require('./make-zero');
 const environments = require('@0confirmation/sdk/environments');
-const env = environments.getAddresses('mainnet');
+const env = environments.getAddresses('testnet');
 
 const chalk = require('chalk');
 
@@ -19,9 +19,9 @@ console.logKeeper = (v) => console.logBold(chalk.magenta('keeper: ') + v);
   const address = (await (zero.getProvider().asEthers()).listAccounts())[0];
   const token = liquidityToken.attach(env.renbtc);
   const balanceOfToken = await token.balanceOf(address);
-//  const approvalLiquidityTokenTx = await zero.approveLiquidityToken(env.renbtc, { gasPrice: ethers.utils.parseUnits('30', 9) });
- // console.log('approve liquidity token: ' + approvalLiquidityTokenTx.hash);
-  const addLiquidityTx = await zero.addLiquidity(env.renbtc, balanceOfToken.sub(ethers.utils.parseUnits('0.006', 8)), { gasPrice: ethers.utils.parseUnits('30', 9) });
+  const approvalLiquidityTokenTx = await zero.approveLiquidityToken(env.renbtc, { gasPrice: ethers.utils.parseUnits('30', 9) });
+  console.log('approve liquidity token: ' + approvalLiquidityTokenTx.hash);
+  const addLiquidityTx = await zero.addLiquidity(env.renbtc, ethers.utils.parseUnits('0.004', 8), { gasPrice: ethers.utils.parseUnits('30', 9) });
   console.log('add liquidity tx: ' + addLiquidityTx.hash);
   const approvePoolTx = await zero.approvePool(env.renbtc, { gasPrice: ethers.utils.parseUnits('30', 9) });
   console.log('approve pool tx: ' + approvePoolTx.hash);
