@@ -104,7 +104,7 @@ library ShifterPoolLib {
     return token.transferTokenFrom(provider, target, amount);
   }
   function getShifter(Isolate storage isolate, address token) internal view returns (IShifter) {
-    return IShifterRegistry(isolate.shifterRegistry).getShifterByToken(token);
+    return IShifterRegistry(isolate.shifterRegistry).getGatewayByToken(token);
   }
   function provisionHashAlreadyUsed(Isolate storage isolate, bytes32 provisionHash) internal view returns (bool) {
     return isolate.provisionExecuted[provisionHash];
