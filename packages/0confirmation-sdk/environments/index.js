@@ -13,6 +13,7 @@ const CurveToken = require('@0confirmation/sol/build/CurveToken');
 const Exchange = require('@0confirmation/sol/build/Exchange');
 const Factory = require('@0confirmation/sol/build/Factory');
 const DAI = require('@0confirmation/sol/build/DAI');
+const MockWETH = require('@0confirmation/sol/build/MockWETH');
 const SwapEntireLoan = require('@0confirmation/sol/build/SwapEntireLoan');
 const TransferAll = require('@0confirmation/sol/build/TransferAll');
 const V2SwapAndDrop = require('@0confirmation/sol/build/V2SwapAndDrop');
@@ -87,7 +88,7 @@ const daiFromNetwork = (network) => {
     };
   } else if (network === 'testnet') {
     return {
-      dai: '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa'
+      dai: fromArtifact(network, DAI)
     };
   } else if (network === 'mainnet') {
     return {
@@ -97,7 +98,8 @@ const daiFromNetwork = (network) => {
 };
 
 const wethFromNetwork = (network) => ({
-  weth: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
+  weth: (network === 'kovan' || network === 'testnet') ? fromArtifact(network, MockWETH) : '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+  
 });
 
 const getAddresses = (network) => ({

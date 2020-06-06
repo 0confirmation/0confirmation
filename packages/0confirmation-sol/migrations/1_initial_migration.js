@@ -3,6 +3,7 @@ const ShifterPool = artifacts.require('ShifterPool');
 const SandboxLib = artifacts.require('SandboxLib');
 const UniswapV2Adapter = artifacts.require('UniswapV2Adapter');
 const SimpleBurnLiquidationModule = artifacts.require('SimpleBurnLiquidationModule');
+const MockWETH = artifacts.require('MockWETH');
 const ShifterERC20Mock = artifacts.require('ShifterERC20Mock');
 const ERC20Adapter = artifacts.require('ERC20Adapter');
 const LiquidityToken = artifacts.require('LiquidityToken');
@@ -54,7 +55,7 @@ module.exports = async function(deployer) {
   const erc20Adapter = await ERC20Adapter.deployed();
   const provider = new ethers.providers.Web3Provider(ShifterPool.currentProvider);
   const [ fromAddress ] = await provider.send('eth_accounts', []);
-  let weth, shifterRegistry, dai, renbtc, factory, router;
+  let weth, shifterRegistry, dai, renbtc, factory, router, from;
   if (['ganache', 'test'].find((v) => isNetworkOrFork(deployer.network, v))) {
     await deployer.deploy(WETH9);
     weth = await WETH9.deployed();
@@ -71,12 +72,18 @@ module.exports = async function(deployer) {
     await factory.createPair(weth.address, dai.address); //, { gasLimit: ethers.utils.hexlify(6e6) });
   } else if (isNetworkOrFork(deployer.network, 'kovan')) {
     const kovan = environments.getAddresses('testnet');
+    await deployer.deploy(MockWETH);
     renbtc = { address: kovan.renbtc };
     shifterRegistry = { address: kovan.shifterRegistry };
     router = { address: kovan.router };
     dai = {
       address: kovan.dai
     };
+    const factoryWrapped = new ethers.Contract(kovan.factory, UniswapV2Factory.abi, UniswapV2Factory.currentProvider);
+    console.log('kovan - creating pairs');
+    await (await factoryWrapped.createPair(weth.address, renbtc.address)).wait(); // { gasLimit: ethers.utils.hexlify(6e6) });
+    await (await factoryWrapped.createPair(weth.address, dai.address)).wait(); //, { gasLimit: ethers.utils.hexlify(6e6) });
+    console.log('kovan - pairs created');
   } else if (isNetworkOrFork(deployer.network, 'mainnet')) {
     const mainnet = environments.getAddresses('mainnet');
     renbtc = { address: mainnet.renbtc };
@@ -163,6 +170,24 @@ module.exports = async function(deployer) {
   }]);
   await deployer;
   // setup uni and the liquidity pool with some liqudity
+  if (isNetworkOrFork(deployer.network, 'kovan')) {
+    const amountMax = ethers.utils.bigNumberify('0x' + 'f'.repeat(64));
+    const provider = new ethers.providers.Web3Provider(ShifterPool.currentProvider);
+    const [ truffleAddress ] = await provider.send('eth_accounts', []);
+    from = truffleAddress;
+    const mockWeth = await MockWETH.deployed()
+    await mockWeth.mint(from, ethers.utils.parseEther('10000').toString());
+    const routerWrapped = new ethers.Contract(router.address, UniswapV2Router01.abi, provider.getSigner());
+    await mapSeries([[ [ mockWeth.address, '7724680' ], [ dai.address, '7724680' ] ] ], async ([ [  tokenA, amountA ], [ tokenB, amountB ] ]) => {
+      const tokenAWrapped = new ethers.Contract(tokenA, DAI.abi, provider.getSigner());
+      const tokenBWrapped = new ethers.Contract(tokenB, DAI.abi, provider.getSigner());
+      await (await tokenAWrapped.mint(from, ethers.utils.parseEther(amountA).toString())).wait();
+      await (await tokenBWrapped.mint(from, ethers.utils.parseEther(amountB).toString())).wait();
+      await (await tokenAWrapped.approve(router.address, amountMax)).wait();
+      await (await tokenBWrapped.approve(router.address, amountMax)).wait();
+      await (await routerWrapped.addLiquidity(tokenA, tokenB, ethers.utils.parseEther(amountA), ethers.utils.parseEther(amountB), truffleAddress, String(Math.floor(Date.now() / 1000) + 120000))).wait();
+    });
+  }
   if (isNetworkOrFork(deployer.network, 'test') || isNetworkOrFork(deployer.network, 'ganache')) {
     const amountMax = ethers.utils.bigNumberify('0x' + 'f'.repeat(64));
     const provider = new ethers.providers.Web3Provider(ShifterPool.currentProvider);

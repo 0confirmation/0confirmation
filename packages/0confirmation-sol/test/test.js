@@ -5,6 +5,7 @@ const AssetForwarderLib = artifacts.require('AssetForwarderLib');
 const UniswapV2Factory = artifacts.require('UniswapV2Factory');
 const ShifterPool = artifacts.require('ShifterPool');
 const ShifterERC20Mock = artifacts.require('ShifterERC20Mock');
+const MockWETH = artifacts.require('MockWETH');
 const randomBytes = require('random-bytes').sync;
 const SandboxLib = artifacts.require('SandboxLib');
 const BorrowProxy = artifacts.require('BorrowProxy');
