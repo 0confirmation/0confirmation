@@ -7,6 +7,8 @@ const randomBytes = require('random-bytes').sync;
 const makeMockBackends = require('../mock');
 const ShifterPool = require('@0confirmation/sol/build/ShifterPool')
 const ShifterRegistryMock = require('@0confirmation/sol/build/ShifterRegistryMock');
+const UniswapV2Factory = require('@0confirmation/sol/build/UniswapV2Factory');
+const UniswapV2Router01 = require('@0confirmation/sol/build/UniswapV2Router01');
 const BorrowProxyLib = require('@0confirmation/sol/build/BorrowProxyLib');
 const Curvefi = require('@0confirmation/sol/build/Curvefi');
 const CurveToken = require('@0confirmation/sol/build/CurveToken');
@@ -71,10 +73,16 @@ const zeroContractsFromNetwork = (network) => {
   };
 };
 
-const uniswapFromNetwork = (network) => ({
-  factory: uniswap.FACTORY_ADDRESS,
-  router: '0xf164fC0Ec4E93095b804a4795bBe1e041497b92a'
-});
+const uniswapFromNetwork = (network) => {
+  if (network === 'testnet') return {
+    factory: fromArtifact(network, UniswapV2Factory),
+    router: fromArtifact(network, UniswapV2Router01)
+  };
+  return {
+    factory: uniswap.FACTORY_ADDRESS,
+    router: '0xf164fC0Ec4E93095b804a4795bBe1e041497b92a'
+  }
+};
 
 const curveFromNetwork = (network) => ({
   curve: fromArtifact(network, Curvefi),
@@ -98,8 +106,7 @@ const daiFromNetwork = (network) => {
 };
 
 const wethFromNetwork = (network) => ({
-  weth: (network === 'kovan' || network === 'testnet') ? fromArtifact(network, MockWETH) : '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-  
+  weth: (network === 'kovan' || network === 'testnet') ? fromArtifact(network, MockWETH) : '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
 });
 
 const getAddresses = (network) => ({
