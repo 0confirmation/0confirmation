@@ -73,16 +73,18 @@ module.exports = async function(deployer) {
   } else if (isNetworkOrFork(deployer.network, 'kovan')) {
     const kovan = environments.getAddresses('testnet');
     await deployer.deploy(MockWETH);
+    await deployer.deploy(DAI);
+    dai = await DAI.deployed();
+    weth = await MockWETH.deployed();
+    await deployer.deploy(UniswapV2Factory, fromAddress);
+    factory = await UniswapV2Factory.deployed();
+    await deployer.deploy(UniswapV2Router01, factory.address, weth.address);
+    router = await UniswapV2Router01.deployed();
     renbtc = { address: kovan.renbtc };
     shifterRegistry = { address: kovan.shifterRegistry };
-    router = { address: kovan.router };
-    dai = {
-      address: kovan.dai
-    };
-    const factoryWrapped = new ethers.Contract(kovan.factory, UniswapV2Factory.abi, UniswapV2Factory.currentProvider);
     console.log('kovan - creating pairs');
-    await (await factoryWrapped.createPair(weth.address, renbtc.address)).wait(); // { gasLimit: ethers.utils.hexlify(6e6) });
-    await (await factoryWrapped.createPair(weth.address, dai.address)).wait(); //, { gasLimit: ethers.utils.hexlify(6e6) });
+    await factory.createPair(weth.address, renbtc.address); // { gasLimit: ethers.utils.hexlify(6e6) });
+    await factory.createPair(weth.address, dai.address); //, { gasLimit: ethers.utils.hexlify(6e6) });
     console.log('kovan - pairs created');
   } else if (isNetworkOrFork(deployer.network, 'mainnet')) {
     const mainnet = environments.getAddresses('mainnet');
@@ -175,7 +177,7 @@ module.exports = async function(deployer) {
     const provider = new ethers.providers.Web3Provider(ShifterPool.currentProvider);
     const [ truffleAddress ] = await provider.send('eth_accounts', []);
     from = truffleAddress;
-    const mockWeth = await MockWETH.deployed()
+    const mockWeth = await MockWETH.deployed();
     await mockWeth.mint(from, ethers.utils.parseEther('10000').toString());
     const routerWrapped = new ethers.Contract(router.address, UniswapV2Router01.abi, provider.getSigner());
     await mapSeries([[ [ mockWeth.address, '7724680' ], [ dai.address, '7724680' ] ] ], async ([ [  tokenA, amountA ], [ tokenB, amountB ] ]) => {
@@ -185,7 +187,7 @@ module.exports = async function(deployer) {
       await (await tokenBWrapped.mint(from, ethers.utils.parseEther(amountB).toString())).wait();
       await (await tokenAWrapped.approve(router.address, amountMax)).wait();
       await (await tokenBWrapped.approve(router.address, amountMax)).wait();
-      await (await routerWrapped.addLiquidity(tokenA, tokenB, ethers.utils.parseEther(amountA), ethers.utils.parseEther(amountB), truffleAddress, String(Math.floor(Date.now() / 1000) + 120000))).wait();
+      await (await routerWrapped.addLiquidity(tokenA, tokenB, ethers.utils.parseEther(amountA), ethers.utils.parseEther(amountB), ethers.utils.parseEther(amountA), ethers.utils.parseEther(amountB), truffleAddress, String(Math.floor(Date.now() / 1000) + 120000))).wait();
     });
   }
   if (isNetworkOrFork(deployer.network, 'test') || isNetworkOrFork(deployer.network, 'ganache')) {
