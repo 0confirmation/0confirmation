@@ -54,7 +54,6 @@ class LiquidityRequestParcel extends LiquidityRequest {
     const proxies = await this.zero.getBorrowProxies(this.borrower);
     const proxy = proxies.find((v) => v.contract.address === this.proxyAddress) || null;
     proxy.utxo = this.utxo;
-    console.log(proxy.utxo);
     return proxy;
   }
   getBroadcastMessage() {
@@ -89,7 +88,6 @@ class LiquidityRequestParcel extends LiquidityRequest {
       if (utxos.length === 0) await timeout(constants.UTXO_POLL_INTERVAL);
       else break;
     }
-    console.log(utxos);
     return this.toDeposit(utxos[0]);
   }
 }

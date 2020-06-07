@@ -6,8 +6,6 @@ const AssetForwarder = require('@0confirmation/sol/build/AssetForwarder');
 
 const ASSET_FORWARDER_IMPLEMENTATION_SALT = ethers.utils.solidityKeccak256(['string'], ['asset-forwarder-implementation']);
 const ASSET_FORWARDER_INITCODEHASH = ethers.utils.solidityKeccak256(['bytes'], [ AssetForwarder.bytecode ]);
-const ln = (v) => ((console.log(v)), v);
-
 const computeAssetForwarderAddress = (shifterPool, borrowProxy, index) => {
   const implementation = ethers.utils.getCreate2Address({
     from: shifterPool,
@@ -25,7 +23,7 @@ const computeAssetForwarderAddress = (shifterPool, borrowProxy, index) => {
       borrowProxy,
       ethers.utils.solidityKeccak256([ 'uint256' ], [ index ])
     ])),
-    initCodeHash: ethers.utils.arrayify(ethers.utils.solidityKeccak256([ 'bytes' ], [ ln(assembleCloneCode(shifterPool, implementation)) ]))
+    initCodeHash: ethers.utils.arrayify(ethers.utils.solidityKeccak256([ 'bytes' ], [ assembleCloneCode(shifterPool, implementation) ]))
   });
 };
 

@@ -20,7 +20,7 @@ console.logKeeper = (v) => console.logBold(chalk.magenta('keeper: ') + v);
   console.log('approved!');
   const node = zero.driver.getBackend('zero').node;
   node.socket.on('peer:discovery', (peer) => {
-    console.log(peer);
+    console.logKeeper('found a peer: ' + peer.id.toB58String());
   });
   zero.listenForLiquidityRequests(async (v) => {
     console.logBold('received liquidity request over libp2p!');

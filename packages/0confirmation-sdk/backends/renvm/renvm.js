@@ -20,8 +20,6 @@ class RenVMBackend extends RPCWrapper {
     id,
     params
   }) {
-   console.log(method);
-   console.log(require('util').inspect(params, { colors: true, depth: 15 }));
    switch (method) {
      case 'ren_submitTx':
        return resultToJsonRpc(id, async () => await this.ren.renVM.submitTx(params.tx, 10));

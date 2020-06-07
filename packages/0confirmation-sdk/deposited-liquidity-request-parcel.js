@@ -65,7 +65,6 @@ class DepositedLiquidityRequestParcel extends LiquidityRequestParcel {
             }]
           }
         } = result;
-        console.log(autogen);
         return {
           amount: autogen.find((v) => v.name === 'amount').value,
           signature: ethers.utils.joinSignature({
@@ -101,7 +100,6 @@ class DepositedLiquidityRequestParcel extends LiquidityRequestParcel {
 }
 
 LiquidityRequestParcel.prototype.toDeposit = function (utxo) {
-  console.log(utxo);
   utxo = utxo || {};
   return new DepositedLiquidityRequestParcel(Object.assign({}, this, {
     utxo: {

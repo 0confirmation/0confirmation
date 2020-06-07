@@ -82,6 +82,18 @@ const web3Modal = new Web3Modal({
   }
 });
 
+const getBorrowProxy = async (deposited) => {
+  while (true) {
+    try {
+      const proxy = await deposited.getBorrowProxy();
+      if (proxy) return proxy;
+      else throw Error();
+    } catch (e) {
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+    }
+  }
+};
+
 if (CHAIN === 'embedded' || CHAIN === 'test') Zero = Zero.ZeroMock;
 
 const setupTestUniswapSDK = async (provider) => {
@@ -292,7 +304,7 @@ class TradeRoom extends React.Component {
         const result = await deposited.submitToRenVM();
         const sig = await deposited.waitForSignature();
         try {
-          const borrowProxy = await deposited.getBorrowProxy();
+          const borrowProxy = await getBorrowProxy(deposited);
           console.logKeeper('waiting for renvm ...');
           await new Promise((resolve, reject) => setTimeout(resolve, 60000));
           console.logKeeper('repaying loan for ' + deposited.proxyAddress + ' !');
@@ -558,14 +570,12 @@ class TradeRoom extends React.Component {
         let proxy;
         const deposited = await this.getDepositedParcel(parcel);
         this.setState({
-          waiting: false
+          waiting: false,
+          modal: false
         });
         proxy = await this.getBorrowProxy(parcel);
         await this.getPendingTransfers();
         const receipt = await proxy.getTransactionReceipt();
-        this.setState({
-          modal: false
-        });
         let amount = String((await proxy.queryTransfers())[0].sendEvent.values.value);
         if (amount) {
           amount = toFormat(amount, 'dai');          
@@ -586,11 +596,7 @@ class TradeRoom extends React.Component {
       return await deposited.waitForSignature(); // this one needs to be fixed for mainnet
     }
     async getBorrowProxy(parcel) {
-      while (true) {
-        const proxy = await parcel.getBorrowProxy();
-        if (proxy) return proxy;
-        await new Promise((resolve) => setTimeout(resolve, 5000));
-      } // fix this so it returns a receipt
+      return await getBorrowProxy(parcel);
     }
     _send = 0;
     _get = 0;
