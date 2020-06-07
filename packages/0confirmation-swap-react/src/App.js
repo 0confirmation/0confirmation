@@ -88,7 +88,6 @@ const setupTestUniswapSDK = async (provider) => {
   const ethersProvider = new ethers.providers.Web3Provider(provider);
   const chainId = await ethersProvider.send('net_version', []);
   ChainId.MAINNET = Number(chainId);
-  console.log('uniswap', contracts.factory);
   Pair.getAddress = (tokenA, tokenB) => {
     const tokens = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA] // does safety checks
     return ethers.utils.getCreate2Address({
@@ -289,7 +288,6 @@ class TradeRoom extends React.Component {
         const deposited = await v.waitForDeposit();
         console.logKeeper('found deposit -- initializing a borrow proxy!')
         const bond = ethers.utils.bigNumberify(v.amount).div(9);
-        console.log((await (new ethers.Contract(deposited.token, ShifterERC20Mock.abi, keeperEthers.getSigner())).balanceOf(keeperAddress)).toString());
         const receipt = await (await deposited.executeBorrow(bond, '100000')).wait();
         const result = await deposited.submitToRenVM();
         const sig = await deposited.waitForSignature();
