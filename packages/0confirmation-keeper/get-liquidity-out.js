@@ -1,11 +1,12 @@
 'use strict';
 
+process.env.CHAIN = '42';
 const ethers = require('ethers');
 const path = require('path');
 const DB = require('./db');
 const makeZero = require('./make-zero');
 const environments = require('@0confirmation/sdk/environments');
-const env = environments.getAddresses('mainnet');
+const env = environments.getAddresses('testnet');
 
 const chalk = require('chalk');
 
@@ -15,12 +16,10 @@ console.logKeeper = (v) => console.logBold(chalk.magenta('keeper: ') + v);
 
 (async () => {
   const zero = makeZero();
-  zero.setEnvironment(Object.assign(env, {
-    shifterPool: '0xc865d59d4fbb447c45af73c9aa2300eaf1f707d4'
-  }));
   const liquidityToken = await zero.getLiquidityTokenFor(env.renbtc);
-  console.log(liquidityToken.address);
-  const balance = await liquidityToken.balanceOf((await (zero.getProvider().asEthers()).listAccounts())[0]);
+  const provider = zero.getProvider().asEthers();
+  const [ from ] = await provider.listAccounts();
+  const balance = await liquidityToken.balanceOf(from);
   const offset = await liquidityToken.offset();
   const amount = balance.sub(offset);
   console.log(balance);

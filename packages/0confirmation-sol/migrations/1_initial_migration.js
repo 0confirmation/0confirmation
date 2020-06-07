@@ -72,6 +72,7 @@ module.exports = async function(deployer) {
     await factory.createPair(weth.address, dai.address); //, { gasLimit: ethers.utils.hexlify(6e6) });
   } else if (isNetworkOrFork(deployer.network, 'kovan')) {
     const kovan = environments.getAddresses('testnet');
+/*
     await deployer.deploy(MockWETH);
     await deployer.deploy(DAI);
     dai = await DAI.deployed();
@@ -80,12 +81,19 @@ module.exports = async function(deployer) {
     factory = await UniswapV2Factory.deployed();
     await deployer.deploy(UniswapV2Router01, factory.address, weth.address);
     router = await UniswapV2Router01.deployed();
+*/
     renbtc = { address: kovan.renbtc };
     shifterRegistry = { address: kovan.shifterRegistry };
+    router = { address: kovan.router };
+    factory = { address: kovan.factory };
+    weth = { address: kovan.weth };
+    dai = { address: kovan.dai };
+/*
     console.log('kovan - creating pairs');
     await factory.createPair(weth.address, renbtc.address); // { gasLimit: ethers.utils.hexlify(6e6) });
     await factory.createPair(weth.address, dai.address); //, { gasLimit: ethers.utils.hexlify(6e6) });
     console.log('kovan - pairs created');
+*/
   } else if (isNetworkOrFork(deployer.network, 'mainnet')) {
     const mainnet = environments.getAddresses('mainnet');
     renbtc = { address: mainnet.renbtc };
@@ -173,6 +181,7 @@ module.exports = async function(deployer) {
   await deployer;
   // setup uni and the liquidity pool with some liqudity
   if (isNetworkOrFork(deployer.network, 'kovan')) {
+/*
     const amountMax = ethers.utils.bigNumberify('0x' + 'f'.repeat(64));
     const provider = new ethers.providers.Web3Provider(ShifterPool.currentProvider);
     const [ truffleAddress ] = await provider.send('eth_accounts', []);
@@ -189,6 +198,7 @@ module.exports = async function(deployer) {
       await (await tokenBWrapped.approve(router.address, amountMax)).wait();
       await (await routerWrapped.addLiquidity(tokenA, tokenB, ethers.utils.parseEther(amountA), ethers.utils.parseEther(amountB), ethers.utils.parseEther(amountA), ethers.utils.parseEther(amountB), truffleAddress, String(Math.floor(Date.now() / 1000) + 120000))).wait();
     });
+*/
   }
   if (isNetworkOrFork(deployer.network, 'test') || isNetworkOrFork(deployer.network, 'ganache')) {
     const amountMax = ethers.utils.bigNumberify('0x' + 'f'.repeat(64));

@@ -24,7 +24,7 @@ contract ShifterBorrowProxy is BorrowProxy, SafeViewExecutor, NullCloneConstruct
     shifter = ShifterPool(isolate.masterAddress).getShifterHandler(token);
   }
   function mint(ShifterBorrowProxyLib.TriggerParcel memory parcel) internal returns (uint256 amount) {
-    amount = getShifter(parcel.record.request.token).mint(parcel.shiftParameters.pHash, parcel.record.request.amount, parcel.computeNHash(), parcel.shiftParameters.darknodeSignature);
+    amount = getShifter(parcel.record.request.token).mint(parcel.shiftParameters.pHash, parcel.shiftParameters.amount, parcel.computeNHash(), parcel.shiftParameters.darknodeSignature);
   }
   function repayLoan(bytes memory data) public returns (bool) {
     (bool success, ShifterBorrowProxyLib.ProxyRecord memory record, address pool, uint256 repayAmount) = _repayLoan(data);
@@ -55,6 +55,7 @@ contract ShifterBorrowProxy is BorrowProxy, SafeViewExecutor, NullCloneConstruct
     }
     isolate.unbound = true;
     require(parcel.record.request.token.sendToken(parcel.record.loan.keeper, fee), "keeper payout failed");
+    record.request.amount = amount;
     repayAmount = amount - fee;
     success = true;
   }

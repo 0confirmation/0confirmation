@@ -193,6 +193,8 @@ const computeGatewayAddress = ({
   
 const toBase64 = (input) => (isBuffer(input) ? input : Buffer.from(stripHexPrefix(input), 'hex')).toString('base64');
 
+const fromBase64 = (input) => Buffer.from(input, 'base64');
+
 const toHex = (input) => addHexPrefix(Buffer.from(input).toString('hex'));
 
 Object.assign(module.exports, {
@@ -209,6 +211,7 @@ Object.assign(module.exports, {
   addHexPrefix,
   NULL_PHASH,
   NULL_ADDRESS,
+  fromBase64,
   initializeCodeHash,
   computeShiftInTxHash
 });

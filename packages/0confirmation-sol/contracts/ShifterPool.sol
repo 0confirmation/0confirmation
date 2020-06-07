@@ -133,6 +133,7 @@ contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
       }),
       shiftParameters: ShifterBorrowProxyLib.ShiftParameters({
         txhash: parcel.shiftParameters.txhash,
+        amount: parcel.shiftParameters.amount,
         vout: parcel.shiftParameters.vout,
         pHash: parcel.shiftParameters.pHash,
         darknodeSignature: parcel.shiftParameters.darknodeSignature
@@ -181,7 +182,6 @@ contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
     require(isolate.borrowProxyController.proxyInitializerRecord[msg.sender] != bytes32(0x0), "not a registered borrow proxy");
     if (repay < originalAmount) {
       if (repay + bond < originalAmount) {
-        if (true) revert(abi.encodePacked(repay.toString(), " ", bond.toString(), " ", originalAmount.toString()).toString());
         repay = repay + bond;
         bond = 0;
       } else {

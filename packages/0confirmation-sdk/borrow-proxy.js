@@ -66,12 +66,16 @@ class BorrowProxy extends makeManagerClass(ShifterBorrowProxy) {
   async repayLoan(overrides) {
     const parcel = this.getLiquidityRequestParcel();
     const deposited = this.utxo ? parcel.toDeposit(this.utxo) : await parcel.waitForDeposit();
-    const darknodeSignature = await deposited.waitForSignature();
+    const {
+      signature: darknodeSignature,
+      amount
+    } = await deposited.waitForSignature();
     const record = this.decodedRecord;
     return await super.repayLoan(encodeTriggerParcel({
       record,
       shiftParameters: {
         pHash: constants.CONST_PHASH,
+        amount,
         vout: deposited.utxo.vOut,
         txhash: addHexPrefix(deposited.utxo.txHash),
         darknodeSignature

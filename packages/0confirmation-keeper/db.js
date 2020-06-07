@@ -64,7 +64,7 @@ class DB {
         ...loan
       });
       const index = toNumber((await this._get(toBuffer(parcel.proxyAddress))) || Buffer.from([0x0]));
-      const decodedLoan = toAscii((await this._get(toBuffer(index))) || Buffer.from([]));
+      const decodedLoan = ((await this._get(toBuffer(index))) || '{}');
       if (decodedLoan) {
         const parsed = JSON.parse(decodedLoan);
         parsed.resolved = true;

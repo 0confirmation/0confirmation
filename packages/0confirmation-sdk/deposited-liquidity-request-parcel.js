@@ -5,7 +5,7 @@ const LiquidityRequestParcel = require('./liquidity-request-parcel');
 const ethers = require('ethers');
 const constants = require('./constants');
 const utils = require('./util');
-const { timeout, toHex } = utils;
+const { fromBase64, timeout, toHex } = utils;
 
 class DepositedLiquidityRequestParcel extends LiquidityRequestParcel {
   constructor({
@@ -49,11 +49,13 @@ class DepositedLiquidityRequestParcel extends LiquidityRequestParcel {
     });
   }
   async waitForSignature() {
+    this.zero.driver.getBackendByPrefix('ren')._amount = ethers.utils.bigNumberify(this.amount).toString();
     while (true) {
       const result = await this.queryTx();
       if (result && result.tx && result.tx.out) {
         const {
           tx: {
+            autogen,
             out: [{
               value: r
             }, {
@@ -63,11 +65,15 @@ class DepositedLiquidityRequestParcel extends LiquidityRequestParcel {
             }]
           }
         } = result;
-        return ethers.utils.joinSignature({
-          v: Number(v) + 27,
-          r: toHex(r),
-          s: toHex(s)
-        });
+        console.log(autogen);
+        return {
+          amount: autogen.find((v) => v.name === 'amount').value,
+          signature: ethers.utils.joinSignature({
+            v: Number(v) + 27,
+            r: toHex(fromBase64(r)),
+            s: toHex(fromBase64(s))
+          })
+        };
       } else await timeout(constants.DARKNODE_QUERY_TX_INTERVAL);
     }
   }

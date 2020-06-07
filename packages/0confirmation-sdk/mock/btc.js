@@ -13,8 +13,8 @@ const makeMockBtc = () => {
       id
     }) {
       return await util.resultToJsonRpc(id, () => [{
-        output_no: 1,
-        txid: randomBytes.sync(32).toString('hex')
+        vOut: 1,
+        txHash: randomBytes.sync(32).toString('hex')
       }]);
     },
     send(o, cb) {
