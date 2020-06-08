@@ -708,7 +708,7 @@ class TradeRoom extends React.Component {
                     </ModalBody>
                 </Modal>
                 
-                <div className="justify-content-center align-content-center pt-5" style={{ zIndex: "1", overflowX: "hidden", position: "relative", opacity: (this.state.modal || this.state.transactionModal) ? "0.1":"1"}} >
+                <div className="justify-content-center align-content-center pt-5 swap" style={{ zIndex: "1", overflowX: "hidden", position: "relative", opacity: (this.state.modal || this.state.transactionModal) ? "0.1":"1"}} >
                     <div className="justify-content-center align-content-center text-center mx-auto my-auto pb-4 pt-5">
                         <button className="btn text-light button-small btn-sm" style={{ fontSize: "24dp", backgroundColor: "#317333", width: "248dp", borderRadius: "10px" }} onClick={ (evt) => this.connectWeb3Modal(evt) } >Connect Wallet</button>
                     </div>
@@ -731,12 +731,12 @@ class TradeRoom extends React.Component {
                             </Row>
                         </Col>
                     </Row>
-                    <Row className="justify-content-center align-content-center text-center mx-auto my-1">
-                        {(window.location.pathname.split("/")[2] === "earn") ? null : <Col lg="6" md="6" sm="6">
+                    <Row className="justify-content-center align-content-center text-center mx-auto my-3">
+                        {/* {(window.location.pathname.split("/")[2] === "earn") ? null : <Col lg="6" md="6" sm="6">
                             <Link to="##" style={{ outline: "none", textDecoration: "none", borderBottom: "1px solid #317333", color: "#317333", fontSize: "0.8em", fontStyle: "normal", fontWeight: "bold" }} href="/#"
                                 onClick={async(e)=> { e.preventDefault(); await this.setState({transactions:!this.state.transactions}) }}
                             >Recent Transactions</Link>
-                        </Col>}
+                        </Col>} */}
                     </Row>
                     <Row className="justify-content-center align-content-center text-center">
                         <Col lg="8" md="8" sm="8" style={{ backgroundColor: "#1F2820", borderRadius: "10px 10px 0px 0px", minHeight: "70vh" }} className=" mx-4">
@@ -981,7 +981,9 @@ class TradeRoom extends React.Component {
                                             <Row className="align-content-center justify-content-center">
                                                 <Col lg="7" md="7" sm="7" className="justify-content-center align-content-center">
                                                     <p className="text-center text-break" style={{ fontWeight: "normal", fontStyle: "normal", fontSize: "0.8em", fontFamily: "PT Sans", color: "#ffffff" }}>
-                                                        You are selling <b>{this.state.value} {this.state._sendcoins.name}</b> for at least <b>{this.state.calcValue} {this.state._getcoins.name}</b> Expected Price Slippage: <b>{this.state.slippage}%</b>  Additional slippage limit: <b>{this.state.slippage}%</b> fee disclosures
+                                                        You are selling <b>{this.state.value} {this.state._sendcoins.name}</b> for at least <b>{this.state.calcValue} {this.state._getcoins.name}</b><br />
+                                                        Expected Price Slippage: <b>{this.state.slippage}%</b><br />
+                                                        Additional slippage limit: <b>{this.state.slippage}%</b>
                                                     </p>
                                                 </Col>
                                             </Row>
