@@ -10,6 +10,8 @@ import { BorrowProxyLib } from "./BorrowProxyLib.sol";
 import { TokenUtils } from "./utils/TokenUtils.sol";
 import { RevertCaptureLib } from "./utils/RevertCaptureLib.sol";
 import { SandboxLib } from "./utils/sandbox/SandboxLib.sol";
+import { IShifter } from "./interfaces/IShifter.sol";
+import { IShifterERC20 } from "./interfaces/IShifterERC20.sol";
 
 library ShifterBorrowProxyLib {
   using SafeMath for *;
@@ -17,6 +19,7 @@ library ShifterBorrowProxyLib {
   struct ProxyRecord {
     LiquidityRequest request;
     LenderRecord loan;
+    uint256 expected;
   }
   struct LiquidityRequest {
     address payable borrower;
@@ -111,14 +114,27 @@ library ShifterBorrowProxyLib {
   function computeNHash(TriggerParcel memory parcel) internal pure returns (bytes32) {
     return keccak256(encodeNPreimage(parcel));
   }
+  uint256 constant BIPS_DENOMINATOR = 10000;
+  function computeExpectedAmount(uint256 amount, address shifter, address token) internal returns (uint256 expected) {
+    uint256 mintFee = getMintFee(shifter);
+    uint256 underlyingAmount = getUnderlyingAmount(token, amount);
+    uint256 fee = underlyingAmount.mul(mintFee).div(BIPS_DENOMINATOR);
+    expected = underlyingAmount.sub(fee);
+  }
+  function getMintFee(address shifter) internal returns (uint256 mintFee) {
+    mintFee = uint256(IShifter(shifter).mintFee());
+  }
+  function getUnderlyingAmount(address token, uint256 amount) internal returns (uint256 underlyingAmount) {
+    underlyingAmount = IShifterERC20(token).fromUnderlying(amount);
+  }
   function computePostFee(ProxyRecord memory record) internal pure returns (uint256) {
-    return record.request.amount.sub(computePoolFee(record).add(computeKeeperFee(record)));
+    return record.expected.sub(computePoolFee(record).add(computeKeeperFee(record)));
   }
   function computePoolFee(ProxyRecord memory record) internal pure returns (uint256) {
-    return record.request.amount.mul(record.loan.params.poolFee).div(uint256(1 ether));
+    return record.expected.mul(record.loan.params.poolFee).div(uint256(1 ether));
   }
   function computeKeeperFee(ProxyRecord memory record) internal pure returns (uint256) {
-    return record.request.amount.mul(record.loan.params.keeperFee).div(uint256(1 ether));
+    return record.expected.mul(record.loan.params.keeperFee).div(uint256(1 ether));
   }
   function computeAdjustedKeeperFee(ProxyRecord memory record, uint256 actual) internal pure returns (uint256) {
     return actual.mul(record.loan.params.keeperFee).div(uint256(1 ether));

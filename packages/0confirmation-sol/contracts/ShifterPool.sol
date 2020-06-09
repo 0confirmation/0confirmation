@@ -104,7 +104,8 @@ contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
       loan: ShifterBorrowProxyLib.LenderRecord(
         msg.sender,
         isolate.computeLoanParams(liquidityRequest.amount, bond, timeoutExpiry)
-      )
+      ),
+      expected: liquidityRequest.amount.computeExpectedAmount(address(isolate.getShifter(liquidityRequest.token)), liquidityRequest.token)
     });
     proxyAddress = address(uint160(deployBorrowProxyClone(borrowerSalt)));
     ShifterPoolLib.mapBorrowProxy(isolate, proxyAddress, proxyRecord);
@@ -125,6 +126,7 @@ contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
   function _executeShiftSansBorrow(ShifterBorrowProxyLib.SansBorrowShiftParcel memory parcel) internal returns (address payable proxyAddress, ShifterBorrowProxyLib.InitializationAction[] memory actions) {
     ShifterBorrowProxyLib.TriggerParcel memory triggerParcel = ShifterBorrowProxyLib.TriggerParcel({
       record: ShifterBorrowProxyLib.ProxyRecord({
+        expected: parcel.liquidityRequestParcel.request.amount,
         request: parcel.liquidityRequestParcel.request,
         loan: ShifterBorrowProxyLib.LenderRecord({
           keeper: msg.sender,
