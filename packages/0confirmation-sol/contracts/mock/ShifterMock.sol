@@ -12,5 +12,8 @@ contract ShifterMock {
     ShifterERC20Mock(token).mint(msg.sender, amount);
     return amount;
   }
+  function mintFee() public returns (uint16) {
+    return 0;
+  }
 }
     

@@ -39,7 +39,7 @@ contract ShifterBorrowProxy is BorrowProxy, SafeViewExecutor, NullCloneConstruct
     parcel.record.request.actions = new ShifterBorrowProxyLib.InitializationAction[](0);
     require(validateProxyRecord(parcel.record.encodeProxyRecord()), "proxy record invalid");
     require(!isolate.isLiquidating, "proxy is being liquidated");
-    uint256 fee = parcel.record.computeAdjustedKeeperFee(parcel.record.request.amount);
+    uint256 fee = parcel.record.computeAdjustedKeeperFee(parcel.record.expected);
     pool = isolate.masterAddress;
     uint256 amount;
     if (!isolate.isRepaying) {
@@ -69,7 +69,7 @@ contract ShifterBorrowProxy is BorrowProxy, SafeViewExecutor, NullCloneConstruct
     if (success) {
       address liqToken = getLiquidityToken(pool, record.request.token);
       require(record.request.token.sendToken(pool, repayPool), "failed to approve pool for token transfer");
-      require(ShifterPool(pool).relayResolveLoan(record.request.token, liqToken, record.loan.keeper, record.loan.params.bond, repayPool, record.request.amount), "loan resolution failure");
+      require(ShifterPool(pool).relayResolveLoan(record.request.token, liqToken, record.loan.keeper, record.loan.params.bond, repayPool, record.expected), "loan resolution failure");
       return true;
     }
     return false;
