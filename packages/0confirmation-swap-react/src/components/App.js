@@ -5,10 +5,12 @@ import {
   Route,
   Redirect,
 } from "react-router-dom";
+import BigNumber from 'bignumber.js';
 import { noop } from "lodash";
 import { InlineIcon } from "@iconify/react";
 import swapIconSvg from "../images/swapicon.svg";
-import { DECIMALS } from "../lib/utils";
+import { chainIdToName, DECIMALS } from "../lib/utils";
+import ERC20 from '../lib/erc20';
 import { getSvgForConfirmations } from "../lib/confirmation-image-wheel";
 import "./App.css";
 import {
@@ -57,7 +59,10 @@ import {
   TokenAmount,
   TradeType,
 } from "@uniswap/sdk";
+import { abi as ERC20ABI } from "@0confirmation/sol/build/DAI";
 const CHAIN = process.env.REACT_APP_CHAIN; // eslint-disable-line
+
+if (window.ethereum) window.ethereum.autoRefreshOnNetworkChange = false;
 
 const web3Modal = new Web3Modal({
   network: utils.chainIdToName(process.env.REACT_APP_CHAIN || "1"), // eslint-disable-line
@@ -210,6 +215,7 @@ const makeTestWallet = (proxyTarget) =>
 
 const TradeRoom = (props) => {
   const { ismobile } = props;
+  const [userAddress, setUserAddress] = useState(ethers.constants.AddressZero);
   const setup = async () => {
     if (provider.migrate) {
       artifacts = await provider.migrate();
@@ -319,6 +325,35 @@ const TradeRoom = (props) => {
     contractsDeferred.resolve(contracts);
   };
   useEffect(() => {
+    if (!window.ethereum) return;
+    const ethersProvider = zero.getProvider().asEthers();
+    const listener = async (accounts) => {
+      const walletAccounts = await ethersProvider.listAccounts();
+      if (accounts[0] === walletAccounts[0]) {
+        setShowAlert(true);
+        setMessage('MetaMask using new wallet: ' + accounts[0]);
+        setUserAddress(accounts[0]);
+      }
+    };
+    window.ethereum.on('accountsChanged', listener);
+    const networkListener = async () => {
+      const metamaskEthersProvider = new ethers.providers.Web3Provider(window.ethereum);
+      const networkId = Number(await metamaskEthersProvider.send('net_version', []))
+      const walletAccounts = await metamaskEthersProvider.listAccounts();
+      const zeroAccounts = await ethersProvider.listAccounts();
+      if (walletAccounts[0] === zeroAccounts[0] && networkId !== Number(CHAIN)) {
+        setShowAlert(true);
+        setMessage('MetaMask using network ' + chainIdToName(String(networkId)) + ' instead of ' + chainIdToName(String(CHAIN)));
+      }
+    }
+    window.ethereum.on('chainChanged', networkListener);
+    return () => {
+      window.ethereum.removeListener('accountsChanged', listener);
+      window.ethereum.removeListener('chainChanged', networkListener);
+    };
+  });
+ 
+  useEffect(() => {
     (async () => {
       if (CHAIN === "test" || CHAIN === "embedded") await setup();
       else {
@@ -344,32 +379,64 @@ const TradeRoom = (props) => {
         }
       };
       ethersProvider.on("block", listener);
+      const userAddresses = await ethersProvider.listAccounts();
+      if (userAddresses) setUserAddress(userAddresses[0]);
       return () => ethersProvider.removeListener("block", listener);
     })().catch((err) => console.error(err));
   }, []);
+  useEffect(() => {
+    (async () => {
+      await getPendingTransfers();
+    })().catch((err) => console.error(err));
+  }, [ userAddress ]);
+  const [ apr, setAPR ] = useState('0.00%');
+  const [ totalLiquidityToken, setTotalLiquidityToken ] = useState('0');
+  useEffect(() => {
+      const ethersProvider = new ethers.providers.Web3Provider(zero.getProvider());
+      const listener = async () => {
+        const renbtcWrapped = new ethers.Contract(contracts.renbtc, ERC20ABI, ethersProvider);
+        const liquidityToken = await zero.getLiquidityTokenFor(contracts.renbtc);
+        const poolSize = await renbtcWrapped.balanceOf(liquidityToken.address);
+        const offset = await liquidityToken.offset();
+        setPool(utils.truncateDecimals(ethers.utils.formatUnits(poolSize.add(offset), DECIMALS.btc), 4));
+        const [ user ] = await ethersProvider.listAccounts();
+        const liquidityTokenBalance = await liquidityToken.balanceOf(user || ethers.constants.AddressZero);
+        const liquidityTokenBalanceFormat = utils.truncateDecimals(ethers.utils.formatUnits(liquidityTokenBalance, DECIMALS.btc), 4);
+        setShare(liquidityTokenBalanceFormat);
+        const totalSupply = await liquidityToken.totalSupply();
+        const apr = utils.truncateDecimals(new BigNumber(String(poolSize.add(offset))).dividedBy(String(totalSupply)).multipliedBy(100).minus(100).toString(), 4);
+        const stake = ((Number(apr) / 100) * Number(liquidityTokenBalanceFormat));
+        setStake(isNaN(stake) ? '0' : stake);
+        setTotalLiquidityToken(utils.truncateDecimals(String(ethers.utils.formatUnits(totalSupply, DECIMALS.btc)), 4)); 
+        setAPR(utils.truncateDecimals(apr, 4) + '%');
+      };
+    listener().catch((err) => console.error(err));
+    ethersProvider.on('block', listener);
+    return () => ethersProvider.removeListener('block', listener);
+  });
   const getPendingTransfers = async () => {
+    const ethersProvider = zero.getProvider().asEthers();
+    if (!(await ethersProvider.listAccounts())[0]) return;
     const borrows = await getBorrows(zero);
     const history = borrows.filter(
       (v) => v.pendingTransfers.length === 1 && v.pendingTransfers[0].sendEvent
     );
     const result = [];
-    for (const record of history) {
-      result.push(await record.getRecord(record));
+    for (const item of history) {
+      result.push(await record.getRecord(item, zero));
     }
     setHistory(record.decorateHistory(result));
   };
-  const [liquidityvalue, setLiquidityValue] = useState("0");
+  const [liquidityvalue, setLiquidityValue] = useState('Add Liquidity');
   const [parcel, setParcel] = useState(null);
   const [liquidity, setLiquidity] = useState("0");
   const [get, setGet] = useState("0");
   const [pool, setPool] = useState("0");
-  if (setPool) noop();
+  const [ liquidityTokenSupply, setLiquidityTokenSupply ] = useState('0')
   const [showdetail, setShowDetail] = useState(true);
   const [blocktooltip, setBlockTooltip] = useState(false);
   const [share, setShare] = useState("0");
-  if (setShare) noop();
   const [stake, setStake] = useState("0");
-  if (setStake) noop();
   const [sendOpen, setSendOpen] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const [transactionDetails, setTransactionDetails] = useState("none");
@@ -422,7 +489,6 @@ const TradeRoom = (props) => {
       name: "BTC",
     },
   ]);
-  const [userAddress, setUserAddress] = useState("0x");
   const [waiting, setWaiting] = useState(true);
   const initializeMarket = async () => {
     await updateMarket();
@@ -451,6 +517,21 @@ const TradeRoom = (props) => {
     setCalcValue(utils.truncateDecimals(trade.outputAmount.toExact(), 2));
     setRate(trade.executionPrice.toFixed(2));
     setSlippage(trade.slippage.toFixed(2));
+  };
+  const addLiquidity = async () => {
+    const liquidityToken = await zero.getLiquidityTokenFor(contracts.renbtc);
+    const ethersProvider = zero.getProvider().asEthers();
+    const renbtcWrapped = new ERC20(contracts.renbtc, ethersProvider);
+    const [ user ] = await ethersProvider.listAccounts();
+    const allowance = await renbtcWrapped.allowance(user, liquidityToken.address);
+    if (allowance.lt('0x' + 'ff'.repeat(30))) {
+      await renbtcWrapped.approve(liquidityToken.address, '0x' + 'ff'.repeat(31));
+    }
+    await liquidityToken.addLiquidity(ethers.utils.parseUnits(value, DECIMALS.btc));
+  };
+  const removeLiquidity = async () => {
+    const liquidityToken = await zero.getLiquidityTokenFor(contracts.renbtc);
+    await liquidityToken.removeLiquidity(ethers.utils.parseUnits(value, DECIMALS.btc));
   };
   const requestLoan = async (evt) => {
     evt.preventDefault();
@@ -485,8 +566,8 @@ const TradeRoom = (props) => {
       let proxy;
       const deposited = await parcel.waitForDeposit();
       setWaiting(false);
+      proxy = await utils.pollForBorrowProxy(deposited);
       setModal(false);
-      proxy = await deposited.getBorrowProxy();
       await getPendingTransfers();
       let amount = String(
         (await proxy.queryTransfers())[0].sendEvent.values.value
@@ -1060,7 +1141,11 @@ const TradeRoom = (props) => {
                 <button
                   onClick={async (e) => {
                     e.preventDefault();
-                    setModal(true);
+                    if (liquidityvalue === 'Add Liquidity') {
+                      await addLiquidity();
+                    } else {
+                      await removeLiquidity();
+                    }
                   }}
                   className="btn text-light button-small btn-sm px-5"
                   style={{
@@ -1130,8 +1215,7 @@ const TradeRoom = (props) => {
                               color: "#ffffff",
                             }}
                           >
-                            {value} {_sendcoins.name} has historic returns of
-                            23.2% APY or .0232 BTC interest per year
+                            zeroBTC has historic returns of <b>{ apr }</b>
                           </p>
                         </Col>
                         <Col sm="12" lg="12" md="12">
@@ -1171,6 +1255,44 @@ const TradeRoom = (props) => {
                                 }}
                               >
                                 {pool} BTC
+                              </p>
+                            </Col>
+                          </Row>
+                          <Row>
+                            <Col
+                              className="text-light align-content-start justify-content-start"
+                              sm="6"
+                              lg="6"
+                              md="6"
+                            >
+                              <p
+                                style={{
+                                  fontWeight: "normal",
+                                  fontStyle: "normal",
+                                  fontSize: "0.8em",
+                                  fontFamily: "PT Sans",
+                                  color: "#ffffff",
+                                }}
+                              >
+			        Liquidity Token Supply
+                              </p>
+                            </Col>
+                            <Col
+                              className="text-light align-content-end justify-content-end"
+                              sm="6"
+                              lg="6"
+                              md="6"
+                            >
+                              <p
+                                style={{
+                                  fontWeight: "normal",
+                                  fontStyle: "normal",
+                                  fontSize: "0.8em",
+                                  fontFamily: "PT Sans",
+                                  color: "#ffffff",
+                                }}
+                              >
+                                {totalLiquidityToken} zeroBTC
                               </p>
                             </Col>
                           </Row>
@@ -1531,7 +1653,7 @@ const TradeRoom = (props) => {
         transactionModal={transactionModal}
         _history={_history}
         transactionDetails={transactionDetails}
-        setTranscationModal={setTransactionModal}
+        setTransactionModal={setTransactionModal}
       />
     </>
   );

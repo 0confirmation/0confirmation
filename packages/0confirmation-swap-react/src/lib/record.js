@@ -135,7 +135,7 @@ export const getDepositAddress = (borrow) => {
 const wrapLink = (s) => {
   return (fn) => etherscan.createEtherscanLink(s, fn(s));
 };
-export const getRecord = async (zero, borrow) => {
+export const getRecord = async (borrow, zero) => {
   return {
     created: await getCreated(zero, borrow),
     sentfullname: getSentfullname(borrow),

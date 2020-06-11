@@ -18,7 +18,7 @@ export const chainIdToName = (n) => {
   return "kovan";
 };
 
-export const getBorrowProxy = async (deposited) => {
+export const pollForBorrowProxy = async (deposited) => {
   for (;;) {
     try {
       var proxy = await deposited.getBorrowProxy();

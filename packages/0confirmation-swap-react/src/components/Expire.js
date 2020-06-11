@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 const Expire = (props) => {
-  const [visible, setVisible] = useState(true);
+  const {visible, setVisible} = props;
   useEffect(() => {
     triggerTimer();
     setVisible(true);
@@ -23,11 +23,6 @@ const Expire = (props) => {
       }, props.delay)
     );
   };
-  return visible ? (
-    <div className="fadeIn">{props.children}</div>
-  ) : (
-    <div className="fadeOut">{props.children}</div>
-  );
 };
 
 export default Expire;
