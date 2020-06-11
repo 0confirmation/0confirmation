@@ -1,6 +1,6 @@
 "use strict";
 
-import ethers from "ethers";
+import {ethers} from "ethers";
 import { Pair, INIT_CODE_HASH, ChainId } from "@uniswap/sdk";
 
 export default async function setupTestUniswapSDK(provider, getContracts) {

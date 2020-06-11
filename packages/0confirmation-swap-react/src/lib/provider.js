@@ -28,18 +28,19 @@ import UniswapV2Adapter from "@0confirmation/sol/build/UniswapV2Adapter";
 import V2SwapAndDrop from "@0confirmation/sol/build/V2SwapAndDrop";
 import WETH9 from "@0confirmation/sol/build/WETH9";
 
-import ethers from "ethers";
-const CHAIN = process.env.CHAIN || process.env.REACT_APP_CHAIN; // eslint-disable-line
+import {ethers } from "ethers";
 
 import makeArtifacts from "@0confirmation/artifacts";
+const CHAIN = process.env.CHAIN || process.env.REACT_APP_CHAIN; // eslint-disable-line
 const migrationSource =
-  (globalObject.document &&
+  (globalObject.document && !process.env.JEST_WORKER_ID &&
     require("raw-loader!@0confirmation/sol/migrations/1_initial_migration") // eslint-disable-line
-      .default) ||
-  require("fs").readFileSync( // eslint-disable-line
+      .default) || !process.env.JEST_WORKER_ID && 
+  require("fs").readFileSync(
+    // eslint-disable-line
     require.resolve("@0confirmation/sol/migrations/1_initial_migration"), // eslint-disable-line
     "utf8"
-  );
+  ) || '';
 
 const defer = () => {
   let promise, resolve, reject;

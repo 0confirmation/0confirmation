@@ -1,13 +1,7 @@
 import React, { useState } from "react";
-import {
-  Row,
-  Col,
-  Modal,
-  ModalBody,
-  Tooltip
-} from "reactstrap";
-import infoSvg from "../images/info";
-import { getSvgForConfirmations } from '../lib/confirmation-image-wheel';
+import { Row, Col, Modal, ModalBody, Tooltip } from "reactstrap";
+import infoSvg from "../images/info.svg";
+import { getSvgForConfirmations } from "../lib/confirmation-image-wheel";
 
 const TransactionDetailsModal = ({
   setTransactionModal,
@@ -16,7 +10,7 @@ const TransactionDetailsModal = ({
   transactionDetails,
   setBlockTooltip,
   blocktooltip,
-  ismobile
+  ismobile,
 }) => {
   const [feetooltip, setFeetooltip] = useState(false);
   const closeModal = (e) => {
@@ -323,9 +317,9 @@ const TransactionDetailsModal = ({
                       } of 6`}
                       width="30%"
                       height="30%"
-                      src={
-                        getSvgForConfirmations(_history[transactionDetails].confirmations)
-                      }
+                      src={getSvgForConfirmations(
+                        _history[transactionDetails].confirmations
+                      )}
                       className="img-fluid"
                     />{" "}
                   </p>

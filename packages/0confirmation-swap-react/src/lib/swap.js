@@ -1,6 +1,6 @@
 "use strict";
 
-import ethers from "ethers";
+import {ethers} from "ethers";
 import { staticPreprocessor } from "@0confirmation/sdk";
 
 export const encodeAddressTriple = (a, b, c) =>

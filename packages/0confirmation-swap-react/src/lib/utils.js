@@ -1,6 +1,6 @@
 "use strict";
 
-import ethers from "ethers";
+import {ethers} from "ethers";
 
 export const DECIMALS = {
   btc: 8,

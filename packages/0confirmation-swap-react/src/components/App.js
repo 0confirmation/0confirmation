@@ -5,10 +5,11 @@ import {
   Route,
   Redirect,
 } from "react-router-dom";
+import { noop } from "lodash";
 import { InlineIcon } from "@iconify/react";
-import swapIconSvg from '../images/swapicon.svg';
-import { DECIMALS } from '../lib/utils';
-import { getSvgForConfirmations } from '../lib/confirmation-image-wheel';
+import swapIconSvg from "../images/swapicon.svg";
+import { DECIMALS } from "../lib/utils";
+import { getSvgForConfirmations } from "../lib/confirmation-image-wheel";
 import "./App.css";
 import {
   Row,
@@ -30,7 +31,7 @@ import btcIcon from "@iconify/icons-cryptocurrency/btc";
 import daiIcon from "@iconify/icons-cryptocurrency/dai";
 import Alert from "./Alert";
 import { Web3Provider } from "@ethersproject/providers";
-import provider from "./provider";
+import provider from "../lib/provider";
 import Web3Modal from "web3modal";
 import Fortmatic from "fortmatic";
 import setupTestUniswapSDK from "../lib/uniswap";
@@ -38,16 +39,15 @@ import makePersonalSignProviderFromPrivate from "@0confirmation/providers/privat
 import { sync as randomBytes } from "random-bytes";
 import ShifterERC20Mock from "@0confirmation/sol/build/ShifterERC20Mock";
 import ShifterRegistryMock from "@0confirmation/sol/build/ShifterRegistryMock";
-const CHAIN = process.env.REACT_APP_CHAIN; // eslint-disable-line
 import personalSignProviderFromPrivate from "@0confirmation/providers/private-key-or-seed";
-import ethers from "ethers";
+import { ethers } from "ethers";
 import * as swap from "../lib/swap";
 import * as utils from "../lib/utils";
 import * as record from "../lib/record";
 import * as persistence from "../lib/persistence";
 import BTCBackend from "@0confirmation/sdk/backends/btc";
-import { getAddresses } from '@0confirmation/sdk/environments';
-import Zero from '@0confirmation/sdk';
+import { getAddresses } from "@0confirmation/sdk/environments";
+import Zero from "@0confirmation/sdk";
 import {
   ChainId,
   Pair,
@@ -55,11 +55,12 @@ import {
   Token,
   Trade,
   TokenAmount,
-  TradeType
+  TradeType,
 } from "@uniswap/sdk";
+const CHAIN = process.env.REACT_APP_CHAIN; // eslint-disable-line
 
 const web3Modal = new Web3Modal({
-  network: chainIdToName(process.env.REACT_APP_CHAIN || "1"), // eslint-disable-line
+  network: utils.chainIdToName(process.env.REACT_APP_CHAIN || "1"), // eslint-disable-line
   cacheProvider: true,
   providerOptions: {
     fortmatic: {
@@ -73,7 +74,6 @@ const web3Modal = new Web3Modal({
     },
   },
 });
-
 
 const getRenBTCAddress = async () => {
   return (
@@ -135,7 +135,7 @@ let contracts = getAddresses(
 );
 const mpkh = contracts.mpkh;
 
-const USE_TESTNET_BTC = 
+const USE_TESTNET_BTC =
   process.env.USE_TESTNET_BTC || process.env.REACT_APP_USE_TESTNET_BTC; // eslint-disable-line
 
 const makeZero = (provider) => {
@@ -302,9 +302,7 @@ const TradeRoom = (props) => {
       const deposited = await v.waitForDeposit();
       console.logKeeper("found deposit -- initializing a borrow proxy!");
       const bond = ethers.utils.bigNumberify(v.amount).div(9);
-      await (
-        await deposited.executeBorrow(bond, "100000")
-      ).wait();
+      await (await deposited.executeBorrow(bond, "100000")).wait();
       await deposited.submitToRenVM();
       await deposited.waitForSignature();
       try {
@@ -326,7 +324,7 @@ const TradeRoom = (props) => {
       else {
         if (CHAIN === "42")
           await setupTestUniswapSDK(zero.getProvider(), () => contracts);
-        provider.setSigningProvider(window.ethereum);
+        if (window.ethereum) provider.setSigningProvider(window.ethereum);
         await zero.initializeDriver();
         contractsDeferred.resolve(contracts);
         console.log("libp2p: bootstrapped");
@@ -360,18 +358,18 @@ const TradeRoom = (props) => {
     }
     setHistory(record.decorateHistory(result));
   };
-  const [ liquidityvalue, setLiquidityValue ] = useState('0');
-  const [ parcel, setParcel ] = useState(null);
-  const [ liquidity, setLiquidity ] = useState('0');
-  const [ get, setGet ] = useState('0');
-  const [ pool, setPool ] = useState('0');
-  if (setPool) 1 + 1;
+  const [liquidityvalue, setLiquidityValue] = useState("0");
+  const [parcel, setParcel] = useState(null);
+  const [liquidity, setLiquidity] = useState("0");
+  const [get, setGet] = useState("0");
+  const [pool, setPool] = useState("0");
+  if (setPool) noop();
   const [showdetail, setShowDetail] = useState(true);
-  const [ blocktooltip, setBlockTooltip ] = useState(false);
-  const [ share, setShare ] = useState('0');
-  if (setShare) 1 + 1;
-  const [ stake, setStake ] = useState('0');
-  if (setStake) 1 + 1;
+  const [blocktooltip, setBlockTooltip] = useState(false);
+  const [share, setShare] = useState("0");
+  if (setShare) noop();
+  const [stake, setStake] = useState("0");
+  if (setStake) noop();
   const [sendOpen, setSendOpen] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const [transactionDetails, setTransactionDetails] = useState("none");
@@ -379,19 +377,19 @@ const TradeRoom = (props) => {
   const [_history, setHistory] = useState(record.decorateHistory([]));
   const [getOpen, setGetOpen] = useState(false);
   const [send, setSend] = useState(0);
-//  const [gets, setGets] = useState(0);
+  //  const [gets, setGets] = useState(0);
   const [rate, setRate] = useState("0");
-  if (rate || setRate) 1 + 1 // eslint silencer
-//  const [getvalue, setGetvalue] = useState(0);
+  if (rate || setRate) noop(); // eslint silencer
+  //  const [getvalue, setGetvalue] = useState(0);
   const [slippage, setSlippage] = useState("0");
-//  const [returnPercentage, setReturnPercentage] = useState(0.232);
+  //  const [returnPercentage, setReturnPercentage] = useState(0.232);
   const [modal, setModal] = useState(false);
   const [message, setMessage] = useState("");
   const [value, setValue] = useState("0");
   const [calcValue, setCalcValue] = useState("0");
   const [market, setMarket] = useState(null);
   const [trade, setTrade] = useState(null);
-  if (trade || setTrade) 1 + 1 // eslint silencer
+  if (trade || setTrade) noop(); // eslint silencer
   const [_getcoins, setGetcoins] = useState([
     {
       coin: (
@@ -425,7 +423,7 @@ const TradeRoom = (props) => {
     },
   ]);
   const [userAddress, setUserAddress] = useState("0x");
-  const [ waiting, setWaiting ] = useState(true);
+  const [waiting, setWaiting] = useState(true);
   const initializeMarket = async () => {
     await updateMarket();
     setRate("N/A");
@@ -569,8 +567,8 @@ const TradeRoom = (props) => {
   return (
     <>
       <LoanModal
-        waiting={ waiting }
-        ismobile={ ismobile }
+        waiting={waiting}
+        ismobile={ismobile}
         modal={modal}
         closeModal={closeModal}
         _sendcoins={_sendcoins}
@@ -579,7 +577,7 @@ const TradeRoom = (props) => {
         _getcoins={_getcoins}
         slippage={slippage}
         parcel={parcel}
-        transactionModal={ transactionModal }
+        transactionModal={transactionModal}
       />
 
       <div
@@ -975,11 +973,7 @@ const TradeRoom = (props) => {
                   </InputGroup>
                 </Col>
                 <Col lg="2" md="6" sm="6" className="mt-2">
-                  <img
-                    className="img-fluid"
-                    src={swapIconSvg}
-                    alt="Swap"
-                  />
+                  <img className="img-fluid" src={swapIconSvg} alt="Swap" />
                 </Col>
                 <Col lg="4" md="12" sm="12" className="mt-2">
                   <InputGroup style={{ height: "52px" }}>
@@ -1141,6 +1135,7 @@ const TradeRoom = (props) => {
                           </p>
                         </Col>
                         <Col sm="12" lg="12" md="12">
+                          ]
                           <Row>
                             <Col
                               className="text-light align-content-start justify-content-start"
@@ -1175,7 +1170,7 @@ const TradeRoom = (props) => {
                                   color: "#ffffff",
                                 }}
                               >
-                                450.392 BTC
+                                {pool} BTC
                               </p>
                             </Col>
                           </Row>
@@ -1418,8 +1413,8 @@ const TradeRoom = (props) => {
             ) : null}
             {window.location.pathname.split("/")[2] === "earn" ? null : (
               <Row className="justify-content-center align-content-center mx-auto">
-                {_history.length !== 0 ? 
-                  (<Col lg="12" sm="12" md="12" className="min-vh-100 mt-5 pt-5">
+                {_history.length !== 0 ? (
+                  <Col lg="12" sm="12" md="12" className="min-vh-100 mt-5 pt-5">
                     <p
                       className="text-light"
                       style={{
@@ -1489,7 +1484,9 @@ const TradeRoom = (props) => {
                                   alt={`${eleos.confirmations} of 6`}
                                   width="30%"
                                   height="30%"
-                                  src={getSvgForConfirmations(eleos.confirmations)}
+                                  src={getSvgForConfirmations(
+                                    eleos.confirmations
+                                  )}
                                   className="img-fluid"
                                 />
                               </td>
@@ -1528,7 +1525,7 @@ const TradeRoom = (props) => {
         </Row>
       </div>
       <TransactionDetailsModal
-        ismobile={ ismobile }
+        ismobile={ismobile}
         setBlockTooltip={setBlockTooltip}
         blocktooltip={blocktooltip}
         transactionModal={transactionModal}
