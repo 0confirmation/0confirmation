@@ -351,7 +351,7 @@ const TradeRoom = (props) => {
       window.ethereum.removeListener('accountsChanged', listener);
       window.ethereum.removeListener('chainChanged', networkListener);
     };
-  });
+  }, []);
  
   useEffect(() => {
     (async () => {
@@ -399,8 +399,7 @@ const TradeRoom = (props) => {
         const poolSize = await renbtcWrapped.balanceOf(liquidityToken.address);
         const offset = await liquidityToken.offset();
         setPool(utils.truncateDecimals(ethers.utils.formatUnits(poolSize.add(offset), DECIMALS.btc), 4));
-        const [ user ] = await ethersProvider.listAccounts();
-        const liquidityTokenBalance = await liquidityToken.balanceOf(user || ethers.constants.AddressZero);
+        const liquidityTokenBalance = await liquidityToken.balanceOf(userAddress || ethers.constants.AddressZero);
         const liquidityTokenBalanceFormat = utils.truncateDecimals(ethers.utils.formatUnits(liquidityTokenBalance, DECIMALS.btc), 4);
         setShare(liquidityTokenBalanceFormat);
         const totalSupply = await liquidityToken.totalSupply();
