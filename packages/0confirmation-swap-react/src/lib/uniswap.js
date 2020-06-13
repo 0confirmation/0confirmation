@@ -1,10 +1,12 @@
 "use strict";
 
-import {ethers} from "ethers";
-import { Pair, INIT_CODE_HASH, ChainId } from "@uniswap/sdk";
+import { Token, Pair, INIT_CODE_HASH, ChainId } from "@uniswap/sdk";
+import { Web3Provider } from '@ethersproject/providers';
+
+import { ethers } from 'ethers';
 
 export default async function setupTestUniswapSDK(provider, getContracts) {
-  const ethersProvider = new ethers.providers.Web3Provider(provider);
+  const ethersProvider = new Web3Provider(provider);
   const chainId = await ethersProvider.send("net_version", []);
   ChainId.MAINNET = Number(chainId);
   Pair.getAddress = (tokenA, tokenB) => {

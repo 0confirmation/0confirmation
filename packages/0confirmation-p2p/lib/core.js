@@ -28,7 +28,9 @@ const WStar = require('libp2p-webrtc-star');
 
 const createNode = async (options, wrtc) => {
   const peerInfo = options.peerInfo || await PeerInfo.create();
-  peerInfo.multiaddrs.add(fromPresetOrMultiAddr(options.multiaddr));
+  const bootstrapNode = fromPresetOrMultiAddr(options.multiaddr);
+  console.log(bootstrapNode);
+  peerInfo.multiaddrs.add(bootstrapNode);
   const dhtEnable = typeof options.dht === 'undefined' || options.dht === true;
   const socket = await libp2p.create({
     peerInfo,
@@ -45,12 +47,15 @@ const createNode = async (options, wrtc) => {
         bootstrap: {
           enabled: true,
           list: [
+/*
             '/dns4/ams-1.bootstrap.libp2p.io/tcp/443/wss/p2p/QmSoLer265NRgSp2LA3dPaeykiS1J6DifTC88f5uVQKNAd',
             '/dns4/lon-1.bootstrap.libp2p.io/tcp/443/wss/p2p/QmSoLMeWqB7YGVLJN3pNLQpmmEk35v6wYtsMGLzSr5QBU3',
             '/dns4/sfo-3.bootstrap.libp2p.io/tcp/443/wss/p2p/QmSoLPppuBtQSGwKDZT2M73ULpjvfd3aZ6ha4oFGL1KrGM',
             '/dns4/sgp-1.bootstrap.libp2p.io/tcp/443/wss/p2p/QmSoLSafTMBsPKadTEgaXctDQVcqN88CNLHXMkTNwMKPnu',
             '/dns4/nyc-1.bootstrap.libp2p.io/tcp/443/wss/p2p/QmSoLueR4xBeUbY9WZ9xGUUxunbKWcrNFTDAadQJmocnWm',
             '/dns4/nyc-2.bootstrap.libp2p.io/tcp/443/wss/p2p/QmSoLV4Bbm51jM9C4gDYZQ9Cy3U6aXMJDAbzgu2fzaDs64'
+*/
+            bootstrapNode + '/QmSoLV4Bbm51jM9C4gDYZQ9Cy3U6aXMJDAbzgu2fzaDs64'
           ]
         }
       },

@@ -16,6 +16,8 @@ console.logKeeper = (v) => console.logBold(chalk.magenta('keeper: ') + v);
 (async () => {
   const zero = makeZero();
   const liquidityToken = await zero.getLiquidityTokenFor(env.renbtc);
+  console.log(liquidityToken.address);
+  process.exit(0);
   const address = (await (zero.getProvider().asEthers()).listAccounts())[0];
   const token = liquidityToken.attach(env.renbtc);
   const balanceOfToken = await token.balanceOf(address);

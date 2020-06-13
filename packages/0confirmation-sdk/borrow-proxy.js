@@ -30,7 +30,7 @@ class BorrowProxy extends makeManagerClass(ShifterBorrowProxy) {
     proxyAddress,
     record
   }) {
-    super(proxyAddress, zero.getProvider().asEthers().getSigner());
+    super(proxyAddress, zero.getProvider().asEthers());
     this.transactionHash = transactionHash;
     this.zero = zero;
     this.shifterPool = shifterPool; 

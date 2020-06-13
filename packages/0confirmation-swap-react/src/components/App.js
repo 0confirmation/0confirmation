@@ -357,14 +357,14 @@ const TradeRoom = (props) => {
     (async () => {
       if (CHAIN === "test" || CHAIN === "embedded") await setup();
       else {
+        if (window.ethereum) provider.setSigningProvider(window.ethereum);
+        if (web3Modal.cachedProvider) await _connectWeb3Modal();
         if (CHAIN === "42")
           await setupTestUniswapSDK(zero.getProvider(), () => contracts);
-        if (window.ethereum) provider.setSigningProvider(window.ethereum);
         await zero.initializeDriver();
         contractsDeferred.resolve(contracts);
         console.log("libp2p: bootstrapped");
       }
-      if (web3Modal.cachedProvider) await _connectWeb3Modal();
       const ethersProvider = zero.getProvider().asEthers();
       let busy = false;
       const listener = async (number) => {
@@ -394,6 +394,7 @@ const TradeRoom = (props) => {
   useEffect(() => {
       const ethersProvider = new ethers.providers.Web3Provider(zero.getProvider());
       const listener = async () => {
+        await contractsDeferred.promise;
         const renbtcWrapped = new ethers.Contract(contracts.renbtc, ERC20ABI, ethersProvider);
         const liquidityToken = await zero.getLiquidityTokenFor(contracts.renbtc);
         const poolSize = await renbtcWrapped.balanceOf(liquidityToken.address);
@@ -412,7 +413,7 @@ const TradeRoom = (props) => {
     listener().catch((err) => console.error(err));
     ethersProvider.on('block', listener);
     return () => ethersProvider.removeListener('block', listener);
-  });
+  }, []);
   const getPendingTransfers = async () => {
     const ethersProvider = zero.getProvider().asEthers();
     if (!(await ethersProvider.listAccounts())[0]) return;
@@ -497,6 +498,7 @@ const TradeRoom = (props) => {
     e.preventDefault();
     const value = e.target.value;
     setValue(value);
+    if (isNaN(value) || Number(value) === 0) return;
     await getTradeDetails();
   };
   const updateMarket = async () => {
@@ -631,9 +633,9 @@ const TradeRoom = (props) => {
   };
   const _connectWeb3Modal = async () => {
     const signingProvider = await web3Modal.connect();
-    const [userAddress] = await new ethers.providers.Web3Provider(
+    const [userAddress] = await (new ethers.providers.Web3Provider(
       signingProvider
-    ).listAccounts();
+    )).listAccounts();
     if (["test", "embedded", "external"].includes(CHAIN))
       provider.setSigningProvider(makeTestWallet(signingProvider));
     else provider.setSigningProvider(signingProvider);
