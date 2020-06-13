@@ -3,7 +3,7 @@
 import React from "react";
 import btcIcon from "@iconify/icons-cryptocurrency/btc";
 import daiIcon from "@iconify/icons-cryptocurrency/dai";
-import {ethers} from "ethers";
+import { ethers } from "ethers";
 import { Fragment } from "react";
 import moment from "moment";
 import { InlineIcon } from "@iconify/react";

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 const Expire = (props) => {
-  const {visible, setVisible} = props;
+  const { visible, setVisible } = props;
   useEffect(() => {
     triggerTimer();
     setVisible(true);
