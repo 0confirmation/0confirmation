@@ -114,7 +114,7 @@ const makeManagerClass = (artifact) => {
     }
     async decorateArgsWithGasPrice(args) {
       const gasPrice = await this.getGasPrice({
-        multiplier: 1.75
+        multiplier: 1.25
       });
       if (gasPrice) {
         const last = (typeof args[args.length - 1] === 'object' && Object.getPrototypeOf(args[args.length - 1]) === Object.prototype) ? args[args.length - 1] : (() => { const last = {}; args.push(last); return last; })();

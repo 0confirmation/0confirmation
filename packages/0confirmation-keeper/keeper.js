@@ -87,8 +87,7 @@ const logBalances = async (zero) => {
     console.logKeeper('found deposit -- initializing a borrow proxy!')
     const bond = ethers.utils.bigNumberify(v.amount).div(9);
     await (await deposited.executeBorrow(bond, '10000', {
-      gasLimit: '0x' + (1200000).toString(16),
-      gasPrice: ethers.utils.parseUnits('30', 9)
+      gasLimit: '0x' + (1200000).toString(16)
     })).wait();
     const result = await deposited.submitToRenVM();
     console.logKeeper('submitted to RenVM')
@@ -96,7 +95,7 @@ const logBalances = async (zero) => {
     try {
       const borrowProxy = await deposited.getBorrowProxy();
       console.logKeeper('repaying loan for ' + deposited.proxyAddress + ' !');
-      await borrowProxy.repayLoan({ gasLimit: ethers.utils.hexlify(2e6), gasPrice: ethers.utils.parseUnits('30', 9) });
+      await borrowProxy.repayLoan({ gasLimit: ethers.utils.hexlify(2e6) });
       await db.markLoanComplete(zero, deposited);
     } catch (e) {
       console.errorKeeper(e.stack);
