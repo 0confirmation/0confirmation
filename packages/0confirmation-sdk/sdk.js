@@ -28,7 +28,7 @@ const abi = ethersUtil.defaultAbiCoder;
 const Driver = require('./driver');
 const { Web3Provider } = require('ethers/providers/web3-provider');
 const Web3ProviderEngine = require('web3-provider-engine');
-const LiquidityToken = require('@0confirmation/sol/build/LiquidityToken');
+const LiquidityToken = makeManagerClass(require('@0confirmation/sol/build/LiquidityToken'));
 const LiquidityRequestParcel = require('./liquidity-request-parcel');
 const LiquidityRequest = require('./liquidity-request');
 const DepositedLiquidityRequestParcel = require('./deposited-liquidity-request-parcel');
@@ -169,8 +169,8 @@ class Zero {
     });
   }
   subscribeBorrows(filterArgs, callback) {
-    const contract = new Contract(this.network.shifterPool, filterABI(BorrowProxyLib.abi), getProvider(this.driver).getSigner());
-    const filter = contract.filters.BorrowProxyMade(...filterArgs);
+    const contract = this.shifterPool;
+    const filter = contract.contract.filters.BorrowProxyMade(...filterArgs);
     contract.on(filter, (user, proxyAddress, data) => callback(new BorrowProxy({
       zero: this,
       user,
@@ -295,17 +295,17 @@ class Zero {
     return await (this.driver.getBackend('zero'))._unsubscribeLiquidityRequests();
   }
   async approvePool(token, overrides) {
-    const contract = new Contract(token, filterABI(LiquidityToken.abi), getProvider(this.driver).getSigner());
+    const contract = new LiquidityToken(token, this.getProvider().asEthers());
     return await contract.approve(this.network.shifterPool, '0x' + Array(64).fill('f').join(''), overrides || {});
   }
   async getLiquidityTokenFor(token) {
-    const contract = new Contract(this.network.shifterPool, filterABI(ShifterPool.abi), getProvider(this.driver).getSigner());
-    const liquidityToken = new Contract(await contract.getLiquidityTokenHandler(token), filterABI(LiquidityToken.abi), getProvider(this.driver).getSigner());
+    const contract = this.shifterPool;
+    const liquidityToken = new LiquidityToken(await contract.getLiquidityTokenHandler(token), this.getProvider().asEthers());
     return liquidityToken;
   }
   async approveLiquidityToken(token, overrides) {
     const liquidityToken = await this.getLiquidityTokenFor(token);
-    const contract = new Contract(token, filterABI(LiquidityToken.abi), getProvider(this.driver).getSigner());
+    const contract = new LiquidityToken(token, this.getProvider().asEthers());
     return await contract.approve(liquidityToken.address, '0x' + Array(62).fill('f').join(''), overrides || {});
   }
   async addLiquidity(token, value, overrides) {
