@@ -76,6 +76,33 @@ class DepositedLiquidityRequestParcel extends LiquidityRequestParcel {
       } else await timeout(constants.DARKNODE_QUERY_TX_INTERVAL);
     }
   }
+  async executeShiftFallback(actions = []) {
+    const {
+      signature: darknodeSignature,
+      amount: darknodeAmount
+    }  = await this.waitForSignature();
+    return this.zero.shifterPool.executeShiftSansBorrow({
+      liquidityRequestParcel: {
+        signature: this.signature,
+        gasRequested: this.gasRequested,
+        request: {
+          borrower: this.borrower,
+          token: this.token,
+          nonce: this.nonce,
+          forbidLoan: this.forbidLoan,
+          actions: this.actions
+        }
+      },
+      shiftParameters: {
+        txhash: this.utxo.txHash,
+        vout: this.utxo.vout,
+        pHash: constants.CONST_PHASH,
+        amount: darknodeAmount,
+        darknodeSignature
+      },
+      actions
+    });
+  }
   computeShiftInTxHash() {
     return utils.computeShiftInTxHash({
       renContract: RenVM.Tokens.BTC.Mint,
