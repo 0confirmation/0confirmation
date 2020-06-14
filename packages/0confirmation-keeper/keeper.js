@@ -81,7 +81,8 @@ const logBalances = async (zero) => {
     try {
       deposited = await v.waitForDeposit(0, THIRTY_MINUTES);
     } catch (e) {
-      console.errorKeeper('dimeout waiting for ' + chalk.cyan(v.depositAddress));
+      console.errorKeeper('timeout waiting for ' + chalk.cyan(v.depositAddress));
+      console.errorKeeper(e.stack);
       return;
     }
     console.logKeeper('found deposit -- initializing a borrow proxy!')
