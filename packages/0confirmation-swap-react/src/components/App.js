@@ -305,7 +305,7 @@ const TradeRoom = (props) => {
         console.logKeeper("request is for too much gas -- abort");
         return;
       }
-      const deposited = await v.waitForDeposit();
+      const deposited = await v.waitForDeposit(0, 60*30*1000);
       console.logKeeper("found deposit -- initializing a borrow proxy!");
       const bond = ethers.utils.bigNumberify(v.amount).div(9);
       await (await deposited.executeBorrow(bond, "100000")).wait();
@@ -621,7 +621,7 @@ const TradeRoom = (props) => {
   const waitOnResult = async (parcel) => {
     (async () => {
       let proxy;
-      const deposited = await parcel.waitForDeposit();
+      const deposited = await parcel.waitForDeposit(0, 30*60*1000);
       setWaiting(false);
       const length = _history.length;
       proxy = await utils.pollForBorrowProxy(deposited);
