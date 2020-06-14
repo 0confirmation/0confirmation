@@ -3,7 +3,7 @@
 const ethers = require('ethers');
 const addHexPrefix = (s) => s.substr(0, 2) === '0x' ? s : '0x' + s;
 const { defaultAbiCoder: abi } = ethers.utils;
-const { makeManagerClass } = require('./manager');
+const { makeManagerClass } = require('@0confirmation/eth-manager');
 const { safeViewExecutorMixin } = require('./mixins');
 const LiquidityRequestParcel = require('./liquidity-request-parcel');
 const constants = require('./constants');

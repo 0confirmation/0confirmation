@@ -215,7 +215,9 @@ module.exports = async function(deployer) {
     const renbtcWrapped = new ethers.Contract(renbtc.address, ShifterERC20Mock.abi, provider.getSigner());
     await (await renbtcWrapped.mint(from, ethers.utils.parseUnits('10', 8))).wait();
     const zero = new ZeroMock(dai.contract.currentProvider);
-    zero.network.shifterPool = shifterPool.address;
+    zero.setEnvironment({
+      shifterPool: shifterPool.address
+    });
     await (await zero.approveLiquidityToken(renbtc.address)).wait();
     await (await zero.addLiquidity(renbtc.address, ethers.utils.parseUnits('5', 8).toString())).wait();
   }

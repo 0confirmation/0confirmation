@@ -194,7 +194,7 @@ contract('ShifterPool', () => {
     const [ keeperAddress ] = await fixtures.keeper.driver.sendWrapped('eth_accounts', []);
     const [ borrowerAddress ] = await fixtures.borrower.driver.sendWrapped('eth_accounts', []);
     await fixtures.keeper.listenForLiquidityRequests(async (v) => {
-      const deposited = await v.waitForDeposit();
+      const deposited = await v.waitForDeposit(0, 60*1000*30);
       console.log(deposited);
       const result = await deposited.submitToRenVM();
       console.log(result);
@@ -251,7 +251,7 @@ contract('ShifterPool', () => {
     const [ keeperAddress ] = await fixtures.keeper.driver.sendWrapped('eth_accounts', []);
     const [ borrowerAddress ] = await fixtures.borrower.driver.sendWrapped('eth_accounts', []);
     await fixtures.keeper.listenForLiquidityRequests(async (v) => {
-      const deposited = await v.waitForDeposit();
+      const deposited = await v.waitForDeposit(30*60*1000);
       const result = await deposited.submitToRenVM();
       const sig = await deposited.waitForSignature();
       try {
