@@ -78,11 +78,11 @@ class LiquidityRequestParcel extends LiquidityRequest {
     throw Error('DepositedLiquidityRequestParcel is not initialized');
     // stub
   }
-  async waitForDeposit(confirmations = 0, timeout = Infinity) {
+  async waitForDeposit(confirmations = 0, timeoutPeriod = Infinity) {
     let utxos;
     const start = Date.now();
     while (true) {
-      if (Date.now() > start + timeout) {
+      if (Date.now() > start + timeoutPeriod) {
         throw Error('Deposit timeout triggered');
       }
       utxos = await (this.zero.driver.sendWrapped('btc_getUTXOs', [{
