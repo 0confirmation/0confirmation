@@ -11,13 +11,13 @@ import { BorrowProxyLib } from "../BorrowProxyLib.sol";
 contract TransferAll {
   using PreprocessorLib for *;
   BorrowProxyLib.ProxyIsolate isolate;
-  address public token;
   address public target;
   function setup(bytes memory consData) public {
-    (token, target) = abi.decode(consData, (address, address));
+    (target) = abi.decode(consData, (address));
   }
   function execute(bytes memory data) view public returns (ShifterBorrowProxyLib.InitializationAction[] memory) {
     SandboxLib.ExecutionContext memory context = data.toContext();
-    return TransferAll(context.preprocessorAddress).token().sendTransaction(abi.encodeWithSelector(IERC20.transfer.selector, TransferAll(context.preprocessorAddress).target(), IERC20(TransferAll(context.preprocessorAddress).token()).balanceOf(address(this))));
+    address token = isolate.token;
+    return isolate.token.sendTransaction(abi.encodeWithSelector(IERC20.transfer.selector, TransferAll(context.preprocessorAddress).target(), IERC20(token).balanceOf(address(this))));
   }
 }

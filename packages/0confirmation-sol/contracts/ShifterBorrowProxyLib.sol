@@ -121,7 +121,7 @@ library ShifterBorrowProxyLib {
     uint256 fee = underlyingAmount.mul(mintFee).div(BIPS_DENOMINATOR);
     expected = underlyingAmount.sub(fee);
   }
-  function getMintFee(address shifter) internal returns (uint256 mintFee) {
+  function getMintFee(address shifter) internal view returns (uint256 mintFee) {
     mintFee = uint256(IShifter(shifter).mintFee());
   }
   function getUnderlyingAmount(address token, uint256 amount) internal returns (uint256 underlyingAmount) {

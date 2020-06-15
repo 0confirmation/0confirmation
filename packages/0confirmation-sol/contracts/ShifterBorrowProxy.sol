@@ -59,6 +59,12 @@ contract ShifterBorrowProxy is BorrowProxy, SafeViewExecutor, NullCloneConstruct
     repayAmount = amount - fee;
     success = true;
   }
+  function relayMint(address shifter, address token, bytes32 pHash, uint256 amount, bytes32 nHash, bytes memory darknodeSignature, uint256 fee) public returns (bool) {
+    require(isolate.masterAddress == msg.sender, "must be called by shifter pool");
+    IShifter(shifter).mint(pHash, amount, nHash, darknodeSignature);
+    require(token.sendToken(msg.sender, fee), "failed to send token");
+    isolate.unbound = true;
+  }
   function getBalanceOf(address token, address user) internal view returns (uint256) {
     return IERC20(token).balanceOf(user);
   }
@@ -74,9 +80,10 @@ contract ShifterBorrowProxy is BorrowProxy, SafeViewExecutor, NullCloneConstruct
     }
     return false;
   }
-  function defaultLoan(bytes memory data) public returns (bool) {
+  function defaultLoan(bytes memory data) public {
     (bool success, ShifterBorrowProxyLib.ProxyRecord memory record, address pool, uint256 postBalance) = _defaultLoan(data);
-    return maybeRelayResolveLoan(success, record, pool, postBalance);
+    maybeRelayResolveLoan(success, record, pool, postBalance);
+    selfdestruct(msg.sender);
   }
   function _defaultLoan(bytes memory data) internal returns (bool success, ShifterBorrowProxyLib.ProxyRecord memory record, address pool, uint256 postBalance) {
     require(!isolate.isRepaying, "loan being repaid");
