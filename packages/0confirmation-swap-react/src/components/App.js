@@ -622,6 +622,7 @@ const TradeRoom = (props) => {
     (async () => {
       let proxy;
       const deposited = await parcel.waitForDeposit(0, 30*60*1000);
+      
       setWaiting(false);
       const length = _history.length;
       proxy = await utils.pollForBorrowProxy(deposited);
