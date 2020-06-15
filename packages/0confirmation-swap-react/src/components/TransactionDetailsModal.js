@@ -425,7 +425,7 @@ const TransactionDetailsModal = ({
                       fontSize: "0.7em",
                     }}
                   >
-                    Proxy
+                    Escrow
                   </p>
                 </Col>
                 <Col lg="6" md="6" sm="6">

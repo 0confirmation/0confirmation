@@ -24,6 +24,9 @@ export const getStatus = (borrowProxy) => {
 export const getAddress = (borrow) => {
   return borrow.address;
 };
+export const getEscrow = (borrow) => {
+  return borrow.sendEvent && borrow.sendEvent.values.to;
+};
 export const getSent = (borrow) => {
   return utils.toFormat(borrow.decodedRecord.request.amount, "btc");
 };
@@ -96,10 +99,10 @@ export const getFees = (borrow) => {
   );
 };
 export const getReceived = (borrow) => {
-  const { resolutionEvent } = borrow.pendingTransfers[0];
-  return resolutionEvent
+  const { sendEvent } = borrow.pendingTransfers[0];
+  return sendEvent
     ? utils.toFormat(
-        resolutionEvent && String(resolutionEvent.values.value),
+        resolutionEvent && String(sendEvent.values.value),
         "dai"
       )
     : "";
@@ -114,9 +117,9 @@ export const getTransactionHash = (borrow) => {
   return borrow.pendingTransfers[0].sendEvent.transactionHash;
 };
 export const getCreated = async (zero, borrow) => {
-  const block = await zero
+  const block = await (zero
     .getProvider()
-    .asEthers()
+    .asEthers())
     .getBlock(borrow.pendingTransfers[0].blockHash);
   return moment(new Date(Number(block.timestamp) * 1000)).format(
     "MM/DD/YY HH:mm"
@@ -140,6 +143,7 @@ export const getRecord = async (borrow, zero) => {
     created: await getCreated(zero, borrow),
     sentfullname: getSentfullname(borrow),
     address: wrapLink(getAddress(borrow)),
+    escrowAddress: wrapLink(getEscrow(borrow)),
     fees: getFees(borrow),
     depositAddress: wrapLink(getDepositAddress(borrow)),
     recipient: wrapLink(getTarget(borrow)),
