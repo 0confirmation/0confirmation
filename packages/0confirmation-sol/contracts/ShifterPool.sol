@@ -22,12 +22,14 @@ import { AssetForwarderLib } from "./adapters/lib/AssetForwarderLib.sol";
 import { AssetForwarder } from "./adapters/lib/AssetForwarder.sol";
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { StringLib } from "./utils/StringLib.sol";
+import { ExtLib } from "./utils/ExtLib.sol";
 
 contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
   using SandboxLib for *;
   using ShifterPoolLib for *;
   using TokenUtils for *;
   using StringLib for *;
+  using ExtLib for *;
   using ShifterBorrowProxyLib for *;
   using ShifterBorrowProxyFactoryLib for *;
   using BorrowProxyLib for *;
@@ -149,17 +151,20 @@ contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
     );
     bytes32 borrowerSalt = parcel.liquidityRequestParcel.request.computeBorrowerSalt();
     proxyAddress = address(uint160(isolate.borrowProxyImplementation.deriveBorrowerAddress(borrowerSalt)));
-    require(!isolate.borrowProxyController.isInitialized(proxyAddress), "proxy has already been initialized");
+    require(!proxyAddress.isContract(), "proxy has already been initialized");
     isolate.borrowProxyController.mapProxyRecord(proxyAddress, abi.encodePacked(uint256(1)));
-    isolate.getShifter(parcel.liquidityRequestParcel.request.token).mint(parcel.shiftParameters.pHash, parcel.liquidityRequestParcel.request.amount, triggerParcel.computeNHash(), parcel.shiftParameters.darknodeSignature);
-    uint256 fee = triggerParcel.record.computeAdjustedKeeperFee(parcel.liquidityRequestParcel.request.amount);
+    uint256 fee = triggerParcel.record.computeAdjustedKeeperFee(parcel.shiftParameters.amount);
     deployBorrowProxyClone(borrowerSalt);
     proxyAddress.setupBorrowProxy(parcel.liquidityRequestParcel.request.borrower, parcel.liquidityRequestParcel.request.token, true);
     if (parcel.liquidityRequestParcel.request.borrower != msg.sender && msg.value == parcel.liquidityRequestParcel.gasRequested) {
       parcel.liquidityRequestParcel.request.borrower.transfer(msg.value);
+      ShifterPoolLib.sendMint(proxyAddress, address(isolate.getShifter(parcel.liquidityRequestParcel.request.token)), parcel.liquidityRequestParcel.request.token, parcel.shiftParameters.pHash, parcel.shiftParameters.amount, triggerParcel.computeNHash(), parcel.shiftParameters.darknodeSignature, fee);
       require(parcel.liquidityRequestParcel.request.token.sendToken(msg.sender, fee), "keeper payout failed");
       actions = parcel.liquidityRequestParcel.request.actions;
-    } else if (parcel.liquidityRequestParcel.request.borrower == msg.sender) actions = parcel.actions;
+    } else if (parcel.liquidityRequestParcel.request.borrower == msg.sender) {
+      ShifterPoolLib.sendMint(proxyAddress, address(isolate.getShifter(parcel.liquidityRequestParcel.request.token)), parcel.liquidityRequestParcel.request.token, parcel.shiftParameters.pHash, parcel.shiftParameters.amount, triggerParcel.computeNHash(), parcel.shiftParameters.darknodeSignature, 0);
+      actions = parcel.actions;
+    }
     else revert("incorrect gas supplied with gas requested");
   }
   function validateProxyRecordHandler(bytes memory proxyRecord) public view returns (bool) {

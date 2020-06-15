@@ -52,6 +52,7 @@ module.exports = async function(deployer) {
   await deployer.deploy(ShifterPool);
   await deployer.deploy(ERC20Adapter);
   await deployer.deploy(V2SwapAndDrop);
+  await deployer.deploy(TransferAll);
   const erc20Adapter = await ERC20Adapter.deployed();
   const provider = new ethers.providers.Web3Provider(ShifterPool.currentProvider);
   const [ fromAddress ] = await provider.send('eth_accounts', []);

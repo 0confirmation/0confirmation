@@ -8,4 +8,9 @@ library ExtLib {
       result := extcodehash(target)
     }
   }
+  function isContract(address target) internal view returns (bool result) {
+    assembly {
+      result := iszero(iszero(extcodesize(target)))
+    }
+  }
 }

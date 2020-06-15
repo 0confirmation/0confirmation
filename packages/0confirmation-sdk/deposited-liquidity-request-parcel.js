@@ -6,6 +6,7 @@ const ethers = require('ethers');
 const constants = require('./constants');
 const utils = require('./util');
 const { fromBase64, timeout, toHex } = utils;
+const addHexPrefix = (s) => s.substr(0, 2) === '0x' ? s : '0x' + s;
 
 class DepositedLiquidityRequestParcel extends LiquidityRequestParcel {
   constructor({
@@ -89,18 +90,25 @@ class DepositedLiquidityRequestParcel extends LiquidityRequestParcel {
           borrower: this.borrower,
           token: this.token,
           nonce: this.nonce,
+          amount: this.amount,
           forbidLoan: this.forbidLoan,
-          actions: this.actions
+          actions: (this.actions || []).map((v) => ({
+            txData: v.txData || v.calldata,
+            to: v.to
+          }))
         }
       },
       shiftParameters: {
-        txhash: this.utxo.txHash,
-        vout: this.utxo.vout,
+        txhash: addHexPrefix(this.utxo.txhash || this.utxo.txHash),
+        vout: this.utxo.vout || this.utxo.vOut,
         pHash: constants.CONST_PHASH,
         amount: darknodeAmount,
         darknodeSignature
       },
-      actions
+      actions: actions.map((v) => ({
+        txData: v.txData || v.calldata,
+        to: v.to
+      }))
     });
   }
   computeShiftInTxHash() {
