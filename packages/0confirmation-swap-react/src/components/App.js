@@ -972,6 +972,11 @@ const TradeRoom = (props) => {
                         outline: "none",
                       }}
                     />
+                      <InputGroupText style={{ backgroundColor: "#485F4B", borderRadius: "0px 8px 8px 0px", 
+                       color: "#ffffff", border: "none", outline: "none" }}>
+                          <InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={btcIcon} />{' '}
+                                                      BTC
+                      </InputGroupText>
                     <InputGroupButtonDropdown
                       style={{
                         backgroundColor: "#354737",
@@ -1052,7 +1057,13 @@ const TradeRoom = (props) => {
                         outline: "none",
                       }}
                     />
-                    <InputGroupButtonDropdown
+                      <InputGroupAddon style={{ backgroundColor: "#354737", borderRadius: "0px 8px 8px 0px", color: "#ffffff" }} addonType="append">
+                         <InputGroupText style={{ backgroundColor: "#485F4B", borderRadius: "0px 8px 8px 0px", color: "#ffffff", border: "none", outline: "none" }}>
+                            <InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={btcIcon} />{' '}
+                                BTC
+                          </InputGroupText>
+                      </InputGroupAddon>
+                    {/*<InputGroupButtonDropdown
                       style={{
                         backgroundColor: "#354737",
                         borderRadius: "0px 8px 8px 0px",
@@ -1113,7 +1124,7 @@ const TradeRoom = (props) => {
                           );
                         })}
                       </DropdownMenu>
-                    </InputGroupButtonDropdown>
+                    </InputGroupButtonDropdown>*/}
                   </InputGroup>
                 </Col>
                 <Col lg="2" md="6" sm="6" className="mt-2">
@@ -1134,7 +1145,13 @@ const TradeRoom = (props) => {
                         outline: "none",
                       }}
                     />
-                    <InputGroupButtonDropdown
+                    <InputGroupAddon style={{ backgroundColor: "#354737", borderRadius: "0px 8px 8px 0px", color: "#ffffff" }} addonType="append">
+                       <InputGroupText style={{ backgroundColor: "#485F4B", borderRadius: "0px 8px 8px 0px", color: "#ffffff", border: "none", outline: "none" }}>
+                          <InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={daiIcon} />{' '}
+                          DAI
+                        </InputGroupText>
+                    </InputGroupAddon>
+                    {/*<InputGroupButtonDropdown
                       style={{
                         backgroundColor: "#354737",
                         borderRadius: "0px 8px 8px 0px",
@@ -1193,7 +1210,7 @@ const TradeRoom = (props) => {
                           );
                         })}
                       </DropdownMenu>
-                    </InputGroupButtonDropdown>
+                    </InputGroupButtonDropdown>*/}
                   </InputGroup>
                 </Col>
               </Row>
