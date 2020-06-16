@@ -16,8 +16,8 @@ import "./App.css";
 import {
   Row,
   Col,
-  InputGroup,
-  InputGroupButtonDropdown,
+  InputGroup, InputGroupText,
+  InputGroupButtonDropdown, InputGroupAddon,
   Input,
   Dropdown,
   Table,
