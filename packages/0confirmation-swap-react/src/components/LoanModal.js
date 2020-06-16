@@ -165,6 +165,9 @@ const LoanModal = ({
                           parcel && parcel.depositAddress
                         );
                         setCopied(true);
+                        setTimeout(()=>{
+                          setCopied(false);
+                        }, 1000);
                       }}
                       style={{ cursor: "pointer" }}
                       className="img-fluid"
