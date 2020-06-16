@@ -102,7 +102,7 @@ export const getReceived = (borrow) => {
   const { sendEvent } = borrow.pendingTransfers[0];
   return sendEvent
     ? utils.toFormat(
-        resolutionEvent && String(sendEvent.values.value),
+        sendEvent && String(sendEvent.values.value),
         "dai"
       )
     : "";
