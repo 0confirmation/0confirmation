@@ -628,11 +628,8 @@ const TradeRoom = (props) => {
       proxy = await utils.pollForBorrowProxy(deposited);
       setModal(false);
       await getPendingTransfers();
-      let amount = String(
-        (await proxy.queryTransfers())[0].sendEvent.values.value
-      );
+      let amount = String((await record.getRecord(proxy, zero)).value);
       if (amount) {
-        amount = utils.toFormat(amount, "dai");
         setShowAlert(true);
         setMessage(
           `BTC/DAI swap executed: ${amount} DAI locked -- await RenVM message to release`
