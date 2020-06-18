@@ -15,9 +15,9 @@ const zero = makeZero();
 const provider = zero.getProvider().asEthers();
 
 (async () => {
-  const token = new MockWETH(kovan.dai, provider);
-  const pair = new UniswapV2Pair('0xFBd94720e049CC80D647Cd2d2825d527aB19c4B3', provider);
-  const amount = ethers.utils.parseUnits('1789882520', 18);
+  const token = new MockWETH(kovan.weth, provider);
+  const pair = new UniswapV2Pair('0x6b7e516104862816fcc60f71989f630b7872b46b', provider);
+  const amount = ethers.utils.parseUnits('2', 18);
   const [ from ] = await provider.listAccounts();
   await (await token.mint(from, amount)).wait();
   console.log('add liquidity');
