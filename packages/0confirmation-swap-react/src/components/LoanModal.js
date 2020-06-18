@@ -132,17 +132,11 @@ const LoanModal = ({
                 sm="12"
                 className="text-light text-center align-content-center justify-content-center"
               >
-                <span
-                  className="mx-1"
-                  style={{
-                    fontSize: "0.79em",
-                    letterSpacing: "0.03em",
-                    color: "#137333",
-                  }}
-                >
+               
+                <span className="mx-1">
                   <b
                     className="mr-1 pb-3"
-                    style={{ borderBottom: "1px solid #137333 " }}
+                    style={{ borderBottom: "1px solid #137333 ",fontSize: "0.72em", letterSpacing: "0.05em", color: "#137333", }}
                   >
                     {parcel && parcel.depositAddress}
                   </b>
