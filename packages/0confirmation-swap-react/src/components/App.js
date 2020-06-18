@@ -466,6 +466,7 @@ const TradeRoom = (props) => {
       result.push(await record.getRecord(item, zero));
     }
     setHistory(record.decorateHistory(result));
+    return borrows;
   };
   const [liquidityvalue, setLiquidityValue] = useState("Add Liquidity");
   const [parcel, setParcel] = useState(null);
@@ -627,12 +628,10 @@ const TradeRoom = (props) => {
       const length = _history.length;
       proxy = await utils.pollForBorrowProxy(deposited);
       setModal(false);
-      await getPendingTransfers();
-      let amount = String(
-        (await proxy.queryTransfers())[0].sendEvent.values.value
-      );
+      let proxies = await getPendingTransfers();
+      proxy = proxies[proxies.length - 1];
+      let amount = String((await record.getRecord(proxy, zero)).value);
       if (amount) {
-        amount = utils.toFormat(amount, "dai");
         setShowAlert(true);
         setMessage(
           `BTC/DAI swap executed: ${amount} DAI locked -- await RenVM message to release`
@@ -965,7 +964,7 @@ const TradeRoom = (props) => {
                       onChange={(event) => updateAmount(event)}
                       className="sendcoin h-100"
                       style={{
-                        backgroundColor: "#354737",
+                        backgroundColor: "#354737", paddingTop:"1em",
                         borderRadius: "8px 0px 0px 8px",
                         color: "#ffffff",
                         border: "none",
@@ -1050,7 +1049,7 @@ const TradeRoom = (props) => {
                       onChange={(event) => updateAmount(event)}
                       className="sendcoin h-100"
                       style={{
-                        backgroundColor: "#354737",
+                        backgroundColor: "#354737", paddingTop:"1em",
                         borderRadius: "8px 0px 0px 8px",
                         color: "#ffffff",
                         border: "none",
@@ -1138,7 +1137,7 @@ const TradeRoom = (props) => {
                       value={calcValue}
                       className="getcoin h-100"
                       style={{
-                        backgroundColor: "#354737",
+                        backgroundColor: "#354737", paddingTop:"1em",
                         borderRadius: "8px 0px 0px 8px",
                         color: "#ffffff",
                         border: "none",
@@ -1280,7 +1279,7 @@ const TradeRoom = (props) => {
                     md="9"
                     sm="9"
                     style={{ backgroundColor: "#354737", borderRadius: "10px" }}
-                    className=" mx-4  py-3"
+                    className=" mx-4  pt-3"
                   >
                     {liquidityvalue === "Add Liquidity" ? (
                       <Row className="justify-content-center align-content-center">
@@ -1572,7 +1571,7 @@ const TradeRoom = (props) => {
                     md="9"
                     sm="9"
                     style={{ backgroundColor: "#354737", borderRadius: "10px" }}
-                    className=" mx-4  py-3"
+                    className=" mx-4  pt-3"
                   >
                     <Row className="align-content-center justify-content-center">
                       <Col

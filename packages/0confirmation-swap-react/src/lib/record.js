@@ -114,6 +114,7 @@ export const getConfirmations = () => {
   return 0;
 };
 export const getTransactionHash = (borrow) => {
+  console.log(borrow);
   return borrow.pendingTransfers[0].sendEvent.transactionHash;
 };
 export const getCreated = async (zero, borrow) => {
@@ -121,7 +122,7 @@ export const getCreated = async (zero, borrow) => {
   const block = await (zero
     .getProvider()
     .asEthers())
-    .getBlock(borrow.pendingTransfers[0].blockHash);
+    .getBlock(borrow.pendingTransfers[0].sendEvent.blockHash);
   return moment(new Date(Number(block.timestamp) * 1000)).format(
     "MM/DD/YY HH:mm"
   );

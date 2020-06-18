@@ -26,7 +26,7 @@ console.logKeeper = (v) => console.logBold(chalk.magenta('keeper: ') + v);
   const offset = await liquidityToken.offset();
   const amount = balance.sub(offset);
   console.log(balance);
-  const tx = await zero.removeLiquidity(env.renbtc, amount.sub(1000), { gasPrice: ethers.utils.parseUnits('30', 9) });
+  const tx = await zero.removeLiquidity(env.renbtc, amount.sub(100000), { gasPrice: ethers.utils.parseUnits('30', 9) });
   console.log(tx);
   await tx.wait();
   console.log('done');

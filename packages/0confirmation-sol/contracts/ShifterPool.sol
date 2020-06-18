@@ -23,9 +23,11 @@ import { AssetForwarder } from "./adapters/lib/AssetForwarder.sol";
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { StringLib } from "./utils/StringLib.sol";
 import { ExtLib } from "./utils/ExtLib.sol";
+import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
 
 contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
   using SandboxLib for *;
+  using SafeMath for *;
   using ShifterPoolLib for *;
   using TokenUtils for *;
   using StringLib for *;
@@ -107,7 +109,7 @@ contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
         msg.sender,
         isolate.computeLoanParams(liquidityRequest.amount, bond, timeoutExpiry)
       ),
-      expected: liquidityRequest.amount.computeExpectedAmount(address(isolate.getShifter(liquidityRequest.token)), liquidityRequest.token)
+      expected: liquidityRequest.amount.computeExpectedAmount(address(isolate.getShifter(liquidityRequest.token)), liquidityRequest.token).sub(35e3)
     });
     proxyAddress = address(uint160(deployBorrowProxyClone(borrowerSalt)));
     ShifterPoolLib.mapBorrowProxy(isolate, proxyAddress, proxyRecord);
