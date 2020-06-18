@@ -466,6 +466,7 @@ const TradeRoom = (props) => {
       result.push(await record.getRecord(item, zero));
     }
     setHistory(record.decorateHistory(result));
+    return borrows;
   };
   const [liquidityvalue, setLiquidityValue] = useState("Add Liquidity");
   const [parcel, setParcel] = useState(null);
@@ -627,7 +628,8 @@ const TradeRoom = (props) => {
       const length = _history.length;
       proxy = await utils.pollForBorrowProxy(deposited);
       setModal(false);
-      await getPendingTransfers();
+      let proxies = await getPendingTransfers();
+      proxy = proxies[proxies.length - 1];
       let amount = String((await record.getRecord(proxy, zero)).value);
       if (amount) {
         setShowAlert(true);
