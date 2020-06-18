@@ -96,10 +96,10 @@ const LoanModal = ({
             <QRCode
               value={parcel && parcel.depositAddress}
               fgColor="#317333"
-              logoHeight={30}
-              logoWidth={30}
-              logoOpacity={0.5}
-              logoImage={zeroCfSvg}
+              //logoHeight={30}
+              //logoWidth={30}
+              //logoOpacity={0.5}
+              //logoImage={zeroCfSvg}
               size={100}
               bgColor="transparent"
               qrStyle="squares"
