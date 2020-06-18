@@ -1277,7 +1277,7 @@ const TradeRoom = (props) => {
                     md="9"
                     sm="9"
                     style={{ backgroundColor: "#354737", borderRadius: "10px" }}
-                    className=" mx-4  py-3"
+                    className=" mx-4  pt-3"
                   >
                     {liquidityvalue === "Add Liquidity" ? (
                       <Row className="justify-content-center align-content-center">
@@ -1569,7 +1569,7 @@ const TradeRoom = (props) => {
                     md="9"
                     sm="9"
                     style={{ backgroundColor: "#354737", borderRadius: "10px" }}
-                    className=" mx-4  py-3"
+                    className=" mx-4  pt-3"
                   >
                     <Row className="align-content-center justify-content-center">
                       <Col
