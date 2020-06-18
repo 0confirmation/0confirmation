@@ -962,7 +962,7 @@ const TradeRoom = (props) => {
                       onChange={(event) => updateAmount(event)}
                       className="sendcoin h-100"
                       style={{
-                        backgroundColor: "#354737",
+                        backgroundColor: "#354737", paddingTop:"1em",
                         borderRadius: "8px 0px 0px 8px",
                         color: "#ffffff",
                         border: "none",
@@ -1047,7 +1047,7 @@ const TradeRoom = (props) => {
                       onChange={(event) => updateAmount(event)}
                       className="sendcoin h-100"
                       style={{
-                        backgroundColor: "#354737",
+                        backgroundColor: "#354737", paddingTop:"1em",
                         borderRadius: "8px 0px 0px 8px",
                         color: "#ffffff",
                         border: "none",
@@ -1135,7 +1135,7 @@ const TradeRoom = (props) => {
                       value={calcValue}
                       className="getcoin h-100"
                       style={{
-                        backgroundColor: "#354737",
+                        backgroundColor: "#354737", paddingTop:"1em",
                         borderRadius: "8px 0px 0px 8px",
                         color: "#ffffff",
                         border: "none",
