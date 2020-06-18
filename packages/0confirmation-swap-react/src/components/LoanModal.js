@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { QRCode } from "react-qrcode-logo";
+import QRCode from "./qrScanner/index";
 import { Row, Col, Modal, ModalBody } from "reactstrap";
 import copySvg from "../images/copy.svg";
 import zeroCfSvg from "../images/0cf.svg";
@@ -94,16 +94,10 @@ const LoanModal = ({
             className="text-light text-center align-content-start justify-content-start"
           >
             <QRCode
-              value={parcel && parcel.depositAddress}
-              fgColor="#317333"
-              //logoHeight={30}
-              //logoWidth={30}
-              //logoOpacity={0.5}
-              //logoImage={zeroCfSvg}
-              size={100}
-              bgColor="transparent"
-              qrStyle="squares"
-            />
+               data={parcel && parcel.depositAddress}
+               size={110}
+               framed={false}
+             />
             {/* <img src={require("../images/barcode.svg")} alt="0CF" className="img-fluid" /> */}
           </Col>
           <Col
