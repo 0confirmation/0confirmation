@@ -117,6 +117,7 @@ export const getTransactionHash = (borrow) => {
   return borrow.pendingTransfers[0].sendEvent.transactionHash;
 };
 export const getCreated = async (zero, borrow) => {
+  console.log(borrow);
   const block = await (zero
     .getProvider()
     .asEthers())
