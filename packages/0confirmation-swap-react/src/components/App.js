@@ -1298,7 +1298,6 @@ const TradeRoom = (props) => {
                           </p>
                         </Col>
                         <Col sm="12" lg="12" md="12">
-                          ]
                           <Row>
                             <Col
                               className="text-light align-content-start justify-content-start"
