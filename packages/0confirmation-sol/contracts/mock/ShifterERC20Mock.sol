@@ -5,7 +5,7 @@ import { TestToken } from "./TestToken.sol";
 
 contract ShifterERC20Mock is TestToken {
   constructor() TestToken("zBTC", "zBTC", 8) public {}
-  function fromUnderlying(uint256 amount) public returns (uint256) {
+  function fromUnderlying(uint256 amount) public pure returns (uint256) {
     return amount;
   }
 }

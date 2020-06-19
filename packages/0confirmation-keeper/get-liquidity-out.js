@@ -16,6 +16,9 @@ console.logKeeper = (v) => console.logBold(chalk.magenta('keeper: ') + v);
 
 (async () => {
   const zero = makeZero();
+  zero.setEnvironment({
+    shifterPool: '0x07ee1838be2c8855fe5a66ab71f7aa20ccf4948f'
+  });
   const liquidityToken = await zero.getLiquidityTokenFor(env.renbtc);
   const provider = zero.getProvider().asEthers();
   const [ from ] = await provider.listAccounts();
@@ -23,7 +26,7 @@ console.logKeeper = (v) => console.logBold(chalk.magenta('keeper: ') + v);
   const offset = await liquidityToken.offset();
   const amount = balance.sub(offset);
   console.log(balance);
-  const tx = await zero.removeLiquidity(env.renbtc, amount.sub(1000), { gasPrice: ethers.utils.parseUnits('30', 9) });
+  const tx = await zero.removeLiquidity(env.renbtc, amount.sub(100000), { gasPrice: ethers.utils.parseUnits('30', 9) });
   console.log(tx);
   await tx.wait();
   console.log('done');
