@@ -1,23 +1,64 @@
-var axios = require('axios')
-  
+import axios from 'axios';
+import url from 'url';
+import queryString from 'query-string';
+import path from 'path';
 
+export const BLOCKCHAIN_INFO_HOSTNAME = 'blockchain.info';
+export const BLOCKCHAIN_INFO_PROTOCOL = 'https:';
 
-axios({
-        method: 'get',
-        url:'https://blockchain.info/q/getreceivedbyaddress/1EyUhw3GwsRGATABpP2DBZRqhVFFzDUR5Q?confirmations=1'
-    }). then(function(response){
-     console.log(response.data);
-    }).catch(function(error){
-     console.log(error); 
-     });
+export const formatGetReceivedByAddressUrl = (depositAddress) => url.format({
+  hostname: BLOCKCHAIN_INFO_HOSTNAME,
+  protocol: BLOCKCHAIN_INFO_PROTOCOL,
+  pathname: path.join('/', 'q', 'getreceivedbyaddress', depositAddress),
+  search: '?' + queryString.stringify({ confirmations: 0 })
+});
 
-
-axios ({
-        method:'get',
-        url:'https://blockchain.info/q/getblockcount/1EyUhw3GwsRGATABpP2DBZRqhVFFzDUR5Q'
-    }).then(function(response){
-            console.log(response.data);
-    }).catch(function(error){
-            console.log(error);
+export const getReceivedByAddress = async (depositAddress) => {
+  try {
+    const response = await axios({
+      method: 'GET',
+      url: formatGetReceivedByAddressUrl(depositAddress)
     });
-~       
+    return response.data;
+  } catch (e) {
+    return Object.getOwnPropertyNames(e).reduce((r, v) => {
+      r[v] = e[v];
+    }, {});
+  }
+};
+
+export const BLOCKCHAIN_INFO_GET_LATEST_BLOCK_URL = () => url.format({
+  hostname: 'blockchain.info',
+  protocol: 'https:',
+  pathname: path.join('/', 'latestblock')
+});
+
+export const getLatestBlockReq = async () => await axios({
+  url: BLOCKCHAIN_INFO_GET_LATEST_BLOCK_URL,
+  method: 'GET'
+});
+
+export const formatGetBlockCountUrl = (depositAddress) => url.format({
+  hostname: BLOCKCHAIN_INFO_HOSTNAME,
+  protocol: BLOCKCHAIN_INFO_PROTOCOL,
+  pathname: path.join('/', 'q', 'getblockcount', depositAddress)
+});
+
+export const getBlockCount = async (depositAddress) => {
+  try {
+    const response = await axios({
+      method: 'GET',
+      url: formatGetBlockCountUrl(depositAddress)
+    });
+    return response.data;
+  } catch (e) {
+    return Object.getOwnPropertyNames(e).reduce((r, v) => {
+      r[v] = e[v];
+    }, {});
+  }
+};
+
+export const getLatestBlock = async () => {
+  const response = await getLatestBlockReq();
+  return Number(response.data.block_index);
+};
