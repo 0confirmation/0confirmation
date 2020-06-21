@@ -9,6 +9,7 @@ import moment from "moment";
 import { InlineIcon } from "@iconify/react";
 import * as etherscan from "./etherscan";
 import * as utils from "./utils";
+import * as bitcoin from './bitcoin-helpers';
 
 export const getStatus = (borrowProxy) => {
   const record = borrowProxy.pendingTransfers[0];
@@ -110,9 +111,15 @@ export const getReceived = (borrow) => {
 export const getSentfullname = () => {
   return "Bitcoin";
 };
-export const getConfirmations = () => {
-  return 0;
+export const getConfirmations = async (borrow, zero) => {
+  const depositAddress = borrow.getDepositAddress();
+  if (!localStorage.getItem(depositAddress)) {
+    localStorage.setItem(depositAddress, await bitcoin.getBlockCount(depositAddress));
+  }
+  const blockNo = Number(localStorage.getItem(depositAddress));
+  return Math.min(zero.btcBlock - blockNo, 6);
 };
+
 export const getTransactionHash = (borrow) => {
   console.log(borrow);
   return borrow.pendingTransfers[0].sendEvent.transactionHash;
@@ -160,7 +167,7 @@ export const getRecord = async (borrow, zero) => {
     sent: getSent(borrow),
     value: getValue(borrow),
     blocks: await getBlocks(borrow, zero),
-    confirmations: await getConfirmations(borrow),
+    confirmations: await getConfirmations(borrow, zero),
     status: getStatus(borrow),
   };
 };

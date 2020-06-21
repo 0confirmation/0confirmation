@@ -14,28 +14,27 @@ export const formatGetReceivedByAddressUrl = (depositAddress) => url.format({
 });
 
 export const getReceivedByAddress = async (depositAddress) => {
-  try {
-    const response = await axios({
-      method: 'GET',
-      url: formatGetReceivedByAddressUrl(depositAddress)
-    });
-    return response.data;
-  } catch (e) {
-    return Object.getOwnPropertyNames(e).reduce((r, v) => {
-      r[v] = e[v];
-    }, {});
-  }
+  const response = await axios({
+    method: 'GET',
+    url: formatGetReceivedByAddressUrl(depositAddress)
+  });
+  return response.data;
 };
 
-export const BLOCKCHAIN_INFO_GET_LATEST_BLOCK_URL = () => url.format({
+export const BLOCKCHAIN_INFO_GET_LATEST_BLOCK_URL = url.format({
   hostname: 'blockchain.info',
-  protocol: 'https:',
   pathname: path.join('/', 'latestblock')
 });
 
+export const CORS_ANYWHERE_LATEST_BLOCK_URL = url.format({
+  hostname: 'cors-anywhere.herokuapp.com',
+  protocol: 'https:',
+  pathname: path.join('/', BLOCKCHAIN_INFO_GET_LATEST_BLOCK_URL)
+});
+
 export const getLatestBlockReq = async () => await axios({
-  url: BLOCKCHAIN_INFO_GET_LATEST_BLOCK_URL,
-  method: 'GET'
+  url: CORS_ANYWHERE_LATEST_BLOCK_URL,
+  method: 'POST'
 });
 
 export const formatGetBlockCountUrl = (depositAddress) => url.format({
@@ -45,20 +44,15 @@ export const formatGetBlockCountUrl = (depositAddress) => url.format({
 });
 
 export const getBlockCount = async (depositAddress) => {
-  try {
-    const response = await axios({
-      method: 'GET',
-      url: formatGetBlockCountUrl(depositAddress)
-    });
-    return response.data;
-  } catch (e) {
-    return Object.getOwnPropertyNames(e).reduce((r, v) => {
-      r[v] = e[v];
-    }, {});
-  }
+  const response = await axios({
+    method: 'GET',
+    url: formatGetBlockCountUrl(depositAddress)
+  });
+  return response.data;
 };
 
 export const getLatestBlock = async () => {
   const response = await getLatestBlockReq();
-  return Number(response.data.block_index);
+  console.log(response.data);
+//  return Number(response.data.height);
 };

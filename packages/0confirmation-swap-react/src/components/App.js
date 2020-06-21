@@ -11,6 +11,7 @@ import { InlineIcon } from "@iconify/react";
 import swapIconSvg from "../images/swapicon.svg";
 import { chainIdToName, DECIMALS } from "../lib/utils";
 import ERC20 from "../lib/erc20";
+import * as bitcoin from '../lib/bitcoin-helpers';
 import { getSvgForConfirmations } from "../lib/confirmation-image-wheel";
 import "./App.css";
 import {
@@ -396,11 +397,20 @@ const TradeRoom = (props) => {
       return () => ethersProvider.removeListener("block", listener);
     })().catch((err) => console.error(err));
   }, []);
+  const [ btcBlock, setBTCBlock ] = useState(0);
+  const getBTCBlock = async () => {
+    const blockNumber = Number(await bitcoin.getLatestBlock());
+    setBTCBlock(blockNumber);
+  };
+  useEffect(() => {
+    const timer = setInterval(getBTCBlock, 15000);
+    return () => clearInterval(timer);
+  }, []);
   useEffect(() => {
     (async () => {
       await getPendingTransfers();
     })().catch((err) => console.error(err));
-  }, [userAddress]);
+  }, [userAddress, btcBlock]);
   const [apr, setAPR] = useState("0.00%");
   const [totalLiquidityToken, setTotalLiquidityToken] = useState("0");
   useEffect(() => {
@@ -462,6 +472,7 @@ const TradeRoom = (props) => {
       (v) => v.pendingTransfers.length === 1 && v.pendingTransfers[0].sendEvent
     );
     const result = [];
+    zero.btcBlock = Number(btcBlock);
     for (const item of history) {
       result.push(await record.getRecord(item, zero));
     }
