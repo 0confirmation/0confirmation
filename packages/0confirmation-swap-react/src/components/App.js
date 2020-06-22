@@ -65,6 +65,8 @@ const CHAIN = process.env.REACT_APP_CHAIN; // eslint-disable-line
 
 if (window.ethereum) window.ethereum.autoRefreshOnNetworkChange = false;
 
+let cachedBtcBlock = 0;
+
 const web3Modal = new Web3Modal({
   network: utils.chainIdToName(process.env.REACT_APP_CHAIN || "1"), // eslint-disable-line
   cacheProvider: true,
@@ -384,7 +386,7 @@ const TradeRoom = (props) => {
         if (number % 3 && !busy) {
           busy = true;
           try {
-            await getPendingTransfers();
+            await getPendingTransfers(cachedBtcBlock);
           } catch (e) {
             console.error(e);
           }
@@ -399,16 +401,18 @@ const TradeRoom = (props) => {
   }, []);
   const [ btcBlock, setBTCBlock ] = useState(0);
   const getBTCBlock = async () => {
-    const blockNumber = Number(await bitcoin.getLatestBlock());
-    setBTCBlock(blockNumber);
+    const blockNumber = (await bitcoin.getLatestBlock());
+    cachedBtcBlock = Number(blockNumber);
+    setBTCBlock(Number(blockNumber));
   };
   useEffect(() => {
+    getBTCBlock().catch((err) => console.error(err));
     const timer = setInterval(getBTCBlock, 15000);
     return () => clearInterval(timer);
   }, []);
   useEffect(() => {
     (async () => {
-      await getPendingTransfers();
+      await getPendingTransfers(btcBlock);
     })().catch((err) => console.error(err));
   }, [userAddress, btcBlock]);
   const [apr, setAPR] = useState("0.00%");
@@ -464,7 +468,7 @@ const TradeRoom = (props) => {
     ethersProvider.on("block", listener);
     return () => ethersProvider.removeListener("block", listener);
   }, []);
-  const getPendingTransfers = async () => {
+  const getPendingTransfers = async (btcBlock) => {
     const ethersProvider = zero.getProvider().asEthers();
     if (!(await ethersProvider.listAccounts())[0]) return;
     const borrows = await getBorrows(zero);
@@ -472,9 +476,8 @@ const TradeRoom = (props) => {
       (v) => v.pendingTransfers.length === 1 && v.pendingTransfers[0].sendEvent
     );
     const result = [];
-    zero.btcBlock = Number(btcBlock);
     for (const item of history) {
-      result.push(await record.getRecord(item, zero));
+      result.push(await record.getRecord(item, zero, btcBlock));
     }
     setHistory(record.decorateHistory(result));
     return borrows;
@@ -639,7 +642,7 @@ const TradeRoom = (props) => {
       const length = _history.length;
       proxy = await utils.pollForBorrowProxy(deposited);
       setModal(false);
-      let proxies = await getPendingTransfers();
+      let proxies = await getPendingTransfers(btcBlock);
       proxy = proxies[proxies.length - 1];
       let amount = String((await record.getRecord(proxy, zero)).value);
       if (amount) {
@@ -658,7 +661,7 @@ const TradeRoom = (props) => {
         setTransactionModal(true);
       }).catch((err) => console.error(err));
       await waitForRepayment(deposited);
-      await getPendingTransfers();
+      await getPendingTransfers(btcBlock);
       setShowAlert(true);
       setMessage(
         "RenVM response made it to the network! DAI forwarded to your wallet!"

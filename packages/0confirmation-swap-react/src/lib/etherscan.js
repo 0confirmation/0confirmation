@@ -11,7 +11,7 @@ export const createEtherscanLinkFor = (s) =>
         ".etherscan.io/" +
         (s.length === 66 ? "tx/" : "address/") +
         s
-      : "https://blockchain.info/btc/address/" + s
+      : "https://www.blockchain.com/btc-testnet/address/" + s
     : "";
 
 export const createEtherscanLink = (s, text) => {

@@ -53,6 +53,5 @@ export const getBlockCount = async (depositAddress) => {
 
 export const getLatestBlock = async () => {
   const response = await getLatestBlockReq();
-  console.log(response.data);
-//  return Number(response.data.height);
+  return Number(response.data.height);
 };

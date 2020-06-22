@@ -76,7 +76,7 @@ export const getBlocks = async (borrow, zero) => {
   return Math.max(
     0,
     Number(borrow.decodedRecord.loan.params.timeoutExpiry) -
-      Number(await zero.getProvider().asEthers().getBlockNumber())
+      Number(await (zero.getProvider().asEthers()).getBlockNumber())
   );
 };
 export const getTarget = (borrow) => {
@@ -111,21 +111,21 @@ export const getReceived = (borrow) => {
 export const getSentfullname = () => {
   return "Bitcoin";
 };
-export const getConfirmations = async (borrow, zero) => {
+export const getConfirmations = async (borrow, btcBlock) => {
   const depositAddress = borrow.getDepositAddress();
   if (!localStorage.getItem(depositAddress)) {
     localStorage.setItem(depositAddress, await bitcoin.getBlockCount(depositAddress));
   }
   const blockNo = Number(localStorage.getItem(depositAddress));
-  return Math.min(zero.btcBlock - blockNo, 6);
+  console.log(blockNo);
+  console.log(btcBlock);
+  return Math.max(0, Math.min(btcBlock - blockNo, 6));
 };
 
 export const getTransactionHash = (borrow) => {
-  console.log(borrow);
   return borrow.pendingTransfers[0].sendEvent.transactionHash;
 };
 export const getCreated = async (zero, borrow) => {
-  console.log(borrow);
   const block = await (zero
     .getProvider()
     .asEthers())
@@ -147,7 +147,7 @@ export const getDepositAddress = (borrow) => {
 const wrapLink = (s) => {
   return (fn) => etherscan.createEtherscanLink(s, fn(s));
 };
-export const getRecord = async (borrow, zero) => {
+export const getRecord = async (borrow, zero, btcBlock) => {
   return {
     created: await getCreated(zero, borrow),
     sentfullname: getSentfullname(borrow),
@@ -167,7 +167,7 @@ export const getRecord = async (borrow, zero) => {
     sent: getSent(borrow),
     value: getValue(borrow),
     blocks: await getBlocks(borrow, zero),
-    confirmations: await getConfirmations(borrow, zero),
+    confirmations: await getConfirmations(borrow, btcBlock),
     status: getStatus(borrow),
   };
 };
