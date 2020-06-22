@@ -26,7 +26,9 @@ export const getAddress = (borrow) => {
   return borrow.address;
 };
 export const getEscrow = (borrow) => {
-  return borrow.sendEvent && borrow.sendEvent.values.to;
+  const transfer = borrow.pendingTransfers[0] || {};
+  const sendEvent = transfer.sendEvent;
+  return sendEvent && sendEvent.values.to || '';
 };
 export const getSent = (borrow) => {
   return utils.toFormat(borrow.decodedRecord.request.amount, "btc");
@@ -181,6 +183,7 @@ export const decorateHistory = (history) => {
       transactionHash: wrapLink(""),
       receiveTransactionHash: wrapLink(""),
       depositAddress: wrapLink(""),
+      escrowAddress: wrapLink('')
     },
   });
 };

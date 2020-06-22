@@ -1664,7 +1664,7 @@ const TradeRoom = (props) => {
                       >
                         <tr>
                           <th>Created</th>
-                          <th>Proxy Address</th>
+                          <th>Escrow Address</th>
                           <th>Confirmations</th>
                           <th>Sent</th>
                           <th>Received</th>
@@ -1686,12 +1686,12 @@ const TradeRoom = (props) => {
                                 {eleos.created}
                               </td>
                               <td className="text-light justify-content-center align-content-center text-center my-auto">
-                                {eleos.address(
+                                {eleos.escrowAddress(
                                   (v) =>
                                     v.substr(0, 6) +
                                     "..." +
                                     v.substr(v.length - 5, v.length)
-                                )}
+                                 )}
                               </td>
                               <td className="text-light justify-content-center align-content-center text-center my-auto">
                                 <img

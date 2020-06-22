@@ -438,7 +438,7 @@ const TransactionDetailsModal = ({
                       fontSize: "0.9em",
                     }}
                   >
-                    {_history[`${transactionDetails}`].address(
+                    {_history[`${transactionDetails}`].escrowAddress(
                       (v) =>
                         v.substr(0, 6) +
                         "..." +
