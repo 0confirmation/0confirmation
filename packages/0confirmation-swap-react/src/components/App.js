@@ -484,7 +484,7 @@ const TradeRoom = (props) => {
   };
   const [liquidityvalue, setLiquidityValue] = useState("Add Liquidity");
   const [parcel, setParcel] = useState(null);
-  const [liquidity, setLiquidity] = useState("0");
+  const [liquidity, setLiquidity] = useState(false);
   const [get, setGet] = useState("0");
   const [pool, setPool] = useState("0");
   const [liquidityTokenSupply, setLiquidityTokenSupply] = useState("0");
