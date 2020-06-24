@@ -551,7 +551,9 @@ const TradeRoom = (props) => {
   };
   const updateAmount = async (e) => {
     e.preventDefault();
-    const value = e.target.value;
+    var checkValueLimit;
+    if(e.target.value > 0.00035) checkValueLimit = e.target.value;
+    const value = checkValueLimit;
     setValue(value);
     if (isNaN(value)) return;
     await getTradeDetails(value);
