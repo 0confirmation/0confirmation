@@ -1738,6 +1738,15 @@ const TradeRoom = (props) => {
             )}
           </Col>
         </Row>
+        <Row className="align-content-center justify-content-center mt-5 pt-5 mb-2">
+            <Col lg="10" md="10" sm="10" className="align-content-center justify-content-center mt-5 mx-auto text-center text-white-50"
+                  style={{
+                          fontStyle: "normal",
+                          fontFamily: "PT Sans",
+                        }}
+              >
+                Fully decentralized, maintained and operated by the 0cf community.<br /> <b>Original software build by JKR Labs LLC.</b></Col>
+        </Row>
       </div>
       <TransactionDetailsModal
         ismobile={ismobile}
