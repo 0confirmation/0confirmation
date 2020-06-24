@@ -24,7 +24,7 @@ import {
   Table,
   DropdownToggle,
   DropdownMenu,
-  DropdownItem,
+  DropdownItem,ButtonDropdown
 } from "reactstrap";
 import LoanModal from "./LoanModal";
 import TransactionDetailsModal from "./TransactionDetailsModal";
@@ -863,7 +863,7 @@ const TradeRoom = (props) => {
                       </p>
                     </Col>
                     <Col lg="12" md="12" sm="12">
-                      <Dropdown
+                      <ButtonDropdown
                         className="my-3"
                         isOpen={liquidity}
                         toggle={() => setLiquidity(!liquidity)}
@@ -892,7 +892,6 @@ const TradeRoom = (props) => {
                             color: "#ffffff",
                             border: "none",
                             outline: "none",
-                            marginLeft: "7.5em",
                           }}
                         >
                           {["Add Liquidity", "Remove Liquidity"].map((a, i) => {
@@ -915,7 +914,7 @@ const TradeRoom = (props) => {
                             );
                           })}
                         </DropdownMenu>
-                      </Dropdown>
+                      </ButtonDropdown>
                     </Col>
                   </Row>
                 </Col>
