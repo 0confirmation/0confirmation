@@ -21,7 +21,7 @@ await zero.initializeDriver(); // instantiates a WebRTC connection to the networ
 
 ```
 
-Check liquidity pool renBTC holdings:
+#### Check liquidity pool renBTC holdings
 
 ```js
 
@@ -38,7 +38,7 @@ const liquidityPoolRenBTCHoldings = await renbtc.balanceOf(zeroBTC.address);
 console.log(String(liquidityPoolRenBTCHoldings));
 ```
 
-ERC20 approve liquidity pool, then add liquidity
+#### ERC20 approve liquidity pool, then add liquidity
 
 ```js
 
@@ -49,7 +49,7 @@ await (
 
 ```
 
-For a keeper, ERC20 approve transfers by the ShifterPool to be able to execute borrows
+#### For a keeper, ERC20 approve transfers by the ShifterPool to be able to execute borrows
 
 ```js
 
@@ -58,7 +58,7 @@ await (
 ).wait();
 ```
 
-Create a liquidity request, sign it, broadcast over libp2p, then wait for your borrow proxy
+#### Create a liquidity request, sign it, broadcast over libp2p, then wait for your borrow proxy
 
 
 ```js
@@ -85,6 +85,8 @@ while (true) {
   }
 }
 ```
+
+#### Transaction scripts
 
 To run transaction scripts with a borrow, you can either pass an array as follows:
 
