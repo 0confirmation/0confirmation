@@ -24,7 +24,7 @@ import {
   Table,
   DropdownToggle,
   DropdownMenu,
-  DropdownItem,
+  DropdownItem,ButtonDropdown
 } from "reactstrap";
 import LoanModal from "./LoanModal";
 import TransactionDetailsModal from "./TransactionDetailsModal";
@@ -551,7 +551,9 @@ const TradeRoom = (props) => {
   };
   const updateAmount = async (e) => {
     e.preventDefault();
-    const value = e.target.value;
+    var checkValueLimit;
+    if(e.target.value > 0.00035) checkValueLimit = e.target.value;
+    const value = checkValueLimit;
     setValue(value);
     if (isNaN(value)) return;
     await getTradeDetails(value);
@@ -863,7 +865,7 @@ const TradeRoom = (props) => {
                       </p>
                     </Col>
                     <Col lg="12" md="12" sm="12">
-                      <Dropdown
+                      <ButtonDropdown
                         className="my-3"
                         isOpen={liquidity}
                         toggle={() => setLiquidity(!liquidity)}
@@ -892,7 +894,6 @@ const TradeRoom = (props) => {
                             color: "#ffffff",
                             border: "none",
                             outline: "none",
-                            marginLeft: "7.5em",
                           }}
                         >
                           {["Add Liquidity", "Remove Liquidity"].map((a, i) => {
@@ -915,7 +916,7 @@ const TradeRoom = (props) => {
                             );
                           })}
                         </DropdownMenu>
-                      </Dropdown>
+                      </ButtonDropdown>
                     </Col>
                   </Row>
                 </Col>
@@ -1736,6 +1737,15 @@ const TradeRoom = (props) => {
               </Row>
             )}
           </Col>
+        </Row>
+        <Row className="align-content-center justify-content-center mt-5 pt-5 mb-2">
+            <Col lg="10" md="10" sm="10" className="align-content-center justify-content-center mt-5 mx-auto text-center text-white-50"
+                  style={{
+                          fontStyle: "normal",
+                          fontFamily: "PT Sans",
+                        }}
+              >
+                Fully decentralized, maintained and operated by the 0cf community.<br /> <b>Original software build by JKR Labs LLC.</b></Col>
         </Row>
       </div>
       <TransactionDetailsModal
