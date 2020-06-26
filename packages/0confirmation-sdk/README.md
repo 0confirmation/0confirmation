@@ -13,7 +13,7 @@ const Zero = require('@0confirmation/sdk');
 const makePrivateKeyWeb3Provider = require('@0confirmation/providers/private-key-or-seed') // truffle HDWalletProvider doesn't correctly handle personal_sign, but this provider will!
 const web3ProviderFromEthersProvider = require('@0confirmation/providers/from-ethers'); // converts an ethers.js provider to a web3 provider
 
-cont provider = makePrivateKeyWeb3Provider('a000000000000000000000000000000000000000000000000000000000000000', web3ProviderFromEthersProvider(new ethers.providers.InfuraProvider('mainnet'));
+const provider = makePrivateKeyWeb3Provider('a000000000000000000000000000000000000000000000000000000000000000', web3ProviderFromEthersProvider(new ethers.providers.InfuraProvider('mainnet'));
 
 const zero = new Zero(provider, 'mainnet');
 
@@ -90,7 +90,7 @@ while (true) {
 
 To run transaction scripts with a borrow, you can either pass an array as follows:
 
-```
+```js
 
 const liquidityRequest = zero.createLiquidityRequest({
   amount: someAmount,
