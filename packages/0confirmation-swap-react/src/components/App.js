@@ -1064,27 +1064,27 @@ const TradeRoom = (props) => {
                       </DropdownMenu>
                     </InputGroupButtonDropdown>
                   </InputGroup>
+                  <span style={{ fontFamily: "PT Sans", fontSize: "0.8em" }}
+                      className={(this.props.ismobile) ? "ml-auto" : "ml-5"}>
+                      <span className={(this.props.ismobile) ? "ml-auto" : "ml-5"} style={{ color: "#00FF41" }}>Current Balance: </span>{share}</span>
                 </Col>
               </Row>
             ) : (
               <Row className="justify-content-center align-content-center text-center mx-auto my-3 text-light">
                 <Col lg="4" md="12" sm="12" className="mt-2">
-                  <InputGroup style={{ height: "52px" }}>
+                  <InputGroup style={{  height: "52px",border: "2px solid #008F11", borderRadius: "8px", }}>
                     <Input
                       type="text"
                       value={value}
                       onChange={(event) => updateAmount(event)}
                       className="sendcoin h-100"
                       style={{
-                        backgroundColor: "#354737", paddingTop:"1em",
-                        borderRadius: "8px 0px 0px 8px",
-                        color: "#ffffff",
-                        border: "none",
-                        outline: "none",
-                      }}
-                    />
-                      <InputGroupAddon style={{ backgroundColor: "#354737", borderRadius: "0px 8px 8px 0px", color: "#ffffff" }} addonType="append">
-                         <InputGroupText style={{ backgroundColor: "#485F4B", borderRadius: "0px 8px 8px 0px", color: "#ffffff", border: "none", outline: "none" }}>
+                             backgroundColor: "transparent", paddingTop:"1em", color: "#ffffff", border: "none", outline: "none"
+                              borderRadius: "8px 0px 0px 8px",
+                            }}
+                      />
+                      <InputGroupAddon style={{ backgroundColor: "#003B00", borderRadius: "0px 8px 8px 0px", color: "#ffffff" }} addonType="append">
+                         <InputGroupText style={{ backgroundColor: "#003B00", borderRadius: "0px 8px 8px 0px", color: "#ffffff", border: "none", outline: "none" }}>
                             <InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={btcIcon} />{' '}
                                 BTC
                           </InputGroupText>
@@ -1157,22 +1157,19 @@ const TradeRoom = (props) => {
                   <img className="img-fluid" src={swapIconSvg} alt="Swap" />
                 </Col>
                 <Col lg="4" md="12" sm="12" className="mt-2">
-                  <InputGroup style={{ height: "52px" }}>
+                  <InputGroup style={{  height: "52px",border: "2px solid #008F11", borderRadius: "8px", }}>
                     <Input
                       readonly="readonly"
                       type="text"
                       value={calcValue}
                       className="getcoin h-100"
                       style={{
-                        backgroundColor: "#354737", paddingTop:"1em",
-                        borderRadius: "8px 0px 0px 8px",
-                        color: "#ffffff",
-                        border: "none",
-                        outline: "none",
-                      }}
+                             backgroundColor: "transparent", paddingTop:"1em", color: "#ffffff", border: "none", outline: "none"
+                              borderRadius: "8px 0px 0px 8px",
+                            }}
                     />
-                    <InputGroupAddon style={{ backgroundColor: "#354737", borderRadius: "0px 8px 8px 0px", color: "#ffffff" }} addonType="append">
-                       <InputGroupText style={{ backgroundColor: "#485F4B", borderRadius: "0px 8px 8px 0px", color: "#ffffff", border: "none", outline: "none" }}>
+                    <InputGroupAddon style={{ backgroundColor: "#003B00", borderRadius: "0px 8px 8px 0px", color: "#ffffff" }} addonType="append">
+                       <InputGroupText style={{ backgroundColor: "#003B00", borderRadius: "0px 8px 8px 0px", color: "#ffffff", border: "none", outline: "none" }}>
                           <InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={daiIcon} />{' '}
                           DAI
                         </InputGroupText>
@@ -1256,11 +1253,11 @@ const TradeRoom = (props) => {
                   className="btn text-light button-small btn-sm px-5"
                   style={{
                     fontSize: "24dp",
-                    backgroundColor: "#317333",
+                    backgroundColor: "#008F11",
                     borderRadius: "10px",
                   }}
                 >
-                  {liquidityvalue === "Add Liquidity" ? "Pool" : "Remove"}
+                  {liquidityvalue === "Add Liquidity" ? "Add" : "Remove"}
                 </button>
               ) : (
                 <button
@@ -1270,7 +1267,7 @@ const TradeRoom = (props) => {
                   className="btn text-light button-small btn-sm px-5"
                   style={{
                     fontSize: "24dp",
-                    backgroundColor: "#317333",
+                    backgroundColor: "#008F11",
                     borderRadius: "10px",
                   }}
                 >
@@ -1291,7 +1288,7 @@ const TradeRoom = (props) => {
                     fontStyle: "normal",
                     fontSize: "0.7em",
                     fontFamily: "PT Sans",
-                    color: "#ffffff",
+                    color: "#00FF41",
                   }}
                 >
                   Details <FaAngleDown />
@@ -1305,12 +1302,12 @@ const TradeRoom = (props) => {
                     lg="9"
                     md="9"
                     sm="9"
-                    style={{ backgroundColor: "#354737", borderRadius: "10px" }}
+                    style={{  backgroundColor: "#0D0208", border: "1px solid #008F11", borderRadius: "10px" }}
                     className=" mx-4  pt-3"
                   >
                     {liquidityvalue === "Add Liquidity" ? (
                       <Row className="justify-content-center align-content-center">
-                        <Col sm="7" lg="7" md="7">
+                        {/*<Col sm="7" lg="7" md="7">
                           <p
                             className="text-center text-break"
                             style={{
@@ -1323,7 +1320,7 @@ const TradeRoom = (props) => {
                           >
                             zeroBTC has historic returns of <b>{apr}</b>
                           </p>
-                        </Col>
+                        </Col>*/}
                         <Col sm="12" lg="12" md="12">
                           <Row>
                             <Col
