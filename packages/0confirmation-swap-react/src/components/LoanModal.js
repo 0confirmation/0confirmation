@@ -31,7 +31,7 @@ const LoanModal = ({
   );
   return (
     <Modal
-      style={{ overflowX: "hidden" }}
+      style={{ overflowX: "hidden", minWidth:"40%" }}
       className="dmodal"
       wrapClassName="dmodal"
       modalClassName="dmodal"
@@ -41,7 +41,10 @@ const LoanModal = ({
       isOpen={modal}
       toggle={closeModal}
     >
-      <ModalBody style={{ backgroundColor: "#1f2820" }} className="h-100">
+      <ModalBody  style={{
+                        backgroundColor: "#0D0208", border: "3px solid #00FF41",
+                        borderRadius: " 20px",
+                    }} className="h-100 p-3">
         <Row className="w-100 align-content-center justify-content-center my-3">
           <Col
             lg="10"
