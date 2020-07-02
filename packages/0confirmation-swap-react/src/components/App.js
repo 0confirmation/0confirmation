@@ -749,18 +749,21 @@ const TradeRoom = (props) => {
         }}
       >
         <div className="justify-content-center align-content-center text-center mx-auto my-auto pb-4 pt-5">
-          <button
-            className="btn text-light button-small btn-sm"
-            style={{
-              fontSize: "24dp",
-              backgroundColor: "#317333",
-              width: "248dp",
-              borderRadius: "10px",
-            }}
-            onClick={(evt) => connectWeb3Modal(evt)}
-          >
-            Connect Wallet
-          </button>
+          {(userAddress != null)?
+              <button
+                  className="btn text-light button-small btn-sm"
+                  style={{
+                    fontSize: "24dp",
+                    backgroundColor: "#317333",
+                    width: "248dp",
+                    borderRadius: "10px",
+                  }}
+                  onClick={(evt) => connectWeb3Modal(evt)}
+                >
+                    Connect Wallet
+                </button>
+         
+        }
         </div>
         <div className="alert-box">
           {showAlert ? (
