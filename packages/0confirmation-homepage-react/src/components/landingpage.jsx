@@ -137,7 +137,7 @@ export default class LandingPage extends React.Component {
                                                                 </Row>
 
                                                                 <Row className="justify-content-start align-content-start py-3">
-                                                                    <button className="btn button-small btn-block text-light mx-3 text-center bold"
+                                                                    <button className="btn button-small btn-block text-light mt-2 mx-3 text-center bold"
                                                                         style={{ backgroundColor: "#008F11", borderRadius: "0.8em" }}>Use the App</button>
                                                                 </Row>
                                                             </Col>
@@ -277,7 +277,7 @@ export default class LandingPage extends React.Component {
                                                             <Col lg="12" md="12" sm="12" className="justify-content-center align-content-center">
                                                                 <Row className="justify-content-center align-content-center">
                                                                     <Col lg="12" md="12" sm="12" className="text-center">
-                                                                        <p className="header-text">Idle BTC<span><i id="idle-btc"><img alt="i" width="12px" className="img-fluid mb-3 ml-2" src={require("../images/info.svg")} /></i><Tooltip placement="top"
+                                                                        <p className="header-text">Idle<br/> BTC<span><i id="idle-btc"><img alt="i" width="12px" className="img-fluid mb-3 ml-2" src={require("../images/info.svg")} /></i><Tooltip placement="top"
                                                                             isOpen={this.state.tooltip3} target="idle-btc" toggle={async (e) => await this.setState({ tooltip3: !this.state.tooltip3 })} >
                                                                             info
                                                                             </Tooltip></span></p>
