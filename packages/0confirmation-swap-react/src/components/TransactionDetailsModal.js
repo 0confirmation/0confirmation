@@ -28,7 +28,7 @@ const TransactionDetailsModal = ({
   );
   return (
     <Modal
-      style={{ minWidth: ismobile ? "60%" : "60%", overflowX: "hidden" }}
+      style={{minWidth:"60%", overflowX: "hidden" }}
       className="dmodal  mx-auto"
       wrapClassName="dmodal  mx-auto"
       modalClassName="dmodal  mx-auto"
@@ -41,7 +41,7 @@ const TransactionDetailsModal = ({
       }}
     >
       <ModalBody
-        style={{ backgroundColor: "#1f2820" }}
+        style={{ backgroundColor: "#0D0208" }}
         className="align-content-center justify-content-center py-5"
       >
         <Row>
@@ -80,13 +80,7 @@ const TransactionDetailsModal = ({
             sm="9"
             className="justify-content-center align-content-center text-center text-light"
           >
-            <p
-              style={{
-                fontWeight: "normal",
-                fontFamily: "PT Sans",
-                fontSize: "0.9em",
-              }}
-            >
+            <p style={{ fontWeight: "normal", color:"#00FF41", fontFamily: "PT Sans",fontSize:"0.9em"}}>
               Sent: {_history[`${transactionDetails}`].created}
             </p>
           </Col>
@@ -125,12 +119,8 @@ const TransactionDetailsModal = ({
           >
             <Col
               className="w-100 h-100 py-3"
-              style={{
-                backgroundColor: "#354737",
-                boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.2005)",
-                borderRadius: "20px",
-              }}
-            >
+              style={{backgroundColor:"#0D0208", border:"3px solid #008F11", boxShadow:"0px 4px 4px rgba(0, 0, 0, 0.2005)", borderRadius:"20px"}}
+              >
               <p
                 className="text-center"
                 style={{
@@ -173,28 +163,12 @@ const TransactionDetailsModal = ({
               </Row>
               <Row>
                 <Col lg="6" md="6" sm="6">
-                  <p
-                    style={{
-                      color: "#757975",
-                      fontFamily: "PT Sans",
-                      fontStyle: "normal",
-                      fontWeight: "normal",
-                      fontSize: "0.7em",
-                    }}
-                  >
+                  <p style={{color:"#ffffff", fontFamily:"PT Sans", fontStyle:"normal", fontWeight:"normal", fontSize:"0.7em"}}>
                     To
                   </p>
                 </Col>
                 <Col lg="6" md="6" sm="6">
-                  <p
-                    style={{
-                      color: "#ffffff",
-                      fontFamily: "PT Sans",
-                      fontStyle: "normal",
-                      fontWeight: "normal",
-                      fontSize: "0.9em",
-                    }}
-                  >
+                  <p style={{color:"#00FF41", fontFamily:"PT Sans", fontStyle:"normal", fontWeight:"normal", fontSize:"0.9em"}}>
                     {_history[transactionDetails].depositAddress(
                       (v) =>
                         v.substr(0, 6) +
@@ -206,28 +180,12 @@ const TransactionDetailsModal = ({
               </Row>
               <Row>
                 <Col lg="6" md="6" sm="6">
-                  <p
-                    style={{
-                      color: "#757975",
-                      fontFamily: "PT Sans",
-                      fontStyle: "normal",
-                      fontWeight: "normal",
-                      fontSize: "0.7em",
-                    }}
-                  >
+                  <p style={{ color: "#ffffff", fontFamily: "PT Sans", fontStyle: "normal", fontWeight: "normal", fontSize: "0.7em" }}>
                     Fees
                   </p>
                 </Col>
                 <Col lg="6" md="6" sm="6">
-                  <p
-                    style={{
-                      color: "#ffffff",
-                      fontFamily: "PT Sans",
-                      fontStyle: "normal",
-                      fontWeight: "normal",
-                      fontSize: "0.9em",
-                    }}
-                  >
+                  <p style={{color:"#00FF41", fontFamily:"PT Sans", fontStyle:"normal", fontWeight:"normal", fontSize:"0.9em"}}>
                     {_history[`${transactionDetails}`].fees}
                     {_history[`${transactionDetails}`].sentname}
                     <span>
@@ -255,28 +213,12 @@ const TransactionDetailsModal = ({
               </Row>
               <Row>
                 <Col lg="6" md="6" sm="6">
-                  <p
-                    style={{
-                      color: "#757975",
-                      fontFamily: "PT Sans",
-                      fontStyle: "normal",
-                      fontWeight: "normal",
-                      fontSize: "0.7em",
-                    }}
-                  >
+                  <p style={{color:"#ffffff", fontFamily:"PT Sans", fontStyle:"normal", fontWeight:"normal", fontSize:"0.7em"}}>
                     Transaction
                   </p>
                 </Col>
                 <Col lg="6" md="6" sm="6">
-                  <p
-                    style={{
-                      color: "#ffffff",
-                      fontFamily: "PT Sans",
-                      fontStyle: "normal",
-                      fontWeight: "normal",
-                      fontSize: "0.9em",
-                    }}
-                  >
+                  <p style={{color:"#00FF41", fontFamily:"PT Sans", fontStyle:"normal", fontWeight:"normal", fontSize:"0.9em"}}>
                     {_history[`${transactionDetails}`].transactionHash(
                       (v) =>
                         v.substr(0, 6) +
@@ -288,15 +230,7 @@ const TransactionDetailsModal = ({
               </Row>
               <Row>
                 <Col lg="6" md="6" sm="6">
-                  <p
-                    style={{
-                      color: "#757975",
-                      fontFamily: "PT Sans",
-                      fontStyle: "normal",
-                      fontWeight: "normal",
-                      fontSize: "0.7em",
-                    }}
-                  >
+                  <p style={{color:"#ffffff", fontFamily:"PT Sans", fontStyle:"normal", fontWeight:"normal", fontSize:"0.7em"}}>
                     Confirmations
                   </p>
                 </Col>
@@ -334,13 +268,7 @@ const TransactionDetailsModal = ({
             className="justify-content-center align-content-center text-light my-3"
           >
             <Col
-              className="w-100 h-100 py-3"
-              style={{
-                backgroundColor: "#354737",
-                boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.2005)",
-                borderRadius: "20px",
-              }}
-            >
+              className="w-100 h-100 py-3" style={{backgroundColor:"#0D0208", border:"3px solid #008F11", boxShadow:"0px 4px 4px rgba(0, 0, 0, 0.2005)", borderRadius:"20px"}} >
               <p
                 className="text-center"
                 style={{
@@ -385,7 +313,7 @@ const TransactionDetailsModal = ({
                 <Col lg="6" md="6" sm="6">
                   <p
                     style={{
-                      color: "#757975",
+                     color:"#ffffff",
                       fontFamily: "PT Sans",
                       fontStyle: "normal",
                       fontWeight: "normal",
@@ -398,7 +326,7 @@ const TransactionDetailsModal = ({
                 <Col lg="6" md="6" sm="6">
                   <p
                     style={{
-                      color: "#ffffff",
+                      color:"#00FF41",
                       fontFamily: "PT Sans",
                       fontStyle: "normal",
                       fontWeight: "normal",
@@ -418,7 +346,7 @@ const TransactionDetailsModal = ({
                 <Col lg="6" md="6" sm="6">
                   <p
                     style={{
-                      color: "#757975",
+                      color:"#ffffff",
                       fontFamily: "PT Sans",
                       fontStyle: "normal",
                       fontWeight: "normal",
@@ -431,7 +359,7 @@ const TransactionDetailsModal = ({
                 <Col lg="6" md="6" sm="6">
                   <p
                     style={{
-                      color: "#ffffff",
+                      color:"#00FF41",
                       fontFamily: "PT Sans",
                       fontStyle: "normal",
                       fontWeight: "normal",
@@ -451,7 +379,7 @@ const TransactionDetailsModal = ({
                 <Col lg="6" md="6" sm="6">
                   <p
                     style={{
-                      color: "#757975",
+                      color:"#ffffff",
                       fontFamily: "PT Sans",
                       fontStyle: "normal",
                       fontWeight: "normal",
@@ -464,7 +392,7 @@ const TransactionDetailsModal = ({
                 <Col lg="6" md="6" sm="6">
                   <p
                     style={{
-                      color: "#ffffff",
+                      color:"#00FF41",
                       fontFamily: "PT Sans",
                       fontStyle: "normal",
                       fontWeight: "normal",
@@ -484,7 +412,7 @@ const TransactionDetailsModal = ({
                 <Col lg="12" md="12" sm="12">
                   <p
                     style={{
-                      color: "#757975",
+                     color:"#ffffff",
                       fontFamily: "PT Sans",
                       fontStyle: "normal",
                       fontWeight: "normal",
