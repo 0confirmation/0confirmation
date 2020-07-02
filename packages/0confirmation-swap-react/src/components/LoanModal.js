@@ -110,7 +110,7 @@ const LoanModal = ({
             className="align-content-start justify-content-start"
           >
             <Row
-              style={{ border: "2px solid #317333", borderRadius: "10px" }}
+              style={{ border: "2px solid #00FF41", borderRadius: "10px" }}
               className="text-light mx-1 h-100 text-center align-content-center justify-content-center"
             >
               <Col
@@ -133,7 +133,7 @@ const LoanModal = ({
                 <span className="mx-1">
                   <b
                     className="mr-1 pb-3"
-                    style={{ borderBottom: "1px solid #137333 ",fontSize: "0.72em", letterSpacing: "0.05em", color: "#137333", }}
+                    style={{ borderBottom: "1px solid #00FF41 ",fontSize: "0.72em", letterSpacing: "0.05em", color: "#00FF41", }}
                   >
                     {parcel && parcel.depositAddress}
                   </b>
