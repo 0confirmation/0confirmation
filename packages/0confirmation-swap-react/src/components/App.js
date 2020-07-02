@@ -750,6 +750,19 @@ const TradeRoom = (props) => {
       >
         <div className="justify-content-center align-content-center text-center mx-auto my-auto pb-4 pt-5">
           {(userAddress != null)?
+              <span
+                      className="text-light"
+                      style={{ fontSize: "0.8em", fontFamily: "PT Sans", color: "#00FF41" }}
+                    >
+                      <b>Connected Address:</b>{" "}
+                      {userAddress &&
+                        userAddress.substr(0, 6) +
+                          "..." +
+                          userAddress.substr(
+                            userAddress.length - 5,
+                            userAddress.length
+                          )}
+              </span>:
               <button
                   className="btn text-light button-small btn-sm"
                   style={{
@@ -781,7 +794,7 @@ const TradeRoom = (props) => {
             md="2"
             sm="6"
             className="justify-content-center align-content-center mx-auto w-50"
-            style={{ backgroundColor: "#1F2820", borderRadius: "10px" }}
+            style={{ backgroundColor: "#003B00", borderRadius: "10px" }}
           >
             <Row className="justify-content-center align-content-center p-1 text-light">
               <Col
@@ -793,7 +806,7 @@ const TradeRoom = (props) => {
                   borderRadius: ismobile ? "10px" : "13px",
                   backgroundColor:
                     window.location.pathname.split("/")[2] === "swap"
-                      ? "#317333"
+                      ? "#008F11"
                       : "",
                 }}
               >
@@ -818,7 +831,7 @@ const TradeRoom = (props) => {
                   borderRadius: ismobile ? "10px" : "13px",
                   backgroundColor:
                     window.location.pathname.split("/")[2] === "earn"
-                      ? "#317333"
+                      ? "#008F11"
                       : "",
                 }}
               >
@@ -837,6 +850,12 @@ const TradeRoom = (props) => {
             </Row>
           </Col>
         </Row>
+         <Row className="justify-content-center align-content-center text-center my-4">
+           <Col lg="6" md="10" sm="10" className="text-light py-2" style={{ border:"1px solid #008F11", borderRadius:"10px", fontSize:"18px"}}>
+               <span>0confirmation is beta software and <span style={{ color:"#F80C0C"}}>HAS NOT BEEN AUDITED.</span></span><br />
+               <span>Do not use any more than you can afford to lose.  Read more about the risks here</span>
+            </Col>
+         </Row>
         <Row className="justify-content-center align-content-center text-center mx-auto my-3"></Row>
         <Row className="justify-content-center align-content-center text-center">
           <Col
@@ -844,7 +863,7 @@ const TradeRoom = (props) => {
             md="8"
             sm="8"
             style={{
-              backgroundColor: "#1F2820",
+//               backgroundColor: "#1F2820",
               borderRadius: "10px 10px 0px 0px",
               minHeight: "70vh",
             }}
@@ -875,28 +894,21 @@ const TradeRoom = (props) => {
                       >
                         <DropdownToggle
                           style={{
-                            width: "11em",
-                            padding: "0.200em",
-                            backgroundColor: "#485F4B",
-                            borderRadius: "8px 8px 8px 8px",
-                            color: "#ffffff",
-                            border: "none",
-                            outline: "none",
+                            width: "11em", padding: "0.200em", border:"2px solid #008F11",
+                            backgroundColor: "#0D0208", borderRadius: "8px 8px 8px 8px",
+                            color: "#ffffff", outline: "none"
                           }}
                         >
                           <span>
                             <span className="mr-1">{liquidityvalue}</span>{" "}
-                            <FaAngleDown />
+                            <FaAngleDown color="#008F11" />
                           </span>
                         </DropdownToggle>
                         <DropdownMenu
                           className="dhover text-light"
                           style={{
-                            backgroundColor: "#354737",
-                            borderRadius: "0px 0px 8px 8px",
-                            color: "#ffffff",
-                            border: "none",
-                            outline: "none",
+                             backgroundColor: "#0D0208", borderRadius: "0px 0px 8px 8px",
+                             color: "#ffffff", border: "none", outline: "none",
                           }}
                         >
                           {["Add Liquidity", "Remove Liquidity"].map((a, i) => {
@@ -907,7 +919,7 @@ const TradeRoom = (props) => {
                                 style={{
                                   color: "#ffffff",
                                   backgroundColor:
-                                    liquidityvalue === a ? "#485F4B" : "",
+                                    liquidityvalue === a ? "#008F11" : "",
                                 }}
                                 // onClick={() => { this._send = i; alert(this._send)}}
                                 onClick={() => {
@@ -951,8 +963,8 @@ const TradeRoom = (props) => {
                       color: "#ffffff",
                     }}
                   >
-                    Add BTC to the 0cf pool to gain interest on short term
-                    liquidity loans
+                    {(liquidityvalue==="Add Liquidity" )?
+                        "Add renBTC to the 0cf liquidity pool" :"Withdrawal renBTC from the 0cf liquidity pool"}
                   </p>
                 </Col>
               ) : (
@@ -963,7 +975,7 @@ const TradeRoom = (props) => {
                       fontStyle: "normal",
                       fontSize: "0.8em",
                       fontFamily: "PT Sans",
-                      color: "#ffffff",
+                      color: "#00FF41"
                     }}
                   >
                     Instantly Swap BTC for ETH assets using decentralized
@@ -982,21 +994,18 @@ const TradeRoom = (props) => {
                       onChange={(event) => updateAmount(event)}
                       className="sendcoin h-100"
                       style={{
-                        backgroundColor: "#354737", paddingTop:"1em",
-                        borderRadius: "8px 0px 0px 8px",
-                        color: "#ffffff",
-                        border: "none",
-                        outline: "none",
+                       backgroundColor: "#0D0208", paddingTop: "1em",
+                       borderRadius: "8px 0px 0px 8px", color: "#ffffff", border: "2px solid #008F11", outline: "none"
                       }}
                     />
-                      <InputGroupText style={{ backgroundColor: "#485F4B", borderRadius: "0px 8px 8px 0px", 
+                      <InputGroupText style={{ backgroundColor: "#008F11", borderRadius: "0px 8px 8px 0px", 
                        color: "#ffffff", border: "none", outline: "none" }}>
                           <InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={btcIcon} />{' '}
                                                       BTC
                       </InputGroupText>
                     <InputGroupButtonDropdown
                       style={{
-                        backgroundColor: "#354737",
+                        backgroundColor: "#008F11",
                         borderRadius: "0px 8px 8px 0px",
                         color: "#ffffff",
                       }}
@@ -1008,7 +1017,7 @@ const TradeRoom = (props) => {
                     >
                       <DropdownToggle
                         style={{
-                          backgroundColor: "#485F4B",
+                          backgroundColor: "#003B00B",
                           borderRadius: "0px 8px 8px 0px",
                           color: "#ffffff",
                           border: "none",
@@ -1019,7 +1028,7 @@ const TradeRoom = (props) => {
                       </DropdownToggle>
                       <DropdownMenu
                         style={{
-                          backgroundColor: "#354737",
+                          backgroundColor: "#003B00",
                           borderRadius: "8px 8px 8px 8px",
                           color: "#ffffff",
                           border: "none",
@@ -1035,7 +1044,7 @@ const TradeRoom = (props) => {
                               className="dhover"
                               style={{
                                 color: "#ffffff",
-                                backgroundColor: send === a.id ? "#485F4B" : "",
+                                backgroundColor: send === a.id ? "#008F11" : "",
                               }}
                               // onClick={() => { this._send = i; alert(this._send)}}
                               onClick={() => {
