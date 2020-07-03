@@ -1079,7 +1079,7 @@ const TradeRoom = (props) => {
                       onChange={(event) => updateAmount(event)}
                       className="sendcoin h-100"
                       style={{
-                             backgroundColor: "transparent", paddingTop:"1em", color: "#ffffff", border: "none", outline: "none"
+                             backgroundColor: "transparent", paddingTop:"1em", color: "#ffffff", border: "none", outline: "none",
                               borderRadius: "8px 0px 0px 8px",
                             }}
                       />
