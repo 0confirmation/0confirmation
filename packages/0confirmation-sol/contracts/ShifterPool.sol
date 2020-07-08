@@ -67,6 +67,9 @@ contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
   function deployBorrowProxyImplementation() public {
     isolate.borrowProxyImplementation = isolate.makeBorrowProxy(BORROW_PROXY_IMPLEMENTATION_SALT);
   }
+  function computeProxyAddress(bytes32 salt) public view returns (address) {
+    return isolate.borrowProxyImplementation.deriveBorrowerAddress(salt);
+  }
   function deployAssetForwarderImplementation() public {
     isolate.assetForwarderImplementation = AssetForwarderLib.deployAssetForwarder();
   }
