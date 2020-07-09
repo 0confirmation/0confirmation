@@ -87,6 +87,11 @@ Object.assign(module.exports, {
     enabled: true,
     currency: "USD",
   },
+  namedAccounts: {
+    deployer: {
+      default: 0
+    }
+  },
   solc: {
     version: "0.6.10",
     optimizer: {

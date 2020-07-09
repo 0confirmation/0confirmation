@@ -8,7 +8,13 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "build": "buidler compile"
+    "task:build:clean": "rimraf build",
+    "task:build:insert-uniswap": "cross-env node internal/insert-uniswap",
+    "task:build:insert-curvefi": "cross-env node internal/insert-curvefi",
+    "task:build:insert-uniswap-v2": "cross-env node internal/insert-uniswap-v2",
+    "task:build:buidler": "buidler compile",
+    "build": "npm-run-all task:build:buidler task:build:insert-uniswap-v2 task:build:insert-curvefi",
+    "deploy": "buidler deploy"
   },
   "dependencies": {
     "@nomiclabs/buidler": "^1.3.8",
@@ -29,7 +35,8 @@
     "@openzeppelin/contracts": "^3.1.0",
     "bip39": "^3.0.2",
     "ethers": "^5.0.5",
-    "local-repl": "^4.0.0"
+    "local-repl": "^4.0.0",
+    "npm-run-all": "^4.1.5"
   },
   "repl": {
     "enableAwait": true
