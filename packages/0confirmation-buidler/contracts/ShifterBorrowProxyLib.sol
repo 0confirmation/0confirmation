@@ -49,6 +49,9 @@ library ShifterBorrowProxyLib {
     uint256 gasRequested;
     bytes signature;
   }
+  function computeDepositAddress(LiquidityRequestParcel memory /* parcel */, address /* mpkh */, bool /* btcTestnet */) internal pure returns (string memory result) {
+    result = "";
+  }
   struct LenderParams {
     uint256 timeoutExpiry;
     uint256 bond;
@@ -88,6 +91,9 @@ library ShifterBorrowProxyLib {
   }
   function validateSignature(LiquidityRequestParcel memory parcel, bytes32 hash) internal pure returns (bool) {
     return parcel.request.borrower == ECDSA.recover(ECDSA.toEthSignedMessageHash(hash), parcel.signature);
+  }
+  function validateSignature(LiquidityRequestParcel memory parcel) internal view returns (bool) {
+    return parcel.request.borrower == ECDSA.recover(ECDSA.toEthSignedMessageHash(computeLiquidityRequestHash(parcel)), parcel.signature);
   }
   struct ShiftParameters {
     bytes32 txhash;
