@@ -2,10 +2,19 @@ const url = require('url');
 const bip39 = require('bip39');
 const path = require('path');
 const { InfuraProvider } = require('@ethersproject/providers');
+const { fromV3, fromPrivateKey } = require('ethereumjs-wallet');
+const { sync: randomBytes } = require('random-bytes');
+
+const wallets = {
+  mainnet: require('./private/mainnet'),
+  kovan: require('./private/kovan')
+};
 
 const modifyEnvironmentIfMonorepo = require('./internal/monorepo');
 
 const unhook = modifyEnvironmentIfMonorepo();
+
+const unlockWalletIfPasswordSet = (wallet) => (process.env.SECRET ? fromV3(wallet, process.env.SECRET) : fromPrivateKey(randomBytes(32))).getPrivateKeyString()
 
 usePlugin("@nomiclabs/buidler-solhint");
 usePlugin("@nomiclabs/buidler-etherscan");
@@ -16,31 +25,6 @@ usePlugin("buidler-deploy");
 usePlugin("solidity-coverage");
 
 unhook();
-
-/*
-const crypto = require("crypto");
-const ethers = require("ethers");
-const ETHERSCAN_API_KEY =
-    process.env.ETHERSCAN_API_KEY || crypto.randomBytes(20).toString("base64");
-const HDWalletProvider = require("@truffle/hdwallet-provider");
-const bip39 = require("bip39");
-const rinkeby =
-    process.env.RINKEBY ||
-    new ethers.providers.InfuraProvider("rinkeby").connection.url;
-const mainnet =
-    process.env.MAINNET ||
-    new ethers.providers.InfuraProvider("mainnet").connection.url;
-const mnemonic = process.env.TEST_MNEMONIC || bip39.generateMnemonic();
-const live = process.env.MNEMONIC || mnemonic;
-*/
-
-task("accounts", "Prints the list of accounts", async () => {
-  const accounts = await ethers.getSigners();
-
-  for (const account of accounts) {
-    console.log((await account.getAddress()));
-  }
-});
 
 Object.assign(module.exports, {
   paths: {
@@ -59,18 +43,14 @@ Object.assign(module.exports, {
     live: {
       url: new InfuraProvider("mainnet", process.env.INFURA_PROJECT_ID)
         .connection.url,
-      accounts: {
-        mnemonic: process.env.MNEMONIC || bip39.generateMnemonic(),
-      },
+      accounts: [ unlockWalletIfPasswordSet(wallets.mainnet) ],
       chainId: 1,
     },
-    rinkeby: {
-      url: new InfuraProvider("rinkeby", process.env.INFURA_PROJECT_ID)
+    kovan: {
+      url: new InfuraProvider("kovan", process.env.INFURA_PROJECT_ID)
         .connection.url,
-      accounts: {
-        mnemonic: process.env.MNEMONIC || bip39.generateMnemonic(),
-      },
-      chainId: 4,
+      accounts: [ unlockWalletIfPasswordSet(wallets.kovan) ],
+      chainId: 42,
     },
   },
   mocha: {
@@ -78,7 +58,7 @@ Object.assign(module.exports, {
     useColors: true,
   },
   etherscan: {
-    url: "https://etherscan.io/api",
+    url: "https://api-kovan.etherscan.io/api",
     apiKey: process.env.ETHERSCAN_API_KEY,
   },
   gasReporter: {
