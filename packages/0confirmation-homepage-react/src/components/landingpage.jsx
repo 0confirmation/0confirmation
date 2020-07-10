@@ -16,11 +16,11 @@ export default class LandingPage extends React.Component {
     }
     render() {
         return (
-            <>
-                <div className="justify-content-center align-content-center overflow-hidden pt-5">
-                    <Row className={(this.props.ismobile) ? "justify-content-center align-content-center px-3" : "justify-content-center align-content-center landing px-3"}>
-                        <Col lg="10" md="12" sm="12" className="justify-content-center mx-auto align-content-center my-4">
-                            <Row className="justify-content-center align-content-center my-5">
+           <>
+                <div className="justify-content-center align-content-center overflow-hidden">
+                    <Row className={(this.props.ismobile) ? "justify-content-center align-content-center px-3 mt-5" : "justify-content-center align-content-center landing mt-3 pb-5 px-3"}>
+                        <Col lg="10" md="12" sm="12" className="justify-content-center mx-auto align-content-center mt-4 pt-5 pb-5">
+                            <Row className="justify-content-center align-content-center">
                                 <Col lg="6" md="12" sm="12" className="justify-content-center align-content-center my-auto">
                                     <Row className="justify-content-center align-content-center mx-auto">
                                         <Card className="card-shadow" style={{ backgroundColor: "#0D0208", border:"1px solid #008F11", borderRadius:"20px" }}>
@@ -46,11 +46,11 @@ export default class LandingPage extends React.Component {
                                         </Card>
                                     </Row>
                                 </Col>
-                                <Col lg="6" md="12" sm="12" className="justify-content-center align-content-center">
+                                <Col lg="6" md="12" sm="12" className="justify-content-center align-content-center text-light text-center">
                                     <Row className="justify-content-center align-content-center">
                                         <Col lg="6" md="6" sm="6" className="my-4">
-                                            <Row className="mx-auto" style={{height:"100%"}}>
-                                                 <Card className="card-shadow" style={{ backgroundColor: "#0D0208", width: "250em", border:"1px solid #008F11", borderRadius:"20px" }}>
+                                            <Row className="mx-auto" style={{ height: "100%" }}>
+                                                <Card className="card-shadow" style={{ backgroundColor: "#0D0208", width: "250em", border:"1px solid #008F11", borderRadius:"20px" }}>
                                                     <CardBody>
                                                         <Row>
                                                             <Col lg="12" md="12" sm="12" className="justify-content-center align-content-center">
@@ -81,8 +81,8 @@ export default class LandingPage extends React.Component {
                                             </Row>
                                         </Col>
                                         <Col lg="6" md="6" sm="6" className="my-4">
-                                            <Row className="mx-auto" style={{height:"100%"}}>
-                                                 <Card className="card-shadow" style={{ backgroundColor: "#0D0208", width: "250em", border: "1px solid #008F11", borderRadius: "20px" }}>
+                                            <Row className="mx-auto" style={{ height: "100%" }}>
+                                                <Card className="card-shadow" style={{ backgroundColor: "#0D0208", width: "250em", border: "1px solid #008F11", borderRadius: "20px" }}>
                                                     <CardBody>
                                                         <Row className="justify-content-center align-content-center">
                                                             <Col lg="12" md="12" sm="12" className="justify-content-center align-content-center">
@@ -115,7 +115,7 @@ export default class LandingPage extends React.Component {
                                     </Row>
                                     <Row className="justify-content-center align-content-center">
                                         <Col lg="6" md="6" sm="6" className="justify-content-center align-content-center my-4">
-                                        <Row className="mx-auto" style={{height:"100%"}}>
+                                            <Row className="mx-auto" style={{ height: "100%" }}>
                                                 <Card className="card-shadow" style={{ backgroundColor: "#0D0208", width: "250em", border: "1px solid #008F11", borderRadius: "20px" }}>
                                                     <CardBody>
                                                         <Row className="justify-content-center align-content-center">
@@ -137,7 +137,7 @@ export default class LandingPage extends React.Component {
                                                                 </Row>
 
                                                                 <Row className="justify-content-start align-content-start py-3">
-                                                                    <button className="btn button-small btn-block text-light mt-2 mx-3 text-center bold"
+                                                                    <button className="btn button-small btn-block text-light mx-3 text-center bold"
                                                                         style={{ backgroundColor: "#008F11", borderRadius: "0.8em" }}>Use the App</button>
                                                                 </Row>
                                                             </Col>
@@ -148,7 +148,7 @@ export default class LandingPage extends React.Component {
                                             </Row>
                                         </Col>
                                         <Col lg="6" md="6" sm="6" className="justify-content-center align-content-center my-4">
-                                            <Row className="mx-auto" style={{height:"100%"}}>
+                                            <Row className="mx-auto" style={{ height: "100%" }}>
                                                 <Card className="card-shadow" style={{ flex: "flex-grow", backgroundColor: "#0D0208", minHeight: "15em", width: "250em", border: "1px solid #008F11", borderRadius: "20px" }}>
                                                     <CardBody>
                                                         <Row className="justify-content-center align-content-center">
@@ -277,7 +277,7 @@ export default class LandingPage extends React.Component {
                                                             <Col lg="12" md="12" sm="12" className="justify-content-center align-content-center">
                                                                 <Row className="justify-content-center align-content-center">
                                                                     <Col lg="12" md="12" sm="12" className="text-center">
-                                                                        <p className="header-text">Idle<br/> BTC<span><i id="idle-btc"><img alt="i" width="12px" className="img-fluid mb-3 ml-2" src={require("../images/info.svg")} /></i><Tooltip placement="top"
+                                                                        <p className="header-text">Idle BTC<span><i id="idle-btc"><img alt="i" width="12px" className="img-fluid mb-3 ml-2" src={require("../images/info.svg")} /></i><Tooltip placement="top"
                                                                             isOpen={this.state.tooltip3} target="idle-btc" toggle={async (e) => await this.setState({ tooltip3: !this.state.tooltip3 })} >
                                                                             info
                                                                             </Tooltip></span></p>
@@ -326,25 +326,28 @@ export default class LandingPage extends React.Component {
                                 </Col>
                             </Row>
                         </Col>
-                    </Row>
-                    <Row className="mx-2 mb-4 mt-3" style={{ backgroundColor:"#0D0208"}}>
-                        <Col lg="12" md="12" sm="12" className="align-content-start justify-content-start">
-                            <Row className="align-content-start justify-content-start">
-                                <Col lg="2" md="2" sm="2" className="align-content-start justify-content-start">
-                                    <img className="img-fluid" style={{ width: "100px" }} alt="Powered By" src={require("../images/foot.svg")} />
-                                </Col>
-                                <Col lg="2" md="2" sm="2" className="social align-content-start justify-content-start">
-                                    <span style={{ color: "#ffffff", fontFamily: "PT Sans", fontStyle: "normal", fontWeight: "normal", fontSize: "0.8em" }}>Follow Us</span>
-                                    <Row className="align-content-start justify-content-start ml-1">
-                                        <FaMedium size={20} style={{ cursor: "pointer" }} onClick={() => { window.open("https://medium.com/0confirmation"); }} color="#008F11" className="mr-2" />
-                                        {/* <FaRedditAlien size={20} style={{cursor:"pointer"}} onClick={()=>{ window.open("https://www.reddit.com/r/RenProject");}} color="#008F11" className="mr-2"/> */}
-                                        <FaTelegramPlane size={20} style={{ cursor: "pointer" }} onClick={() => { window.open("https://t.me/zeroconfirmation"); }} color="#008F11" className="mr-2" />
-                                        <FaTwitter size={20} style={{ cursor: "pointer" }} onClick={() => { window.open("https://twitter.com/0confirmation"); }} color="#008F11" className="mr-2" />
+                        <Col lg="12" md="12" sm="12">
+                            <Row className="px-5 pb-4 justify-content-center align-content-center">
+                                <Col lg="9" md="9" sm="9" style={{ backgroundColor: "#0D0208", border: "1px solid #008F11", borderRadius: "10px" }}
+                                    className="align-content-center justify-content-center py-2">
+                                    <Row className="align-content-start justify-content-start">
+                                        <Col lg="2" md="2" sm="2" className="align-content-start justify-content-start">
+                                            <img className="img-fluid" style={{ width: "100px" }} alt="Powered By" src={require("../images/foot.svg")} />
+                                        </Col>
+                                        <Col lg="2" md="2" sm="2" className="social align-content-end justify-content-end py-3 ml-auto">
+                                            <Row className="align-content-center justify-content-center">
+                                                <FaMedium size={25} style={{ cursor: "pointer" }} onClick={() => { window.open("https://medium.com/0confirmation"); }} color="#008F11" className="mr-2" />
+                                                {/* <FaRedditAlien size={25} style={{cursor:"pointer"}} onClick={()=>{ window.open("https://www.reddit.com/r/RenProject");}} color="#008F11" className="mr-2"/> */}
+                                                <FaTelegramPlane size={25} style={{ cursor: "pointer" }} onClick={() => { window.open("https://t.me/zeroconfirmation"); }} color="#008F11" className="mr-2" />
+                                                <FaTwitter size={25} style={{ cursor: "pointer" }} onClick={() => { window.open("https://twitter.com/0confirmation"); }} color="#008F11" className="mr-2" />
+                                            </Row>
+                                        </Col>
                                     </Row>
                                 </Col>
                             </Row>
                         </Col>
                     </Row>
+                    
                 </div>
             </>
         );
