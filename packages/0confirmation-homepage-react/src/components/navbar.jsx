@@ -61,21 +61,24 @@ export default class Navigation extends React.Component {
                                     onClick={async () => { await this.setState({ isopen: false }) }}
                                     onKeyDown={async () => { await this.setState({ isopen: false }) }}>
                                     <Nav vertical>
-                                        <NavItem className="p-2" style={{ backgroundColor: (window.location.pathname.split("/")[2] === "doc") ? "#1F2820" : "" }}>
-                                            <Link to="/" style={{outline:"none", textDecoration:"none", color: "#ffffff"}} className="my-2"
-              
-                                            >Docs</Link>
-                                        </NavItem>
-                                        <NavItem className="p-2" style={{ backgroundColor: (window.location.pathname.split("/")[2] === "earn") ? "#1F2820" : ""}}>
-                                            <Link to="/trade/earn" style={{outline:"none", textDecoration:"none", color: "#ffffff" }} className="my-2"
-              
-                                            >Earn</Link>
-                                        </NavItem>
-                                        <NavItem className="p-2" style={{ backgroundColor: (window.location.pathname.split("/")[2] === "swap") ? "#1F2820" : "" }}>
-                                            <Link to="https://swap.0confirmation.com/trade/swap" style={{outline:"none", textDecoration:"none", color: "#ffffff" }} className="my-2"
-                                   
-                                            >Swap</Link>
-                                        </NavItem>
+                                        <NavItem>
+                                    <Link to="https://swap.0confirmation.com/trade/swap" style={{
+                                        width: "115px", height: "50px", padding: "10px", outline: "none", textDecoration: "none", color: "#ffffff",
+                                        backgroundColor: (window.location.pathname.split("/")[2] === "earn") ? "#008F11" : "#008F11",
+                                        borderRadius: "10px"
+                                    }} className="mx-1 px-3"
+
+                                    >Swap App</Link>
+                                </NavItem>
+                            <NavItem>
+                                    <Link to="/" style={{
+                                        width: "115px", height: "50px", padding: "10px", outline: "none", textDecoration: "none", color: "#ffffff",
+                                        backgroundColor: (window.location.pathname.split("/")[2] === "doc") ? "#008F11" : "#008F11",
+                                        borderRadius: "10px"
+                                    }} className="mx-1 px-4" 
+                                  
+                                >Docs</Link>
+                            </NavItem>
                                     </Nav>
                                 </div>
                             </Drawer>
