@@ -36,9 +36,12 @@ export default class LandingPage extends React.Component {
                                                             <img className="img-fluid" src={require("../images/list.svg")} alt="0CF" />
                                                         </Row>
                                                         <Row className="justify-content-start align-content-start py-3 px-2">
-                                                            <button className="btn button-small button-text btn-block text-light mx-5 text-center bold"
-                                                                style={{ backgroundColor: "#008F11", borderRadius: "0.8em" }}>
-                                                                    Get Started</button>
+                                                        
+                                                        <a href="https://swap.0confirmation.com/trade/swap" style={{ textDecoration: "none"}}>
+                                                            <button style={{ backgroundColor: "#008F11", borderRadius: "0.8em"}} className="btn button-small button-text btn-block text-light mx-5 text-center bold">
+                                                                Get Started
+                                                            </button>
+                                                        </a>
                                                         </Row>
                                                     </Col>
                                                 </Row>
