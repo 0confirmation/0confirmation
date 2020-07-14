@@ -65,15 +65,20 @@ export default class Navigation extends React.Component {
                                             width: "250px", height: "50px", padding: "10px", outline: "none", textDecoration: "none",
                                             // backgroundColor: "#008F11",
                                         }} className="mb-4">
-                                            <Link to="https://swap.0confirmation.com/trade/swap" style={{ color: "#ffffff",outline:"none"}}
+                                            <Link to="https://swap.0confirmation.com/trade/swap" style={{ color:"#ffffff", fontWeight: "bold", outline: "none"}}
                                             >Swap App</Link>
                                         </NavItem>
                                         <NavItem style={{
-                                            width: "250px", height: "50px", padding: "10px", outline: "none", textDecoration: "none",
+                                            width: "250px", height: "50px", padding: "10px", outline: "none", fontWeight: "bold", textDecoration: "none",
                                             // backgroundColor: "#008F11",
                                         }} className="mb-4">
-                                            <Link to="/" style={{ color: "#ffffff", }}
-                                            >Docs</Link>
+                                            <a href ="https://docs.0confirmation.com/">
+                                                <button className="btn button-small button-text btn-block text-light mx-5 text-center bold">
+                                                    Docs
+                                                </button>
+                                            </a>
+                                            {/* <Link to="https://docs.0confirmation.com/" style={{ color: "#ffffff", }}
+                                            >Docs</Link> */}
                                         </NavItem>
                                     </Nav>
                                 </div>
@@ -85,33 +90,20 @@ export default class Navigation extends React.Component {
                         <NavbarBrand href="/"><img src={require("../images/0cf.svg")} alt="0cf"/></NavbarBrand>
                         <NavbarToggler onClick={async()=>await this.setState({isopen:!this.state.isopen})} />
                             <Nav className="ml-auto">
-                                <NavItem>
-                                    <Link to="https://swap.0confirmation.com/trade/swap" style={{
-                                        width: "115px", height: "50px", padding: "10px", outline: "none", textDecoration: "none", color: "#ffffff",
-                                        backgroundColor: (window.location.pathname.split("/")[2] === "earn") ? "#008F11" : "#008F11",
-                                        borderRadius: "10px"
-                                    }} className="mx-1 px-3"
-
-                                    >Swap App</Link>
-                                </NavItem>
+                                <NavItem style={{marginRight: "1em"}}>
+                                    <a href="https://swap.0confirmation.com/trade/swap" style={{ textDecoration: "none"}}>
+                                        <button style={{ backgroundColor: "#008F11", borderRadius: "0.8em", paddingLeft: "2rem", paddingRight: "2rem"}} className="btn button-small button-text btn-block text-light text-center bold">
+                                            Swap App
+                                        </button>
+                                    </a>
+                                    </NavItem>
                             <NavItem>
-                                    <Link to="/" style={{
-                                        width: "115px", height: "50px", padding: "10px", outline: "none", textDecoration: "none", color: "#ffffff",
-                                        backgroundColor: (window.location.pathname.split("/")[2] === "doc") ? "#008F11" : "#008F11",
-                                        borderRadius: "10px"
-                                    }} className="mx-1 px-4" 
-                                  
-                                >Docs</Link>
+                                <a href="https://docs.0confirmation.com/" style={{ textDecoration: "none"}}>
+                                    <button style={{ backgroundColor: "#008F11", borderRadius: "0.8em", paddingLeft: "2rem", paddingRight: "2rem",}} className="btn button-small button-text btn-block text-light text-center bold">
+                                        Docs
+                                    </button>
+                                </a>
                             </NavItem>
-                            {/* <NavItem>
-                                    <Link to="https://swap.0confirmation.com/trade/swap" style={{
-                                        width: "115px", height: "50px", padding: "10px", outline: "none",
-                                        textDecoration: "none", color: "#ffffff", backgroundColor: (window.location.pathname.split("/")[2] === "swap") ? "#1F2820" : "",
-                                        borderRadius: (window.location.pathname.split("/")[2] === "swap") ? "10px" : ""
-                                    }} className="mx-1" 
- 
-                                >Swap</Link>
-                            </NavItem> */}
                        </Nav>
                     </Navbar>}
                 </div>

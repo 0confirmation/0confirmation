@@ -36,7 +36,7 @@ export default class LandingPage extends React.Component {
                                                             <img className="img-fluid" src={require("../images/list.svg")} alt="0CF" />
                                                         </Row>
                                                         <Row className="justify-content-start align-content-start py-3 px-2">
-                                                            <button className="btn button-small btn-block text-light mx-5 text-center bold"
+                                                            <button className="btn button-small button-text btn-block text-light mx-5 text-center bold"
                                                                 style={{ backgroundColor: "#008F11", borderRadius: "0.8em" }}>
                                                                     Get Started</button>
                                                         </Row>
@@ -71,7 +71,7 @@ export default class LandingPage extends React.Component {
                                                                 </Row>
 
                                                                 <Row className="justify-content-start align-content-start py-3">
-                                                                    <button className="btn button-small btn-block text-light mx-3 text-center bold"
+                                                                    <button className="btn button-small btn-block button-text text-light mx-3 text-center bold"
                                                                         style={{ backgroundColor: "#008F11", borderRadius: "0.8em" }}>Add your app as a 0cf module</button>
                                                                 </Row>
                                                             </Col>
@@ -103,7 +103,7 @@ export default class LandingPage extends React.Component {
                                                                 </Row>
 
                                                                 <Row className="justify-content-start align-content-start mt-5 py-3">
-                                                                    <button className="btn button-small btn-block text-light mx-3 text-center bold"
+                                                                    <button className="btn button-small btn-block button-text text-light mx-3 text-center bold"
                                                                         style={{ backgroundColor: "#008F11", borderRadius: "0.8em" }}>Reach out to be a keeper</button>
                                                                 </Row>
                                                             </Col>
@@ -137,7 +137,7 @@ export default class LandingPage extends React.Component {
                                                                 </Row>
 
                                                                 <Row className="justify-content-start align-content-start py-3">
-                                                                    <button className="btn button-small btn-block text-light mx-3 text-center bold"
+                                                                    <button className="btn button-small button-text btn-block text-light mx-3 text-center bold"
                                                                         style={{ backgroundColor: "#008F11", borderRadius: "0.8em" }}>Use the App</button>
                                                                 </Row>
                                                             </Col>
@@ -170,7 +170,7 @@ export default class LandingPage extends React.Component {
                                                                 </Row>
 
                                                                 <Row className="justify-content-start align-content-start py-3">
-                                                                    <button className="btn button-small btn-block text-light mx-3 text-center bold" style={{ backgroundColor: "#008F11", borderRadius: "0.8em" }}>Contribute to the Pool</button>
+                                                                    <button className="btn button-small button-text btn-block text-light mx-3 text-center bold" style={{ backgroundColor: "#008F11", borderRadius: "0.8em" }}>Contribute to the Pool</button>
                                                                 </Row>
                                                             </Col>
                                                         </Row>
@@ -197,7 +197,7 @@ export default class LandingPage extends React.Component {
                                             <img className="img-fluid" alt="UNISWAP" width="250em" src={require("../images/uniswap.svg")} />
                                         </Col>
                                         <Col lg="4" md="4" sm="4" className="mx-auto mt-5">
-                                            <button className="btn button-small btn-block text-light mx-auto text-center bold"
+                                            <button className="btn button-small button-text btn-block text-light mx-auto text-center bold"
                                                 style={{ backgroundColor: "#008F11", borderRadius: "0.8em" }}>Integrate 0cf</button>
                                         </Col>
                                     </Row>
