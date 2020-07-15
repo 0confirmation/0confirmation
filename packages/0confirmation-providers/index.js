@@ -1,7 +1,7 @@
 'use strict';
 
 const RpcEngine = require('json-rpc-engine');
-const ethers = require('ethers');
+const { Web3Provider } = require('@ethersproject/providers');
 const providerFromEngine = require('eth-json-rpc-middleware/providerFromEngine');
 const providerAsMiddleware = require('eth-json-rpc-middleware/providerAsMiddleware');
 
@@ -10,7 +10,7 @@ const baseProviderProto = Object.getPrototypeOf(providerFromEngine(new RpcEngine
 class BaseProvider {
   constructor(provider) { return makeBaseProvider(provider); }
   asEthers() {
-    if (!this._ethers) this._ethers = new ethers.providers.Web3Provider(this);
+    if (!this._ethers) this._ethers = new Web3Provider(this);
     return this._ethers;
   }
   asMiddleware() {

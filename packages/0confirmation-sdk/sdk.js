@@ -22,7 +22,7 @@ const ethersUtil = require('ethers/utils');
 const { joinSignature, solidityKeccak256 } = ethersUtil;
 const ethers = require('ethers');
 const defaultProvider = ethers.getDefaultProvider();
-const { Contract } = require('ethers/contract');
+const { Contract, ContractFactory } = require('@ethersproject/contracts');
 const utils = require('./util');
 const abi = ethersUtil.defaultAbiCoder;
 const Driver = require('./driver');
@@ -48,8 +48,6 @@ const getSignatures = (abi) => {
 };
 
 const { timeout } = require('./util');
-
-const getProvider = (driver) => makeBaseProvider(driver.getBackend('ethereum').provider).asEthers();
 
 class Zero {
   static async fromProvider(ethProvider, presetName = 'default') {
@@ -105,7 +103,7 @@ class Zero {
     return makeBaseProvider(eth.provider);
   }
   getBorrowProvider() {
-    const wrappedEthProvider = getProvider(this.driver);
+    const wrappedEthProvider = this.getProvider(this.driver);
     const ethProvider = wrappedEthProvider.provider;
     const providerEngine = new Web3ProviderEngine();
     const sendAsync = (o, cb) => {
@@ -192,7 +190,7 @@ class Zero {
     const logs = await provider.getLogs(Object.assign({
       fromBlock: await this.shifterPool.getGenesis() 
     }, filter));
-    const decoded = logs.map((v) => contract.interface.parseLog(v).values);
+    const decoded = logs.map((v) => contract.interface.parseLog(v).args);
     return decoded.map((v, i) => new BorrowProxy(Object.assign({
       zero: this,
       shifterPool: this.network.shifterPool,
@@ -328,7 +326,7 @@ class Zero {
       forbidLoan,
       borrower
     } = liquidityRequest;
-    const contract = new Contract(this.network.shifterPool, filterABI(ShifterPool.abi), getProvider(this.driver).getSigner());
+    const contract = this.shifterPool;
     const tx = await contract.executeBorrow({
       request: {
         borrower,
@@ -349,7 +347,7 @@ class Zero {
     return tx;
   }
   async loadBorrowProxyCreationCode() {
-    this.network.borrowProxyCreationCode = await (new Contract(this.network.shifterPool, filterABI(ShifterPool.abi), getProvider(this.driver).getSigner())).getBorrowProxyCreationCode();
+    this.network.borrowProxyCreationCode = await (new Contract(this.network.shifterPool, filterABI(ShifterPool.abi), this.getProvider(this.driver).getSigner())).getBorrowProxyCreationCode();
   }
   async initializeDriver() {
     await this.driver.initialize();

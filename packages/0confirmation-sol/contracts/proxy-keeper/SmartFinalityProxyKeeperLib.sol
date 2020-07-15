@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.6.0;
 
 import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
@@ -5,6 +6,7 @@ import { SmartFinalityLib } from "./SmartFinalityLib.sol";
 import { ShifterPool } from "../ShifterPool.sol";
 
 library SmartFinalityProxyKeeperLib {
+  using SafeMath for *;
   struct Isolate {
     address shifterPool;
     uint256 confirmationThreshold;
@@ -12,7 +14,7 @@ library SmartFinalityProxyKeeperLib {
     mapping (address => SmartFinalityLib.FinalityCheckRecord) finalityCheck;
     mapping (bytes32 => address) reqIdToAddress;
   }
-  function getNextReqId(Isolate storage isolate) internal returns (bytes32 next) {
+  function getNextId(Isolate storage isolate) internal returns (bytes32 next) {
     next = isolate.reqId;
     isolate.reqId = bytes32(uint256(next).add(1));
   }

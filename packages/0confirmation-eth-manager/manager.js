@@ -1,16 +1,15 @@
 'use strict';
 
-const { uniqBy, keyBy, mapValues, once } = require('lodash');
-const ethers = require('ethers');
-const { Web3Provider } = ethers.providers;
-const { BigNumber, bigNumberify, formatUnits, getAddress } = require('ethers/utils');
+const { uniqBy, keyBy, once } = require('lodash');
+const { ContractFactory, Contract } = require('@ethersproject/contracts');
+const { Interface } = require('@ethersproject/abi');
+const { hexlify } = require('@ethersproject/bytes');
+const { getDefaultProvider, InfuraProvider } = require('@ethersproject/providers');
+const { AddressZero: ZERO_ADDRESS } = require('@ethersproject/constants');
+const { parseUnits } = require('@ethersproject/units');
 const axios = require('axios');
 
-const moment = require('moment');
-
-const ZERO_ADDRESS = '0x' + Array(40).fill('0').join('');
-
-const EthersContract = Object.getPrototypeOf(new ethers.Contract(ZERO_ADDRESS, [], new ethers.getDefaultProvider()));
+const EthersContract = Object.getPrototypeOf(new Contract(ZERO_ADDRESS, [], new getDefaultProvider()));
 
 const wrapLog = (log, contract) => Object.assign(log, {
   getBlock: async () => await contract.provider.getBlock(log.blockHash),
@@ -22,7 +21,7 @@ class Manager {
   constructor() {}
   async getEvents(filterOpts = {}) {
     const iface = this.constructor.interface;
-    if (!filterOpts.fromBlock && this.getGenesis) filterOpts.fromBlock = ethers.utils.hexlify(await this.getGenesis());
+    if (!filterOpts.fromBlock && this.getGenesis) filterOpts.fromBlock = hexlify(await this.getGenesis());
     else filterOpts.fromBlock = filterOpts.fromBlock || '0x0';
     const address = this.contract.address.length === 66 ? '0x' + this.contract.address.substr(26) : this.contract.address;
     let filter = Object.assign({
@@ -62,8 +61,6 @@ const coerceToSigner = (providerOrSigner) => {
   }
 };
 
-const globalObject = require('the-global-object');
-
 const defer = () => {
   let promise, resolve, reject;
   promise = new Promise((_resolve, _reject) => {
@@ -79,11 +76,16 @@ const defer = () => {
 
 const makeManagerClass = (artifact) => {
   const abi = uniqBy(artifact.abi, 'name');
-  const contract = new ethers.Contract(ZERO_ADDRESS, abi, new ethers.providers.InfuraProvider('kovan'));
+  const contract = new Contract(ZERO_ADDRESS, abi, new InfuraProvider('kovan'));
+  const interfaceObject = new Interface(artifact.abi);
   const EthersContract = Object.getPrototypeOf(contract);
-  const managerClass = class PolymarketManager extends Manager {
+  const managerClass = class DerivedManager extends Manager {
+    static get interface() { return interfaceObject; }
+    static get abi() { return abi; }
+    static get functions() { return interfaceObject.functions; }
+    static get networks() { return (artifact.networks = artifact.networks || {}); }
     static async deploy(provider, ...args) {
-      const factory = new ethers.ContractFactory(abi, artifact.bytecode, provider)
+      const factory = new ContractFactory(abi, artifact.bytecode, provider)
       return await factory.deploy(...args);
     }
     constructor(address, providerOrSigner) {
@@ -106,7 +108,7 @@ const makeManagerClass = (artifact) => {
           method: 'GET',
           url: 'https://ethgasstation.info/json/ethgasAPI.json'
         })).data.fast;
-        return ethers.utils.hexlify(ethers.utils.parseUnits(String(Math.floor((Number(result)*Number(multiplier)))), 8));
+        return hexlify(parseUnits(String(Math.floor((Number(result)*Number(multiplier)))), 8));
       } catch (e) {
         console.error(e);
         return null;
@@ -123,7 +125,7 @@ const makeManagerClass = (artifact) => {
       return args;
     }
   };
-  const managerSubclass = class extends managerClass {};
+  const managerSubclass = class ManagerClass extends managerClass {};
   const keyed = keyBy(abi, 'name');
   Object.keys(contract.functions).forEach((v) => {
     managerSubclass.prototype[v] = async function (...args) {
@@ -141,9 +143,9 @@ const makeManagerClass = (artifact) => {
         while (true) {
           block = await provider.send('eth_getBlockByNumber', [ '0x' + Number(block).toString(16), true ]);
           if (block) break;
-          await new Promise((resolve, reject) => setTimeout(resolve, 2000));
+          await new Promise((resolve) => setTimeout(resolve, 2000));
         }
-        const actualTx = block.transactions.find((v) => v.from === tx.from && nonce === tx.nonce);
+        const actualTx = block.transactions.find((v) => v.from === tx.from && v.nonce === tx.nonce);
         if (actualTx) {
           const receipt = await provider.send('eth_getTransactionReceipt', [ actualTx.hash ])
           receipt.logs = receipt.logs.map((v) => {
@@ -166,42 +168,9 @@ const makeManagerClass = (artifact) => {
     };
   });
   managerSubclass.prototype._events = contract._events;
-  return copyStatics(managerSubclass, Object.assign({}, contract, {
-    abi: abi,
-    networks: artifact.networks
-  }));
+  return managerSubclass;
 };
-
-const copyStatics = (target, from) => {
-  target.interface = from.interface;
-  target.functions = from.functions;
-  target.networks = from.networks;
-  target.abi = from.abi;
-  return target;
-};
-
-const copyStaticsFromArtifact = (target, artifact) => {
-  const interfaceObject = new ethers.utils.Interface(uniqBy(artifact.abi, 'name'));
-  const functions = interfaceObject.functions;
-  return Object.assign(target, {
-    functions,
-    interface: interfaceObject,
-    networks: artifact.networks,
-    abi: artifact.abi
-  });
-};
-
-const makeMainnetInstanceGetterFactory = (artifact) => {
-  const managerClass = class extends makeManagerClass(artifact) {};
-  managerClass.getMainnetInstance = function (provider) {
-    provider = provider || new ethers.providers.InfuraProvider('mainnet');
-    if (!artifact.networks[1]) throw Error('no mainnet address associated with factory for ' + artifact.contractName);
-    return new this(artifact.networks[1].address, provider);
-  }
-  return managerClass;
-}
 
 Object.assign(module.exports, {
-  makeManagerClass,
-  makeMainnetInstanceGetterFactory
+  makeManagerClass
 });
