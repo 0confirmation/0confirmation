@@ -811,7 +811,8 @@ const TradeRoom = (props) => {
                 }}
               >
                 <Link
-                  to="/trade/swap"
+                    to="https://swap.0confirmation.com/trade/swap"
+//                   to="/trade/swap"
                   style={{
                     outline: "none",
                     textDecoration: "none",
@@ -836,7 +837,8 @@ const TradeRoom = (props) => {
                 }}
               >
                 <Link
-                  to="/trade/earn"
+                    to="https://swap.0confirmation.com/trade/earn"
+//                   to="/trade/earn"
                   style={{
                     outline: "none",
                     textDecoration: "none",

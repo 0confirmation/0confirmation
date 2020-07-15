@@ -45,7 +45,7 @@ export default class Navigation extends React.Component {
             <>
                 <div>
                     {(this.props.ismobile)?
-                        <Navbar fixed="top" className={(this.state.isScroll) ? "px-5 py-3 shadow-sm bgs" : "px-5 py-3"}>
+                        <Navbar style={{ border: "1px solid #008F11", borderRadius: "10px" }} fixed="top" className={(this.state.isScroll) ? "px-5 py-3 shadow-sm bgs mx-5 my-3" : "px-5 py-3 bgs mx-5 my-3"}>
                             <NavbarBrand href="/"><img src={require("../images/0cf.svg")} alt="0cf" /></NavbarBrand>
                             <NavLink className="ml-auto" onClick={
                                 async e => {
@@ -61,42 +61,57 @@ export default class Navigation extends React.Component {
                                     onClick={async () => { await this.setState({ isopen: false }) }}
                                     onKeyDown={async () => { await this.setState({ isopen: false }) }}>
                                     <Nav vertical>
-                                        <Link to="/" style={{outline:"none", textDecoration:"none", color: "#ffffff"}} className="my-2 p-2">Docs
-                                            <NavItem style={{ backgroundColor: (window.location.pathname.split("/")[2] === "doc") ? "#008F11" : "" }} />
-                                        </Link>
-                                        <a href="https://swap.0confirmation.com/trade/earn" style={{outline:"none", textDecoration:"none", color: "#ffffff", backgroundColor: (window.location.pathname.split("/")[2] === "earn") ? "#008F11" : "" }} className="my-2 p-2">
-                                            Earn
-                                            <NavItem />
-                                        </a>
-                                        <a href="https://swap.0confirmation.com/trade/swap" style={{outline:"none", textDecoration:"none", color: "#ffffff", backgroundColor: (window.location.pathname.split("/")[2] === "swap") ? "#008F11" : ""  }} className="my-2 p-2">
-                                            Swap
-                                            <NavItem />
-                                        </a>
+                                        <NavItem style={{
+                                            width: "250px", height: "50px", padding: "10px", outline: "none", textDecoration: "none",
+                                            // backgroundColor: "#008F11",
+                                        }} className="mb-4">
+                                            <Link to="https://swap.0confirmation.com/trade/swap" style={{ color: "#ffffff",outline:"none"}}
+                                            >Swap App</Link>
+                                        </NavItem>
+                                        <NavItem style={{
+                                            width: "250px", height: "50px", padding: "10px", outline: "none", textDecoration: "none",
+                                            // backgroundColor: "#008F11",
+                                        }} className="mb-4">
+                                            <Link to="/" style={{ color: "#ffffff", }}
+                                            >Docs</Link>
+                                        </NavItem>
                                     </Nav>
                                 </div>
                             </Drawer>
                             
                         </Navbar>
                     :    
-                    <Navbar fixed="top" className={(this.state.isScroll) ? "px-5 py-3 shadow-sm bgs" : "px-5 py-3"}>
+                        <Navbar style={{ border: "1px solid #008F11", borderRadius: "10px" }} fixed="top" className={(this.state.isScroll) ? "px-5 py-3 shadow-sm bgs mx-5 my-3" : "px-5 py-3 bgs mx-5 my-3"}>
                         <NavbarBrand href="/"><img src={require("../images/0cf.svg")} alt="0cf"/></NavbarBrand>
                         <NavbarToggler onClick={async()=>await this.setState({isopen:!this.state.isopen})} />
-                        <Nav className="ml-auto">
-                            <Link to="/" style={{color: "#ffffff",textDecoration:"none"}} className="mx-1">
-                                <NavItem className="nav-button" style={{width:"75px", marginRight:"4px", marginLeft:"4px", textAlign:"center", outline:"none", textDecoration:"none", backgroundColor:(window.location.pathname.split("/")[2] === "doc")?"#008F11":"" }}>
-                                         Docs
+                            <Nav className="ml-auto">
+                                <NavItem>
+                                    <Link to="https://swap.0confirmation.com/trade/swap" style={{
+                                        width: "115px", height: "50px", padding: "10px", outline: "none", textDecoration: "none", color: "#ffffff",
+                                        backgroundColor: (window.location.pathname.split("/")[2] === "earn") ? "#008F11" : "#008F11",
+                                        borderRadius: "10px"
+                                    }} className="mx-1 px-3"
+
+                                    >Swap App</Link>
                                 </NavItem>
-                            </Link>
-                            <a href="https://swap.0confirmation.com/trade/earn" style={{color: "#ffffff",textDecoration:"none"}} className="mx-1">
-                                <NavItem className="nav-button" style={{width:"75px", marginRight:"4px", marginLeft:"4px", textAlign:"center", outline:"none", textDecoration:"none", backgroundColor:(window.location.pathname.split("/")[2] === "earn")?"#008F11":"" }}>
-                                        Earn
-                                </NavItem>
-                            </a>
-                            <a href="https://swap.0confirmation.com/trade/swap" style={{color: "#ffffff",textDecoration:"none"}} className="mx-1">
-                                <NavItem className="nav-button" style={{width:"75px", marginRight:"4px", marginLeft:"4px", textAlign:"center", outline:"none", textDecoration:"none", backgroundColor:(window.location.pathname.split("/")[2] === "swap")?"#008F11":"" }}>
-                                    Swap
-                                </NavItem>
-                            </a>
+                            <NavItem>
+                                    <Link to="/" style={{
+                                        width: "115px", height: "50px", padding: "10px", outline: "none", textDecoration: "none", color: "#ffffff",
+                                        backgroundColor: (window.location.pathname.split("/")[2] === "doc") ? "#008F11" : "#008F11",
+                                        borderRadius: "10px"
+                                    }} className="mx-1 px-4" 
+                                  
+                                >Docs</Link>
+                            </NavItem>
+                            {/* <NavItem>
+                                    <Link to="https://swap.0confirmation.com/trade/swap" style={{
+                                        width: "115px", height: "50px", padding: "10px", outline: "none",
+                                        textDecoration: "none", color: "#ffffff", backgroundColor: (window.location.pathname.split("/")[2] === "swap") ? "#1F2820" : "",
+                                        borderRadius: (window.location.pathname.split("/")[2] === "swap") ? "10px" : ""
+                                    }} className="mx-1" 
+ 
+                                >Swap</Link>
+                            </NavItem> */}
                        </Nav>
                     </Navbar>}
                 </div>
