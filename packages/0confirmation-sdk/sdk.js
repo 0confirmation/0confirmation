@@ -9,7 +9,7 @@ const environment = require('./environments');
 const constants = require('./constants');
 const BN = require('bignumber.js');
 const resultToJsonRpc = require('./util/result-to-jsonrpc');
-const constants = require('@ethersproject/constants');
+const { AddressZero } = require('@ethersproject/constants');
 const { Buffer } = require('safe-buffer');
 const {
   Common: {
@@ -62,7 +62,7 @@ class Zero {
   }
   setEnvironment(env) {
     this.network = env;
-    this.network.shifterPool = this.network.shifterPool || constants.AddressZero;
+    this.network.shifterPool = this.network.shifterPool || AddressZero;
     this.shifterPool = new ShifterPool(this.network.shifterPool, this.getProvider().asEthers(), this);
   }
   constructor(o, ...args) {
@@ -358,7 +358,7 @@ const preprocessor = (artifact, ...args) => {
   const factory = new ContractFactory(artifact.abi, artifact.bytecode, (new JsonRpcProvider('http://localhost:8545')).getSigner());
   const { data } = factory.getDeployTransaction(...args);
   return {
-    to: constants.AddressZero,
+    to: AddressZero,
     calldata: data
   };
 };
