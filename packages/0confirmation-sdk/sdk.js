@@ -9,6 +9,7 @@ const environment = require('./environments');
 const constants = require('./constants');
 const BN = require('bignumber.js');
 const resultToJsonRpc = require('./util/result-to-jsonrpc');
+const constants = require('@ethersproject/constants');
 const { Buffer } = require('safe-buffer');
 const {
   Common: {
@@ -18,15 +19,14 @@ const {
 } = require('@0confirmation/renvm');
 const makeBaseProvider = require('@0confirmation/providers/base-provider');
 const { toHex, toBase64 } = require('./util');
-const ethersUtil = require('ethers/utils');
-const { joinSignature, solidityKeccak256 } = ethersUtil;
-const ethers = require('ethers');
-const defaultProvider = ethers.getDefaultProvider();
+const { joinSignature } = require('@ethersproject/bytes');
+const { keccak256 } = require('@ethersproject/solidity');
 const { Contract, ContractFactory } = require('@ethersproject/contracts');
 const utils = require('./util');
-const abi = ethersUtil.defaultAbiCoder;
+const { defaultAbiCoder: abi, Interface } = require('@ethersproject/abi');
 const Driver = require('./driver');
-const { Web3Provider } = require('ethers/providers/web3-provider');
+const { getDefaultProvider, Web3Provider, JsonRpcProvider } = require('@ethersproject/providers');
+const defaultProvider = getDefaultProvider();
 const Web3ProviderEngine = require('web3-provider-engine');
 const LiquidityToken = makeManagerClass(require('@0confirmation/sol/build/LiquidityToken'));
 const LiquidityRequestParcel = require('./liquidity-request-parcel');
@@ -38,12 +38,12 @@ const ShifterBorrowProxy = require('@0confirmation/sol/build/ShifterBorrowProxy'
 const BorrowProxy = require('./borrow-proxy');
 const ShifterPool = require('./shifter-pool');
 const filterABI = (abi) => abi.filter((v) => v.type !== 'receive');
-const shifterPoolInterface = new ethers.utils.Interface(filterABI(ShifterPoolArtifact.abi));
-const shifterBorrowProxyInterface = new ethers.utils.Interface(filterABI(ShifterBorrowProxy.abi));
+const shifterPoolInterface = new Interface(filterABI(ShifterPoolArtifact.abi));
+const shifterBorrowProxyInterface = new Interface(filterABI(ShifterBorrowProxy.abi));
 const uniq = require('lodash/uniq');
 
 const getSignatures = (abi) => {
-  const wrapped = new ethers.utils.Interface(filterABI(abi));
+  const wrapped = new Interface(filterABI(abi));
   return uniq(Object.keys(wrapped.functions).filter((v) => /^\w+$/.test(v)).map((v) => wrapped.functions[v].sighash));
 };
 
@@ -62,7 +62,7 @@ class Zero {
   }
   setEnvironment(env) {
     this.network = env;
-    this.network.shifterPool = this.network.shifterPool || ethers.constants.AddressZero;
+    this.network.shifterPool = this.network.shifterPool || constants.AddressZero;
     this.shifterPool = new ShifterPool(this.network.shifterPool, this.getProvider().asEthers(), this);
   }
   constructor(o, ...args) {
@@ -355,10 +355,10 @@ class Zero {
 }
 
 const preprocessor = (artifact, ...args) => {
-  const factory = new ethers.ContractFactory(artifact.abi, artifact.bytecode, (new ethers.providers.JsonRpcProvider('http://localhost:8545')).getSigner());
+  const factory = new ContractFactory(artifact.abi, artifact.bytecode, (new JsonRpcProvider('http://localhost:8545')).getSigner());
   const { data } = factory.getDeployTransaction(...args);
   return {
-    to: ethers.constants.AddressZero,
+    to: constants.AddressZero,
     calldata: data
   };
 };

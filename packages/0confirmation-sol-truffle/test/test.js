@@ -24,7 +24,12 @@ const ShifterBorrowProxy = artifacts.require('ShifterBorrowProxy');
 const DAI = artifacts.require('DAI');
 //const WBTC = artifacts.require('WBTC');
 const V2SwapAndDrop = artifacts.require('V2SwapAndDrop');
-const ethers = require('ethers');
+const { hexlify, arrayify } = require('@ethersproject/bytes');
+const { Contract } = require('@ethersproject/contracts');
+const { parseUnits, parseEther } = require('@ethersproject/units');
+const { Web3Provider } = require('@ethersproject/providers');
+const { defaultAbiCoder, Interface } = require('@ethersproject/abi');
+const { Wallet } = require('@ethersproject/wallet');
 const Zero = require('@0confirmation/sdk');
 const { ZeroMock } = Zero;
 const { mapValues } = require('lodash');
@@ -42,8 +47,6 @@ const isNear = (expected, b) => {
   expected.to.be.lt(upperBound);
 };
 
-const Interface = ethers.utils.Interface;
-
 const makeZero = (provider, contracts) => {
   const zero = new ZeroMock(provider);
   zero.setEnvironment(contracts);
@@ -52,18 +55,18 @@ const makeZero = (provider, contracts) => {
 
 const getAddress = async (artifact) => (await artifact.deployed()).address;
 
-const encodeAddressTriple = (a, b, c) => ethers.utils.defaultAbiCoder.encode(['bytes'], [ ethers.utils.defaultAbiCoder.encode(['address', 'address', 'address' ], [ a, b, c ]) ]);
+const encodeAddressTriple = (a, b, c) => defaultAbiCoder.encode(['bytes'], [ defaultAbiCoder.encode(['address', 'address', 'address' ], [ a, b, c ]) ]);
 
 const bluebird = require('bluebird');
 
 const makePrivateKeyWalletWithPersonalSign = (pvt, provider) => {
   const engine = new RpcEngine();
-  const wallet = new ethers.Wallet('0x' + pvt);
+  const wallet = new Wallet('0x' + pvt);
   const walletProvider = new HDWalletProvider(pvt, provider);
   engine.push(providerAsMiddleware(walletProvider));
   engine.push(function (req, res, next, end) {
     if (req.method === 'personal_sign') {
-      res.result = wallet.signMessage(ethers.utils.arrayify(req.params[0]));
+      res.result = wallet.signMessage(arrayify(req.params[0]));
     }
     end();
   });
@@ -133,7 +136,7 @@ contract('ShifterPool', () => {
     const keeperProvider = makePrivateKeyWalletWithPersonalSign(randomBytes(32).toString('hex'), fixtures.provider);
     const borrowerProvider = makePrivateKeyWalletWithPersonalSign(randomBytes(32).toString('hex'), fixtures.provider);
     const daoProvider = makePrivateKeyWalletWithPersonalSign(randomBytes(32).toString('hex'), fixtures.provider);
-    const daoAddress = (await (new ethers.providers.Web3Provider(daoProvider)).listAccounts())[0]
+    const daoAddress = (await (new Web3Provider(daoProvider)).listAccounts())[0]
     const network = {
       shifterPool: fixtures.ShifterPool.address,
       mpkh: '0x' + randomBytes(32).toString('hex')
@@ -148,9 +151,9 @@ contract('ShifterPool', () => {
       borrower,
       keeper
     });
-    const provider = new ethers.providers.Web3Provider(fixtures.provider);
-    const keeperEthers = new ethers.providers.Web3Provider(keeperProvider);
-    const borrowerEthers = new ethers.providers.Web3Provider(borrowerProvider);
+    const provider = new Web3Provider(fixtures.provider);
+    const keeperEthers = new Web3Provider(keeperProvider);
+    const borrowerEthers = new Web3Provider(borrowerProvider);
     const [ from ] = await provider.send('eth_accounts', []);
     const [ keeperAddress ] = await keeperEthers.send('eth_accounts', []);
     const [ borrowerAddress ] = await borrowerEthers.send('eth_accounts', []);
@@ -161,16 +164,16 @@ contract('ShifterPool', () => {
     await provider.waitForTransaction(await provider.send('eth_sendTransaction', [{
       from,
       to: keeperAddress,
-      value: ethers.utils.hexlify(ethers.utils.parseEther('20'))
+      value: hexlify(parseEther('20'))
     }]));
     await provider.waitForTransaction(await provider.send('eth_sendTransaction', [{
       from,
       to: borrowerAddress,
-      value: ethers.utils.hexlify(ethers.utils.parseEther('20'))
+      value: hexlify(parseEther('20'))
     }]));
     fixtures.from = from;
-    const renbtcWrapped = new ethers.Contract(fixtures.renbtc.address, ShifterERC20Mock.abi, new ethers.providers.Web3Provider(keeperProvider).getSigner());
-    await (await renbtcWrapped.mint(fixtures.keeperAddress, ethers.utils.parseUnits('10', 8))).wait();
+    const renbtcWrapped = new Contract(fixtures.renbtc.address, ShifterERC20Mock.abi, new Web3Provider(keeperProvider).getSigner());
+    await (await renbtcWrapped.mint(fixtures.keeperAddress, parseUnits('10', 8))).wait();
     await (await fixtures.keeper.approvePool(fixtures.renbtc.address)).wait();
     fixtures.providerZero = makeZero(fixtures.provider, network);
     fixtures.daoZero = makeZero(daoProvider, network);
@@ -189,7 +192,7 @@ contract('ShifterPool', () => {
   it('should execute a payment', async () => {
     const outputLogs = (v) => v.logs.map((log) => {
       try {
-        return new ethers.utils.Interface(fixtures.ShifterPool.abi).parseLog(log).values.message;
+        return new Interface(fixtures.ShifterPool.abi).parseLog(log).values.message;
       } catch (e) { }
     }).filter(Boolean).forEach((v) => console.log(v));
     const deferred = defer();
@@ -202,7 +205,7 @@ contract('ShifterPool', () => {
       //console.log(result);
       const sig = await deposited.waitForSignature();
       try {
-        const receipt = await (await deposited.executeBorrow(ethers.utils.parseUnits('1', 8).toString(), '100000')).wait();
+        const receipt = await (await deposited.executeBorrow(parseUnits('1', 8).toString(), '100000')).wait();
         //console.log(Number(receipt.gasUsed));
         deferred.resolve({
           borrowProxy: await deposited.getBorrowProxy(),
@@ -220,10 +223,10 @@ contract('ShifterPool', () => {
     ];
     const liquidityRequest = fixtures.borrower.createLiquidityRequest({
       token: fixtures.renbtc.address,
-      amount: ethers.utils.parseUnits('2', 8).toString(),
+      amount: parseUnits('2', 8).toString(),
       nonce: '0x68b7aed3299637f7ed8d02d40fb04a727d89bb3448ca439596bd42d65a6e16cf',
       actions,
-      gasRequested: ethers.utils.parseEther('0.01').toString()
+      gasRequested: parseEther('0.01').toString()
     });
     const liquidityRequestParcel = await liquidityRequest.sign();
     await liquidityRequestParcel.broadcast();
@@ -235,10 +238,10 @@ contract('ShifterPool', () => {
     //console.log(deposited);
     await new Promise((resolve) => setTimeout(resolve, 5000));
     
-    const receipt = await (await proxy.repayLoan({ gasLimit: ethers.utils.hexlify(6e6) })).wait();
+    const receipt = await (await proxy.repayLoan({ gasLimit: hexlify(6e6) })).wait();
     const iface = new Interface(ShifterBorrowProxy.abi.concat(AssetForwarderLib.abi).concat(ERC20Adapter.abi).concat(ERC20AdapterLib.abi));
-    const daiWrapped = new ethers.Contract(fixtures.DAI.address, fixtures.DAI.abi, fixtures.borrower.getProvider().asEthers());
-    const renbtcWrapped = new ethers.Contract(fixtures.renbtc.address, fixtures.DAI.abi, fixtures.daoZero.getProvider().asEthers());
+    const daiWrapped = new Contract(fixtures.DAI.address, fixtures.DAI.abi, fixtures.borrower.getProvider().asEthers());
+    const renbtcWrapped = new Contract(fixtures.renbtc.address, fixtures.DAI.abi, fixtures.daoZero.getProvider().asEthers());
     //console.log(String(await renbtcWrapped.balanceOf((await fixtures.keeper.getLiquidityTokenFor(fixtures.renbtc.address)).address)));
     //console.log(String(await renbtcWrapped.balanceOf(fixtures.keeper.shifterPool.address)));
     //console.log(String(await renbtcWrapped.balanceOf(fixtures.keeperAddress)));
@@ -247,7 +250,7 @@ contract('ShifterPool', () => {
   it('should default properly', async () => {
     const outputLogs = (v) => v.logs.map((log) => {
       try {
-        return new ethers.utils.Interface(fixtures.ShifterPool.abi).parseLog(log).values.message;
+        return new Interface(fixtures.ShifterPool.abi).parseLog(log).values.message;
       } catch (e) { }
     }).filter(Boolean).forEach((v) => console.log(v));
     const deferred = defer();
@@ -258,7 +261,7 @@ contract('ShifterPool', () => {
       const result = await deposited.submitToRenVM();
       const sig = await deposited.waitForSignature();
       try {
-        const receipt = await (await deposited.executeBorrow(ethers.utils.parseUnits('1', 8).toString(), '1')).wait();
+        const receipt = await (await deposited.executeBorrow(parseUnits('1', 8).toString(), '1')).wait();
         console.log(Number(receipt.gasUsed));
         deferred.resolve(await deposited.getBorrowProxy());
       } catch (e) {
@@ -272,21 +275,21 @@ contract('ShifterPool', () => {
     ];
     const liquidityRequest = fixtures.borrower.createLiquidityRequest({
       token: fixtures.renbtc.address,
-      amount: ethers.utils.parseUnits('2', 8).toString(),
+      amount: parseUnits('2', 8).toString(),
       nonce: '0x68b7aed3299637f7ed8d02d40fb04a727d89bb3448ca439596bd42d65a6e16cd',
       actions,
-      gasRequested: ethers.utils.parseEther('0.01').toString()
+      gasRequested: parseEther('0.01').toString()
     });
     const liquidityRequestParcel = await liquidityRequest.sign();
-    const renbtcWrapped = new ethers.Contract(fixtures.renbtc.address, fixtures.DAI.abi, fixtures.daoZero.getProvider().asEthers());
+    const renbtcWrapped = new Contract(fixtures.renbtc.address, fixtures.DAI.abi, fixtures.daoZero.getProvider().asEthers());
     //console.log(String(await renbtcWrapped.balanceOf(fixtures.keeperAddress)));
     await liquidityRequestParcel.broadcast();
     const proxy = await deferred.promise;
     await new Promise((resolve) => setTimeout(resolve, 5000));
    
-    const receipt = await (await proxy.defaultLoan({ gasLimit: ethers.utils.hexlify(6e6) })).wait();
+    const receipt = await (await proxy.defaultLoan({ gasLimit: hexlify(6e6) })).wait();
     const iface = new Interface(ShifterBorrowProxy.abi.concat(AssetForwarderLib.abi).concat(ERC20Adapter.abi).concat(ERC20AdapterLib.abi));
-    const daiWrapped = new ethers.Contract(fixtures.DAI.address, fixtures.DAI.abi, fixtures.borrower.getProvider().asEthers());
+    const daiWrapped = new Contract(fixtures.DAI.address, fixtures.DAI.abi, fixtures.borrower.getProvider().asEthers());
     //console.log(String(await renbtcWrapped.balanceOf((await fixtures.keeper.getLiquidityTokenFor(fixtures.renbtc.address)).address)));
     //console.log(String(await renbtcWrapped.balanceOf(fixtures.keeper.shifterPool.address)));
     //console.log(String(await renbtcWrapped.balanceOf(fixtures.keeperAddress)));
@@ -296,7 +299,7 @@ contract('ShifterPool', () => {
   it('should do a fallback shift', async () => {
     const outputLogs = (v) => v.logs.map((log) => {
       try {
-        return new ethers.utils.Interface(fixtures.ShifterPool.abi).parseLog(log).values.message;
+        return new Interface(fixtures.ShifterPool.abi).parseLog(log).values.message;
       } catch (e) { }
     }).filter(Boolean).forEach((v) => console.log(v));
     const deferred = defer();
@@ -309,23 +312,23 @@ contract('ShifterPool', () => {
     ];
     const liquidityRequest = fixtures.borrower.createLiquidityRequest({
       token: fixtures.renbtc.address,
-      amount: ethers.utils.parseUnits('2', 8).toString(),
+      amount: parseUnits('2', 8).toString(),
       nonce: '0x88b7aed3299637f7ed8d02d40fb04a727d89bb3448ca439596bd42d65a6e16cf',
       actions,
-      gasRequested: ethers.utils.parseEther('0.01').toString()
+      gasRequested: parseEther('0.01').toString()
     });
     const liquidityRequestParcel = await liquidityRequest.sign();
-    const renbtcWrapped = new ethers.Contract(fixtures.renbtc.address, fixtures.DAI.abi, fixtures.daoZero.getProvider().asEthers());
+    const renbtcWrapped = new Contract(fixtures.renbtc.address, fixtures.DAI.abi, fixtures.daoZero.getProvider().asEthers());
     //console.log(String(await renbtcWrapped.balanceOf(fixtures.keeperAddress)));
  //   console.log(String(await renbtcWrapped.balanceOf(borrowerAddress)));
     const deposited = await liquidityRequestParcel.waitForDeposit(0, 60*1000*30);
-    console.log(Zero.staticPreprocessor(fixtures.TransferAll.address, ethers.utils.defaultAbiCoder.encode(['bytes'], [ ethers.utils.defaultAbiCoder.encode(['address'], [borrowerAddress]) ])))
+    console.log(Zero.staticPreprocessor(fixtures.TransferAll.address, defaultAbiCoder.encode(['bytes'], [ defaultAbiCoder.encode(['address'], [borrowerAddress]) ])))
     const receipt = await (await deposited.executeShiftFallback([
-      Zero.staticPreprocessor(fixtures.TransferAll.address, ethers.utils.defaultAbiCoder.encode(['bytes'], [ ethers.utils.defaultAbiCoder.encode(['address'], [borrowerAddress]) ]))
+      Zero.staticPreprocessor(fixtures.TransferAll.address, defaultAbiCoder.encode(['bytes'], [ defaultAbiCoder.encode(['address'], [borrowerAddress]) ]))
     ])).wait();
 //    console.log(String(await renbtcWrapped.balanceOf(borrowerAddress)));
     const iface = new Interface(ShifterBorrowProxy.abi.concat(AssetForwarderLib.abi).concat(ERC20Adapter.abi).concat(ERC20AdapterLib.abi));
-    const daiWrapped = new ethers.Contract(fixtures.DAI.address, fixtures.DAI.abi, fixtures.borrower.getProvider().asEthers());
+    const daiWrapped = new Contract(fixtures.DAI.address, fixtures.DAI.abi, fixtures.borrower.getProvider().asEthers());
     //console.log(String(await renbtcWrapped.balanceOf((await fixtures.keeper.getLiquidityTokenFor(fixtures.renbtc.address)).address)));
    // console.log(String(await renbtcWrapped.balanceOf(fixtures.keeper.shifterPool.address)));
     //console.log(String(await renbtcWrapped.balanceOf(fixtures.keeperAddress)));

@@ -183,7 +183,7 @@ module.exports = async function(deployer) {
   // setup uni and the liquidity pool with some liqudity
   if (isNetworkOrFork(deployer.network, 'kovan')) {
 /*
-    const amountMax = ethers.utils.bigNumberify('0x' + 'f'.repeat(64));
+    const amountMax = ethers.BigNumber.from('0x' + 'f'.repeat(64));
     const provider = new ethers.providers.Web3Provider(ShifterPool.currentProvider);
     const [ truffleAddress ] = await provider.send('eth_accounts', []);
     from = truffleAddress;
@@ -202,7 +202,7 @@ module.exports = async function(deployer) {
 */
   }
   if (isNetworkOrFork(deployer.network, 'test') || isNetworkOrFork(deployer.network, 'ganache')) {
-    const amountMax = ethers.utils.bigNumberify('0x' + 'f'.repeat(64));
+    const amountMax = ethers.BigNumber.from('0x' + 'f'.repeat(64));
     const provider = new ethers.providers.Web3Provider(ShifterPool.currentProvider);
     const [ truffleAddress ] = await provider.send('eth_accounts', []);
     from = truffleAddress;
