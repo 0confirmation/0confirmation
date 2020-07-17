@@ -1,13 +1,13 @@
 'use strict';
 
-const { Web3Provider } = require('ethers/providers/web3-provider');
-const { id } = require('ethers/utils');
+const { Web3Provider } = require('@ethersproject/providers');
+const { id } = require('@ethersproject/bytes');
 const {
   Provider: {
     isProvider
   }
-} = require('ethers/providers');
-const abi = require('ethers/utils').defaultAbiCoder;
+} = require('@ethersproject/providers');
+const abi = require('@ethersproject/abi').defaultAbiCoder;
 const { RPCWrapper }  = require('../../util');
 
 const stripHexPrefix = (s) => s.substr(0, 2) === '0x' ? s.substr(2) : s;

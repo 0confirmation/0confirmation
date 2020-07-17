@@ -1,30 +1,32 @@
 'use strict';
 
 const assembleCloneCode = require('./assemble-clone-code');
-const ethers = require('ethers');
+const { getCreate2Address } = require('@ethersproject/address');
 const AssetForwarder = require('@0confirmation/sol/build/AssetForwarder');
+const { keccak256 } = require('@ethersproject/solidity');
+const { arrayify } = require('@ethersproject/bytes');
 
-const ASSET_FORWARDER_IMPLEMENTATION_SALT = ethers.utils.solidityKeccak256(['string'], ['asset-forwarder-implementation']);
-const ASSET_FORWARDER_INITCODEHASH = ethers.utils.solidityKeccak256(['bytes'], [ AssetForwarder.bytecode ]);
+const ASSET_FORWARDER_IMPLEMENTATION_SALT = keccak256(['string'], ['asset-forwarder-implementation']);
+const ASSET_FORWARDER_INITCODEHASH = keccak256(['bytes'], [ AssetForwarder.bytecode ]);
 const computeAssetForwarderAddress = (shifterPool, borrowProxy, index) => {
-  const implementation = ethers.utils.getCreate2Address({
-    from: shifterPool,
-    salt: ethers.utils.arrayify(ASSET_FORWARDER_IMPLEMENTATION_SALT),
-    initCodeHash: ethers.utils.arrayify(ASSET_FORWARDER_INITCODEHASH)
-  });
-  return ethers.utils.getCreate2Address({
-    from: shifterPool,
-    salt: ethers.utils.arrayify(ethers.utils.solidityKeccak256([
+  const implementation = getCreate2Address(
+    shifterPool,
+    arrayify(ASSET_FORWARDER_IMPLEMENTATION_SALT),
+    arrayify(ASSET_FORWARDER_INITCODEHASH)
+  );
+  return getCreate2Address(
+    shifterPool,
+    arrayify(keccak256([
       'bytes32',
       'address',
       'bytes32'
     ], [
       ASSET_FORWARDER_IMPLEMENTATION_SALT,
       borrowProxy,
-      ethers.utils.solidityKeccak256([ 'uint256' ], [ index ])
+      keccak256([ 'uint256' ], [ index ])
     ])),
-    initCodeHash: ethers.utils.arrayify(ethers.utils.solidityKeccak256([ 'bytes' ], [ assembleCloneCode(shifterPool, implementation) ]))
-  });
+    arrayify(keccak256([ 'bytes' ], [ assembleCloneCode(shifterPool.toLowerCase(), implementation.toLowerCase()) ]))
+  );
 };
 
 module.exports = computeAssetForwarderAddress;

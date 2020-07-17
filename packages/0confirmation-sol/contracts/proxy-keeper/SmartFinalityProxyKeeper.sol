@@ -3,6 +3,7 @@ pragma experimental ABIEncoderV2;
 pragma solidity ^0.6.0;
 
 import { ChainlinkClient } from "@chainlink/contracts/src/v0.6/ChainlinkClient.sol";
+import { Chainlink } from "@chainlink/contracts/src/v0.6/Chainlink.sol";
 
 import { SmartFinalityLib } from "./SmartFinalityLib.sol";
 import { SmartFinalityProxyKeeperLib } from "./SmartFinalityProxyKeeperLib.sol";
@@ -11,6 +12,7 @@ import { StringLib } from "../utils/StringLib.sol";
 
 contract SmartFinalityProxyKeeper is ChainlinkClient {
   using SmartFinalityProxyKeeperLib for *;
+  using ShifterBorrowProxyLib for *;
   using StringLib for *;
   SmartFinalityProxyKeeperLib.Isolate public isolate;
   constructor(address shifterPool, uint256 confirmationThreshold, address link) public {
@@ -19,13 +21,14 @@ contract SmartFinalityProxyKeeper is ChainlinkClient {
     if (link != address(0x0)) setChainlinkToken(link);
     else setPublicChainlinkToken();
   }
-  function queryOracleConfirmations(ShifterBorrowProxyLib.LiquidityRequestParcel memory parcel, address mpkh, bool btcTestnet, uint256 bond) public {
-    bytes32 salt = parcel.computeBorrowerSalt();
+  function queryOracleConfirmations(ShifterBorrowProxyLib.LiquidityRequestParcel memory parcel, address mpkh, bool btcTestnet, uint256 /* bond */) public {
+    bytes32 salt = parcel.request.computeBorrowerSalt();
+    require(parcel.validateSignature(), "signature is invalid");
     address proxyAddress = isolate.computeProxyAddress(salt);
     bytes32 jobId = isolate.getNextId();
-    SmartFinalityLib.FinalityRecord storage record = isolate.finalityCheck[proxyAddress];
+    SmartFinalityLib.FinalityCheckRecord storage record = isolate.finalityCheck[proxyAddress];
     require(record.state == SmartFinalityLib.FinalityState.UNINITIALIZED || record.state == SmartFinalityLib.FinalityState.INSUFFICIENT_CONFIRMATIONS, "oracle request still in progress, or already resolved with sufficient confirmations");
-    record = SmartFinalityLib.FinalityRecord({
+    isolate.finalityCheck[proxyAddress] = SmartFinalityLib.FinalityCheckRecord({
       proxiedKeeper: record.proxiedKeeper,
       bond: record.bond,
       amount: parcel.request.amount,
@@ -35,7 +38,7 @@ contract SmartFinalityProxyKeeper is ChainlinkClient {
       jobId,
       address(this),
       this.fulfillCheckConfirmations.selector
-    )
+    );
     req.add(
       "get",
       abi.encodePacked(
@@ -50,12 +53,12 @@ contract SmartFinalityProxyKeeper is ChainlinkClient {
   }
   function fulfillCheckConfirmations(bytes32 requestId, uint256 value) public recordChainlinkFulfillment(requestId) {
     address proxyAddress = isolate.reqIdToAddress[requestId];
-    SmartFinalityLib.FinalityRecord storage record = isolate.finalityCheck[proxyAddress];
+    SmartFinalityLib.FinalityCheckRecord storage record = isolate.finalityCheck[proxyAddress];
     if (value >= record.amount) record.state = SmartFinalityLib.FinalityState.SUFFICIENT_CONFIRMATIONS;
     else record.state = SmartFinalityLib.FinalityState.INSUFFICIENT_CONFIRMATIONS;
   }
   function peekFinalityRecord(address proxyAddress) public view returns (SmartFinalityLib.FinalityState, address, uint256, uint256) {
-    SmartFinalityLib.FinalityRecord storage record = isolate.finalityCheck[proxyAddress];
+    SmartFinalityLib.FinalityCheckRecord storage record = isolate.finalityCheck[proxyAddress];
     return (record.state, record.proxiedKeeper, record.bond, record.amount);
   }
 }

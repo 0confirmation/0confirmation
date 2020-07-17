@@ -5,6 +5,11 @@ const { toBase64 } = util;
 const randomBytes = require('random-bytes');
 const constants = require('../constants');
 
+const adjustS = (s) => {
+  s.writeUInt8(Math.min(0x7f, s.readUInt8(0), 0))
+  return s;
+};
+
 const mockRenVMBackend = {
   name: 'renvm',
   prefixes: ['ren'],
@@ -54,7 +59,7 @@ const mockRenVMBackend = {
           out: [{
             value: randomBytes.sync(32).toString('base64')
           }, {
-            value: randomBytes.sync(32).toString('base64')
+            value: adjustS(randomBytes.sync(32)).toString('base64')
           }, {
             value: 0
           }]

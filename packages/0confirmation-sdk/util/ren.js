@@ -2,17 +2,17 @@
 
 const { Buffer } = require('safe-buffer');
 const { Networks, Opcode, Script } = require('bitcore-lib');
-const ethers = require('ethers');
+const ShifterBorrowProxy = require('@0confirmation/sol/build/ShifterBorrowProxy');
+const { arrayify } = require('@ethersproject/bytes');
 const stripHexPrefix = (s) => s.substr(0, 2) === '0x' ? s.substr(2) : s;
 const addHexPrefix = (s) => '0x' + stripHexPrefix(s);
 const { isBuffer } = Buffer;
-const { defaultAbiCoder: abi, solidityKeccak256, getCreate2Address } = require('ethers/utils');
-const ShifterBorrowProxy = require('@0confirmation/sol/build/ShifterBorrowProxy');
-const BorrowProxyLib = require('@0confirmation/sol/build/BorrowProxyLib');
-const { Contract } = require('ethers/contract');
+const { defaultAbiCoder: abi } = require('@ethersproject/abi');
+const { getCreate2Address } = require('@ethersproject/address');
+const { keccak256: solidityKeccak256 } = require('@ethersproject/solidity');
+
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 const NULL_PHASH = '0x0000000000000000000000000000000000000000000000000000000000000000';
-const defaultProvider = ethers.getDefaultProvider();
 
 const BYTES_TYPES = [ 'bytes' ];
 const keccakAbiEncoded = (types, values) => solidityKeccak256(BYTES_TYPES, [ abi.encode(types, values) ])
@@ -61,19 +61,6 @@ const computeLiquidityRequestHash = ({
   encodeInitializationActions(actions)
 ]);
 
-const encodeConstructor = () => {
-  const abi = [{
-    type: 'function',
-    name: 'cloneConstructor',
-    inputs: [{
-      name: 'consData',
-      type: 'bytes'
-    }]
-  }];
-  const iface = new ethers.utils.Interface(abi);
-  return iface.functions.cloneConstructor.encode(['0x']);
-};
-
 const assembleCloneCode = require('./assemble-clone-code');
 
 const computeBorrowProxyAddress = ({
@@ -100,16 +87,8 @@ const computeBorrowProxyAddress = ({
     forbidLoan,
     encodeInitializationActions(actions)
   ]);
-  const implementation = getCreate2Address({
-    from: shifterPool,
-    salt: ethers.utils.arrayify(solidityKeccak256(['string'], [ 'borrow-proxy-implementation' ])),
-    initCode: ethers.utils.arrayify(ShifterBorrowProxy.bytecode)
-  });
-  return getCreate2Address({
-    from: shifterPool,
-    salt: ethers.utils.arrayify(salt),
-    initCode: ethers.utils.arrayify(assembleCloneCode(shifterPool, implementation))
-  });
+  const implementation = getCreate2Address(shifterPool, arrayify(solidityKeccak256(['string'], [ 'borrow-proxy-implementation' ])), arrayify(solidityKeccak256([ 'bytes' ], [ ShifterBorrowProxy.bytecode ])));
+  return getCreate2Address(shifterPool, arrayify(salt),  arrayify(solidityKeccak256([ 'bytes' ], [ assembleCloneCode(shifterPool.toLowerCase(), implementation.toLowerCase()) ])));
 };
 
 const computeGHash = ({
@@ -134,8 +113,6 @@ const computeShiftInTxHash = ({
   utxo,
   g
 }) => toBase64(solidityKeccak256([ 'string' ], [ `txHash_${renContract}_${toBase64(maybeCoerceToGHash(g))}_${toBase64(utxo.txHash)}_${utxo.vOut}` ]));
-
-const maybeCoerceToShiftInHash = (input) => typeof input === 'object' ? computeShiftInTxHash(input) : input;
 
 const computeNHash = ({
   txHash, // utxo hash

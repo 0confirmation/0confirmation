@@ -139,7 +139,7 @@ const getEnvironment = (provider, network, backends) => ({
 
 const getMockEnvironment = (provider) => getEnvironment(provider, 'ganache', makeMockBackends(provider));
 
-const { makeManagerClass } = require('../manager');
+const { makeManagerClass } = require('@0confirmation/eth-manager');
 
 const FactoryManager = makeManagerClass(Factory);
 const ExchangeManager = makeManagerClass(Exchange);
