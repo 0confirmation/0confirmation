@@ -1,6 +1,19 @@
 pragma solidity ^0.6.0;
 
+import { SliceLib } from "./SliceLib.sol";
+import { MemcpyLib } from "./MemcpyLib.sol";
+
 library BitcoinScriptLib {
+  struct Script {
+    bytes buffer;
+    uint256 len;
+  }
+  function newScript(uint256 hint) internal pure returns (Script memory script) {
+    script.buffer = new bytes(hint);
+  }
+  function newScript() internal pure returns (Script memory) {
+    return newScript(0x400);
+  }
   // push value
   uint8 constant _OP_FALSE = 0;
   uint8 constant _OP_0 = 0;
@@ -493,4 +506,45 @@ library BitcoinScriptLib {
   function OP_INVALIDOPCODE() internal pure returns (uint8) {
     return _OP_INVALIDOPCODE;
   }
+  function _maybeRealloc(Script memory script, uint256 size) internal {
+    if (script.length + size > script.buffer.length) {
+      _realloc(script, script.buffer.length << 0x1);
+    }
+  }
+  function _realloc(Script memory script, uint256 newLength) internal {
+    bytes memory newBuffer = new bytes(newLength);
+    bytes memory buffer = script.buffer;
+    uint256 newPtr;
+    uint256 ptr;
+    assembly {
+      newPtr := add(0x20, newBuffer)
+      ptr := add(0x20, buffer)
+    }
+    MemcpyLib.memcpy(newPtr, ptr, script.len);
+    script.buffer = newBuffer;
+  }
+  function add(Script memory script, uint8 op) internal returns (Script memory) {
+    _maybeRealloc(0x1);
+    script.buffer[op] = byte(op);
+    script.len++;
+  } 
+  function _toLE(uint16 sz) internal pure returns (bytes memory buffer) {
+    bytes2 casted = bytes2(sz);
+    buffer = new bytes(sz);
+    assembly {
+      mstore(add(0x20, buffer), casted)
+    }
+  }
+  function _toLE(uint32) in
+  function add(Script memory script, bytes memory buffer) internal returns (Script memory) {
+    uint256 length = buffer.length;
+    uint256 sz;
+    if (length < 0x100) {
+      sz = 1;
+    } else if (length < 0x10000) {
+      sz = 2;
+    } else if (length < 0x100000000) {
+      sz = 4;
+    } else revert("script pushdata overflow");
+    
 }
