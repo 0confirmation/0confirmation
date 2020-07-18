@@ -87,8 +87,8 @@ const computeBorrowProxyAddress = ({
     forbidLoan,
     encodeInitializationActions(actions)
   ]);
-  const implementation = getCreate2Address(shifterPool, arrayify(solidityKeccak256(['string'], [ 'borrow-proxy-implementation' ])), arrayify(solidityKeccak256([ 'bytes' ], [ ShifterBorrowProxy.bytecode ])));
-  return getCreate2Address(shifterPool, arrayify(salt),  arrayify(solidityKeccak256([ 'bytes' ], [ assembleCloneCode(shifterPool.toLowerCase(), implementation.toLowerCase()) ])));
+  const implementation = getCreate2Address(shifterPool, solidityKeccak256(['string'], [ 'borrow-proxy-implementation' ]), solidityKeccak256([ 'bytes' ], [ ShifterBorrowProxy.bytecode ]));
+  return getCreate2Address(shifterPool, salt, solidityKeccak256([ 'bytes' ], [ assembleCloneCode(shifterPool.toLowerCase(), implementation.toLowerCase()) ]));
 };
 
 const computeGHash = ({
