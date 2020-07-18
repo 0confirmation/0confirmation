@@ -60,7 +60,7 @@ library BitcoinScriptLib {
   uint8 constant _OP_TUCK = 125;
 
   // splice ops
-  uint8 constanat _OP_CAT = 126;
+  uint8 constant _OP_CAT = 126;
   uint8 constant _OP_SUBSTR = 127;
   uint8 constant _OP_LEFT = 128;
   uint8 constant _OP_RIGHT = 129;
@@ -136,7 +136,7 @@ library BitcoinScriptLib {
   uint8 constant _OP_NOP10 = 185;
 
   // template matching params
-  uint8 constant _OP_PUBKEYHASH: 253;
+  uint8 constant _OP_PUBKEYHASH = 253;
   uint8 constant _OP_PUBKEY = 254;
   uint8 constant _OP_INVALIDOPCODE = 255;
   function OP_FALSE() internal pure returns (uint8) {
@@ -493,4 +493,4 @@ library BitcoinScriptLib {
   function OP_INVALIDOPCODE() internal pure returns (uint8) {
     return _OP_INVALIDOPCODE;
   }
-};
+}
