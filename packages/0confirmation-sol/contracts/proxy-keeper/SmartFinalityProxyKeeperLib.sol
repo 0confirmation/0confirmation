@@ -9,6 +9,7 @@ library SmartFinalityProxyKeeperLib {
   using SafeMath for *;
   struct Isolate {
     address shifterPool;
+    bool btcTestnet;
     uint256 confirmationThreshold;
     bytes32 reqId;
     mapping (address => SmartFinalityLib.FinalityCheckRecord) finalityCheck;

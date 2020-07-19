@@ -1,9 +1,13 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.6.0;
 
+import { LELib } from "./LELib.sol";
 import { SliceLib } from "./SliceLib.sol";
 import { MemcpyLib } from "./MemcpyLib.sol";
 
 library BitcoinScriptLib {
+  using LELib for *;
+  using SliceLib for *;
   struct Script {
     bytes buffer;
     uint256 len;
@@ -506,16 +510,16 @@ library BitcoinScriptLib {
   function OP_INVALIDOPCODE() internal pure returns (uint8) {
     return _OP_INVALIDOPCODE;
   }
-  function _maybeRealloc(Script memory script, uint256 size) internal {
-    if (script.length + size > script.buffer.length) {
+  function _maybeRealloc(Script memory script, uint256 size) internal pure {
+    if (script.len + size > script.buffer.length) {
       _realloc(script, script.buffer.length << 0x1);
     }
   }
-  function _realloc(Script memory script, uint256 newLength) internal {
+  function _realloc(Script memory script, uint256 newLength) internal pure {
     bytes memory newBuffer = new bytes(newLength);
     bytes memory buffer = script.buffer;
-    uint256 newPtr;
-    uint256 ptr;
+    bytes32 newPtr;
+    bytes32 ptr;
     assembly {
       newPtr := add(0x20, newBuffer)
       ptr := add(0x20, buffer)
@@ -523,35 +527,12 @@ library BitcoinScriptLib {
     MemcpyLib.memcpy(newPtr, ptr, script.len);
     script.buffer = newBuffer;
   }
-  function add(Script memory script, uint8 op) internal returns (Script memory) {
-    _maybeRealloc(0x1);
+  function addScript(Script memory script, uint8 op) internal pure returns (Script memory) {
+    _maybeRealloc(script, 0x1);
     script.buffer[op] = byte(op);
     script.len++;
   } 
-  function _toLE(uint16 sz) internal pure returns (bytes memory le) {
-    bytes2 casted = bytes2(sz);
-    buffer = new bytes(2);
-    assembly {
-      mstore(add(0x20, buffer), casted)
-    }
-    byte tmp = buffer[0];
-    buffer[0] = buffer[1];
-    buffer[1] = tmp;
-  }
-  function _toLE(uint32 sz) internal pure returns (bytes memory buffer) {
-    bytes4 casted = bytes4(sz);
-    buffer = new bytes(4);
-    assembly {
-      mstore(add(0x20, buffer), casted)
-    }
-    byte tmp = buffer[0];
-    buffer[0] = buffer[3];
-    buffer[3] = tmp;
-    tmp = buffer[1];
-    buffer[1] = buffer[2];
-    buffer[2] = tmp;
-  }
-  function add(Script memory script, bytes memory buffer) internal returns (Script memory) {
+  function addScript(Script memory script, bytes memory buffer) internal pure returns (Script memory) {
     uint256 length = buffer.length;
     uint256 sz;
     bytes memory lengthBuffer;
@@ -562,16 +543,16 @@ library BitcoinScriptLib {
     if (length < 0x100) {
       lengthBuffer = new bytes(1);
       sz = 1;
-      op = _OP_PUSHDATA1;
+      op = byte(bytes1(_OP_PUSHDATA1));
       lengthBuffer[0] = byte(uint8(length));
     } else if (length < 0x10000) {
-      lengthBuffer = _toLE(uint16(length));
+      lengthBuffer = uint16(length).toLE16();
       sz = 2;
-      op = _OP_PUSHDATA2;
+      op = byte(bytes1(_OP_PUSHDATA2));
     } else if (length < 0x100000000) {
-      lengthBuffer = _toLE(uint32(length));
+      lengthBuffer = uint32(length).toLE32();
       sz = 4;
-      op = _OP_PUSHDATA4;
+      op = byte(bytes1(_OP_PUSHDATA4));
     } else revert("script pushdata overflow");
     _maybeRealloc(script, sz + 1 + buffer.length);
     bytes memory scriptBuffer = script.buffer;
@@ -581,15 +562,15 @@ library BitcoinScriptLib {
       ptr := add(0x21, scriptBuffer)
       newPtr := add(0x20, buffer)
     }
-    MemcpyLib.memcpy(ptr, newPtr, sz);
-    MemcpyLib.memcpy(ptr + sz, newPtr, buffer.length);
+    MemcpyLib.memcpy(bytes32(ptr), bytes32(newPtr), sz);
+    MemcpyLib.memcpy(bytes32(ptr + sz), bytes32(newPtr), buffer.length);
     return script;
   }
   function toBuffer(Script memory script) internal pure returns (bytes memory buffer) {
     buffer = script.buffer.toSlice(0, script.len).copy();
   }
   function hashBuffer(Script memory script) internal pure returns (bytes memory result) {
-    bytes20 word = ripemd160(keccak256(toBuffer(script)));
+    bytes20 word = ripemd160(abi.encodePacked(keccak256(toBuffer(script))));
     result = new bytes(20);
     assembly {
       mstore(add(0x20, result), word)
@@ -597,9 +578,9 @@ library BitcoinScriptLib {
   }
   function toScriptHashOut(Script memory script) internal pure returns (Script memory output) {
     output = newScript(24);
-    add(output, _OP_HASH160);
-    add(output, hashBuffer(script));
-    add(output, _OP_EQUAL);
+    addScript(output, _OP_HASH160);
+    addScript(output, hashBuffer(script));
+    addScript(output, _OP_EQUAL);
   }
   function toAddress(Script memory script, bool isTestnet) internal pure returns (bytes memory buffer) {
     buffer = new bytes(21);
@@ -608,5 +589,29 @@ library BitcoinScriptLib {
     assembly {
       mstore(add(buffer, 0x21), mload(add(0x20, scriptHash)))
     }
+  }
+  function addressToBytes(address input) internal pure returns (bytes memory buffer) {
+    buffer = new bytes(20);
+    bytes20 word = bytes20(uint160(input));
+    assembly {
+      mstore(add(0x20, buffer), word)
+    }
+  }
+  function bytes32ToBytes(bytes32 input) internal pure returns (bytes memory buffer) {
+    buffer = new bytes(32);
+    assembly {
+      mstore(add(0x20, buffer), input)
+    }
+  }
+  function assembleMintScript(bytes32 gHash, address mpkh) internal pure returns (Script memory script) {
+    script = newScript(0x3d);
+    addScript(script, bytes32ToBytes(gHash));
+    addScript(script, _OP_DROP);
+    addScript(script, _OP_DUP);
+    addScript(script, _OP_HASH160);
+    addScript(script, addressToBytes(mpkh));
+    addScript(script, _OP_EQUALVERIFY);
+    addScript(script, _OP_CHECKSIG);
+    return toScriptHashOut(script);
   }
 }
