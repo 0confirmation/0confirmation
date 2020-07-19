@@ -585,4 +585,28 @@ library BitcoinScriptLib {
     MemcpyLib.memcpy(ptr + sz, newPtr, buffer.length);
     return script;
   }
+  function toBuffer(Script memory script) internal pure returns (bytes memory buffer) {
+    buffer = script.buffer.toSlice(0, script.len).copy();
+  }
+  function hashBuffer(Script memory script) internal pure returns (bytes memory result) {
+    bytes20 word = ripemd160(keccak256(toBuffer(script)));
+    result = new bytes(20);
+    assembly {
+      mstore(add(0x20, result), word)
+    }
+  }
+  function toScriptHashOut(Script memory script) internal pure returns (Script memory output) {
+    output = newScript(24);
+    add(output, _OP_HASH160);
+    add(output, hashBuffer(script));
+    add(output, _OP_EQUAL);
+  }
+  function toAddress(Script memory script, bool isTestnet) internal pure returns (bytes memory buffer) {
+    buffer = new bytes(21);
+    buffer[0] = byte(uint8(isTestnet ? 0xc4 : 0x05));
+    bytes memory scriptHash = hashBuffer(script);
+    assembly {
+      mstore(add(buffer, 0x21), mload(add(0x20, scriptHash)))
+    }
+  }
 }
