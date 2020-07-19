@@ -528,23 +528,61 @@ library BitcoinScriptLib {
     script.buffer[op] = byte(op);
     script.len++;
   } 
-  function _toLE(uint16 sz) internal pure returns (bytes memory buffer) {
+  function _toLE(uint16 sz) internal pure returns (bytes memory le) {
     bytes2 casted = bytes2(sz);
-    buffer = new bytes(sz);
+    buffer = new bytes(2);
     assembly {
       mstore(add(0x20, buffer), casted)
     }
+    byte tmp = buffer[0];
+    buffer[0] = buffer[1];
+    buffer[1] = tmp;
   }
-  function _toLE(uint32) in
+  function _toLE(uint32 sz) internal pure returns (bytes memory buffer) {
+    bytes4 casted = bytes4(sz);
+    buffer = new bytes(4);
+    assembly {
+      mstore(add(0x20, buffer), casted)
+    }
+    byte tmp = buffer[0];
+    buffer[0] = buffer[3];
+    buffer[3] = tmp;
+    tmp = buffer[1];
+    buffer[1] = buffer[2];
+    buffer[2] = tmp;
+  }
   function add(Script memory script, bytes memory buffer) internal returns (Script memory) {
     uint256 length = buffer.length;
     uint256 sz;
+    bytes memory lengthBuffer;
+    uint256 lenPtr;
+    uint256 ptr;
+    uint256 newPtr;
+    byte op; 
     if (length < 0x100) {
+      lengthBuffer = new bytes(1);
       sz = 1;
+      op = _OP_PUSHDATA1;
+      lengthBuffer[0] = byte(uint8(length));
     } else if (length < 0x10000) {
+      lengthBuffer = _toLE(uint16(length));
       sz = 2;
+      op = _OP_PUSHDATA2;
     } else if (length < 0x100000000) {
+      lengthBuffer = _toLE(uint32(length));
       sz = 4;
+      op = _OP_PUSHDATA4;
     } else revert("script pushdata overflow");
-    
+    _maybeRealloc(script, sz + 1 + buffer.length);
+    bytes memory scriptBuffer = script.buffer;
+    scriptBuffer[script.len] = op;
+    assembly {
+      lenPtr := add(0x20, lengthBuffer)
+      ptr := add(0x21, scriptBuffer)
+      newPtr := add(0x20, buffer)
+    }
+    MemcpyLib.memcpy(ptr, newPtr, sz);
+    MemcpyLib.memcpy(ptr + sz, newPtr, buffer.length);
+    return script;
+  }
 }
