@@ -275,7 +275,6 @@ describe("ShifterPool", () => {
     const renbtcWrapped = new ethers.Contract(fixtures.renbtc.address, fixtures.DAI.abi, fixtures.daoZero.getProvider().asEthers());
     await fixtures.keeper.stopListeningForLiquidityRequests();
   });
-    /*
   it('should default properly', async () => {
     const outputLogs = (v) => v.logs.map((log) => {
       try {
@@ -350,5 +349,4 @@ describe("ShifterPool", () => {
   
     await fixtures.keeper.stopListeningForLiquidityRequests();
   });
-    */
 });
