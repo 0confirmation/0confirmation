@@ -2,22 +2,25 @@
 // but useful for running the script in a standalone fashion through `node <script>`.
 // When running the script with `buidler run <script>` you'll find the Buidler
 // Runtime Environment's members available in the global scope.
-const ShifterERC20Mock = require('../build/ShifterERC20Mock');
+const ShifterERC20Mock = require("../build/ShifterERC20Mock");
 const DAI = require("../build/DAI");
-const { BigNumber } = require('@ethersproject/bignumber');
+const {BigNumber} = require("@ethersproject/bignumber");
 const bigNumberify = (n) => BigNumber.from(n);
 const UniswapV2Router01 = require("../build/UniswapV2Router01");
 const bre = require("@nomiclabs/buidler");
 const environments = require("@0confirmation/sdk/environments");
 const Zero = require("@0confirmation/sdk");
-const fromEthers = require('@0confirmation/providers/from-ethers');
-const { ZeroMock } = Zero;
-const { mapSeries } = require("bluebird");
+const fromEthers = require("@0confirmation/providers/from-ethers");
+const {ZeroMock} = Zero;
+const {mapSeries} = require("bluebird");
+const chalk = require("chalk");
 
 const ModuleTypes = {
   BY_CODEHASH: 1,
   BY_ADDRESS: 2,
 };
+
+const logger = require("@0confirmation/logger")("@0confirmation/sol/deploy");
 
 const networks = {
   kovan: environments.getAddresses("testnet"),
@@ -47,29 +50,29 @@ const makeDeploy = (deploy, wrap, push, deployer) => async (
   contractName,
   args = [],
   libraries = {}
-) =>
-  wrap(
-    push(
-      await deploy(contractName, {
-        from: deployer,
-        contractName,
-        args,
-        libraries
-      })
-    )
-  );
+) => {
+  logger.info("deploying " + contractName);
+  const deployed = await deploy(contractName, {
+    from: deployer,
+    contractName,
+    args,
+    libraries,
+  });
+  logger.info("deployed!");
+  return wrap(push(deployed));
+};
 
 module.exports = async (buidler) => {
-  const { getNamedAccounts, deployments } = buidler;
-  const { log } = deployments;
-  const { ethers } = bre;
+  const {getNamedAccounts, deployments} = buidler;
+  const {log} = deployments;
+  const {ethers} = bre;
   const deployed = [];
   const push = makePush(deployed);
   const [signer] = await ethers.getSigners();
   const wrap = makeWrapper(ethers, signer);
-  const { deployer } = await getNamedAccounts();
+  const {deployer} = await getNamedAccounts();
   const deploy = makeDeploy(deployments.deploy, wrap, push, deployer);
-  const { AddressZero: NO_SUBMODULE } = ethers.constants;
+  const {AddressZero: NO_SUBMODULE} = ethers.constants;
   const chain = chainIdToNetwork(Number(await bre.getChainId()));
   const shifterBorrowProxyFactoryLib = await deploy(
     "ShifterBorrowProxyFactoryLib",
@@ -83,14 +86,26 @@ module.exports = async (buidler) => {
   await deploy("TransferAll");
   let weth, shifterRegistry, dai, renbtc, factory, router, from;
   switch (chain) {
-    case "mainnet":
     case "kovan":
-      renbtc = { address: networks[chain].renbtc };
-      shifterRegistry = { address: networks[chain].shifterRegistry };
-      router = { address: networks[chain].router };
-      factory = { address: networks[chain].factory };
-      weth = { address: networks[chain].weth };
-      dai = { address: networks[chain].dai };
+      weth = await deploy("WETH9");
+      dai = await deploy("DAI");
+      factory = await deploy("UniswapV2Factory", [deployer]);
+      router = await deploy("UniswapV2Router01", [
+        factory.address,
+        weth.address,
+      ]);
+      renbtc = {address: networks[chain].renbtc};
+      shifterRegistry = {address: networks[chain].shifterRegistry};
+      await factory.createPair(weth.address, renbtc.address); // { gasLimit: ethers.utils.hexlify(6e6) });
+      await factory.createPair(weth.address, dai.address); //, { gasLimit: ethers.utils.hexlify(6e6) });
+      break;
+    case "mainnet":
+      renbtc = {address: networks[chain].renbtc};
+      shifterRegistry = {address: networks[chain].shifterRegistry};
+      router = {address: networks[chain].router};
+      factory = {address: networks[chain].factory};
+      weth = {address: networks[chain].weth};
+      dai = {address: networks[chain].dai};
       break;
     case "test":
       weth = await deploy("WETH9");
@@ -223,7 +238,7 @@ module.exports = async (buidler) => {
             ethers.utils.parseEther("10"),
             deployerAddress,
             String(Math.floor(Date.now() / 1000) + 120000),
-            { value: ethers.utils.parseEther("10") }
+            {value: ethers.utils.parseEther("10")}
           )
         ).wait();
       }
