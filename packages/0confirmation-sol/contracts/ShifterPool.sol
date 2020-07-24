@@ -120,11 +120,15 @@ contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
     require(liquidityRequest.token.transferTokenFrom(msg.sender, address(this), bond), "bond submission failed");
   }
   function executeBorrow(ShifterBorrowProxyLib.LiquidityRequestParcel memory liquidityRequestParcel, uint256 bond, uint256 timeoutExpiry) public payable {
+    require(isolate.isKeeper[msg.sender], "only can be called by keeper");
     ShifterBorrowProxyLib.InitializationAction[] memory actions = liquidityRequestParcel.request.actions;
     validateUnderMaxLoan(liquidityRequestParcel);
     address payable proxyAddress = _executeBorrow(liquidityRequestParcel, bond, timeoutExpiry);
     proxyAddress.setupBorrowProxy(liquidityRequestParcel.request.borrower, liquidityRequestParcel.request.token, false);
     proxyAddress.sendInitializationActions(actions);
+  }
+  function setKeeper(address user, bool isKeeper) public onlyOwner {
+    isolate.isKeeper[user] = isKeeper;
   }
   function executeShiftSansBorrow(ShifterBorrowProxyLib.SansBorrowShiftParcel memory parcel) public payable {
     (address payable proxyAddress, ShifterBorrowProxyLib.InitializationAction[] memory actions) = _executeShiftSansBorrow(parcel);
