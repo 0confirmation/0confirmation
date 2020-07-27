@@ -5,18 +5,15 @@ const uniswap = require('@uniswap/sdk');
 const ethers = require('ethers');
 const randomBytes = require('random-bytes').sync;
 const makeMockBackends = require('../mock');
-const ShifterPool = require('@0confirmation/sol/build/ShifterPool')
-const ShifterRegistryMock = require('@0confirmation/sol/build/ShifterRegistryMock');
-const UniswapV2Factory = require('@0confirmation/sol/build/UniswapV2Factory');
-const UniswapV2Router01 = require('@0confirmation/sol/build/UniswapV2Router01');
-const BorrowProxyLib = require('@0confirmation/sol/build/BorrowProxyLib');
-const Curvefi = require('@0confirmation/sol/build/Curvefi');
-const CurveToken = require('@0confirmation/sol/build/CurveToken');
-const DAI = require('@0confirmation/sol/build/DAI');
-const MockWETH = require('@0confirmation/sol/build/MockWETH');
-const SwapEntireLoan = require('@0confirmation/sol/build/SwapEntireLoan');
-const TransferAll = require('@0confirmation/sol/build/TransferAll');
-const V2SwapAndDrop = require('@0confirmation/sol/build/V2SwapAndDrop');
+const ShifterPool = require('@0confirmation/sol/deployments/kovan/ShifterPool')
+//const ShifterRegistryMock = require('@0confirmation/sol/deployments/kovan/ShifterRegistryMock');
+const UniswapV2Factory = require('@0confirmation/sol/deployments/kovan/UniswapV2Factory');
+const UniswapV2Router01 = require('@0confirmation/sol/deployments/kovan/UniswapV2Router01');
+const DAI = require('@0confirmation/sol/deployments/kovan/DAI');
+const MockWETH = require('@0confirmation/sol/deployments/kovan/MockWETH');
+//const SwapEntireLoan = require('@0confirmation/sol/deployments/kovan/SwapEntireLoan');
+//const TransferAll = require('@0confirmation/sol/deployments/kovan/TransferAll');
+const V2SwapAndDrop = require('@0confirmation/sol/deployments/kovan/V2SwapAndDrop');
 
 const chainIdFromNetwork = (network) => {
   switch (network) {
@@ -29,7 +26,7 @@ const chainIdFromNetwork = (network) => {
   }
 };
 
-const fromArtifact = (network, artifact) => ((artifact.networks || {})[chainIdFromNetwork(network)] || {}).address;
+const fromArtifact = (network, artifact) => artifact.address;
 
 const renNetworkFromNetwork = (network) => {
   switch (network) {
@@ -45,7 +42,7 @@ const renNetworkFromNetwork = (network) => {
 const renvmFromEnvironment = (network) => {
   if (network === 'ganache' || network === 'test') {
     return {
-      shifterRegistry: fromArtifact(network, ShifterRegistryMock),
+      shifterRegistry: '0x' + '00'.repeat(20),
       mpkh: '0x' + randomBytes(32).toString('hex')
     }
   }
@@ -82,10 +79,12 @@ const uniswapFromNetwork = (network) => {
   }
 };
 
+/*
 const curveFromNetwork = (network) => ({
   curve: fromArtifact(network, Curvefi),
   curveToken: fromArtifact(network, CurveToken)
 });
+*/
 
 const daiFromNetwork = (network) => {
   if (network === 'ganache') {
@@ -108,7 +107,7 @@ const wethFromNetwork = (network) => ({
 });
 
 const getAddresses = (network) => ({
-  ...curveFromNetwork(network),
+ // ...curveFromNetwork(network),
   ...uniswapFromNetwork(network),
   ...zeroContractsFromNetwork(network),
   ...renvmFromEnvironment(network),
@@ -139,15 +138,19 @@ const getMockEnvironment = (provider) => getEnvironment(provider, 'ganache', mak
 
 const { makeManagerClass } = require('@0confirmation/eth-manager');
 
+/*
 const CurvefiManager = makeManagerClass(Curvefi);
+*/
 const ShifterPoolManager = makeManagerClass(ShifterPool);
+/*
 const CurveTokenManager = makeManagerClass(CurveToken);
+*/
 
 Object.assign(module.exports, {
   getAddresses,
-  CurvefiManager,
+//  CurvefiManager,
   ShifterPoolManager,
-  CurveTokenManager,
+//  CurveTokenManager,
   getEnvironment,
   getMockEnvironment
 });

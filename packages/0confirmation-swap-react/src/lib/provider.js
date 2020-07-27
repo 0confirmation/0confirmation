@@ -5,6 +5,7 @@ import fromEthers from "@0confirmation/providers/from-ethers";
 import { makeEngine, makeBaseProvider } from "@0confirmation/providers";
 import makeWalletSelectorFromProvider from "@0confirmation/providers/selector";
 
+/*
 import Migrations from "@0confirmation/sol/build/Migrations";
 import ShifterPool from "@0confirmation/sol/build/ShifterPool";
 import SandboxLib from "@0confirmation/sol/build/SandboxLib";
@@ -27,22 +28,13 @@ import UniswapV2Factory from "@0confirmation/sol/build/UniswapV2Factory";
 import UniswapV2Adapter from "@0confirmation/sol/build/UniswapV2Adapter";
 import V2SwapAndDrop from "@0confirmation/sol/build/V2SwapAndDrop";
 import WETH9 from "@0confirmation/sol/build/WETH9";
+*/
 
 import { ethers } from "ethers";
 
 import makeArtifacts from "@0confirmation/artifacts";
 const CHAIN = process.env.CHAIN || process.env.REACT_APP_CHAIN; // eslint-disable-line
-const migrationSource =
-  (globalObject.document &&
-    !process.env.JEST_WORKER_ID &&
-    require("raw-loader!@0confirmation/sol/migrations/1_initial_migration") // eslint-disable-line
-      .default) ||
-  (!process.env.JEST_WORKER_ID &&
-    require("fs").readFileSync( // eslint-disable-line
-      require.resolve("@0confirmation/sol/migrations/1_initial_migration"), // eslint-disable-line
-      "utf8"
-    )) ||
-  "";
+const migrationSource ="";
 
 const defer = () => {
   let promise, resolve, reject;
@@ -57,6 +49,7 @@ const defer = () => {
   };
 };
 
+/*
 const builds = {
   Migrations,
   ShifterPool,
@@ -80,6 +73,7 @@ const builds = {
   Exchange,
   Factory,
 };
+*/
 
 let makeGanacheProvider = () =>
     fromEthers(new ethers.providers.JsonRpcProvider("http://localhost:8545")),
@@ -94,27 +88,6 @@ if (CHAIN === "embedded" || CHAIN === "test") {
             )
           )
       : require("@0confirmation/browser-ganache"); // eslint-disable-line
-  setupEmbeddedMocks = async function () {
-    const provider = this;
-    const setupProvider = makeWalletSelectorFromProvider(
-      provider.dataProvider,
-      2
-    );
-    if (provider._initialized) return await provider._initialized;
-    const deferred = defer();
-    provider._initialized = deferred.promise;
-    const artifacts = makeArtifacts(setupProvider, builds);
-    await artifacts.runMigration(migrationSource, {
-      ethers,
-      bluebird: require("bluebird"), // eslint-disable-line
-      fs: {},
-      "@0confirmation/sdk/environments": require("@0confirmation/sdk/environments"), // eslint-disable-line
-      "@0confirmation/sdk": require("@0confirmation/sdk"), // eslint-disable-line
-      console,
-    });
-    window.alert("0confirmation: demo environment bootstrapped");
-    return artifacts;
-  };
 }
 
 const engine = makeEngine();
@@ -236,6 +209,6 @@ if (globalObject.ethereum) {
 provider.migrate = setupEmbeddedMocks;
 if (CHAIN === "embedded") globalObject.provider = provider;
 
-provider.builds = builds;
+//provider.builds = builds;
 provider.makeFauxMetamaskSigner = makeFauxMetamaskSigner;
 export default provider;
