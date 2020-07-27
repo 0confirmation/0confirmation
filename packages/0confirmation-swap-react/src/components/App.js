@@ -29,7 +29,7 @@ import {
 import LoanModal from "./LoanModal";
 import TransactionDetailsModal from "./TransactionDetailsModal";
 import { Link } from "react-router-dom";
-import { FaAngleDown } from "react-icons/fa";
+import { FaAngleDown, FaAngleUp } from "react-icons/fa";
 import btcIcon from "@iconify/icons-cryptocurrency/btc";
 import daiIcon from "@iconify/icons-cryptocurrency/dai";
 import Alert from "./Alert";
@@ -218,6 +218,7 @@ const makeTestWallet = (proxyTarget) =>
 
 const TradeRoom = (props) => {
   const { ismobile } = props;
+  //const [userAddress, setUserAddress] = useState(ethers.constants.AddressZero);
   const [userAddress, setUserAddress] = useState(ethers.constants.AddressZero);
   const setup = async () => {
     if (provider.migrate) {
@@ -740,7 +741,7 @@ const TradeRoom = (props) => {
       />
 
       <div
-        className="justify-content-center align-content-center pt-5 swap"
+        className= {(ismobile ? "justify-content-center align-content-center pt-5" : "justify-content-center align-content-center pt-5 swap" )} 
         style={{
           zIndex: "1",
           overflowX: "hidden",
@@ -749,7 +750,7 @@ const TradeRoom = (props) => {
         }}
       >
         <div className="justify-content-center align-content-center text-center mx-auto my-auto pb-4 pt-5">
-          {(userAddress != null)?
+          {(userAddress != null && userAddress != ethers.constants.AddressZero)?
               <span
                       className="text-light"
                       style={{ fontSize: "0.8em", fontFamily: "PT Sans", color: "#00FF41" }}
@@ -764,10 +765,10 @@ const TradeRoom = (props) => {
                           )}
               </span>:
               <button
-                  className="btn text-light button-small btn-sm"
+                  className="btn text-light"
                   style={{
                     fontSize: "24dp",
-                    backgroundColor: "#317333",
+                    backgroundColor: "#008F11",
                     width: "248dp",
                     borderRadius: "10px",
                   }}
@@ -790,8 +791,8 @@ const TradeRoom = (props) => {
         </div>
         <Row className="justify-content-center align-content-center text-center mx-auto">
           <Col
-            lg="2"
-            md="2"
+            lg="4"
+            md="6"
             sm="6"
             className="justify-content-center align-content-center mx-auto w-50"
             style={{ backgroundColor: "#003B00", borderRadius: "10px" }}
@@ -802,25 +803,29 @@ const TradeRoom = (props) => {
                 lg="6"
                 md="6"
                 sm="6"
+              >
+                <Link
+                    to="swap"
+                    style={{
+                      outline: "none",
+                      textDecoration: "none",
+                      color: "#ffffff",
+                      width: "100%"
+                    }}
+                    href="/#"
+                  >
+                <div className="btn text-light"
                 style={{
+                  width: "100%",
                   borderRadius: ismobile ? "10px" : "13px",
                   backgroundColor:
                     window.location.pathname.split("/")[2] === "swap"
                       ? "#008F11"
                       : "",
-                }}
-              >
-                <Link
-                    to="https://swap.0confirmation.com/trade/swap"
-//                   to="/trade/swap"
-                  style={{
-                    outline: "none",
-                    textDecoration: "none",
-                    color: "#ffffff",
-                  }}
-                  href="/#"
-                >
-                  Swap
+                }}>
+                  
+                    Swap
+                </div>
                 </Link>
               </Col>
               <Col
@@ -828,17 +833,9 @@ const TradeRoom = (props) => {
                 lg="6"
                 md="6"
                 sm="6"
-                style={{
-                  borderRadius: ismobile ? "10px" : "13px",
-                  backgroundColor:
-                    window.location.pathname.split("/")[2] === "earn"
-                      ? "#008F11"
-                      : "",
-                }}
               >
                 <Link
-                    to="https://swap.0confirmation.com/trade/earn"
-//                   to="/trade/earn"
+                    to="earn"
                   style={{
                     outline: "none",
                     textDecoration: "none",
@@ -846,8 +843,18 @@ const TradeRoom = (props) => {
                   }}
                   href="/#"
                 >
+                <div className="btn text-light"
+                  style={{
+                    width: "100%",
+                    borderRadius: ismobile ? "10px" : "13px",
+                    backgroundColor:
+                      window.location.pathname.split("/")[2] === "earn"
+                        ? "#008F11"
+                        : "",
+                }}>
                   Earn
-                </Link>
+                </div>
+              </Link>
               </Col>
             </Row>
           </Col>
@@ -1067,8 +1074,8 @@ const TradeRoom = (props) => {
                     </InputGroupButtonDropdown>
                   </InputGroup>
                   <span style={{ fontFamily: "PT Sans", fontSize: "0.8em" }}
-                      className={(this.props.ismobile) ? "ml-auto" : "ml-5"}>
-                      <span className={(this.props.ismobile) ? "ml-auto" : "ml-5"} style={{ color: "#00FF41" }}>Current Balance: </span>{share}</span>
+                      className={(ismobile) ? "ml-auto" : "ml-5"}>
+                      <span className={(ismobile) ? "ml-auto" : "ml-5"} style={{ color: "#00FF41" }}>Current Balance: </span>{share}</span>
                 </Col>
               </Row>
             ) : (
@@ -1262,6 +1269,7 @@ const TradeRoom = (props) => {
                   {liquidityvalue === "Add Liquidity" ? "Add" : "Remove"}
                 </button>
               ) : (
+                userAddress != null && userAddress != ethers.constants.AddressZero ?
                 <button
                   onClick={async (evt) => {
                     requestLoan(evt).catch((err) => console.error(err));
@@ -1274,6 +1282,19 @@ const TradeRoom = (props) => {
                   }}
                 >
                   Swap
+                </button> :
+                <button
+                className="btn button-small btn-sm px-5"
+                onClick={(evt) => connectWeb3Modal(evt)}
+                style={{
+                  fontSize: "24dp",
+                  backgroundColor: "#008F11",
+                  borderRadius: "10px",
+                  color: "#FFFFFF",
+                  opacity: "0.38"
+                }}
+              >
+                  Connect Wallet to Swap
                 </button>
               )}
             </div>
@@ -1293,7 +1314,7 @@ const TradeRoom = (props) => {
                     color: "#00FF41",
                   }}
                 >
-                  Details <FaAngleDown />
+                  Details {showdetail ? <FaAngleDown /> : <FaAngleUp />}
                 </span>
               </Col>
             </Row>
@@ -1595,7 +1616,7 @@ const TradeRoom = (props) => {
                     lg="9"
                     md="9"
                     sm="9"
-                    style={{ backgroundColor: "#354737", borderRadius: "10px" }}
+                    style={{ border:"1px solid #008F11", borderRadius:"10px", fontSize:"18px"}}
                     className=" mx-4  pt-3"
                   >
                     <Row className="align-content-center justify-content-center">
@@ -1617,11 +1638,13 @@ const TradeRoom = (props) => {
                         >
                           You are selling{" "}
                           <b>
-                            {value} {_sendcoins.name}
+                            {value} BTC
+                            {/* {_sendcoins.name} */}
                           </b>{" "}
                           for at least{" "}
                           <b>
-                            {calcValue} {_getcoins.name}
+                            {calcValue} DAI
+                            {/* {_getcoins.name} */}
                           </b>
                           <br />
                           Expected Price Slippage: <b>{slippage}%</b>
