@@ -4,6 +4,7 @@ pragma solidity ^0.6.0;
 
 import { ChainlinkClient } from "@chainlink/contracts/src/v0.6/ChainlinkClient.sol";
 import { Chainlink } from "@chainlink/contracts/src/v0.6/Chainlink.sol";
+import { DepositAddressCalculatorLib } from "../utils/DepositAddressCalculatorLib.sol";
 
 import { SmartFinalityLib } from "./SmartFinalityLib.sol";
 import { SmartFinalityProxyKeeperLib } from "./SmartFinalityProxyKeeperLib.sol";
@@ -14,14 +15,24 @@ contract SmartFinalityProxyKeeper is ChainlinkClient {
   using SmartFinalityProxyKeeperLib for *;
   using ShifterBorrowProxyLib for *;
   using StringLib for *;
+  using DepositAddressCalculatorLib for *;
   SmartFinalityProxyKeeperLib.Isolate public isolate;
-  constructor(address shifterPool, uint256 confirmationThreshold, address link) public {
+  constructor(address shifterPool,bool btcTestnet,  uint256 confirmationThreshold, address link) public {
     isolate.shifterPool = shifterPool;
+    isolate.btcTestnet = btcTestnet;
     isolate.confirmationThreshold = confirmationThreshold;
     if (link != address(0x0)) setChainlinkToken(link);
     else setPublicChainlinkToken();
   }
-  function queryOracleConfirmations(ShifterBorrowProxyLib.LiquidityRequestParcel memory parcel, address mpkh, bool btcTestnet, uint256 /* bond */) public {
+  function _makeApiUrl(ShifterBorrowProxyLib.LiquidityRequestParcel memory parcel, address mpkh) internal view returns (string memory result) {
+    result = abi.encodePacked(
+      "https://blockchain.info/q/getreceivedbyaddress/",
+      parcel.request.computeDepositAddress(isolate.shifterPool, mpkh, isolate.btcTestnet),
+      "?confirmations=",
+      isolate.confirmationThreshold.toString()
+    ).toString();
+  }
+  function queryOracleConfirmations(ShifterBorrowProxyLib.LiquidityRequestParcel memory parcel, address mpkh, uint256 /* bond */) public {
     bytes32 salt = parcel.request.computeBorrowerSalt();
     require(parcel.validateSignature(), "signature is invalid");
     address proxyAddress = isolate.computeProxyAddress(salt);
@@ -41,12 +52,7 @@ contract SmartFinalityProxyKeeper is ChainlinkClient {
     );
     req.add(
       "get",
-      abi.encodePacked(
-        "https://blockchain.info/q/getreceivedbyaddress/",
-        parcel.computeDepositAddress(mpkh, btcTestnet),
-        "?confirmations=",
-        isolate.confirmationThreshold.toString()
-      ).toString()
+      _makeApiUrl(parcel, mpkh)
     );
     bytes32 requestId = sendChainlinkRequest(req, 1 * LINK);
     isolate.reqIdToAddress[requestId] = proxyAddress; 

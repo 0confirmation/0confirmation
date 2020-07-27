@@ -229,19 +229,10 @@ describe("ShifterPool", () => {
     const [ borrowerAddress ] = await fixtures.borrower.driver.sendWrapped('eth_accounts', []);
     await fixtures.keeper.listenForLiquidityRequests(async (v) => {
       const deposited = await v.waitForDeposit(0, 60*1000*30);
-      //console.log(deposited);
       const result = await deposited.submitToRenVM();
-      //console.log(result);
       const sig = await deposited.waitForSignature();
-      console.log(deposited.proxyAddress);
       try {
         const receipt = await (await deposited.executeBorrow(ethers.utils.parseUnits('1', 8).toString(), '100000')).wait();
-        console.log(receipt.logs.map((v) => {
-          try {
-            return fixtures.keeper.shifterPool.constructor.interface.parseLog(v);
-          } catch (e) { return v; }
-        }));
-        //console.log(Number(receipt.gasUsed));
         deferred.resolve({
           borrowProxy: await deposited.getBorrowProxy(),
           deposited
@@ -262,8 +253,6 @@ describe("ShifterPool", () => {
       gasRequested: ethers.utils.parseEther('0.01').toString()
     });
     const liquidityRequestParcel = await liquidityRequest.sign();
-    console.log('signer: ' + liquidityRequestParcel.borrower);
-    console.log('actual: ' + (await fixtures.borrower.getProvider().asEthers().listAccounts())[0]);
     await liquidityRequestParcel.broadcast();
     const {
       borrowProxy: proxy,
@@ -275,7 +264,6 @@ describe("ShifterPool", () => {
     const renbtcWrapped = new ethers.Contract(fixtures.renbtc.address, fixtures.DAI.abi, fixtures.daoZero.getProvider().asEthers());
     await fixtures.keeper.stopListeningForLiquidityRequests();
   });
-    /*
   it('should default properly', async () => {
     const outputLogs = (v) => v.logs.map((log) => {
       try {
@@ -291,7 +279,6 @@ describe("ShifterPool", () => {
       const sig = await deposited.waitForSignature();
       try {
         const receipt = await (await deposited.executeBorrow(ethers.utils.parseUnits('1', 8).toString(), '1')).wait();
-        console.log(Number(receipt.gasUsed));
         deferred.resolve(await deposited.getBorrowProxy());
       } catch (e) {
         deferred.reject(e);
@@ -341,7 +328,6 @@ describe("ShifterPool", () => {
     const liquidityRequestParcel = await liquidityRequest.sign();
     const renbtcWrapped = new ethers.Contract(fixtures.renbtc.address, fixtures.DAI.abi, fixtures.daoZero.getProvider().asEthers());
     const deposited = await liquidityRequestParcel.waitForDeposit(0, 60*1000*30);
-    console.log(Zero.staticPreprocessor(fixtures.TransferAll.address, ethers.utils.defaultAbiCoder.encode(['bytes'], [ ethers.utils.defaultAbiCoder.encode(['address'], [borrowerAddress]) ])))
     const receipt = await (await deposited.executeShiftFallback([
       Zero.staticPreprocessor(fixtures.TransferAll.address, ethers.utils.defaultAbiCoder.encode(['bytes'], [ ethers.utils.defaultAbiCoder.encode(['address'], [borrowerAddress]) ]))
     ])).wait();
@@ -350,5 +336,4 @@ describe("ShifterPool", () => {
   
     await fixtures.keeper.stopListeningForLiquidityRequests();
   });
-    */
 });

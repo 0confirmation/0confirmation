@@ -1,7 +1,7 @@
 'use strict';
 
 const { Web3Provider } = require('@ethersproject/providers');
-const { id } = require('@ethersproject/bytes');
+const { id } = require('@ethersproject/hash');
 const {
   Provider: {
     isProvider

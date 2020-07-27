@@ -12,8 +12,6 @@ const UniswapV2Router01 = require('@0confirmation/sol/build/UniswapV2Router01');
 const BorrowProxyLib = require('@0confirmation/sol/build/BorrowProxyLib');
 const Curvefi = require('@0confirmation/sol/build/Curvefi');
 const CurveToken = require('@0confirmation/sol/build/CurveToken');
-const Exchange = require('@0confirmation/sol/build/Exchange');
-const Factory = require('@0confirmation/sol/build/Factory');
 const DAI = require('@0confirmation/sol/build/DAI');
 const MockWETH = require('@0confirmation/sol/build/MockWETH');
 const SwapEntireLoan = require('@0confirmation/sol/build/SwapEntireLoan');
@@ -23,7 +21,7 @@ const V2SwapAndDrop = require('@0confirmation/sol/build/V2SwapAndDrop');
 const chainIdFromNetwork = (network) => {
   switch (network) {
     case 'ganache':
-      return Math.max(...Object.keys(ShifterPool.networks).map(Number));
+      return '1337';
     case 'testnet':
       return 42;
     case 'mainnet':
@@ -141,16 +139,12 @@ const getMockEnvironment = (provider) => getEnvironment(provider, 'ganache', mak
 
 const { makeManagerClass } = require('@0confirmation/eth-manager');
 
-const FactoryManager = makeManagerClass(Factory);
-const ExchangeManager = makeManagerClass(Exchange);
 const CurvefiManager = makeManagerClass(Curvefi);
 const ShifterPoolManager = makeManagerClass(ShifterPool);
 const CurveTokenManager = makeManagerClass(CurveToken);
 
 Object.assign(module.exports, {
   getAddresses,
-  FactoryManager,
-  ExchangeManager,
   CurvefiManager,
   ShifterPoolManager,
   CurveTokenManager,
