@@ -187,6 +187,7 @@ describe("ShifterPool", () => {
     fixtures.providerZero = makeZero(fixtures.provider, network);
     fixtures.daoZero = makeZero(daoProvider, network);
     fixtures.renbtcWrapped = renbtcWrapped;
+    await fixtures.providerZero.shifterPool.setKeeper(keeperAddress, true);
     await fixtures.providerZero.shifterPool.transferOwnership(daoAddress);
   });
   it("should add/remove liquidity", async () => {
