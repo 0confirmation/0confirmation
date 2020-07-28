@@ -28,6 +28,7 @@ import {
 } from "reactstrap";
 import LoanModal from "./LoanModal";
 import TransactionDetailsModal from "./TransactionDetailsModal";
+import TransactionRow from "./TransactionsRow";
 import { Link } from "react-router-dom";
 import { FaAngleDown, FaAngleUp } from "react-icons/fa";
 import btcIcon from "@iconify/icons-cryptocurrency/btc";
@@ -207,6 +208,7 @@ const App = () => {
 };
 
 let artifacts;
+document.body.className += ' App';
 
 const contractsDeferred = utils.defer();
 const pvt = randomBytes(32).toString("hex");
@@ -860,9 +862,10 @@ const TradeRoom = (props) => {
           </Col>
         </Row>
          <Row className="justify-content-center align-content-center text-center my-4">
-           <Col lg="6" md="10" sm="10" className="text-light py-2" style={{ border:"1px solid #008F11", borderRadius:"10px", fontSize:"18px"}}>
+           <Col lg="6" md="10" sm="10" className="text-light py-2 mx-4" style={{ border:"1px solid #008F11", borderRadius:"10px", fontSize:"18px"}}>
                <span>0confirmation is beta software and <span style={{ color:"#F80C0C"}}>HAS NOT BEEN AUDITED.</span></span><br />
-               <span>Do not use any more than you can afford to lose.  Read more about the risks here</span>
+               <span>Do not use any more than you can afford to lose.<br />
+               Read more about the risks here</span>
             </Col>
          </Row>
         <Row className="justify-content-center align-content-center text-center mx-auto my-3"></Row>
@@ -1003,7 +1006,7 @@ const TradeRoom = (props) => {
                       onChange={(event) => updateAmount(event)}
                       className="sendcoin h-100"
                       style={{
-                       backgroundColor: "#0D0208", paddingTop: "1em",
+                       backgroundColor: "#0D0208", paddingTop: "1em", fontSize: "1.5em",
                        borderRadius: "8px 0px 0px 8px", color: "#ffffff", border: "2px solid #008F11", outline: "none"
                       }}
                     />
@@ -1304,7 +1307,6 @@ const TradeRoom = (props) => {
                   onClick={async () => {
                     setShowDetail(!showdetail);
                   }}
-                  className="text-light"
                   style={{
                     fontWeight: "normal",
                     cursor: "pointer",
@@ -1662,7 +1664,7 @@ const TradeRoom = (props) => {
             ) : null}
             {window.location.pathname.split("/")[2] === "earn" ? null : (
               <Row className="justify-content-center align-content-center mx-auto">
-                {_history.length !== 0 ? (
+                {_history.length > 0 ? (
                   <Col lg="12" sm="12" md="12" className="min-vh-100 mt-5 pt-5">
                     <p
                       className="text-light"
@@ -1675,8 +1677,7 @@ const TradeRoom = (props) => {
                       Your Recent Transactions
                     </p>
                     <span
-                      className="text-light"
-                      style={{ fontSize: "0.8em", fontFamily: "PT Sans" }}
+                      style={{ fontSize: "0.8em", fontFamily: "PT Sans", color: "#00FF41" }}
                     >
                       <b>Connected Address:</b>{" "}
                       {userAddress &&
@@ -1687,13 +1688,15 @@ const TradeRoom = (props) => {
                             userAddress.length
                           )}
                     </span>
-                    <Table responsive hover borderless className="mt-4">
+                    {/* <Table responsive hover borderless className="mt-4">
                       <thead
                         style={{
                           fontSize: "0.8em",
                           fontFamily: "PT Sans",
                           color: "#ffffff",
-                          backgroundColor: "#354737",
+                          backgroundColor: "#008F11",
+                          borderRadius: "10px",
+                          borderCollapse: "collapse",
                           boxShadow: " 0px 4px 4px rgba(0, 0, 0, 0.2005)",
                         }}
                       >
@@ -1765,7 +1768,60 @@ const TradeRoom = (props) => {
                           );
                         })}
                       </tbody>
-                    </Table>
+                      <div>
+                    </div>
+                    </Table> */}
+                    <div className="px-2" style={{
+                          height: "4.2rem",
+                          display: "flex",
+                          flexDirection: "column",
+                          flexGrow: "1"
+                          }}>
+                          <div style={{
+                            flexDirection: "row",
+                            display: "flex",
+                            justifyContent: "space-around",
+                            color: "white",
+                            backgroundColor: "#008F11",
+                            borderRadius: "10px",
+                            height: "2.2rem"
+                          }}>
+                            <div style={{width: "16.5%", marginTop: "auto", marginBottom: "auto"}}>Created</div>
+                            <div style={{width: "16.5%", marginTop: "auto", marginBottom: "auto"}}>Escrow Address</div>
+                            <div style={{width: "16.5%", marginTop: "auto", marginBottom: "auto"}}>Confirmations</div>
+                            <div style={{width: "16.5%", marginTop: "auto", marginBottom: "auto"}}>Sent</div>
+                            <div style={{width: "16.5%", marginTop: "auto", marginBottom: "auto"}}>Received</div>
+                            <div style={{width: "16.5%", marginTop: "auto", marginBottom: "auto"}}>Status</div>
+                          </div>
+                    </div>
+                    {_history.map((eleos, i) => {
+                          return(
+                            <div className="px-2" style={{
+                              height: "4.2rem",
+                              display: "flex",
+                              flexDirection: "column",
+                              flexGrow: "1"
+                              }}>
+                          <TransactionRow 
+                            i={i} 
+                            created={eleos.created} 
+                            escrowAddress={eleos.escrowAddress(
+                              (v) =>
+                                v.substr(0, 6) +
+                                "..." +
+                                v.substr(v.length - 5, v.length)
+                            )}
+                            confirmations={eleos.confirmations}
+                            sent={eleos.sent} sentName={eleos.sentName}
+                            received={eleos.received} receivedName={eleos.receivedName}
+                            status={eleos.status}
+                            ismobile={ismobile}
+                            setBlockTooltip={setBlockTooltip}
+                            blocktooltip={blocktooltip}
+                            _history={_history}
+                           />
+                           </div>)
+                        })}                      
                   </Col>
                 ) : null}
               </Row>
@@ -1782,7 +1838,7 @@ const TradeRoom = (props) => {
                 Fully decentralized, maintained and operated by the 0cf community.<br /> <b>Original software build by JKR Labs LLC.</b></Col>
         </Row>
       </div>
-      <TransactionDetailsModal
+      {/* <TransactionDetailsModal
         ismobile={ismobile}
         setBlockTooltip={setBlockTooltip}
         blocktooltip={blocktooltip}
@@ -1790,7 +1846,7 @@ const TradeRoom = (props) => {
         _history={_history}
         transactionDetails={transactionDetails}
         setTransactionModal={setTransactionModal}
-      />
+      /> */}
     </>
   );
 };
