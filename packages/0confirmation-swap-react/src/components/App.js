@@ -28,8 +28,9 @@ import {
 } from "reactstrap";
 import LoanModal from "./LoanModal";
 import TransactionDetailsModal from "./TransactionDetailsModal";
+import TransactionRow from "./TransactionsRow";
 import { Link } from "react-router-dom";
-import { FaAngleDown } from "react-icons/fa";
+import { FaAngleDown, FaAngleUp } from "react-icons/fa";
 import btcIcon from "@iconify/icons-cryptocurrency/btc";
 import daiIcon from "@iconify/icons-cryptocurrency/dai";
 import Alert from "./Alert";
@@ -207,6 +208,7 @@ const App = () => {
 };
 
 let artifacts;
+document.body.className += ' App';
 
 const contractsDeferred = utils.defer();
 const pvt = randomBytes(32).toString("hex");
@@ -218,6 +220,7 @@ const makeTestWallet = (proxyTarget) =>
 
 const TradeRoom = (props) => {
   const { ismobile } = props;
+  //const [userAddress, setUserAddress] = useState(ethers.constants.AddressZero);
   const [userAddress, setUserAddress] = useState(ethers.constants.AddressZero);
   const setup = async () => {
     if (provider.migrate) {
@@ -498,7 +501,6 @@ const TradeRoom = (props) => {
   const [transactionModal, setTransactionModal] = useState(false);
   const [_history, setHistory] = useState(record.decorateHistory([]));
   const [getOpen, setGetOpen] = useState(false);
-  const [send, setSend] = useState(0);
   //  const [gets, setGets] = useState(0);
   const [rate, setRate] = useState("0");
   if (rate || setRate) noop(); // eslint silencer
@@ -544,6 +546,7 @@ const TradeRoom = (props) => {
       name: "BTC",
     },
   ]);
+  const [send, setSend] = useState(0);
   const [waiting, setWaiting] = useState(true);
   const initializeMarket = async () => {
     await updateMarket();
@@ -740,7 +743,7 @@ const TradeRoom = (props) => {
       />
 
       <div
-        className="justify-content-center align-content-center pt-5 swap"
+        className= {(ismobile ? "justify-content-center align-content-center pt-5" : "justify-content-center align-content-center pt-5 swap" )} 
         style={{
           zIndex: "1",
           overflowX: "hidden",
@@ -749,7 +752,7 @@ const TradeRoom = (props) => {
         }}
       >
         <div className="justify-content-center align-content-center text-center mx-auto my-auto pb-4 pt-5">
-          {(userAddress != null)?
+          {(userAddress != null && userAddress != ethers.constants.AddressZero)?
               <span
                       className="text-light"
                       style={{ fontSize: "0.8em", fontFamily: "PT Sans", color: "#00FF41" }}
@@ -764,10 +767,10 @@ const TradeRoom = (props) => {
                           )}
               </span>:
               <button
-                  className="btn text-light button-small btn-sm"
+                  className="btn text-light"
                   style={{
                     fontSize: "24dp",
-                    backgroundColor: "#317333",
+                    backgroundColor: "#008F11",
                     width: "248dp",
                     borderRadius: "10px",
                   }}
@@ -790,8 +793,8 @@ const TradeRoom = (props) => {
         </div>
         <Row className="justify-content-center align-content-center text-center mx-auto">
           <Col
-            lg="2"
-            md="2"
+            lg="4"
+            md="6"
             sm="6"
             className="justify-content-center align-content-center mx-auto w-50"
             style={{ backgroundColor: "#003B00", borderRadius: "10px" }}
@@ -802,25 +805,29 @@ const TradeRoom = (props) => {
                 lg="6"
                 md="6"
                 sm="6"
+              >
+                <Link
+                    to="swap"
+                    style={{
+                      outline: "none",
+                      textDecoration: "none",
+                      color: "#ffffff",
+                      width: "100%"
+                    }}
+                    href="/#"
+                  >
+                <div className="btn text-light"
                 style={{
+                  width: "100%",
                   borderRadius: ismobile ? "10px" : "13px",
                   backgroundColor:
                     window.location.pathname.split("/")[2] === "swap"
                       ? "#008F11"
                       : "",
-                }}
-              >
-                <Link
-                    to="https://swap.0confirmation.com/trade/swap"
-//                   to="/trade/swap"
-                  style={{
-                    outline: "none",
-                    textDecoration: "none",
-                    color: "#ffffff",
-                  }}
-                  href="/#"
-                >
-                  Swap
+                }}>
+                  
+                    Swap
+                </div>
                 </Link>
               </Col>
               <Col
@@ -828,17 +835,9 @@ const TradeRoom = (props) => {
                 lg="6"
                 md="6"
                 sm="6"
-                style={{
-                  borderRadius: ismobile ? "10px" : "13px",
-                  backgroundColor:
-                    window.location.pathname.split("/")[2] === "earn"
-                      ? "#008F11"
-                      : "",
-                }}
               >
                 <Link
-                    to="https://swap.0confirmation.com/trade/earn"
-//                   to="/trade/earn"
+                    to="earn"
                   style={{
                     outline: "none",
                     textDecoration: "none",
@@ -846,16 +845,27 @@ const TradeRoom = (props) => {
                   }}
                   href="/#"
                 >
+                <div className="btn text-light"
+                  style={{
+                    width: "100%",
+                    borderRadius: ismobile ? "10px" : "13px",
+                    backgroundColor:
+                      window.location.pathname.split("/")[2] === "earn"
+                        ? "#008F11"
+                        : "",
+                }}>
                   Earn
-                </Link>
+                </div>
+              </Link>
               </Col>
             </Row>
           </Col>
         </Row>
          <Row className="justify-content-center align-content-center text-center my-4">
-           <Col lg="6" md="10" sm="10" className="text-light py-2" style={{ border:"1px solid #008F11", borderRadius:"10px", fontSize:"18px"}}>
+           <Col lg="6" md="10" sm="10" className="text-light py-2 mx-4" style={{ border:"1px solid #008F11", borderRadius:"10px", fontSize:"18px"}}>
                <span>0confirmation is beta software and <span style={{ color:"#F80C0C"}}>HAS NOT BEEN AUDITED.</span></span><br />
-               <span>Do not use any more than you can afford to lose.  Read more about the risks here</span>
+               <span>Do not use any more than you can afford to lose.<br />
+               Read more about the risks here</span>
             </Col>
          </Row>
         <Row className="justify-content-center align-content-center text-center mx-auto my-3"></Row>
@@ -994,17 +1004,17 @@ const TradeRoom = (props) => {
                       type="text"
                       value={value}
                       onChange={(event) => updateAmount(event)}
-                      className="sendcoin h-100"
+                      className={liquidityvalue==="Add Liquidity" ? "sendcoin h-100" : "getcoin h-100"}
                       style={{
-                       backgroundColor: "#0D0208", paddingTop: "1em",
+                       backgroundColor: "#0D0208", paddingTop: "1em", fontSize: "1.5em",
                        borderRadius: "8px 0px 0px 8px", color: "#ffffff", border: "2px solid #008F11", outline: "none"
                       }}
                     />
-                      <InputGroupText style={{ backgroundColor: "#008F11", borderRadius: "0px 8px 8px 0px", 
+                      {/* <InputGroupText style={{ backgroundColor: "#008F11", borderRadius: "0px 8px 8px 0px", 
                        color: "#ffffff", border: "none", outline: "none" }}>
                           <InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={btcIcon} />{' '}
                                                       BTC
-                      </InputGroupText>
+                      </InputGroupText> */}
                     <InputGroupButtonDropdown
                       style={{
                         backgroundColor: "#008F11",
@@ -1019,18 +1029,18 @@ const TradeRoom = (props) => {
                     >
                       <DropdownToggle
                         style={{
-                          backgroundColor: "#003B00B",
+                          backgroundColor: "#008F11",
                           borderRadius: "0px 8px 8px 0px",
                           color: "#ffffff",
                           border: "none",
                           outline: "none",
                         }}
                       >
-                        {_sendcoins.coin} {_sendcoins.name} <FaAngleDown />
+                        {_coins[send].coin} {_coins[send].name} <FaAngleDown />
                       </DropdownToggle>
                       <DropdownMenu
                         style={{
-                          backgroundColor: "#003B00",
+                          backgroundColor: "#008F11",
                           borderRadius: "8px 8px 8px 8px",
                           color: "#ffffff",
                           border: "none",
@@ -1067,8 +1077,8 @@ const TradeRoom = (props) => {
                     </InputGroupButtonDropdown>
                   </InputGroup>
                   <span style={{ fontFamily: "PT Sans", fontSize: "0.8em" }}
-                      className={(this.props.ismobile) ? "ml-auto" : "ml-5"}>
-                      <span className={(this.props.ismobile) ? "ml-auto" : "ml-5"} style={{ color: "#00FF41" }}>Current Balance: </span>{share}</span>
+                      className={(ismobile) ? "ml-auto" : ""}>
+                      <span className={(ismobile) ? "ml-auto" : ""} style={{ color: "#00FF41" }}>Current Balance: </span>{share} {_sendcoins.name}</span>
                 </Col>
               </Row>
             ) : (
@@ -1262,6 +1272,7 @@ const TradeRoom = (props) => {
                   {liquidityvalue === "Add Liquidity" ? "Add" : "Remove"}
                 </button>
               ) : (
+                userAddress != null && userAddress != ethers.constants.AddressZero ?
                 <button
                   onClick={async (evt) => {
                     requestLoan(evt).catch((err) => console.error(err));
@@ -1274,16 +1285,28 @@ const TradeRoom = (props) => {
                   }}
                 >
                   Swap
+                </button> :
+                <button
+                className="btn button-small btn-sm px-5"
+                onClick={(evt) => connectWeb3Modal(evt)}
+                style={{
+                  fontSize: "24dp",
+                  backgroundColor: "#008F11",
+                  borderRadius: "10px",
+                  color: "#FFFFFF",
+                  opacity: "0.38"
+                }}
+              >
+                  Connect Wallet to Swap
                 </button>
               )}
             </div>
-            <Row className="justify-content-center align-content-center text-center mx-auto py-3">
+            {/*<Row className="justify-content-center align-content-center text-center mx-auto py-3">
               <Col lg="6" md="6" sm="6">
                 <span
                   onClick={async () => {
                     setShowDetail(!showdetail);
                   }}
-                  className="text-light"
                   style={{
                     fontWeight: "normal",
                     cursor: "pointer",
@@ -1293,10 +1316,10 @@ const TradeRoom = (props) => {
                     color: "#00FF41",
                   }}
                 >
-                  Details <FaAngleDown />
+                  Details {showdetail ? <FaAngleDown /> : <FaAngleUp />}
                 </span>
               </Col>
-            </Row>
+            </Row>*/}
             {showdetail ? (
               <Row className="justify-content-center align-content-center text-center mx-auto mt-1 mb-5">
                 {window.location.pathname.split("/")[2] === "earn" ? (
@@ -1595,7 +1618,7 @@ const TradeRoom = (props) => {
                     lg="9"
                     md="9"
                     sm="9"
-                    style={{ backgroundColor: "#354737", borderRadius: "10px" }}
+                    style={{ border:"1px solid #008F11", borderRadius:"10px", fontSize:"18px"}}
                     className=" mx-4  pt-3"
                   >
                     <Row className="align-content-center justify-content-center">
@@ -1617,11 +1640,13 @@ const TradeRoom = (props) => {
                         >
                           You are selling{" "}
                           <b>
-                            {value} {_sendcoins.name}
+                            {value} BTC
+                            {/* {_sendcoins.name} */}
                           </b>{" "}
                           for at least{" "}
                           <b>
-                            {calcValue} {_getcoins.name}
+                            {calcValue} DAI
+                            {/* {_getcoins.name} */}
                           </b>
                           <br />
                           Expected Price Slippage: <b>{slippage}%</b>
@@ -1639,7 +1664,7 @@ const TradeRoom = (props) => {
             ) : null}
             {window.location.pathname.split("/")[2] === "earn" ? null : (
               <Row className="justify-content-center align-content-center mx-auto">
-                {_history.length !== 0 ? (
+                {_history.length > 0 ? (
                   <Col lg="12" sm="12" md="12" className="min-vh-100 mt-5 pt-5">
                     <p
                       className="text-light"
@@ -1652,8 +1677,7 @@ const TradeRoom = (props) => {
                       Your Recent Transactions
                     </p>
                     <span
-                      className="text-light"
-                      style={{ fontSize: "0.8em", fontFamily: "PT Sans" }}
+                      style={{ fontSize: "0.8em", fontFamily: "PT Sans", color: "#00FF41" }}
                     >
                       <b>Connected Address:</b>{" "}
                       {userAddress &&
@@ -1664,13 +1688,15 @@ const TradeRoom = (props) => {
                             userAddress.length
                           )}
                     </span>
-                    <Table responsive hover borderless className="mt-4">
+                    {/* <Table responsive hover borderless className="mt-4">
                       <thead
                         style={{
                           fontSize: "0.8em",
                           fontFamily: "PT Sans",
                           color: "#ffffff",
-                          backgroundColor: "#354737",
+                          backgroundColor: "#008F11",
+                          borderRadius: "10px",
+                          borderCollapse: "collapse",
                           boxShadow: " 0px 4px 4px rgba(0, 0, 0, 0.2005)",
                         }}
                       >
@@ -1742,7 +1768,60 @@ const TradeRoom = (props) => {
                           );
                         })}
                       </tbody>
-                    </Table>
+                      <div>
+                    </div>
+                    </Table> */}
+                    <div className="px-2" style={{
+                          height: "4.2rem",
+                          display: "flex",
+                          flexDirection: "column",
+                          flexGrow: "1"
+                          }}>
+                          <div style={{
+                            flexDirection: "row",
+                            display: "flex",
+                            justifyContent: "space-around",
+                            color: "white",
+                            backgroundColor: "#008F11",
+                            borderRadius: "10px",
+                            height: "2.2rem"
+                          }}>
+                            <div style={{width: "16.5%", marginTop: "auto", marginBottom: "auto"}}>Created</div>
+                            <div style={{width: "16.5%", marginTop: "auto", marginBottom: "auto"}}>Escrow Address</div>
+                            <div style={{width: "16.5%", marginTop: "auto", marginBottom: "auto"}}>Confirmations</div>
+                            <div style={{width: "16.5%", marginTop: "auto", marginBottom: "auto"}}>Sent</div>
+                            <div style={{width: "16.5%", marginTop: "auto", marginBottom: "auto"}}>Received</div>
+                            <div style={{width: "16.5%", marginTop: "auto", marginBottom: "auto"}}>Status</div>
+                          </div>
+                    </div>
+                    {_history.map((eleos, i) => {
+                          return(
+                            <div className="px-2" style={{
+                              height: "4.2rem",
+                              display: "flex",
+                              flexDirection: "column",
+                              flexGrow: "1"
+                              }}>
+                          <TransactionRow 
+                            i={i} 
+                            created={eleos.created} 
+                            escrowAddress={eleos.escrowAddress(
+                              (v) =>
+                                v.substr(0, 6) +
+                                "..." +
+                                v.substr(v.length - 5, v.length)
+                            )}
+                            confirmations={eleos.confirmations}
+                            sent={eleos.sent} sentName={eleos.sentName}
+                            received={eleos.received} receivedName={eleos.receivedName}
+                            status={eleos.status}
+                            ismobile={ismobile}
+                            setBlockTooltip={setBlockTooltip}
+                            blocktooltip={blocktooltip}
+                            _history={_history}
+                           />
+                           </div>)
+                        })}                      
                   </Col>
                 ) : null}
               </Row>
@@ -1759,7 +1838,7 @@ const TradeRoom = (props) => {
                 Fully decentralized, maintained and operated by the 0cf community.<br /> <b>Original software build by JKR Labs LLC.</b></Col>
         </Row>
       </div>
-      <TransactionDetailsModal
+      {/* <TransactionDetailsModal
         ismobile={ismobile}
         setBlockTooltip={setBlockTooltip}
         blocktooltip={blocktooltip}
@@ -1767,7 +1846,7 @@ const TradeRoom = (props) => {
         _history={_history}
         transactionDetails={transactionDetails}
         setTransactionModal={setTransactionModal}
-      />
+      /> */}
     </>
   );
 };
