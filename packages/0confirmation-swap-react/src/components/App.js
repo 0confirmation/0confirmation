@@ -501,7 +501,6 @@ const TradeRoom = (props) => {
   const [transactionModal, setTransactionModal] = useState(false);
   const [_history, setHistory] = useState(record.decorateHistory([]));
   const [getOpen, setGetOpen] = useState(false);
-  const [send, setSend] = useState(0);
   //  const [gets, setGets] = useState(0);
   const [rate, setRate] = useState("0");
   if (rate || setRate) noop(); // eslint silencer
@@ -547,6 +546,7 @@ const TradeRoom = (props) => {
       name: "BTC",
     },
   ]);
+  const [send, setSend] = useState(0);
   const [waiting, setWaiting] = useState(true);
   const initializeMarket = async () => {
     await updateMarket();
@@ -1004,17 +1004,17 @@ const TradeRoom = (props) => {
                       type="text"
                       value={value}
                       onChange={(event) => updateAmount(event)}
-                      className="sendcoin h-100"
+                      className={liquidityvalue==="Add Liquidity" ? "sendcoin h-100" : "getcoin h-100"}
                       style={{
                        backgroundColor: "#0D0208", paddingTop: "1em", fontSize: "1.5em",
                        borderRadius: "8px 0px 0px 8px", color: "#ffffff", border: "2px solid #008F11", outline: "none"
                       }}
                     />
-                      <InputGroupText style={{ backgroundColor: "#008F11", borderRadius: "0px 8px 8px 0px", 
+                      {/* <InputGroupText style={{ backgroundColor: "#008F11", borderRadius: "0px 8px 8px 0px", 
                        color: "#ffffff", border: "none", outline: "none" }}>
                           <InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={btcIcon} />{' '}
                                                       BTC
-                      </InputGroupText>
+                      </InputGroupText> */}
                     <InputGroupButtonDropdown
                       style={{
                         backgroundColor: "#008F11",
@@ -1029,18 +1029,18 @@ const TradeRoom = (props) => {
                     >
                       <DropdownToggle
                         style={{
-                          backgroundColor: "#003B00B",
+                          backgroundColor: "#008F11",
                           borderRadius: "0px 8px 8px 0px",
                           color: "#ffffff",
                           border: "none",
                           outline: "none",
                         }}
                       >
-                        {_sendcoins.coin} {_sendcoins.name} <FaAngleDown />
+                        {_coins[send].coin} {_coins[send].name} <FaAngleDown />
                       </DropdownToggle>
                       <DropdownMenu
                         style={{
-                          backgroundColor: "#003B00",
+                          backgroundColor: "#008F11",
                           borderRadius: "8px 8px 8px 8px",
                           color: "#ffffff",
                           border: "none",
@@ -1077,8 +1077,8 @@ const TradeRoom = (props) => {
                     </InputGroupButtonDropdown>
                   </InputGroup>
                   <span style={{ fontFamily: "PT Sans", fontSize: "0.8em" }}
-                      className={(ismobile) ? "ml-auto" : "ml-5"}>
-                      <span className={(ismobile) ? "ml-auto" : "ml-5"} style={{ color: "#00FF41" }}>Current Balance: </span>{share}</span>
+                      className={(ismobile) ? "ml-auto" : ""}>
+                      <span className={(ismobile) ? "ml-auto" : ""} style={{ color: "#00FF41" }}>Current Balance: </span>{share} {_sendcoins.name}</span>
                 </Col>
               </Row>
             ) : (
