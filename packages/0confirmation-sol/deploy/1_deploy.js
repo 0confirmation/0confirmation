@@ -46,13 +46,25 @@ const makePush = (ary) => (v) => {
 const makeWrapper = (ethers, signer) => (deployment) => {
   return new ethers.Contract(deployment.address, deployment.abi, signer);
 };
-const makeDeploy = (deploy, wrap, push, deployer) => async (
+
+const alreadyDeployed = [
+  'ShifterBorrowProxyFactoryLib',
+  'ShifterPool',
+  'ERC20Adapter',
+  'V2SwapAndDrop',
+  'TransferAll',
+  'UniswapV2Adapter',
+  'SimpleBurnLiquidationModule',
+  'LiquidityToken'
+];
+
+const makeDeploy = (deploy, deployments, wrap, push, deployer) => async (
   contractName,
   args = [],
   libraries = {}
 ) => {
   logger.info("deploying " + contractName);
-  const deployed = await deploy(contractName, {
+  const deployed = alreadyDeployed.includes(contractName) ? await deployments.get(contractName) : await deploy(contractName, {
     from: deployer,
     contractName,
     args,
@@ -71,7 +83,7 @@ module.exports = async (buidler) => {
   const [signer] = await ethers.getSigners();
   const wrap = makeWrapper(ethers, signer);
   const {deployer} = await getNamedAccounts();
-  const deploy = makeDeploy(deployments.deploy, wrap, push, deployer);
+  const deploy = makeDeploy(deployments.deploy, deployments, wrap, push, deployer);
   const {AddressZero: NO_SUBMODULE} = ethers.constants;
   const chain = chainIdToNetwork(Number(await bre.getChainId()));
   const shifterBorrowProxyFactoryLib = await deploy(
@@ -84,6 +96,8 @@ module.exports = async (buidler) => {
   const erc20Adapter = await deploy("ERC20Adapter");
   await deploy("V2SwapAndDrop");
   await deploy("TransferAll");
+  const ethersProvider = new bre.ethers.providers.Web3Provider(fromEthers(bre.ethereum));
+  logger.info(bre.ethers.utils.formatEther(await ethersProvider.getBalance((await ethersProvider.listAccounts())[0])));
   let weth, shifterRegistry, dai, renbtc, factory, router, from;
   switch (chain) {
     case "kovan":
@@ -136,15 +150,15 @@ module.exports = async (buidler) => {
     "zeroBTC",
     8,
   ]);
-  await shifterPool.deployBorrowProxyImplementation();
-  await shifterPool.deployAssetForwarderImplementation();
+//  await shifterPool.deployBorrowProxyImplementation();
+  await (await shifterPool.deployAssetForwarderImplementation()).wait();
   await (
     await shifterPool.setup(
       {
         shifterRegistry: shifterRegistry.address,
         minTimeout: chain === "test" ? "1" : "10000",
-        daoFee: ethers.utils.parseEther("0.01"),
-        poolFee: ethers.utils.parseEther("0.01"),
+        daoFee: ethers.utils.parseEther("0.001"),
+        poolFee: ethers.utils.parseEther("0.001"),
         maxLoan:
           chain === "mainnet"
             ? ethers.utils.parseEther("0.1")

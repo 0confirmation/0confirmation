@@ -5,15 +5,29 @@ const uniswap = require('@uniswap/sdk');
 const ethers = require('ethers');
 const randomBytes = require('random-bytes').sync;
 const makeMockBackends = require('../mock');
-const ShifterPool = require('@0confirmation/sol/deployments/kovan/ShifterPool')
+const ShifterPool = {
+  kovan: require('@0confirmation/sol/deployments/kovan/ShifterPool'),
+  mainnet: require('@0confirmation/sol/deployments/live_1/ShifterPool')
+};
 //const ShifterRegistryMock = require('@0confirmation/sol/deployments/kovan/ShifterRegistryMock');
-const UniswapV2Factory = require('@0confirmation/sol/deployments/kovan/UniswapV2Factory');
-const UniswapV2Router01 = require('@0confirmation/sol/deployments/kovan/UniswapV2Router01');
-const DAI = require('@0confirmation/sol/deployments/kovan/DAI');
-const MockWETH = require('@0confirmation/sol/deployments/kovan/MockWETH');
+const UniswapV2Factory = {
+  kovan: require('@0confirmation/sol/deployments/kovan/UniswapV2Factory')
+};
+const UniswapV2Router01 = {
+  kovan: require('@0confirmation/sol/deployments/kovan/UniswapV2Router01')
+};
+const DAI = {
+  kovan: require('@0confirmation/sol/deployments/kovan/DAI')
+};
+const MockWETH = {
+  kovan: require('@0confirmation/sol/deployments/kovan/MockWETH')
+};
 //const SwapEntireLoan = require('@0confirmation/sol/deployments/kovan/SwapEntireLoan');
 //const TransferAll = require('@0confirmation/sol/deployments/kovan/TransferAll');
-const V2SwapAndDrop = require('@0confirmation/sol/deployments/kovan/V2SwapAndDrop');
+const V2SwapAndDrop = {
+  kovan: require('@0confirmation/sol/deployments/kovan/V2SwapAndDrop'),
+  mainnet: require('@0confirmation/sol/deployments/live_1/V2SwapAndDrop')
+};
 
 const chainIdFromNetwork = (network) => {
   switch (network) {
@@ -26,7 +40,7 @@ const chainIdFromNetwork = (network) => {
   }
 };
 
-const fromArtifact = (network, artifact) => artifact.address;
+const fromArtifact = (network, artifact) => artifact[network].address;
 
 const renNetworkFromNetwork = (network) => {
   switch (network) {
@@ -141,7 +155,7 @@ const { makeManagerClass } = require('@0confirmation/eth-manager');
 /*
 const CurvefiManager = makeManagerClass(Curvefi);
 */
-const ShifterPoolManager = makeManagerClass(ShifterPool);
+const ShifterPoolManager = makeManagerClass(ShifterPool.mainnet);
 /*
 const CurveTokenManager = makeManagerClass(CurveToken);
 */
