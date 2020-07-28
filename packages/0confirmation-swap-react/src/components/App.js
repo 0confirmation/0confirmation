@@ -24,7 +24,8 @@ import {
   Table,
   DropdownToggle,
   DropdownMenu,
-  DropdownItem,ButtonDropdown
+  DropdownItem,ButtonDropdown,
+  Tooltip
 } from "reactstrap";
 import LoanModal from "./LoanModal";
 import TransactionDetailsModal from "./TransactionDetailsModal";
@@ -403,6 +404,7 @@ const TradeRoom = (props) => {
     })().catch((err) => console.error(err));
   }, []);
   const [ btcBlock, setBTCBlock ] = useState(0);
+  const [ changeWalletTooltip, setChangeWalletTooltip ] = useState(false);
   const getBTCBlock = async () => {
     const blockNumber = (await bitcoin.getLatestBlock());
     cachedBtcBlock = Number(blockNumber);
@@ -552,10 +554,13 @@ const TradeRoom = (props) => {
     await updateMarket();
     setRate("N/A");
   };
-  const updateAmount = async (e) => {
+  const checkNumber = (number) => {
+    return number.match(/[1-9]\d*((\.|,)\d+)?/g) !== null;
+  };
+  const updateAmount = async (e, oldValue) => {
     e.preventDefault();
     var checkValueLimit;
-    if(e.target.value > 0.00035) checkValueLimit = e.target.value;
+    if(e.target.value > 0.00035 || Number(e.target.value) === 0 || e.target.value === ".") checkValueLimit = e.target.value; else checkValueLimit = oldValue;
     const value = checkValueLimit;
     setValue(value);
     if (isNaN(value)) return;
@@ -753,9 +758,12 @@ const TradeRoom = (props) => {
       >
         <div className="justify-content-center align-content-center text-center mx-auto my-auto pb-4 pt-5">
           {(userAddress != null && userAddress != ethers.constants.AddressZero)?
+            <Fragment>
               <span
                       className="text-light"
-                      style={{ fontSize: "0.8em", fontFamily: "PT Sans", color: "#00FF41" }}
+                      id="connectedAddress"
+                      onClick={(evt) => connectWeb3Modal(evt)}
+                      style={{ cursor: "pointer", fontSize: "0.8em", fontFamily: "PT Sans", color: "#00FF41" }}
                     >
                       <b>Connected Address:</b>{" "}
                       {userAddress &&
@@ -765,7 +773,9 @@ const TradeRoom = (props) => {
                             userAddress.length - 5,
                             userAddress.length
                           )}
-              </span>:
+              </span> 
+              <Tooltip placement="top" isOpen={changeWalletTooltip} target="connectedAddress" toggle={() => setChangeWalletTooltip(!changeWalletTooltip)}>Click to Change Wallet</Tooltip>
+            </Fragment>:
               <button
                   className="btn text-light"
                   style={{
@@ -862,7 +872,7 @@ const TradeRoom = (props) => {
           </Col>
         </Row>
          <Row className="justify-content-center align-content-center text-center my-4">
-           <Col lg="6" md="10" sm="10" className="text-light py-2 mx-4" style={{ border:"1px solid #008F11", borderRadius:"10px", fontSize:"18px"}}>
+           <Col lg="6" md="10" sm="10" className="text-light py-2 mx-4" style={{ border:"1px solid #008F11", userSelect: "none", cursor: "default", borderRadius:"10px", fontSize:"18px"}}>
                <span>0confirmation is beta software and <span style={{ color:"#F80C0C"}}>HAS NOT BEEN AUDITED.</span></span><br />
                <span>Do not use any more than you can afford to lose.<br />
                Read more about the risks here</span>
@@ -1003,10 +1013,10 @@ const TradeRoom = (props) => {
                     <Input
                       type="text"
                       value={value}
-                      onChange={(event) => updateAmount(event)}
+                      onChange={(event) => updateAmount(event, value)}
                       className={liquidityvalue==="Add Liquidity" ? "sendcoin h-100" : "getcoin h-100"}
                       style={{
-                       backgroundColor: "#0D0208", paddingTop: "1em", fontSize: "1.5em",
+                       backgroundColor: "#0D0208", paddingTop: "1em",
                        borderRadius: "8px 0px 0px 8px", color: "#ffffff", border: "2px solid #008F11", outline: "none"
                       }}
                     />
@@ -1086,16 +1096,17 @@ const TradeRoom = (props) => {
                 <Col lg="4" md="12" sm="12" className="mt-2">
                   <InputGroup style={{  height: "52px",border: "2px solid #008F11", borderRadius: "8px", }}>
                     <Input
+                      pattern="/[1-9]\d*((\.|,)\d+)?/g"
                       type="text"
                       value={value}
-                      onChange={(event) => updateAmount(event)}
+                      onChange={(event) => updateAmount(event, value)}
                       className="sendcoin h-100"
                       style={{
                              backgroundColor: "transparent", paddingTop:"1em", color: "#ffffff", border: "none", outline: "none",
                               borderRadius: "8px 0px 0px 8px",
                             }}
                       />
-                      <InputGroupAddon style={{ backgroundColor: "#003B00", borderRadius: "0px 8px 8px 0px", color: "#ffffff" }} addonType="append">
+                      <InputGroupAddon style={{ userSelect: "none", cursor: "default", backgroundColor: "#003B00", borderRadius: "0px 8px 8px 0px", color: "#ffffff" }} addonType="append">
                          <InputGroupText style={{ backgroundColor: "#003B00", borderRadius: "0px 8px 8px 0px", color: "#ffffff", border: "none", outline: "none" }}>
                             <InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={btcIcon} />{' '}
                                 BTC
@@ -1169,14 +1180,14 @@ const TradeRoom = (props) => {
                   <img className="img-fluid" src={swapIconSvg} alt="Swap" />
                 </Col>
                 <Col lg="4" md="12" sm="12" className="mt-2">
-                  <InputGroup style={{  height: "52px",border: "2px solid #008F11", borderRadius: "8px", }}>
+                  <InputGroup style={{  userSelect: "none", cursor: "default", height: "52px", border: "2px solid #008F11", borderRadius: "8px", }}>
                     <Input
-                      readonly="readonly"
+                    readOnly={true}
                       type="text"
                       value={calcValue}
                       className="getcoin h-100"
                       style={{
-                             backgroundColor: "transparent", paddingTop:"1em", color: "#ffffff", border: "none", outline: "none",
+                             backgroundColor: "transparent", userSelect: "none", cursor: "default", paddingTop:"1em", color: "#ffffff", border: "none", outline: "none",
                               borderRadius: "8px 0px 0px 8px",
                             }}
                     />
@@ -1619,7 +1630,7 @@ const TradeRoom = (props) => {
                     md="9"
                     sm="9"
                     style={{ border:"1px solid #008F11", borderRadius:"10px", fontSize:"18px"}}
-                    className=" mx-4  pt-3"
+                    className=" mx-4  pt-3 mt-4"
                   >
                     <Row className="align-content-center justify-content-center">
                       <Col
@@ -1636,6 +1647,8 @@ const TradeRoom = (props) => {
                             fontSize: "0.8em",
                             fontFamily: "PT Sans",
                             color: "#ffffff",
+                            userSelect: "none",
+                            cursor: "default"
                           }}
                         >
                           You are selling{" "}
