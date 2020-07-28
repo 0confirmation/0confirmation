@@ -1301,7 +1301,7 @@ const TradeRoom = (props) => {
                 </button>
               )}
             </div>
-            <Row className="justify-content-center align-content-center text-center mx-auto py-3">
+            {/*<Row className="justify-content-center align-content-center text-center mx-auto py-3">
               <Col lg="6" md="6" sm="6">
                 <span
                   onClick={async () => {
@@ -1319,7 +1319,7 @@ const TradeRoom = (props) => {
                   Details {showdetail ? <FaAngleDown /> : <FaAngleUp />}
                 </span>
               </Col>
-            </Row>
+            </Row>*/}
             {showdetail ? (
               <Row className="justify-content-center align-content-center text-center mx-auto mt-1 mb-5">
                 {window.location.pathname.split("/")[2] === "earn" ? (
