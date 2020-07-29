@@ -875,7 +875,7 @@ const TradeRoom = (props) => {
            <Col lg="6" md="10" sm="10" className="text-light py-2 mx-4" style={{ border:"1px solid #008F11", userSelect: "none", cursor: "default", borderRadius:"10px", fontSize:"18px"}}>
                <span>0confirmation is beta software and <span style={{ color:"#F80C0C"}}>HAS NOT BEEN AUDITED.</span></span><br />
                <span>Do not use any more than you can afford to lose.<br />
-               Read more about the risks here</span>
+               Read more about the risks <a href="https://docs.0confirmation.com/security-considerations" target="_blank" style={{color: "#008F11", textDecoration: "none"}}>here</a></span>
             </Col>
          </Row>
         <Row className="justify-content-center align-content-center text-center mx-auto my-3"></Row>
