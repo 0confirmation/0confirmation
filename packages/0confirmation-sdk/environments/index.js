@@ -137,7 +137,7 @@ const getEnvironment = (provider, network, backends) => ({
       provider
     },
     zero: {
-      multiaddr: 'lendnet',
+      multiaddr: network === 'mainnet' ? 'zeronet' : 'lendnet',
       dht: true
     },
     btc: {
