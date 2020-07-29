@@ -29,6 +29,8 @@ const V2SwapAndDrop = {
   mainnet: require('@0confirmation/sol/deployments/live_1/V2SwapAndDrop')
 };
 
+const networkToEthereumNetwork = (n) => n === 'testnet' ? 'kovan' : n;
+
 const chainIdFromNetwork = (network) => {
   switch (network) {
     case 'ganache':
@@ -40,7 +42,7 @@ const chainIdFromNetwork = (network) => {
   }
 };
 
-const fromArtifact = (network, artifact) => artifact[network].address;
+const fromArtifact = (network, artifact) => artifact[networkToEthereumNetwork(network)].address;
 
 const renNetworkFromNetwork = (network) => {
   switch (network) {
