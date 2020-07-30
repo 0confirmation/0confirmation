@@ -20,7 +20,60 @@ export default class LandingPage extends React.Component {
                 <div className="justify-content-center align-content-center overflow-hidden">
                     <Row className={(this.props.ismobile) ? "justify-content-center align-content-center px-3 mt-5" : "justify-content-center align-content-center landing mt-3 pb-5 px-3"}>
                         <Col lg="10" md="12" sm="12" className="justify-content-center mx-auto align-content-center mt-4 pt-5 pb-5">
-                            <Row className="justify-content-center align-content-center">
+                            <Row>
+                                <Card className="mt-5 py-5 d-flex hero-card">
+                                    <CardBody className="">
+                                        <div className="d-flex flex-row flex-wrap px-4 justify-content-center">
+                                        <div className="flex-column d-flex" style={{flexBasis:"40%"}}>
+                                            <img className="img-fluid" src={require("../images/0cflogo.svg")} alt="0CF" />
+                                            <p className="card-hero-text text-center">Interoperability, Optimized</p>
+                                        </div>
+                                        <div className="flex-column d-flex flex-wrap" style={{flexBasis:"60%"}}>
+                                            <div className="d-flex flex-row space-even-row flex-wrap">
+                                                <div className="d-flex flex-column flex-wrap thirds">
+                                                    <img className="img-fluid pb-4" src={require("../images/speed.svg")} alt="Smart Finality" />
+                                                    <p className="card-header-text small-margin">Smart Finality</p>
+                                                    <p className="card-sub-text small-margin">Bitcoin on ethereum in 2 confirmations or less.  Your assets, when you want them</p>
+                                                    <button className="main-0cf-button">Smart Finality Bridge</button>
+                                                </div>
+                                                <div className="d-flex flex-column flex-wrap thirds" >
+                                                    <img className="img-fluid pb-4" src={require("../images/noslippage.svg")} alt="Swap" />
+                                                    <p className="card-header-text small-margin">Swap</p>
+                                                    <p className="card-sub-text small-margin">DEX trading directly with BTC. Trade at the price you see NOW not in an hour.</p>
+                                                    <button className="main-0cf-button">0cf Swap</button>
+                                                </div>
+                                                <div className="d-flex flex-column flex-wrap thirds">
+                                                    <img className="img-fluid pb-4" src={require("../images/income.svg")} alt="Earn" />
+                                                    <p className="card-header-text small-margin">Earn</p>
+                                                    <p className="card-sub-text small-margin">Add liquidity to the 0cf pool. earn income from confirmation as a service fees</p>
+                                                    <button className="main-0cf-button">0cf Earn</button>
+                                                </div>
+                                            </div>
+                                            <div className="d-flex flex-row space-even-row flex-wrap just-center-0cf" style={{paddingTop: "2rem"}}>
+                                                <div className="d-flex flex-column flex-wrap thirds">
+                                                    <p className="card-header-text">Integrate</p>
+                                                    <button className="main-0cf-button">SDK</button>
+                                                </div>
+                                                <div className="d-flex flex-column flex-wrap thirds">
+                                                    <p className="card-header-text">Learn</p>
+                                                    <button className="main-0cf-button">Docs</button>
+                                                </div>
+                                                <div className="d-flex flex-column flex-wrap thirds">
+                                                    <p className="card-header-text">Contact</p>
+                                                    <Row className=" justify-content-center">
+                                                        <FaMedium size={25} style={{ cursor: "pointer" }} onClick={() => { window.open("https://medium.com/0confirmation"); }} color="#008F11" className="mr-2" />
+                                                        {/* <FaRedditAlien size={25} style={{cursor:"pointer"}} onClick={()=>{ window.open("https://www.reddit.com/r/RenProject");}} color="#008F11" className="mr-2"/> */}
+                                                        <FaTelegramPlane size={25} style={{ cursor: "pointer" }} onClick={() => { window.open("https://t.me/zeroconfirmation"); }} color="#008F11" className="mr-2" />
+                                                        <FaTwitter size={25} style={{ cursor: "pointer" }} onClick={() => { window.open("https://twitter.com/0confirmation"); }} color="#008F11" className="mr-2" />
+                                                    </Row>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        </div>
+                                    </CardBody>
+                                </Card>
+                            </Row>
+                            {/* <Row className="justify-content-center align-content-center">
                                 <Col lg="6" md="12" sm="12" className="justify-content-center align-content-center my-auto">
                                     <Row className="justify-content-center align-content-center mx-auto">
                                         <Card className="card-shadow" style={{ backgroundColor: "#0D0208", border:"1px solid #008F11", borderRadius:"20px" }}>
@@ -196,7 +249,7 @@ export default class LandingPage extends React.Component {
                                         </Col>
                                     </Row>
                                 </Col>
-                            </Row>
+                            </Row> */}
 
                         </Col>
                         <Col lg="12" md="12" sm="12" className="justify-content-center align-content-center text-center pt-5">
@@ -211,7 +264,7 @@ export default class LandingPage extends React.Component {
                                         </Col>
                                         <Col lg="4" md="4" sm="4" className="mx-auto mt-5">
                                             <a href="https://github.com/0confirmation/0confirmation/tree/master/packages/0confirmation-sdk" style={{ textDecoration: "none"}}>
-                                                <button style={{ backgroundColor: "#008F11", borderRadius: "0.8em"}} className="btn button-small button-text btn-block text-light text-center bold">
+                                                <button className="main-0cf-button">
                                                     Integrate 0cf
                                                 </button>
                                             </a>
@@ -241,14 +294,13 @@ export default class LandingPage extends React.Component {
                                                                     <Col lg="14" md="14" sm="14" className="text-center">
                                                                         <p className="header-text">Total Liquidity<span><i id="liquidity"><img alt="i" width="12px" className="img-fluid mb-3 ml-2" src={require("../images/info.svg")} /></i><Tooltip placement="top"
                                                                             isOpen={this.state.tooltip1} target="liquidity" toggle={async (e) => await this.setState({ tooltip1: !this.state.tooltip1 })} >
-                                                                            info
+                                                                            Total liquidity available in the 0cf renBTC Pool
                                                                             </Tooltip></span></p>
                                                                     </Col>
                                                                 </Row>
                                                                 <Col lg="14" md="14" sm="14">
                                                                     <b className="pb-3 sub-header-text">
-                                                                        450.392 BTC<br />
-                                                                        $4.05M
+                                                                        COMING SOON
                                                                     </b>
                                                                 </Col>
                                                             </Col>
@@ -268,14 +320,13 @@ export default class LandingPage extends React.Component {
                                                                     <Col lg="14" md="14" sm="14" className="text-center">
                                                                         <p className="header-text">BTC On Loan<span><i id="loan"><img alt="i" width="12px" className="img-fluid mb-3 ml-2" src={require("../images/info.svg")} /></i><Tooltip placement="top"
                                                                             isOpen={this.state.tooltip2} target="loan" toggle={async (e) => await this.setState({ tooltip2: !this.state.tooltip2 })} >
-                                                                            info
+                                                                            Amount of renBTC loaned to users for use in the 0cf loan system.
                                                                             </Tooltip></span></p>
                                                                     </Col>
                                                                 </Row>
                                                                 <Col lg="14" md="14" sm="14">
                                                                     <b className="pb-3 sub-header-text">
-                                                                        450.392 BTC<br />
-                                                                        $4.05M
+                                                                        COMING SOON
                                                                     </b>
                                                                 </Col>
                                                             </Col>
@@ -295,14 +346,13 @@ export default class LandingPage extends React.Component {
                                                                     <Col lg="14" md="14" sm="14" className="text-center">
                                                                         <p className="header-text">Idle BTC<span><i id="idle-btc"><img alt="i" width="12px" className="img-fluid mb-3 ml-2" src={require("../images/info.svg")} /></i><Tooltip placement="top"
                                                                             isOpen={this.state.tooltip3} target="idle-btc" toggle={async (e) => await this.setState({ tooltip3: !this.state.tooltip3 })} >
-                                                                            info
+                                                                            Amount of renBTC available to be used for loans in the 0cf system.
                                                                             </Tooltip></span></p>
                                                                     </Col>
                                                                 </Row>
                                                                 <Col lg="14" md="14" sm="14">
                                                                     <b className="pb-3 sub-header-text">
-                                                                        450.392 BTC<br />
-                                                                        $4.05M
+                                                                        COMING SOON
                                                                     </b>
                                                                 </Col>
                                                             </Col>
@@ -322,14 +372,13 @@ export default class LandingPage extends React.Component {
                                                                     <Col lg="14" md="14" sm="14" className="text-center">
                                                                         <p className="header-text">Total Returns<span><i id="returns"><img alt="i" width="12px" className="img-fluid mb-3 ml-2" src={require("../images/info.svg")} /></i><Tooltip placement="top"
                                                                             isOpen={this.state.tooltip4} target="returns" toggle={async (e) => await this.setState({ tooltip4: !this.state.tooltip4 })} >
-                                                                            info
+                                                                            Total amount of yield generated by the 0cf system.
                                                                             </Tooltip></span></p>
                                                                     </Col>
                                                                 </Row>
                                                                 <Col lg="14" md="14" sm="14">
                                                                     <b className="pb-3 sub-header-text">
-                                                                        450.392 BTC<br />
-                                                                        $4.05M
+                                                                        COMING SOON
                                                                     </b>
                                                                 </Col>
                                                             </Col>

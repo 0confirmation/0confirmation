@@ -92,20 +92,27 @@ export default class Navigation extends React.Component {
                             <Nav className="ml-auto">
                                 <NavItem style={{marginRight: "1em"}}>
                                     <a href="https://swap.0confirmation.com/trade/swap" style={{ textDecoration: "none"}}>
-                                        <button style={{ backgroundColor: "#008F11", borderRadius: "0.8em", paddingLeft: "2rem", paddingRight: "2rem"}} className="btn button-small button-text btn-block text-light text-center bold">
-                                            Swap App
+                                        <button className="nav-0cf-button">
+                                            Swap
                                         </button>
                                     </a>
-                                    </NavItem>
-                            <NavItem>
-                                <a href="https://docs.0confirmation.com/" style={{ textDecoration: "none"}}>
-                                    <button style={{ backgroundColor: "#008F11", borderRadius: "0.8em", paddingLeft: "2rem", paddingRight: "2rem",}} className="btn button-small button-text btn-block text-light text-center bold">
-                                        Docs
-                                    </button>
-                                </a>
-                            </NavItem>
-                       </Nav>
-                    </Navbar>}
+                                </NavItem>
+                                <NavItem style={{marginRight: "1em"}}>
+                                    <a href="https://swap.0confirmation.com/trade/earn" style={{ textDecoration: "none"}}>
+                                        <button className="nav-0cf-button">
+                                            Earn
+                                        </button>
+                                    </a>
+                                </NavItem>
+                                <NavItem>
+                                    <a href="https://docs.0confirmation.com/" style={{ textDecoration: "none"}}>
+                                        <button className="nav-0cf-button">
+                                            Docs
+                                        </button>
+                                    </a>
+                                </NavItem>
+                            </Nav>
+                        </Navbar>}
                 </div>
             </>
         );
