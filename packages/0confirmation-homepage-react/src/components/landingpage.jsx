@@ -23,13 +23,13 @@ export default class LandingPage extends React.Component {
                             <Row>
                                 <Card className="mt-5 py-5 d-flex hero-card">
                                     <CardBody className="">
-                                        <div className="d-flex flex-row flex-wrap px-4 justify-content-center">
+                                        <div className="d-flex flex-row flex-wrap px-4 justify-content-center align-items-center">
                                         <div className="flex-column d-flex" style={{flexBasis:"40%"}}>
                                             <img className="img-fluid" src={require("../images/0cflogo.svg")} alt="0CF" />
                                             <p className="card-hero-text text-center">Interoperability, Optimized</p>
                                         </div>
-                                        <div className="flex-column d-flex flex-wrap" style={{flexBasis:"60%"}}>
-                                            <div className="d-flex flex-row space-even-row flex-wrap">
+                                        <div className="flex-column d-flex flex-wrap" style={{flexBasis:"60%", alignContent: "center"}}>
+                                            <div className="d-flex flex-row space-even-row flex-wrap just-center-0cf">
                                                 <div className="d-flex flex-column flex-wrap thirds">
                                                     <img className="img-fluid pb-4" src={require("../images/speed.svg")} alt="Smart Finality" />
                                                     <p className="card-header-text small-margin">Smart Finality</p>
@@ -52,8 +52,6 @@ export default class LandingPage extends React.Component {
                                                     <p className="card-sub-text small-margin">Add liquidity to the 0cf pool. earn income from confirmation as a service fees</p>
                                                     <button className="main-0cf-button" onClick={() => { window.open("https://mainnet.0confirmation.com/trade/earn"); }}>0cf Earn</button>
                                                 </div>
-                                            </div>
-                                            <div className="d-flex flex-row space-even-row flex-wrap just-center-0cf" style={{paddingTop: "2rem"}}>
                                                 <div className="d-flex flex-column flex-wrap thirds">
                                                     <p className="card-header-text">Integrate</p>
                                                     <button className="main-0cf-button" onClick={() => { window.open("https://github.com/0confirmation/0confirmation/tree/master/packages/0confirmation-sdk"); }}>SDK</button>
