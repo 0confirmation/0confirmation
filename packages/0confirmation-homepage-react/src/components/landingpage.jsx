@@ -15,6 +15,7 @@ export default class LandingPage extends React.Component {
         }
     }
     render() {
+        document.body.className += ' App';
         return (
            <>
                 <div className="justify-content-center align-content-center overflow-hidden">
