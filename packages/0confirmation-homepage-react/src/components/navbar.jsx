@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Navbar, Nav, NavLink, NavItem, NavbarBrand, NavbarToggler } from "reactstrap";
-import {Link} from "react-router-dom";
 import "../App.css";
 import { IoIosMenu } from "react-icons/io";
 import Drawer from '@material-ui/core/Drawer';
@@ -87,25 +86,19 @@ export default class Navigation extends React.Component {
                         <NavbarToggler onClick={async()=>await this.setState({isopen:!this.state.isopen})} />
                             <Nav className="ml-auto">
                                 <NavItem style={{marginRight: "1em"}}>
-                                    <a href="https://mainnet.0confirmation.com/trade/swap" target="_blank" style={{ textDecoration: "none"}}>
-                                        <button className="nav-0cf-button">
-                                            Swap
-                                        </button>
-                                    </a>
+                                    <button className="nav-0cf-button" onClick={() => { window.open("https://mainnet.0confirmation.com/trade/swap"); }}>
+                                        Swap
+                                    </button>
                                 </NavItem>
                                 <NavItem style={{marginRight: "1em"}}>
-                                    <a href="https://mainnet.0confirmation.com/trade/earn" target="_blank" style={{ textDecoration: "none"}}>
-                                        <button className="nav-0cf-button">
-                                            Earn
-                                        </button>
-                                    </a>
+                                    <button className="nav-0cf-button" onClick={() => { window.open("https://mainnet.0confirmation.com/trade/earn"); }}>
+                                        Earn
+                                    </button>
                                 </NavItem>
                                 <NavItem>
-                                    <a href="https://docs.0confirmation.com/" target="_blank" style={{ textDecoration: "none"}}>
-                                        <button className="nav-0cf-button">
-                                            Docs
-                                        </button>
-                                    </a>
+                                    <button className="nav-0cf-button" onClick={() => { window.open("https://docs.0confirmation.com/"); }}>
+                                        Docs
+                                    </button>
                                 </NavItem>
                             </Nav>
                         </Navbar>}

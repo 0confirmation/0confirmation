@@ -38,7 +38,7 @@ export default class LandingPage extends React.Component {
                                                             isOpen={this.state.sfTooltip} target="sf-bridge" toggle={async (e) => await this.setState({ sfTooltip: !this.state.sfTooltip })} >
                                                             Coming Soon!
                                                     </Tooltip>
-                                                    <button id="sf-bridge" className="main-0cf-button">Smart Finality Bridge</button>
+                                                    <button id="sf-bridge" className="main-0cf-button">Smart Finality</button>
                                                 </div>
                                                 <div className="d-flex flex-column flex-wrap thirds" >
                                                     <img className="img-fluid pb-4" src={require("../images/noslippage.svg")} alt="Swap" />
@@ -108,7 +108,7 @@ export default class LandingPage extends React.Component {
                                             <Row className="justify-content-center align-content-center mx-auto">
                                                 <Card className="card-shadow py-4" 
                                                     style={{
-                                                        backgroundColor: "#0D0208", width: "20em",
+                                                        backgroundColor: "#0D0208", minWidth: "14em",
                                                         border: "1px solid #008F11", fontFamily: "PT Sans", borderRadius: "20px"
                                                     }}>
                                                     <CardBody>
@@ -136,7 +136,7 @@ export default class LandingPage extends React.Component {
                                         <Col lg="2" mm="12" sm="12" className="align-content-center justify-content-center mx-3 my-2">
                                             <Row className="justify-content-center align-content-center mx-auto">
                                                 <Card className="card-shadow py-4" 
-                                                style={{  width: "20em", backgroundColor: "#0D0208", border: "1px solid #008F11", fontFamily:"PT Sans", borderRadius: "20px"  }}>
+                                                style={{  minWidth: "14em", backgroundColor: "#0D0208", border: "1px solid #008F11", fontFamily:"PT Sans", borderRadius: "20px"  }}>
                                                     <CardBody>
                                                         <Row className="justify-content-center align-content-center">
                                                             <Col lg="14" md="14" sm="14" className="justify-content-center align-content-center">
@@ -162,7 +162,7 @@ export default class LandingPage extends React.Component {
                                         <Col lg="2" mm="12" sm="12" className="align-content-center justify-content-center mx-3 my-2">
                                             <Row className="justify-content-center align-content-center mx-auto">
                                                 <Card className="card-shadow py-4" 
-                                                style={{ width: "20em", backgroundColor: "#0D0208", border: "1px solid #008F11", fontFamily:"PT Sans", borderRadius: "20px"  }}>
+                                                style={{ minWidth: "14em", backgroundColor: "#0D0208", border: "1px solid #008F11", fontFamily:"PT Sans", borderRadius: "20px"  }}>
                                                     <CardBody>
                                                         <Row className="justify-content-center align-content-center">
                                                             <Col lg="14" md="14" sm="14" className="justify-content-center align-content-center">
@@ -185,10 +185,10 @@ export default class LandingPage extends React.Component {
                                                 </Card>
                                             </Row>
                                         </Col>
-                                        <Col lg="2" md="12" sm="12" className="align-content-center justify-content-center mx-3 my-2">
+                                        <Col lg="2" md="10" sm="10" className="align-content-center justify-content-center mx-3 my-2">
                                             <Row className="justify-content-center align-content-center mx-auto">
                                                 <Card className="card-shadow py-4" 
-                                                style={{  width: "20em", backgroundColor: "#0D0208", border: "1px solid #008F11", fontFamily:"PT Sans", borderRadius: "20px"  }}>
+                                                style={{  minWidth: "14em", backgroundColor: "#0D0208", border: "1px solid #008F11", fontFamily:"PT Sans", borderRadius: "20px"  }}>
                                                     <CardBody>
                                                         <Row className="justify-content-center align-content-center">
                                                             <Col lg="14" md="14" sm="14" className="justify-content-center align-content-center">
@@ -221,7 +221,7 @@ export default class LandingPage extends React.Component {
                                 <div style={{paddingLeft: "20px", flex:"1"}}>
                                     <img style={{ width: "100px" }} alt="Powered By" src={require("../images/foot.svg")} />
                                 </div>
-                                <div style={{paddingRight:"25px", alignSelf:"center", display:"flex", justifyContent:"end", flex:"1"}}>
+                                <div style={{paddingRight:"25px", alignSelf:"center", display:"flex", justifyContent:"end"}}>
                                     <Row className="">
                                         <FaMedium size={25} style={{ cursor: "pointer" }} onClick={() => { window.open("https://medium.com/0confirmation"); }} color="#008F11" className="mr-2" />
                                         {/* <FaRedditAlien size={25} style={{cursor:"pointer"}} onClick={()=>{ window.open("https://www.reddit.com/r/RenProject");}} color="#008F11" className="mr-2"/> */}
