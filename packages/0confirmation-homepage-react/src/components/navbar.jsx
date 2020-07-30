@@ -91,21 +91,21 @@ export default class Navigation extends React.Component {
                         <NavbarToggler onClick={async()=>await this.setState({isopen:!this.state.isopen})} />
                             <Nav className="ml-auto">
                                 <NavItem style={{marginRight: "1em"}}>
-                                    <a href="https://swap.0confirmation.com/trade/swap" style={{ textDecoration: "none"}}>
+                                    <a href="https://mainnet.0confirmation.com/trade/swap" target="_blank" style={{ textDecoration: "none"}}>
                                         <button className="nav-0cf-button">
                                             Swap
                                         </button>
                                     </a>
                                 </NavItem>
                                 <NavItem style={{marginRight: "1em"}}>
-                                    <a href="https://swap.0confirmation.com/trade/earn" style={{ textDecoration: "none"}}>
+                                    <a href="https://mainnet.0confirmation.com/trade/earn" target="_blank" style={{ textDecoration: "none"}}>
                                         <button className="nav-0cf-button">
                                             Earn
                                         </button>
                                     </a>
                                 </NavItem>
                                 <NavItem>
-                                    <a href="https://docs.0confirmation.com/" style={{ textDecoration: "none"}}>
+                                    <a href="https://docs.0confirmation.com/" target="_blank" style={{ textDecoration: "none"}}>
                                         <button className="nav-0cf-button">
                                             Docs
                                         </button>
