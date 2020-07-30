@@ -11,6 +11,7 @@ export default class LandingPage extends React.Component {
             tooltip2: false,
             tooltip3: false,
             tooltip4: false,
+            sfTooltip: false,
         }
     }
     render() {
@@ -33,7 +34,11 @@ export default class LandingPage extends React.Component {
                                                     <img className="img-fluid pb-4" src={require("../images/speed.svg")} alt="Smart Finality" />
                                                     <p className="card-header-text small-margin">Smart Finality</p>
                                                     <p className="card-sub-text small-margin">Bitcoin on ethereum in 2 confirmations or less.  Your assets, when you want them</p>
-                                                    <button className="main-0cf-button">Smart Finality Bridge</button>
+                                                    <Tooltip placement="left"
+                                                            isOpen={this.state.sfTooltip} target="sf-bridge" toggle={async (e) => await this.setState({ sfTooltip: !this.state.sfTooltip })} >
+                                                            Coming Soon!
+                                                    </Tooltip>
+                                                    <button id="sf-bridge" className="main-0cf-button">Smart Finality Bridge</button>
                                                 </div>
                                                 <div className="d-flex flex-column flex-wrap thirds" >
                                                     <img className="img-fluid pb-4" src={require("../images/noslippage.svg")} alt="Swap" />
