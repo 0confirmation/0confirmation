@@ -1,8 +1,7 @@
 import React from 'react';
 import { Row, Card, CardBody, Col, Tooltip } from "reactstrap";
 import "../App.css";
-import { FaTelegramPlane, FaMedium, FaRedditAlien, FaTwitter } from "react-icons/fa";
-import {Link} from "react-router-dom";
+import { FaTelegramPlane, FaMedium, FaTwitter } from "react-icons/fa";
 
 export default class LandingPage extends React.Component {
     constructor(props) {
@@ -40,13 +39,13 @@ export default class LandingPage extends React.Component {
                                                     <img className="img-fluid pb-4" src={require("../images/noslippage.svg")} alt="Swap" />
                                                     <p className="card-header-text small-margin">Swap</p>
                                                     <p className="card-sub-text small-margin">DEX trading directly with BTC. Trade at the price you see NOW not in an hour.</p>
-                                                    <button className="main-0cf-button" onClick={() => { window.open("https://swap.0confirmation.com/trade/swap"); }}>0cf Swap</button>
+                                                    <button className="main-0cf-button" onClick={() => { window.open("https://mainnet.0confirmation.com/trade/swap"); }}>0cf Swap</button>
                                                 </div>
                                                 <div className="d-flex flex-column flex-wrap thirds">
                                                     <img className="img-fluid pb-4" src={require("../images/income.svg")} alt="Earn" />
                                                     <p className="card-header-text small-margin">Earn</p>
                                                     <p className="card-sub-text small-margin">Add liquidity to the 0cf pool. earn income from confirmation as a service fees</p>
-                                                    <button className="main-0cf-button" onClick={() => { window.open("https://swap.0confirmation.com/trade/earn"); }}>0cf Earn</button>
+                                                    <button className="main-0cf-button" onClick={() => { window.open("https://mainnet.0confirmation.com/trade/earn"); }}>0cf Earn</button>
                                                 </div>
                                             </div>
                                             <div className="d-flex flex-row space-even-row flex-wrap just-center-0cf" style={{paddingTop: "2rem"}}>
@@ -85,11 +84,9 @@ export default class LandingPage extends React.Component {
                                             <img className="img-fluid" alt="UNISWAP" width="250em" src={require("../images/uniswap.svg")} />
                                         </Col>
                                         <Col lg="4" md="4" sm="4" className="mx-auto mt-5">
-                                            <a href="https://github.com/0confirmation/0confirmation/tree/master/packages/0confirmation-sdk" style={{ textDecoration: "none"}}>
-                                                <button className="main-0cf-button">
-                                                    Integrate 0cf
-                                                </button>
-                                            </a>
+                                            <button className="main-0cf-button" onClick={() => { window.open("https://github.com/0confirmation/0confirmation/tree/master/packages/0confirmation-sdk"); }}>
+                                                Integrate 0cf
+                                            </button>
                                         </Col>
                                     </Row>
                                 </Col>
