@@ -60,25 +60,21 @@ export default class Navigation extends React.Component {
                                     role="presentation"
                                     onClick={async () => { await this.setState({ isopen: false }) }}
                                     onKeyDown={async () => { await this.setState({ isopen: false }) }}>
-                                    <Nav vertical>
-                                        <NavItem style={{
-                                            width: "250px", height: "50px", padding: "10px", outline: "none", textDecoration: "none",
-                                            // backgroundColor: "#008F11",
-                                        }} className="mb-4">
-                                            <Link to="https://swap.0confirmation.com/trade/swap" style={{ color:"#ffffff", fontWeight: "bold", outline: "none"}}
-                                            >Swap App</Link>
+                                    <Nav vertical className="d-flex align-content-center">
+                                        <NavItem>
+                                            <button className="main-0cf-button w-100 mb-3" onClick={() => { window.open("https://mainnet.0confirmation.com/trade/swap"); }}>
+                                                Swap
+                                            </button>
                                         </NavItem>
-                                        <NavItem style={{
-                                            width: "250px", height: "50px", padding: "10px", outline: "none", fontWeight: "bold", textDecoration: "none",
-                                            // backgroundColor: "#008F11",
-                                        }} className="mb-4">
-                                            <a href ="https://docs.0confirmation.com/">
-                                                <button className="btn button-small button-text btn-block text-light mx-5 text-center bold">
-                                                    Docs
-                                                </button>
-                                            </a>
-                                            {/* <Link to="https://docs.0confirmation.com/" style={{ color: "#ffffff", }}
-                                            >Docs</Link> */}
+                                        <NavItem>
+                                            <button className="main-0cf-button w-100 my-3" onClick={() => { window.open("https://mainnet.0confirmation.com/trade/earn"); }}>
+                                                Earn
+                                            </button>
+                                        </NavItem>
+                                        <NavItem>
+                                            <button className="main-0cf-button w-100 my-3" onClick={() => { window.open("https://docs.0confirmation.com/"); }}>
+                                                Docs
+                                            </button>
                                         </NavItem>
                                     </Nav>
                                 </div>
