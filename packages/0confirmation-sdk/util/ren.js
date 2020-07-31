@@ -2,7 +2,7 @@
 
 const { Buffer } = require('safe-buffer');
 const { Networks, Opcode, Script } = require('bitcore-lib');
-const ShifterBorrowProxy = require('@0confirmation/sol/build/ShifterBorrowProxy');
+const ShifterBorrowProxy = require('@0confirmation/sol/build/ShifterBorrowProxyFreeze');
 const { arrayify } = require('@ethersproject/bytes');
 const stripHexPrefix = (s) => s.substr(0, 2) === '0x' ? s.substr(2) : s;
 const addHexPrefix = (s) => '0x' + stripHexPrefix(s);

@@ -262,6 +262,7 @@ describe("ShifterPool", () => {
     const receipt = await (await proxy.repayLoan({ gasLimit: ethers.utils.hexlify(6e6) })).wait();
     const iface = new Interface(ShifterBorrowProxy.abi.concat(AssetForwarderLib.abi).concat(ERC20Adapter.abi).concat(ERC20AdapterLib.abi));
     const daiWrapped = new ethers.Contract(fixtures.DAI.address, fixtures.DAI.abi, fixtures.borrower.getProvider().asEthers());
+    expect(Number(ethers.utils.formatUnits(await daiWrapped.balanceOf(fixtures.borrowerAddress), 18))).to.be.gt(1);
     const renbtcWrapped = new ethers.Contract(fixtures.renbtc.address, fixtures.DAI.abi, fixtures.daoZero.getProvider().asEthers());
     await fixtures.keeper.stopListeningForLiquidityRequests();
   });
@@ -279,7 +280,7 @@ describe("ShifterPool", () => {
       const result = await deposited.submitToRenVM();
       const sig = await deposited.waitForSignature();
       try {
-        const receipt = await (await deposited.executeBorrow(ethers.utils.parseUnits('1', 8).toString(), '1')).wait();
+        const receipt = await (await deposited.executeBorrow(ethers.utils.parseUnits('1', 8).toString(), '2')).wait();
         deferred.resolve(await deposited.getBorrowProxy());
       } catch (e) {
         deferred.reject(e);
