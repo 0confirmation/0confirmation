@@ -2,7 +2,7 @@
 
 const assembleCloneCode = require('./assemble-clone-code');
 const { getCreate2Address } = require('@ethersproject/address');
-const AssetForwarder = require('@0confirmation/sol/build/AssetForwarder');
+const AssetForwarder = require('@0confirmation/sol/build/AssetForwarderFreeze');
 const { keccak256 } = require('@ethersproject/solidity');
 const { arrayify } = require('@ethersproject/bytes');
 

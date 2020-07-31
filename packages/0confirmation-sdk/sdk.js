@@ -43,8 +43,9 @@ const shifterBorrowProxyInterface = new Interface(filterABI(ShifterBorrowProxy.a
 const uniq = require('lodash/uniq');
 
 const getSignatures = (abi) => {
-  const wrapped = new Interface(filterABI(abi));
-  return uniq(Object.keys(wrapped.functions).filter((v) => /^\w+$/.test(v)).map((v) => wrapped.functions[v].sighash));
+  const iface = new Interface(filterABI(abi));
+  return uniq(Object.keys(iface.functions).map((v) => iface.getSighash(v)));
+
 };
 
 const { timeout } = require('./util');

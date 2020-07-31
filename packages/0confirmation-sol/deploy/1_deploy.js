@@ -47,6 +47,7 @@ const makeWrapper = (ethers, signer) => (deployment) => {
   return new ethers.Contract(deployment.address, deployment.abi, signer);
 };
 
+/*
 const alreadyDeployed = [
   'ShifterBorrowProxyFactoryLib',
   'ShifterPool',
@@ -56,7 +57,8 @@ const alreadyDeployed = [
   'UniswapV2Adapter',
   'SimpleBurnLiquidationModule',
   'LiquidityToken'
-];
+]; */
+const alreadyDeployed = [];
 
 const makeDeploy = (deploy, deployments, wrap, push, deployer) => async (
   contractName,
@@ -97,7 +99,6 @@ module.exports = async (buidler) => {
   await deploy("V2SwapAndDrop");
   await deploy("TransferAll");
   const ethersProvider = new bre.ethers.providers.Web3Provider(fromEthers(bre.ethereum));
-  logger.info(bre.ethers.utils.formatEther(await ethersProvider.getBalance((await ethersProvider.listAccounts())[0])));
   let weth, shifterRegistry, dai, renbtc, factory, router, from;
   switch (chain) {
     case "kovan":
@@ -150,15 +151,15 @@ module.exports = async (buidler) => {
     "zeroBTC",
     8,
   ]);
-//  await shifterPool.deployBorrowProxyImplementation();
+  await (await shifterPool.deployBorrowProxyImplementation()).wait();
   await (await shifterPool.deployAssetForwarderImplementation()).wait();
   await (
     await shifterPool.setup(
       {
         shifterRegistry: shifterRegistry.address,
         minTimeout: chain === "test" ? "1" : "10000",
-        daoFee: ethers.utils.parseEther("0.001"),
-        poolFee: ethers.utils.parseEther("0.001"),
+        daoFee: ethers.utils.parseEther("0.01"),
+        poolFee: ethers.utils.parseEther("0.01"),
         maxLoan:
           chain === "mainnet"
             ? ethers.utils.parseEther("0.1")

@@ -42,7 +42,7 @@ const chainIdFromNetwork = (network) => {
   }
 };
 
-const fromArtifact = (network, artifact) => artifact[networkToEthereumNetwork(network)].address;
+const fromArtifact = (network, artifact) => (artifact[networkToEthereumNetwork(network)] || {}).address || ethers.constants.AddressZero;
 
 const renNetworkFromNetwork = (network) => {
   switch (network) {
