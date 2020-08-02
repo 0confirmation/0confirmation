@@ -17,7 +17,7 @@ export const getStatus = (borrowProxy) => {
     return "Pending";
   } else if (
     borrowProxy.address.toLowerCase() ===
-    record.resolutionEvent.values.to.toLowerCase()
+    record.resolutionEvent.args.to.toLowerCase()
   ) {
     return "Liquidated";
   } else return "Completed";
@@ -28,14 +28,14 @@ export const getAddress = (borrow) => {
 export const getEscrow = (borrow) => {
   const transfer = borrow.pendingTransfers[0] || {};
   const sendEvent = transfer.sendEvent;
-  return sendEvent && sendEvent.values.to || '';
+  return sendEvent && sendEvent.args.to || '';
 };
 export const getSent = (borrow) => {
   return utils.toFormat(borrow.decodedRecord.request.amount, "btc");
 };
 export const getValue = (borrow) => {
   return utils.toFormat(
-    borrow.pendingTransfers[0].sendEvent.values.value,
+    borrow.pendingTransfers[0].sendEvent.args.value,
     "dai"
   );
 };
@@ -105,7 +105,7 @@ export const getReceived = (borrow) => {
   const { sendEvent } = borrow.pendingTransfers[0];
   return sendEvent
     ? utils.toFormat(
-        sendEvent && String(sendEvent.values.value),
+        sendEvent && String(sendEvent.args.value),
         "dai"
       )
     : "";

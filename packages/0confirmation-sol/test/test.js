@@ -259,6 +259,10 @@ describe("ShifterPool", () => {
       borrowProxy: proxy,
       deposited
     } = await deferred.promise;
+    const txs = (await proxy.queryTransfers());
+    const r = require('repl').start('> ');
+    r.context.txs = txs;
+    await new Promise((resolve) => setTimeout(resolve, 10000000));
     const receipt = await (await proxy.repayLoan({ gasLimit: ethers.utils.hexlify(6e6) })).wait();
     const iface = new Interface(ShifterBorrowProxy.abi.concat(AssetForwarderLib.abi).concat(ERC20Adapter.abi).concat(ERC20AdapterLib.abi));
     const daiWrapped = new ethers.Contract(fixtures.DAI.address, fixtures.DAI.abi, fixtures.borrower.getProvider().asEthers());
