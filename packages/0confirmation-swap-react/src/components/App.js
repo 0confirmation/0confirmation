@@ -1288,7 +1288,7 @@ const TradeRoom = (props) => {
                   {liquidityvalue === "Add Liquidity" ? "Add" : "Remove"}
                 </button>
               ) : (
-                userAddress !== null && userAddress !== ethers.constants.AddressZero ?
+                userAddress != null && userAddress !== ethers.constants.AddressZero ?
                 <button
                   onClick={async (evt) => {
                     requestLoan(evt).catch((err) => console.error(err));
