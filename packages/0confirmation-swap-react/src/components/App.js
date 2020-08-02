@@ -335,7 +335,7 @@ const TradeRoom = (props) => {
       const walletAccounts = await ethersProvider.listAccounts();
       if (accounts[0] === walletAccounts[0]) {
         setShowAlert(true);
-        setMessage("MetaMask using new wallet: " + accounts[0]);
+        accounts[0] != null ? setMessage("MetaMask using new wallet: " + accounts[0]) : setMessage("MetaMask has been disconnected.");
         setUserAddress(accounts[0]);
       }
     };
@@ -743,7 +743,6 @@ const TradeRoom = (props) => {
         parcel={parcel}
         transactionModal={transactionModal}
       />
-
       <div
         className= {(ismobile ? "justify-content-center align-content-center pt-5" : "justify-content-center align-content-center pt-5 swap" )} 
         style={{
@@ -753,8 +752,19 @@ const TradeRoom = (props) => {
           opacity: modal || transactionModal ? "0.1" : "1",
         }}
       >
+        <Row className="justify-content-center align-content-center text-center mt-6">
+          <Col lg="3" md="10" sm="10" className="py-2 mx-4" style={{ border:"1px solid #008F11", userSelect: "none", cursor: "default", borderRadius:"10px", fontWeight: "normal",
+                      fontStyle: "normal",
+                      fontSize: "0.8em",
+                      fontFamily: "PT Sans",
+                      color: "#00FF41" }}>
+            <span>0confirmation is beta software and <span style={{ color:"#F80C0C"}}>HAS NOT BEEN AUDITED.</span></span><br />
+            <span>Do not use any more than you can afford to lose.<br />
+            Read more about the risks <a href="https://docs.0confirmation.com/security-considerations" target="_blank" style={{color: "#008F11", textDecoration: "none"}}>here</a></span>
+          </Col>
+        </Row>
         <div className="justify-content-center align-content-center text-center mx-auto my-auto pb-4 pt-5">
-          {(userAddress != null && userAddress !== ethers.constants.AddressZero)?
+          {(userAddress != null && userAddress !== ethers.constants.AddressZero?
             <Fragment>
               <span
                       className="text-light"
@@ -785,14 +795,14 @@ const TradeRoom = (props) => {
                 >
                     Connect Wallet
                 </button>
-         
+          )
         }
         </div>
         <div className="alert-box">
           {showAlert ? (
             <Alert
               delay={5000}
-              boldText="Transaction Detail"
+              boldText="Notice: "
               detailText={message}
               alertType="alert-green"
             />
@@ -870,13 +880,6 @@ const TradeRoom = (props) => {
             </Row>
           </Col>
         </Row>
-         <Row className="justify-content-center align-content-center text-center my-4">
-           <Col lg="6" md="10" sm="10" className="text-light py-2 mx-4" style={{ border:"1px solid #008F11", userSelect: "none", cursor: "default", borderRadius:"10px", fontSize:"18px"}}>
-               <span>0confirmation is beta software and <span style={{ color:"#F80C0C"}}>HAS NOT BEEN AUDITED.</span></span><br />
-               <span>Do not use any more than you can afford to lose.<br />
-               Read more about the risks <a href="https://docs.0confirmation.com/security-considerations" target="_blank" style={{color: "#008F11", textDecoration: "none"}}>here</a></span>
-            </Col>
-         </Row>
         <Row className="justify-content-center align-content-center text-center mx-auto my-3"></Row>
         <Row className="justify-content-center align-content-center text-center">
           <Col
@@ -909,7 +912,7 @@ const TradeRoom = (props) => {
                     </Col>
                     <Col lg="12" md="12" sm="12">
                       <ButtonDropdown
-                        className="my-3"
+                        className="mb-3"
                         isOpen={liquidity}
                         toggle={() => setLiquidity(!liquidity)}
                       >
@@ -981,7 +984,7 @@ const TradeRoom = (props) => {
                       fontStyle: "normal",
                       fontSize: "0.8em",
                       fontFamily: "PT Sans",
-                      color: "#ffffff",
+                      color: "#00FF41",
                     }}
                   >
                     {(liquidityvalue==="Add Liquidity" )?
