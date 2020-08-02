@@ -754,7 +754,7 @@ const TradeRoom = (props) => {
         }}
       >
         <div className="justify-content-center align-content-center text-center mx-auto my-auto pb-4 pt-5">
-          {(userAddress != null && userAddress != ethers.constants.AddressZero)?
+          {(userAddress != null && userAddress !== ethers.constants.AddressZero)?
             <Fragment>
               <span
                       className="text-light"
