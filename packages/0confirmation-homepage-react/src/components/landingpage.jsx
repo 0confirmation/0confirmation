@@ -31,7 +31,7 @@ export default class LandingPage extends React.Component {
                                         </div>
                                         <div className="flex-column d-flex flex-wrap" style={{flexBasis:"60%", alignContent: "center"}}>
                                             <div className="d-flex flex-row space-even-row flex-wrap just-center-0cf">
-                                                <div className="d-flex flex-column flex-wrap thirds">
+                                                <div className="d-flex flex-column flex-wrap thirds px-md">
                                                     <img className="img-fluid pb-4" src={require("../images/speed.svg")} alt="Smart Finality" />
                                                     <p className="card-header-text small-margin">Smart Finality</p>
                                                     <p className="card-sub-text small-margin">Bitcoin on ethereum in 2 confirmations or less.  Your assets, when you want them</p>
@@ -41,27 +41,27 @@ export default class LandingPage extends React.Component {
                                                     </Tooltip>
                                                     <button id="sf-bridge" className="main-0cf-button">Smart Finality</button>
                                                 </div>
-                                                <div className="d-flex flex-column flex-wrap thirds" >
+                                                <div className="d-flex flex-column flex-wrap thirds px-md" >
                                                     <img className="img-fluid pb-4" src={require("../images/noslippage.svg")} alt="Swap" />
                                                     <p className="card-header-text small-margin">Swap</p>
                                                     <p className="card-sub-text small-margin">DEX trading directly with BTC. Trade at the price you see NOW not in an hour.</p>
                                                     <button className="main-0cf-button" onClick={() => { window.open("https://mainnet.0confirmation.com/trade/swap"); }}>0cf Swap</button>
                                                 </div>
-                                                <div className="d-flex flex-column flex-wrap thirds">
+                                                <div className="d-flex flex-column flex-wrap thirds px-md">
                                                     <img className="img-fluid pb-4" src={require("../images/income.svg")} alt="Earn" />
                                                     <p className="card-header-text small-margin">Earn</p>
                                                     <p className="card-sub-text small-margin">Add liquidity to the 0cf pool. earn income from confirmation as a service fees</p>
                                                     <button className="main-0cf-button" onClick={() => { window.open("https://mainnet.0confirmation.com/trade/earn"); }}>0cf Earn</button>
                                                 </div>
-                                                <div className="d-flex flex-column flex-wrap thirds">
+                                                <div className="d-flex flex-column flex-wrap thirds justify-content-center px-md">
                                                     <p className="card-header-text">Integrate</p>
                                                     <button className="main-0cf-button" onClick={() => { window.open("https://github.com/0confirmation/0confirmation/tree/master/packages/0confirmation-sdk"); }}>SDK</button>
                                                 </div>
-                                                <div className="d-flex flex-column flex-wrap thirds">
+                                                <div className="d-flex flex-column flex-wrap thirds justify-content-center px-md">
                                                     <p className="card-header-text">Learn</p>
                                                     <button className="main-0cf-button" onClick={() => { window.open("https://docs.0confirmation.com/"); }}>Docs</button>
                                                 </div>
-                                                <div className="d-flex flex-column flex-wrap thirds">
+                                                <div className="d-flex flex-column flex-wrap thirds justify-content-center px-md">
                                                     <p className="card-header-text">Contact</p>
                                                     <Row className=" justify-content-center">
                                                         <FaMedium size={25} style={{ cursor: "pointer" }} onClick={() => { window.open("https://medium.com/0confirmation"); }} color="#008F11" className="mr-2" />

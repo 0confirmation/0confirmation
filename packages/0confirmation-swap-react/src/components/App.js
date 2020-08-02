@@ -12,23 +12,20 @@ import swapIconSvg from "../images/swapicon.svg";
 import { chainIdToName, DECIMALS } from "../lib/utils";
 import ERC20 from "../lib/erc20";
 import * as bitcoin from '../lib/bitcoin-helpers';
-import { getSvgForConfirmations } from "../lib/confirmation-image-wheel";
+// import { getSvgForConfirmations } from "../lib/confirmation-image-wheel";
 import "./App.css";
 import {
   Row,
   Col,
-  InputGroup, InputGroupText,
-  InputGroupButtonDropdown, InputGroupAddon,
+  InputGroup, InputGroupText,InputGroupAddon,
   Input,
-  Dropdown,
-  Table,
   DropdownToggle,
   DropdownMenu,
   DropdownItem,ButtonDropdown,
   Tooltip
 } from "reactstrap";
 import LoanModal from "./LoanModal";
-import TransactionDetailsModal from "./TransactionDetailsModal";
+//import TransactionDetailsModal from "./TransactionDetailsModal";
 import TransactionRow from "./TransactionsRow";
 import { Link } from "react-router-dom";
 import { FaAngleDown, FaAngleUp } from "react-icons/fa";
@@ -757,7 +754,7 @@ const TradeRoom = (props) => {
         }}
       >
         <div className="justify-content-center align-content-center text-center mx-auto my-auto pb-4 pt-5">
-          {(userAddress != null && userAddress != ethers.constants.AddressZero)?
+          {(userAddress !== null && userAddress !== ethers.constants.AddressZero)?
             <Fragment>
               <span
                       className="text-light"
@@ -825,6 +822,7 @@ const TradeRoom = (props) => {
                       width: "100%"
                     }}
                     href="/#"
+                    onClick={() => {setValue("0"); setCalcValue("0"); setSlippage("0");}}
                   >
                 <div className="btn text-light"
                 style={{
@@ -854,6 +852,7 @@ const TradeRoom = (props) => {
                     color: "#ffffff",
                   }}
                   href="/#"
+                  onClick={() => {setValue("0"); setCalcValue("0"); setSlippage("0");}}
                 >
                 <div className="btn text-light"
                   style={{
@@ -1009,7 +1008,7 @@ const TradeRoom = (props) => {
             {window.location.pathname.split("/")[2] === "earn" ? (
               <Row className="justify-content-center align-content-center text-center mx-auto my-3 text-light">
                 <Col lg="4" md="12" sm="12" className="mt-2">
-                  <InputGroup style={{ height: "52px" }}>
+                  <InputGroup style={{ height: "52px",border: "2px solid #008F11", borderRadius: "8px", }}>
                     <Input
                       type="text"
                       value={value}
@@ -1017,7 +1016,7 @@ const TradeRoom = (props) => {
                       className={liquidityvalue==="Add Liquidity" ? "sendcoin h-100" : "getcoin h-100"}
                       style={{
                        backgroundColor: "#0D0208", paddingTop: "1em",
-                       borderRadius: "8px 0px 0px 8px", color: "#ffffff", border: "2px solid #008F11", outline: "none"
+                       borderRadius: "8px 0px 0px 8px", color: "#ffffff", border: "none", outline: "none"
                       }}
                     />
                       {/* <InputGroupText style={{ backgroundColor: "#008F11", borderRadius: "0px 8px 8px 0px", 
@@ -1025,7 +1024,7 @@ const TradeRoom = (props) => {
                           <InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={btcIcon} />{' '}
                                                       BTC
                       </InputGroupText> */}
-                    <InputGroupButtonDropdown
+                    {/* <InputGroupButtonDropdown
                       style={{
                         backgroundColor: "#008F11",
                         borderRadius: "0px 8px 8px 0px",
@@ -1084,7 +1083,13 @@ const TradeRoom = (props) => {
                           );
                         })}
                       </DropdownMenu>
-                    </InputGroupButtonDropdown>
+                    </InputGroupButtonDropdown> */}
+                    <InputGroupAddon style={{ userSelect: "none", cursor: "default", backgroundColor: "#003B00", borderRadius: "0px 8px 8px 0px", color: "#ffffff" }} addonType="append">
+                         <InputGroupText style={{ backgroundColor: "#003B00", borderRadius: "0px 8px 8px 0px", color: "#ffffff", border: "none", outline: "none" }}>
+                            <InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={btcIcon} />{' '}
+                                renBTC
+                          </InputGroupText>
+                      </InputGroupAddon>
                   </InputGroup>
                   <span style={{ fontFamily: "PT Sans", fontSize: "0.8em" }}
                       className={(ismobile) ? "ml-auto" : ""}>
@@ -1096,7 +1101,6 @@ const TradeRoom = (props) => {
                 <Col lg="4" md="12" sm="12" className="mt-2">
                   <InputGroup style={{  height: "52px",border: "2px solid #008F11", borderRadius: "8px", }}>
                     <Input
-                      pattern="/[1-9]\d*((\.|,)\d+)?/g"
                       type="text"
                       value={value}
                       onChange={(event) => updateAmount(event, value)}
@@ -1278,12 +1282,13 @@ const TradeRoom = (props) => {
                     fontSize: "24dp",
                     backgroundColor: "#008F11",
                     borderRadius: "10px",
+                    marginBottom: "2rem"
                   }}
                 >
                   {liquidityvalue === "Add Liquidity" ? "Add" : "Remove"}
                 </button>
               ) : (
-                userAddress != null && userAddress != ethers.constants.AddressZero ?
+                userAddress !== null && userAddress !== ethers.constants.AddressZero ?
                 <button
                   onClick={async (evt) => {
                     requestLoan(evt).catch((err) => console.error(err));
