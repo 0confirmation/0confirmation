@@ -743,27 +743,7 @@ const TradeRoom = (props) => {
         parcel={parcel}
         transactionModal={transactionModal}
       />
-      <div
-        className= {(ismobile ? "justify-content-center align-content-center pt-5" : "justify-content-center align-content-center pt-5 swap" )} 
-        style={{
-          zIndex: "1",
-          overflowX: "hidden",
-          position: "relative",
-          opacity: modal || transactionModal ? "0.1" : "1",
-        }}
-      >
-        <Row className="justify-content-center align-content-center text-center mt-6">
-          <Col lg="3" md="10" sm="10" className="py-2 mx-4" style={{ border:"1px solid #008F11", userSelect: "none", cursor: "default", borderRadius:"10px", fontWeight: "normal",
-                      fontStyle: "normal",
-                      fontSize: "0.8em",
-                      fontFamily: "PT Sans",
-                      color: "#00FF41" }}>
-            <span>0confirmation is beta software and <span style={{ color:"#F80C0C"}}>HAS NOT BEEN AUDITED.</span></span><br />
-            <span>Do not use any more than you can afford to lose.<br />
-            Read more about the risks <a href="https://docs.0confirmation.com/security-considerations" target="_blank" style={{color: "#008F11", textDecoration: "none"}}>here</a></span>
-          </Col>
-        </Row>
-        <div className="justify-content-center align-content-center text-center mx-auto my-auto pb-4 pt-5">
+      <div className={ window.innerWidth < 600 ? "d-flex pt-3 connect-wallet-btn":"d-flex pt-3 connect-wallet-btn" }>
           {(userAddress != null && userAddress !== ethers.constants.AddressZero?
             <Fragment>
               <span
@@ -798,6 +778,26 @@ const TradeRoom = (props) => {
           )
         }
         </div>
+      <div
+        className= {(ismobile ? "justify-content-center align-content-center pt-5" : "justify-content-center align-content-center pt-5 swap" )} 
+        style={{
+          zIndex: "1",
+          overflowX: "hidden",
+          position: "relative",
+          opacity: modal || transactionModal ? "0.1" : "1",
+        }}
+      >
+        <Row className="justify-content-center align-content-center text-center mb-5">
+          <Col lg="3" md="3" sm="3" className="py-2 mx-4" style={{ border:"1px solid #008F11", userSelect: "none", cursor: "default", borderRadius:"10px", fontWeight: "normal",
+                      fontStyle: "normal",
+                      fontSize: "0.8em",
+                      fontFamily: "PT Sans",
+                      color: "#00FF41" }}>
+            <span>0confirmation is beta software and <span style={{ color:"#F80C0C"}}>HAS NOT BEEN AUDITED.</span></span><br />
+            <span>Do not use any more than you can afford to lose.<br />
+            Read more about the risks <a href="https://docs.0confirmation.com/security-considerations" target="_blank" style={{color: "#008F11", textDecoration: "none"}}>here</a></span>
+          </Col>
+        </Row>
         <div className="alert-box">
           {showAlert ? (
             <Alert
@@ -1271,6 +1271,8 @@ const TradeRoom = (props) => {
 
             <div className="justify-content-center align-content-center text-center mx-auto my-auto pt-3">
               {window.location.pathname.split("/")[2] === "earn" ? (
+                (
+                  userAddress != null && userAddress !== ethers.constants.AddressZero ?
                 <button
                   onClick={async (e) => {
                     e.preventDefault();
@@ -1289,7 +1291,20 @@ const TradeRoom = (props) => {
                   }}
                 >
                   {liquidityvalue === "Add Liquidity" ? "Add" : "Remove"}
-                </button>
+                </button> : <button
+                className="btn button-small btn-sm px-5"
+                onClick={(evt) => connectWeb3Modal(evt)}
+                style={{
+                  fontSize: "24dp",
+                  backgroundColor: "#008F11",
+                  color: "#FFFFFF",
+                  borderRadius: "10px",
+                  marginBottom: "2rem",
+                  opacity: "0.38"
+                }}
+              >
+                  Connect Wallet to Provide Liquidity
+                </button>)
               ) : (
                 userAddress != null && userAddress !== ethers.constants.AddressZero ?
                 <button
