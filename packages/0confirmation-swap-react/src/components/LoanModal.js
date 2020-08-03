@@ -23,7 +23,7 @@ const LoanModal = ({
   const closeBtn = (
     <button
       className="btn"
-      style={{ color: "#317333", fontSize: transactionModal ? "2em" : "" }}
+      style={{ color: "#317333", height: "50%", fontSize: transactionModal ? "2em" : "" }}
       onClick={closeModal}
     >
       &times;
@@ -45,11 +45,11 @@ const LoanModal = ({
                         backgroundColor: "#0D0208", border: "3px solid #00FF41",
                         borderRadius: " 20px",
                     }} className="h-100 p-3">
-        <Row className="w-100 align-content-center justify-content-center my-3">
+        <Row className="d-flex justify-content-end" style={{justifyContent:"flex-end", height:"50%"}}>
+          {closeBtn}
+        </Row>
+        <Row className="w-100 align-content-center justify-content-center mb-3" style={{marginTop: "-20px"}}>
           <Col
-            lg="10"
-            sm="10"
-            md="10"
             className="align-content-center justify-content-center text-center"
           >
             <span
@@ -62,9 +62,6 @@ const LoanModal = ({
             >
               Bitcoin Payment
             </span>
-          </Col>
-          <Col lg="1" sm="1" md="1">
-            {closeBtn}
           </Col>
         </Row>
         <Row className="w-100 align-content-center justify-content-center text-center text-light">
