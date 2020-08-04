@@ -1,20 +1,20 @@
 import React from "react";
-import { Modal, ModalBody } from "reactstrap";
+import { Modal, ModalBody, Col } from "reactstrap";
 
 function getNetworkName(currentNetwork) {
     switch (currentNetwork) {
         case 1:
-            return "Main";
+            return "Main Ethereum Network";
         case 2:
-            return "Morden";
+            return "Morden Test Network";
         case 3:
-            return "Ropsten";
+            return "Ropsten Test Network";
         case 4:
-            return "Rinkeby";
+            return "Rinkeby Test Network";
         case 42:
-            return "Kovan";
+            return "Kovan Test Network";
         default:
-            return "Unknown";
+            return "Unknown Ethereum Network";
     }
 }
 
@@ -33,9 +33,11 @@ export default function WrongNetworkModal(props) {
         toggle={props.closeModal}>
             <ModalBody style={{
                         backgroundColor: "#0D0208", border: "1px solid #00FF41", color: "#ffffff",
-                        borderRadius: " 10px"
+                        borderRadius: " 10px", textAlign: "center"
                     }} className="h-100 p-3">
-                You are using the {currentNetworkName} network.  Please login and switch to the {correctNetworkName} network to continue.
+                <Col>
+                    <p style={{height:"10rem", paddingTop: "10%"}}>You are using the <span style={{color:"#00FF41"}}>{currentNetworkName}</span> network.  Please login and switch to the <span style={{color:"#00FF41"}}>{correctNetworkName}</span> network to continue.</p>
+                </Col>
             </ModalBody>
         </Modal>
     )
