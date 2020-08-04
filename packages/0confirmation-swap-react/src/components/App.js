@@ -344,9 +344,8 @@ const TradeRoom = (props) => {
       const metamaskEthersProvider = new ethers.providers.Web3Provider(
         window.ethereum
       );
-      const networkId = Number(
-        await metamaskEthersProvider.send("net_version", [])
-      );
+      let network = metamaskEthersProvider.getNetwork()
+      let networkId = Number(network.chainId)
       const walletAccounts = await metamaskEthersProvider.listAccounts();
       const zeroAccounts = await ethersProvider.listAccounts();
       if (
@@ -360,6 +359,7 @@ const TradeRoom = (props) => {
             " instead of " +
             chainIdToName(String(CHAIN))
         );
+        setUserAddress(ethers.constants.AddressZero)
       }
     };
     window.ethereum.on("chainChanged", networkListener);
@@ -383,6 +383,23 @@ const TradeRoom = (props) => {
       }
       const ethersProvider = zero.getProvider().asEthers();
       let busy = false;
+      const walletAccounts = await ethersProvider.listAccounts();
+      const zeroAccounts = await ethersProvider.listAccounts();
+      let currentProvider = await new ethers.providers.Web3Provider(window.ethereum)
+      let network = await currentProvider.getNetwork()
+      let networkId = Number(network.chainId)
+      if (
+        walletAccounts[0] === zeroAccounts[0] &&
+        networkId !== Number(CHAIN)
+      ) {
+        setShowAlert(true);
+        setMessage(
+          "MetaMask using network " +
+            chainIdToName(String(networkId)) +
+            " instead of " +
+            chainIdToName(String(CHAIN))
+        );
+      }
       const listener = async (number) => {
         if (number % 3 && !busy) {
           busy = true;
@@ -550,9 +567,6 @@ const TradeRoom = (props) => {
   const initializeMarket = async () => {
     await updateMarket();
     setRate("N/A");
-  };
-  const checkNumber = (number) => {
-    return number.match(/[1-9]\d*((\.|,)\d+)?/g) !== null;
   };
   const updateAmount = async (e, oldValue) => {
     e.preventDefault();
