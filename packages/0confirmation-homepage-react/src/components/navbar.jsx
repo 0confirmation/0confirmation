@@ -61,12 +61,12 @@ export default class Navigation extends React.Component {
                                     onKeyDown={async () => { await this.setState({ isopen: false }) }}>
                                     <Nav vertical className="d-flex align-content-center">
                                         <NavItem>
-                                            <button className="main-0cf-button w-100 mb-3" onClick={() => { window.open("https://mainnet.0confirmation.com/trade/swap"); }}>
+                                            <button className="main-0cf-button w-100 mb-3" onClick={() => { window.open("https://swap.0confirmation.com/trade/swap"); }}>
                                                 Swap
                                             </button>
                                         </NavItem>
                                         <NavItem>
-                                            <button className="main-0cf-button w-100 my-3" onClick={() => { window.open("https://mainnet.0confirmation.com/trade/earn"); }}>
+                                            <button className="main-0cf-button w-100 my-3" onClick={() => { window.open("https://swap.0confirmation.com/trade/earn"); }}>
                                                 Earn
                                             </button>
                                         </NavItem>
@@ -86,12 +86,12 @@ export default class Navigation extends React.Component {
                         <NavbarToggler onClick={async()=>await this.setState({isopen:!this.state.isopen})} />
                             <Nav className="ml-auto">
                                 <NavItem style={{marginRight: "1em"}}>
-                                    <button className="nav-0cf-button" onClick={() => { window.open("https://mainnet.0confirmation.com/trade/swap"); }}>
+                                    <button className="nav-0cf-button" onClick={() => { window.open("https://swap.0confirmation.com/trade/swap"); }}>
                                         Swap
                                     </button>
                                 </NavItem>
                                 <NavItem style={{marginRight: "1em"}}>
-                                    <button className="nav-0cf-button" onClick={() => { window.open("https://mainnet.0confirmation.com/trade/earn"); }}>
+                                    <button className="nav-0cf-button" onClick={() => { window.open("https://swap.0confirmation.com/trade/earn"); }}>
                                         Earn
                                     </button>
                                 </NavItem>
