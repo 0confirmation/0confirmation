@@ -60,6 +60,8 @@ import {
   TradeType,
 } from "@uniswap/sdk";
 import { abi as ERC20ABI } from "@0confirmation/sol/build/DAI";
+import WrongNetworkModal from "./WrongNetworkModal";
+import ModalBackground from "./ModalBackground";
 const CHAIN = process.env.REACT_APP_CHAIN; // eslint-disable-line
 
 if (window.ethereum) window.ethereum.autoRefreshOnNetworkChange = false;
@@ -341,25 +343,27 @@ const TradeRoom = (props) => {
     };
     window.ethereum.on("accountsChanged", listener);
     const networkListener = async () => {
-      const metamaskEthersProvider = new ethers.providers.Web3Provider(
-        window.ethereum
-      );
-      let network = metamaskEthersProvider.getNetwork()
+      let currentProvider = await new ethers.providers.Web3Provider(window.ethereum)
+      let network = await currentProvider.getNetwork()
       let networkId = Number(network.chainId)
-      const walletAccounts = await metamaskEthersProvider.listAccounts();
+      setCurrentNetwork(networkId)
+      const walletAccounts = await currentProvider.listAccounts();
       const zeroAccounts = await ethersProvider.listAccounts();
       if (
         walletAccounts[0] === zeroAccounts[0] &&
         networkId !== Number(CHAIN)
       ) {
-        setShowAlert(true);
-        setMessage(
-          "MetaMask using network " +
-            chainIdToName(String(networkId)) +
-            " instead of " +
-            chainIdToName(String(CHAIN))
-        );
-        setUserAddress(ethers.constants.AddressZero)
+        setWrongNetworkModal(true)
+        // setShowAlert(true);
+        // setMessage(
+        //   "MetaMask using network " +
+        //     chainIdToName(String(networkId)) +
+        //     " instead of " +
+        //     chainIdToName(String(CHAIN))
+        // );
+        // setUserAddress(ethers.constants.AddressZero)
+      } else {
+        setWrongNetworkModal(false)
       }
     };
     window.ethereum.on("chainChanged", networkListener);
@@ -388,17 +392,21 @@ const TradeRoom = (props) => {
       let currentProvider = await new ethers.providers.Web3Provider(window.ethereum)
       let network = await currentProvider.getNetwork()
       let networkId = Number(network.chainId)
+      setCurrentNetwork(networkId)
       if (
         walletAccounts[0] === zeroAccounts[0] &&
         networkId !== Number(CHAIN)
       ) {
-        setShowAlert(true);
-        setMessage(
-          "MetaMask using network " +
-            chainIdToName(String(networkId)) +
-            " instead of " +
-            chainIdToName(String(CHAIN))
-        );
+        setWrongNetworkModal(true)
+        // setShowAlert(true);
+        // setMessage(
+        //   "MetaMask using network " +
+        //     chainIdToName(String(networkId)) +
+        //     " instead of " +
+        //     chainIdToName(String(CHAIN))
+        // );
+      } else {
+        setWrongNetworkModal(false)
       }
       const listener = async (number) => {
         if (number % 3 && !busy) {
@@ -517,6 +525,9 @@ const TradeRoom = (props) => {
   const [transactionModal, setTransactionModal] = useState(false);
   const [_history, setHistory] = useState(record.decorateHistory([]));
   const [getOpen, setGetOpen] = useState(false);
+  const [networkModal, setWrongNetworkModal] = useState(false)
+  const [currentNetwork, setCurrentNetwork] = useState("")
+  const [correctNetwork, setCorrectNetwork] = useState(Number(CHAIN))
   //  const [gets, setGets] = useState(0);
   const [rate, setRate] = useState("0");
   if (rate || setRate) noop(); // eslint silencer
@@ -741,9 +752,11 @@ const TradeRoom = (props) => {
     evt.preventDefault();
     if (modal) setModal(false);
     if (transactionModal) setTransactionModal(false);
+    if (networkModal && currentNetwork === correctNetwork) setWrongNetworkModal(false);
   };
   return (
     <>
+      <ModalBackground isOpen={networkModal || modal}/>
       <LoanModal
         waiting={waiting}
         ismobile={ismobile}
@@ -757,7 +770,22 @@ const TradeRoom = (props) => {
         parcel={parcel}
         transactionModal={transactionModal}
       />
-      <div className={ window.innerWidth < 600 ? "d-flex pt-3 connect-wallet-btn":"d-flex pt-3 connect-wallet-btn" }>
+      <WrongNetworkModal 
+        modal={networkModal}
+        closeModal={closeModal} 
+        currentNetwork={currentNetwork}
+        correctNetwork={correctNetwork}
+      />
+      <div
+        className= {(ismobile ? "justify-content-center align-content-center pt-1" : "justify-content-center align-content-center pt-1 swap" )} 
+        style={{
+          zIndex: "1",
+          overflowX: "hidden",
+          position: "relative",
+          opacity: modal || transactionModal ? "0.1" : "1",
+        }}
+      >
+        <div className={ window.innerWidth < 600 ? "d-flex pt-3 connect-wallet-btn":"d-flex pt-3 connect-wallet-btn" }>
           {(userAddress != null && userAddress !== ethers.constants.AddressZero?
             <Fragment>
               <span
@@ -792,16 +820,7 @@ const TradeRoom = (props) => {
           )
         }
         </div>
-      <div
-        className= {(ismobile ? "justify-content-center align-content-center pt-5" : "justify-content-center align-content-center pt-5 swap" )} 
-        style={{
-          zIndex: "1",
-          overflowX: "hidden",
-          position: "relative",
-          opacity: modal || transactionModal ? "0.1" : "1",
-        }}
-      >
-        <Row className="justify-content-center align-content-center text-center mb-5">
+        <Row className="justify-content-center align-content-center text-center my-5">
           <Col lg="3" md="3" sm="3" className="py-2 mx-4" style={{ border:"1px solid #008F11", userSelect: "none", cursor: "default", borderRadius:"10px", fontWeight: "normal",
                       fontStyle: "normal",
                       fontSize: "0.8em",
