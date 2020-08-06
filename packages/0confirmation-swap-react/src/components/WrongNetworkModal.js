@@ -33,7 +33,7 @@ export default function WrongNetworkModal(props) {
         toggle={props.closeModal}>
             <ModalBody style={{
                         backgroundColor: "#0D0208", border: "1px solid #00FF41", color: "#ffffff",
-                        borderRadius: " 10px", textAlign: "center"
+                        borderRadius: "10px", textAlign: "center"
                     }} className="h-100 p-3">
                 <Col>
                     <p style={{height:"10rem", paddingTop: "10%"}}>You are using the <span style={{color:"#00FF41"}}>{currentNetworkName}</span> network.  Please login and switch to the <span style={{color:"#00FF41"}}>{correctNetworkName}</span> network to continue.</p>

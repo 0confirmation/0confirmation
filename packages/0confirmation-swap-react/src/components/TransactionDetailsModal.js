@@ -41,7 +41,12 @@ const TransactionDetailsModal = ({
       }}
     >
       <ModalBody
-        style={{ backgroundColor: "#0D0208" }}
+        style={{ 
+          backgroundColor: "#0D0208",
+          border: "1px solid #00FF41", 
+          color: "#ffffff",
+          borderRadius: "10px",
+       }}
         className="align-content-center justify-content-center py-5"
       >
         <Row>

@@ -1,17 +1,20 @@
 "use strict";
 
 import React from "react";
-import { chainIdToName } from "./utils";
+const CHAIN = process.env.REACT_APP_CHAIN; // eslint-disable-line
+
 
 export const createEtherscanLinkFor = (s) =>
   s
     ? s.length === 66 || s.length === 42
       ? "https://" +
-        chainIdToName(s) +
+        Number(CHAIN) === 1 ? 'mainnet' : 'kovan' +
         ".etherscan.io/" +
         (s.length === 66 ? "tx/" : "address/") +
         s
-      : "https://www.blockchain.com/btc-testnet/address/" + s
+      : "https://www.blockchain.com/" + 
+      Number(CHAIN) === 1 ? 'btc' : 'btc-testnet' + 
+      s.length === 64 ? "/tx/" : "/address/" + s
     : "";
 
 export const createEtherscanLink = (s, text) => {
