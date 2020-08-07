@@ -595,8 +595,10 @@ const TradeRoom = (props) => {
     if(e.target.value > 2) {
       checkValueLimit = oldValue;
       showWarningAlert("The maximum swap amount is 2 BTC.");
-    } else if(e.target.value > 0.00035 || Number(e.target.value) === 0 || e.target.value === ".") {
-      showWarningAlert("The minimum swap amount is 0.00035 BTC.");
+    } else if (e.target.value < 0.0004 && Number(e.target.value) !== 0) {
+      showWarningAlert("The minimum swap amount is 0.0004 BTC.");
+      checkValueLimit = oldValue;
+    } else if(e.target.value >= 0.0004 || Number(e.target.value) === 0 || e.target.value === ".") {
       checkValueLimit = e.target.value; 
     } else checkValueLimit = oldValue;
     const value = checkValueLimit;
@@ -1164,7 +1166,7 @@ const TradeRoom = (props) => {
                   <InputGroup style={{  height: "52px",border: "2px solid #008F11", borderRadius: "8px", }}>
                     <Input
                       type="text"
-                      value={value === "0" ? null : value}
+                      value={value}
                       placeholder="0"
                       onChange={(event) => updateAmount(event, value)}
                       className="sendcoin h-100"
