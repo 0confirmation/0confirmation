@@ -521,6 +521,7 @@ const TradeRoom = (props) => {
   const [stake, setStake] = useState("0");
   const [sendOpen, setSendOpen] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
+  const [warningAlert, setWarningAlert] = useState(false);
   const [transactionDetails, setTransactionDetails] = useState("none");
   const [transactionModal, setTransactionModal] = useState(false);
   const [_history, setHistory] = useState(record.decorateHistory([]));
@@ -536,6 +537,7 @@ const TradeRoom = (props) => {
   //  const [returnPercentage, setReturnPercentage] = useState(0.232);
   const [modal, setModal] = useState(false);
   const [message, setMessage] = useState("");
+  const [warningMessage, setWarningMessage] = useState("");
   const [value, setValue] = useState("0");
   const [calcValue, setCalcValue] = useState("0");
   const [market, setMarket] = useState(null);
@@ -579,10 +581,24 @@ const TradeRoom = (props) => {
     await updateMarket();
     setRate("N/A");
   };
+
+  const showWarningAlert = function (message) {
+    setWarningAlert(true);
+    setWarningMessage(message);
+    setTimeout(() => {
+      setWarningAlert(false)
+    }, 5500)
+  }
   const updateAmount = async (e, oldValue) => {
     e.preventDefault();
     var checkValueLimit;
-    if(e.target.value > 0.00035 || Number(e.target.value) === 0 || e.target.value === ".") checkValueLimit = e.target.value; else checkValueLimit = oldValue;
+    if(e.target.value > 2) {
+      checkValueLimit = oldValue;
+      showWarningAlert("The maximum swap amount is 2 BTC.");
+    } else if(e.target.value > 0.00035 || Number(e.target.value) === 0 || e.target.value === ".") {
+      showWarningAlert("The minimum swap amount is 0.00035 BTC.");
+      checkValueLimit = e.target.value; 
+    } else checkValueLimit = oldValue;
     const value = checkValueLimit;
     setValue(value);
     if (isNaN(value)) return;
@@ -683,8 +699,8 @@ const TradeRoom = (props) => {
           `BTC/DAI swap executed: ${amount} DAI locked -- await RenVM message to release`
         );
       } else {
-        setShowAlert(true);
-        setMessage("something went wrong");
+          setShowAlert(true);
+          setMessage("something went wrong");
       }
       if (CHAIN === "embedded" || CHAIN === "test" || CHAIN === "external")
         await new Promise((resolve) => setTimeout(resolve, 60000));
@@ -838,6 +854,16 @@ const TradeRoom = (props) => {
               boldText="Notice: "
               detailText={message}
               alertType="alert-green"
+            />
+          ) : null}
+        </div>
+        <div className="alert-box">
+          {warningAlert ? (
+            <Alert
+              delay={5000}
+              boldText="WARNING: "
+              detailText={warningMessage}
+              alertType="alert-red"
             />
           ) : null}
         </div>
@@ -1138,7 +1164,8 @@ const TradeRoom = (props) => {
                   <InputGroup style={{  height: "52px",border: "2px solid #008F11", borderRadius: "8px", }}>
                     <Input
                       type="text"
-                      value={value}
+                      value={value === "0" ? null : value}
+                      placeholder="0"
                       onChange={(event) => updateAmount(event, value)}
                       className="sendcoin h-100"
                       style={{
