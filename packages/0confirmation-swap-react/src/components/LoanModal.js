@@ -182,7 +182,7 @@ const LoanModal = ({
             style={{ fontSize: "0.9em" }}
             className="align-content-center justify-content-center"
           >
-            <button className={"btn btn-block rounded-pill text-center text-light " + waiting ? "bg-warning" : "bg-success"}>
+            <button onClick={waiting ? "":closeModal} className={waiting ? "btn btn-block rounded-pill text-center text-light bg-warning" : "btn btn-block rounded-pill text-center text-light bg-success"}>
               {waiting ? "Awaiting Payment" : "Payment Found!"}
             </button>
           </Col>
