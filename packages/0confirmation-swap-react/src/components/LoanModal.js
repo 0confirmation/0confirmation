@@ -42,13 +42,13 @@ const LoanModal = ({
       toggle={closeModal}
     >
       <ModalBody  style={{
-                        backgroundColor: "#0D0208", border: "3px solid #00FF41",
+                        backgroundColor: "#0D0208", border: "1px solid #00FF41",
                         borderRadius: " 20px",
                     }} className="h-100 p-3">
         <Row className="d-flex justify-content-end" style={{justifyContent:"flex-end", height:"50%"}}>
           {closeBtn}
         </Row>
-        <Row className="w-100 align-content-center justify-content-center mb-3" style={{marginTop: "-20px"}}>
+        <Row className="w-100 align-content-#0D0208center justify-content-center mb-3" style={{marginTop: "-20px"}}>
           <Col
             className="align-content-center justify-content-center text-center"
           >
@@ -182,7 +182,7 @@ const LoanModal = ({
             style={{ fontSize: "0.9em" }}
             className="align-content-center justify-content-center"
           >
-            <button onClick={waiting ? "":closeModal} className={waiting ? "btn btn-block rounded-pill text-center text-light bg-warning" : "btn btn-block rounded-pill text-center text-light bg-success"}>
+            <button style={{color: "#0D0208"}} onClick={waiting ? "":closeModal} className={waiting ? "btn btn-block rounded-pill text-center bg-warning" : "btn btn-block rounded-pill text-center bg-success"}>
               {waiting ? "Awaiting Payment" : "Payment Found!"}
             </button>
           </Col>
