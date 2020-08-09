@@ -58,7 +58,12 @@ const alreadyDeployed = [
   'SimpleBurnLiquidationModule',
   'LiquidityToken'
 ]; */
-const alreadyDeployed = [];
+const alreadyDeployed = [
+  'UniswapV2Adapter',
+  'V2SwapAndDrop',
+  'ERC20Adapter',
+  'SimpleBurnLiquidationModule'
+];
 
 const makeDeploy = (deploy, deployments, wrap, push, deployer) => async (
   contractName,
@@ -97,7 +102,6 @@ module.exports = async (buidler) => {
   });
   const erc20Adapter = await deploy("ERC20Adapter");
   await deploy("V2SwapAndDrop");
-  await deploy("TransferAll");
   const ethersProvider = new bre.ethers.providers.Web3Provider(fromEthers(bre.ethereum));
   let weth, shifterRegistry, dai, renbtc, factory, router, from;
   switch (chain) {
