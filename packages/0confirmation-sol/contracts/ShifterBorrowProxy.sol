@@ -13,6 +13,7 @@ import { BorrowProxy } from "./BorrowProxy.sol";
 import { ShifterBorrowProxyLib } from "./ShifterBorrowProxyLib.sol";
 import { ShifterPool } from "./ShifterPool.sol";
 import { IShifter } from "./interfaces/IShifter.sol";
+import { Math } from "@openzeppelin/contracts/math/Math.sol";
 
 contract ShifterBorrowProxy is BorrowProxy, SafeViewExecutor, NullCloneConstructor {
   using ShifterBorrowProxyLib for *;
@@ -26,14 +27,24 @@ contract ShifterBorrowProxy is BorrowProxy, SafeViewExecutor, NullCloneConstruct
   function mint(ShifterBorrowProxyLib.TriggerParcel memory parcel) internal returns (uint256 amount) {
     amount = getShifter(parcel.record.request.token).mint(parcel.shiftParameters.pHash, parcel.shiftParameters.amount, parcel.computeNHash(), parcel.shiftParameters.darknodeSignature);
   }
+  function _getGasReserved() internal view returns (uint256 result) {
+    result = ShifterPool(isolate.masterAddress).getGasReserved(address(this));
+  }
+  function _payoutCallbackGas(address payable borrower, uint256 amount, uint256 originAmount) internal {
+    if (amount != 0) ShifterPool(isolate.masterAddress).payoutCallbackGas(borrower, amount - originAmount, originAmount);
+  }
   function repayLoan(bytes memory data) public returns (bool) {
-    (bool success, ShifterBorrowProxyLib.ProxyRecord memory record, address pool, uint256 repayAmount) = _repayLoan(data);
+    uint256 startGas = gasleft();
+    (bool success, ShifterBorrowProxyLib.ProxyRecord memory record, address payable pool, uint256 repayAmount) = _repayLoan(data);
     if (maybeRelayResolveLoan(success, record, pool, repayAmount)) {
       ShifterBorrowProxyLib.emitShifterBorrowProxyRepaid(record.request.borrower, record);
+      uint256 amount = _getGasReserved();
+      uint256 originAmount = Math.min((gasleft() - startGas + 20000)*tx.gasprice, amount); // another estimate
+      _payoutCallbackGas(record.request.borrower, amount, originAmount);
       return true;
     } else return false;
   }
-  function _repayLoan(bytes memory data) internal returns (bool success, ShifterBorrowProxyLib.ProxyRecord memory record, address pool, uint256 repayAmount) {
+  function _repayLoan(bytes memory data) internal returns (bool success, ShifterBorrowProxyLib.ProxyRecord memory record, address payable pool, uint256 repayAmount) {
     (ShifterBorrowProxyLib.TriggerParcel memory parcel) = data.decodeTriggerParcel();
     record = parcel.record;
     parcel.record.request.actions = new ShifterBorrowProxyLib.InitializationAction[](0);
@@ -68,10 +79,10 @@ contract ShifterBorrowProxy is BorrowProxy, SafeViewExecutor, NullCloneConstruct
   function getBalanceOf(address token, address user) internal view returns (uint256) {
     return IERC20(token).balanceOf(user);
   }
-  function getLiquidityToken(address pool, address token) internal view returns (address liqToken) {
+  function getLiquidityToken(address payable pool, address token) internal view returns (address liqToken) {
     liqToken = address(ShifterPool(pool).getLiquidityTokenHandler(token));
   }
-  function maybeRelayResolveLoan(bool success, ShifterBorrowProxyLib.ProxyRecord memory record, address pool, uint256 repayPool) internal returns (bool) {
+  function maybeRelayResolveLoan(bool success, ShifterBorrowProxyLib.ProxyRecord memory record, address payable pool, uint256 repayPool) internal returns (bool) {
     if (success) {
       address liqToken = getLiquidityToken(pool, record.request.token);
       require(record.request.token.sendToken(pool, repayPool), "failed to approve pool for token transfer");
@@ -81,11 +92,12 @@ contract ShifterBorrowProxy is BorrowProxy, SafeViewExecutor, NullCloneConstruct
     return false;
   }
   function defaultLoan(bytes memory data) public {
-    (bool success, ShifterBorrowProxyLib.ProxyRecord memory record, address pool, uint256 postBalance) = _defaultLoan(data);
+    (bool success, ShifterBorrowProxyLib.ProxyRecord memory record, address payable pool, uint256 postBalance) = _defaultLoan(data);
     maybeRelayResolveLoan(success, record, pool, postBalance);
+    _payoutCallbackGas(record.request.borrower, 0, _getGasReserved());
     selfdestruct(msg.sender);
   }
-  function _defaultLoan(bytes memory data) internal returns (bool success, ShifterBorrowProxyLib.ProxyRecord memory record, address pool, uint256 postBalance) {
+  function _defaultLoan(bytes memory data) internal returns (bool success, ShifterBorrowProxyLib.ProxyRecord memory record, address payable pool, uint256 postBalance) {
     require(!isolate.isRepaying, "loan being repaid");
     require(!isolate.unbound, "loan already repaid");
     require(validateProxyRecord(data), "proxy record invalid");

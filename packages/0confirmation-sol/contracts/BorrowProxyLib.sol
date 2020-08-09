@@ -13,7 +13,7 @@ import { ModuleLib } from "./adapters/lib/ModuleLib.sol";
 library BorrowProxyLib {
   using ModuleLib for *;
   struct ProxyIsolate {
-    address masterAddress;
+    address payable masterAddress;
     bool unbound;
     address owner;
     address token;

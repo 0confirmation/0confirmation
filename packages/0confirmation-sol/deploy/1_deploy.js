@@ -145,6 +145,8 @@ module.exports = async (buidler) => {
     [router.address, erc20Adapter.address]
   );
   const liquidityToken = await deploy("LiquidityToken", [
+    weth.address,
+    router.address,
     shifterPool.address,
     renbtc.address,
     "zeroBTC",
@@ -160,6 +162,8 @@ module.exports = async (buidler) => {
         minTimeout: chain === "test" ? "1" : "10000",
         daoFee: ethers.utils.parseEther("0.01"),
         poolFee: ethers.utils.parseEther("0.01"),
+        gasEstimate: '1200000',
+        maxGasPriceForRefund: ethers.utils.parseUnits('80', 9),
         maxLoan:
           chain === "mainnet"
             ? ethers.utils.parseEther("0.1")
@@ -224,7 +228,7 @@ module.exports = async (buidler) => {
     from = deployerAddress;
     await mapSeries(
       [
-        [renbtc.address, 8, "1000"],
+        [renbtc.address, 8, "0.34"],
         [dai.address, 18, "7724680"],
       ],
       async ([token, decimals, amount]) => {

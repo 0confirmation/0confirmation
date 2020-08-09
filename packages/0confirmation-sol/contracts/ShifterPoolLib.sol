@@ -28,6 +28,13 @@ library ShifterPoolLib {
     uint256 poolFee;
     uint256 daoFee;
     uint256 maxLoan;
+    uint256 gasEstimate;
+    uint256 maxGasPriceForRefund;
+  }
+  struct BorrowState {
+    uint256 startGas;
+    uint256 gasPrice;
+    uint256 refundAmount;
   }
   struct Isolate {
     uint256 genesis;
@@ -38,6 +45,9 @@ library ShifterPoolLib {
     uint256 poolFee;
     uint256 daoFee;
     uint256 maxLoan;
+    uint256 gasEstimate;
+    uint256 maxGasPriceForRefund;
+    mapping (address => uint256) gasReserved;
     mapping (address => bool) isKeeper;
     mapping (bytes32 => bool) provisionExecuted;
     mapping (address => address) tokenToLiquidityToken;
@@ -59,8 +69,8 @@ library ShifterPoolLib {
   function makeBorrowProxy(Isolate storage isolate, bytes32 salt) internal returns (address payable proxyAddress) {
     proxyAddress = address(uint160(isolate.deployBorrowProxy(salt)));
   }
-  function issueLoan(Isolate storage isolate, address token, address payable proxyAddress, uint256 fee) internal {
-    require(LiquidityToken(getLiquidityToken(isolate, token)).loan(proxyAddress, fee), "insufficient funds in liquidity pool");
+  function issueLoan(Isolate storage isolate, address token, address payable proxyAddress, uint256 fee, uint256 getGas) internal {
+    require(LiquidityToken(getLiquidityToken(isolate, token)).loan(proxyAddress, fee, getGas), "insufficient funds in liquidity pool");
   }
   function setupBorrowProxy(address payable proxyAddress, address borrower, address token, bool unbound) internal {
     require(ShifterBorrowProxy(proxyAddress).setup(borrower, token, unbound), "setup phase failure");
@@ -91,9 +101,9 @@ library ShifterPoolLib {
     address token;
     address liqToken;
   }
-  function launchLiquidityToken(Isolate storage isolate, address token, string memory name, string memory symbol, uint8 decimals) internal returns (address) {
+  function launchLiquidityToken(Isolate storage isolate, address weth, address router, address token, string memory name, string memory symbol, uint8 decimals) internal returns (address) {
     require(isolate.tokenToLiquidityToken[token] == address(0x0), "already deployed liquidity token for target token");
-    address liquidityToken = address(new LiquidityToken(address(this), token, name, symbol, decimals));
+    address liquidityToken = address(new LiquidityToken(weth, router, address(uint160(address(this))), token, name, symbol, decimals));
     isolate.tokenToLiquidityToken[token] = liquidityToken;
     return liquidityToken;
   }

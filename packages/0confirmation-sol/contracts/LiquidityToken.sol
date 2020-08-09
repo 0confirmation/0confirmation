@@ -6,26 +6,38 @@ import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { ERC20Burnable } from "@openzeppelin/contracts/token/ERC20/ERC20Burnable.sol";
 import { TokenUtils } from "./utils/TokenUtils.sol";
+import { IUniswapV2Router01 } from "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router01.sol";
+import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
+import { console } from "@nomiclabs/buidler/console.sol";
 
 contract LiquidityToken is ERC20, ERC20Burnable {
   using TokenUtils for *;
-  address public pool;
+  address payable public pool;
   address public asset;
+  address public router;
+  address public weth;
   uint256 public offset;
   mapping (address => uint256) public outstandingLoans;
-  constructor(address shifterPool, address underlyingAsset, string memory name, string memory symbol, uint8 decimals) ERC20(name, symbol) public {
+  constructor(address _weth, address _router, address payable shifterPool, address underlyingAsset, string memory name, string memory symbol, uint8 decimals) ERC20(name, symbol) public {
+    weth = _weth;
+    router = _router;
     pool = shifterPool;
     asset = underlyingAsset;
+    require(weth.approveForMaxIfNeeded(router) && asset.approveForMaxIfNeeded(router), "failed to approve router for asset");
     _setupDecimals(decimals);
   }
   modifier onlyPool {
     require(msg.sender == pool, "must be called by pool manager");
     _;
   }
-  function loan(address proxy, uint256 amount) public onlyPool returns (bool) {
-    require(asset.sendToken(proxy, amount), "loan transfer failed");
+  function loan(address proxy, uint256 amount, uint256 getGas) public onlyPool returns (bool) {
     offset += amount;
     outstandingLoans[proxy] = amount;
+    address[] memory path = new address[](2);
+    path[0] = asset;
+    path[1] = weth;
+    uint256[] memory amounts = IUniswapV2Router01(router).swapTokensForExactETH(getGas, amount, path, pool, block.timestamp + 1);
+    require(asset.sendToken(proxy, amount - amounts[0]), "loan transfer failed");
     return true;
   }
   function resolveLoan(address proxy) public onlyPool returns (bool) {

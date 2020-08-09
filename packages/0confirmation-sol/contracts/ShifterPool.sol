@@ -24,6 +24,7 @@ import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { StringLib } from "./utils/StringLib.sol";
 import { ExtLib } from "./utils/ExtLib.sol";
 import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
+import { Math } from "@openzeppelin/contracts/math/Math.sol";
 
 contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
   using SandboxLib for *;
@@ -46,6 +47,8 @@ contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
     isolate.minTimeout = params.minTimeout;
     isolate.poolFee = params.poolFee;
     isolate.daoFee = params.daoFee;
+    isolate.gasEstimate = params.gasEstimate;
+    isolate.maxGasPriceForRefund = params.maxGasPriceForRefund;
     for (uint256 i = 0; i < modules.length; i++) {
       BorrowProxyLib.ModuleRegistration memory registration = BorrowProxyLib.ModuleRegistration({
         module: modules[i],
@@ -59,6 +62,13 @@ contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
       ShifterPoolLib.LiquidityTokenLaunch memory launch = tokenLaunches[i];
       isolate.tokenToLiquidityToken[launch.token] = launch.liqToken;
     }
+  }
+  function getGasReserved(address proxyAddress) view public returns (uint256) {
+    return isolate.gasReserved[proxyAddress];
+  }
+  function payoutCallbackGas(address payable borrower, uint256 amountBorrower, uint256 amountOrigin) public {
+    if (amountOrigin != 0) tx.origin.send(amountOrigin);
+    if (amountBorrower != 0) borrower.send(amountBorrower);
   }
   function getLiquidityTokenForTokenHandler(address token) public view returns (address) {
     return isolate.tokenToLiquidityToken[token];
@@ -90,7 +100,7 @@ contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
     require(decimals <= 18, "the token supplied is not a shifter token -- decimals too high");
     require(parcel.request.amount / 10**(18 - uint256(decimals)) <= isolate.maxLoan, "loan exceeds maximum");
   }
-  function _executeBorrow(ShifterBorrowProxyLib.LiquidityRequestParcel memory liquidityRequestParcel, uint256 bond, uint256 timeoutExpiry) internal returns (address payable proxyAddress) {
+  function _executeBorrow(ShifterPoolLib.BorrowState memory state, ShifterBorrowProxyLib.LiquidityRequestParcel memory liquidityRequestParcel, uint256 bond, uint256 timeoutExpiry) internal returns (address payable proxyAddress) {
     require(liquidityRequestParcel.request.forbidLoan == false, "is not a loan request, try using executeShiftSansBorrow");
     require(
       liquidityRequestParcel.gasRequested == msg.value,
@@ -116,16 +126,25 @@ contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
     });
     proxyAddress = address(uint160(deployBorrowProxyClone(borrowerSalt)));
     ShifterPoolLib.mapBorrowProxy(isolate, proxyAddress, proxyRecord);
-    isolate.issueLoan(liquidityRequest.token, proxyAddress, proxyRecord.computePostFee());
+    isolate.issueLoan(liquidityRequest.token, proxyAddress, proxyRecord.computePostFee(), state.refundAmount);
     require(liquidityRequest.token.transferTokenFrom(msg.sender, address(this), bond), "bond submission failed");
   }
   function executeBorrow(ShifterBorrowProxyLib.LiquidityRequestParcel memory liquidityRequestParcel, uint256 bond, uint256 timeoutExpiry) public payable {
+    ShifterPoolLib.BorrowState memory state = ShifterPoolLib.BorrowState({
+      refundAmount: 0,
+      gasPrice: Math.min(isolate.maxGasPriceForRefund, tx.gasprice),
+      startGas: gasleft()
+    });
+    state.refundAmount = state.gasPrice*isolate.gasEstimate;
     require(isolate.isKeeper[msg.sender], "only can be called by keeper");
     ShifterBorrowProxyLib.InitializationAction[] memory actions = liquidityRequestParcel.request.actions;
     validateUnderMaxLoan(liquidityRequestParcel);
-    address payable proxyAddress = _executeBorrow(liquidityRequestParcel, bond, timeoutExpiry);
+    address payable proxyAddress = _executeBorrow(state, liquidityRequestParcel, bond, timeoutExpiry);
     proxyAddress.setupBorrowProxy(liquidityRequestParcel.request.borrower, liquidityRequestParcel.request.token, false);
     proxyAddress.sendInitializationActions(actions);
+    state.startGas = Math.min(state.refundAmount, (state.startGas - gasleft()  + 8600)*state.gasPrice); // estimate 10000 for additional gas, should be close
+    tx.origin.transfer(state.startGas); // just reuse this memory loc, startGas becomes total amount refunded
+    isolate.gasReserved[proxyAddress] = state.refundAmount - state.startGas;
   }
   function setKeeper(address user, bool isKeeper) public onlyOwner {
     isolate.isKeeper[user] = isKeeper;
@@ -215,4 +234,5 @@ contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
     require(LiquidityToken(liquidityToken).resolveLoan(msg.sender), "loan resolution failure");
     return true;
   }
+  receive() external payable { }
 }
