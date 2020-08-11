@@ -30,7 +30,7 @@ export default class LandingPage extends React.Component {
                                             <p className="card-hero-text text-center">Interoperability, Optimized</p>
                                         </div>
                                         <div className="flex-column d-flex flex-wrap" style={{flexBasis:"60%", alignContent: "center"}}>
-                                            <div className="d-flex flex-row space-even-row flex-wrap just-center-0cf">
+                                            <div className="d-flex flex-row space-even-row flex-wrap just-center-0cf" style={{maxWidth: "760px"}}>
                                                 <div className="d-flex flex-column flex-wrap thirds px-md">
                                                     <img className="img-fluid pb-4" src={require("../images/speed.svg")} alt="Smart Finality" />
                                                     <p className="card-header-text small-margin">Smart Finality</p>
