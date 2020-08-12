@@ -494,7 +494,7 @@ const TradeRoom = (props) => {
     listener().catch((err) => console.error(err));
     ethersProvider.on("block", listener);
     return () => ethersProvider.removeListener("block", listener);
-  }, []);
+  }, [ userAddress ]);
   const getPendingTransfers = async (btcBlock) => {
     const ethersProvider = zero.getProvider().asEthers();
     if (!(await ethersProvider.listAccounts())[0]) return;

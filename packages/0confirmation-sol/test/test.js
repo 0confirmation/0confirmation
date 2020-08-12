@@ -233,7 +233,10 @@ describe("ShifterPool", () => {
       const result = await deposited.submitToRenVM();
       const sig = await deposited.waitForSignature();
       try {
-        const receipt = await (await deposited.executeBorrow(ethers.utils.parseUnits('1', 8).toString(), '100000')).wait();
+	fixtures.keeperEthers = new ethers.providers.Web3Provider(fixtures.keeper.getProvider());
+	console.log(ethers.utils.formatEther(await fixtures.keeperEthers.getBalance(fixtures.keeperAddress)));
+        const receipt = await (await deposited.executeBorrow(ethers.utils.parseUnits('0.1', 8).toString(), '100000', { gasPrice: ethers.utils.parseUnits('50', 9) })).wait();
+	console.log(ethers.utils.formatEther(await fixtures.keeperEthers.getBalance(fixtures.keeperAddress)));
         deferred.resolve({
           borrowProxy: await deposited.getBorrowProxy(),
           deposited
@@ -248,10 +251,10 @@ describe("ShifterPool", () => {
     ];
     const liquidityRequest = fixtures.borrower.createLiquidityRequest({
       token: fixtures.renbtc.address,
-      amount: ethers.utils.parseUnits('2', 8).toString(),
+      amount: ethers.utils.parseUnits('0.1', 8).toString(),
       nonce: '0x68b7aed3299637f7ed8d02d40fb04a727d89bb3448ca439596bd42d65a6e16cf',
       actions,
-      gasRequested: ethers.utils.parseEther('0.01').toString()
+      gasRequested: ethers.utils.parseEther('0').toString()
     });
     const liquidityRequestParcel = await liquidityRequest.sign();
     await liquidityRequestParcel.broadcast();
@@ -259,11 +262,7 @@ describe("ShifterPool", () => {
       borrowProxy: proxy,
       deposited
     } = await deferred.promise;
-    const txs = (await proxy.queryTransfers());
-    const r = require('repl').start('> ');
-    r.context.txs = txs;
-    await new Promise((resolve) => setTimeout(resolve, 10000000));
-    const receipt = await (await proxy.repayLoan({ gasLimit: ethers.utils.hexlify(6e6) })).wait();
+    await (await proxy.repayLoan({ gasLimit: ethers.utils.hexlify(6e6) })).wait();
     const iface = new Interface(ShifterBorrowProxy.abi.concat(AssetForwarderLib.abi).concat(ERC20Adapter.abi).concat(ERC20AdapterLib.abi));
     const daiWrapped = new ethers.Contract(fixtures.DAI.address, fixtures.DAI.abi, fixtures.borrower.getProvider().asEthers());
     expect(Number(ethers.utils.formatUnits(await daiWrapped.balanceOf(fixtures.borrowerAddress), 18))).to.be.gt(1);
@@ -284,7 +283,7 @@ describe("ShifterPool", () => {
       const result = await deposited.submitToRenVM();
       const sig = await deposited.waitForSignature();
       try {
-        const receipt = await (await deposited.executeBorrow(ethers.utils.parseUnits('1', 8).toString(), '2')).wait();
+        const receipt = await (await deposited.executeBorrow(ethers.utils.parseUnits('0.1', 8).toString(), '2')).wait();
         deferred.resolve(await deposited.getBorrowProxy());
       } catch (e) {
         deferred.reject(e);
@@ -296,7 +295,7 @@ describe("ShifterPool", () => {
     ];
     const liquidityRequest = fixtures.borrower.createLiquidityRequest({
       token: fixtures.renbtc.address,
-      amount: ethers.utils.parseUnits('2', 8).toString(),
+      amount: ethers.utils.parseUnits('0.1', 8).toString(),
       nonce: '0x68b7aed3299637f7ed8d02d40fb04a727d89bb3448ca439596bd42d65a6e16cd',
       actions,
       gasRequested: ethers.utils.parseEther('0.01').toString()
@@ -326,7 +325,7 @@ describe("ShifterPool", () => {
     ];
     const liquidityRequest = fixtures.borrower.createLiquidityRequest({
       token: fixtures.renbtc.address,
-      amount: ethers.utils.parseUnits('2', 8).toString(),
+      amount: ethers.utils.parseUnits('0.1', 8).toString(),
       nonce: '0x88b7aed3299637f7ed8d02d40fb04a727d89bb3448ca439596bd42d65a6e16cf',
       actions,
       gasRequested: ethers.utils.parseEther('0.01').toString()

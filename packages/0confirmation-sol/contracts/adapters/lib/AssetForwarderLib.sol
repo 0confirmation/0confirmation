@@ -17,7 +17,7 @@ library AssetForwarderLib {
   function deployAssetForwarderClone(address target, bytes32 salt) internal returns (address output) {
     output = FactoryLib.create2Clone(target, uint256(salt));
   }
-  function deriveAssetForwarderAddress(address shifterPool, address from, bytes32 salt) internal view returns (address) {
+  function deriveAssetForwarderAddress(address payable shifterPool, address from, bytes32 salt) internal view returns (address) {
     return FactoryLib.deriveInstanceAddress(shifterPool, ShifterPool(shifterPool).getAssetForwarderImplementationHandler(), keccak256(abi.encodePacked(GET_ASSET_FORWARDER_IMPLEMENTATION_SALT(), from, salt)));
   }
 }

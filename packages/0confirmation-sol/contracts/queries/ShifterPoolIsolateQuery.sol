@@ -16,7 +16,7 @@ contract ShifterPoolIsolateQuery is ShifterPoolQuery {
     uint256 daoFee;
     uint256 maxLoan;
   }
-  function execute(bytes memory /* context */) public returns (ExternalIsolate memory) {
+  function execute(bytes memory /* context */) public view returns (ExternalIsolate memory) {
     return ExternalIsolate({
       genesis: isolate.genesis,
       borrowProxyImplementation: isolate.borrowProxyImplementation,
