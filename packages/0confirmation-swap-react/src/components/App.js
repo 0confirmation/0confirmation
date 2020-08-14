@@ -471,7 +471,15 @@ const TradeRoom = (props) => {
         ethers.utils.formatUnits(liquidityTokenBalance, DECIMALS.btc),
         4
       );
-      setShare(liquidityTokenBalanceFormat);
+      const renBtcWrappedBalance = await renbtcWrapped.balanceOf(
+        userAddress || ethers.constants.AddressZero
+      );
+      const renBtcWrappedBalanceFormat = utils.truncateDecimals(
+        ethers.utils.formatUnits(renBtcWrappedBalance, DECIMALS.btc),
+        4
+      );
+      // We need to check if adding liquidity or removing liquidity here and modify setShare to liquidityTokenBalanceFormat or a formatted version of renBTC balance
+      (liquidityvalue==="Add Liquidity" ) ? setShare(renBtcWrappedBalanceFormat) :  setShare(liquidityTokenBalanceFormat);
       const totalSupply = await liquidityToken.totalSupply();
       const apr = utils.truncateDecimals(
         new BigNumber(String(poolSize.add(offset)))
@@ -592,16 +600,34 @@ const TradeRoom = (props) => {
   const updateAmount = async (e, oldValue) => {
     e.preventDefault();
     var checkValueLimit;
-    if(e.target.value > 2) {
-      checkValueLimit = oldValue;
-      showWarningAlert("The maximum swap amount is 2 BTC.");
-    } else if (e.target.value < 0.0004 && Number(e.target.value) !== 0) {
-      showWarningAlert("The minimum swap amount is 0.0004 BTC.");
-      checkValueLimit = oldValue;
-    } else if(e.target.value >= 0.0004 || Number(e.target.value) === 0 || e.target.value === ".") {
-      checkValueLimit = e.target.value; 
-    } else checkValueLimit = oldValue;
-    const value = checkValueLimit;
+    // if(liquidityvalue==="Add Liquidity") {
+    //   const contracts = await contractsDeferred.promise;
+    //   const ethersProvider = zero.getProvider().asEthers();
+    //   const renbtcWrapped = new ethers.Contract(
+    //     contracts.renbtc,
+    //     ERC20ABI,
+    //     ethersProvider
+    //   );
+    //   if(e.target.value > renbtcWrapped.balanceOf(userAddress || ethers.constants.AddressZero)) {
+    //     checkValueLimit = oldValue;
+    //     showWarningAlert("You can only contribute up to your balance of renBTC.");
+    //   } else {
+    //     checkValueLimit = e.target.value;
+    //   }
+    //   const value = checkValueLimit;
+    // } else {
+      if(e.target.value > 2) {
+        checkValueLimit = oldValue;
+        showWarningAlert("The maximum swap amount is 2 BTC.");
+      } else if (e.target.value < 0.0004 && Number(e.target.value) !== 0) {
+        showWarningAlert("The minimum swap amount is 0.0004 BTC.");
+        checkValueLimit = oldValue;
+      } else if(e.target.value >= 0.0004 || Number(e.target.value) === 0 || e.target.value === ".") {
+        checkValueLimit = e.target.value; 
+      } else checkValueLimit = oldValue;
+      const value = checkValueLimit;
+    // }
+      
     setValue(value);
     if (isNaN(value)) return;
     await getTradeDetails(value);
@@ -1157,7 +1183,7 @@ const TradeRoom = (props) => {
                   </InputGroup>
                   <span style={{ fontFamily: "PT Sans", fontSize: "0.8em" }}
                       className={(ismobile) ? "ml-auto" : ""}>
-                      <span className={(ismobile) ? "ml-auto" : ""} style={{ color: "#00FF41" }}>Current Balance: </span>{share} {_sendcoins.name}</span>
+                      <span className={(ismobile) ? "ml-auto" : ""} style={{ color: "#00FF41" }}>Current Balance: </span>{share} {(liquidityvalue==="Add Liquidity" ) ? "renBTC" : "zeroBTC"}</span>
                 </Col>
               </Row>
             ) : (
