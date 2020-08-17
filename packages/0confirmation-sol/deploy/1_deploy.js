@@ -59,6 +59,7 @@ const alreadyDeployed = [
   'LiquidityToken'
 ]; */
 const alreadyDeployed = [
+	/*
   'UniswapV2Adapter',
   'V2SwapAndDrop',
   'ERC20Adapter',
@@ -67,6 +68,7 @@ const alreadyDeployed = [
   'WETH9',
   'UniswapV2Router01',
   'UniswapV2Factory',
+  */
 ];
 
 const makeDeploy = (deploy, deployments, wrap, push, deployer) => async (
@@ -106,6 +108,7 @@ module.exports = async (buidler) => {
   });
   const erc20Adapter = await deploy("ERC20Adapter");
   await deploy("V2SwapAndDrop");
+  await deploy("TransferAll");
   const ethersProvider = new bre.ethers.providers.Web3Provider(fromEthers(bre.ethereum));
   let weth, shifterRegistry, dai, renbtc, factory, router, from;
   switch (chain) {
@@ -119,8 +122,11 @@ module.exports = async (buidler) => {
       ]);
       renbtc = {address: networks[chain].renbtc};
       shifterRegistry = {address: networks[chain].shifterRegistry};
+      logger.info('creating weth/renbtc pair');
       await factory.createPair(weth.address, renbtc.address); // { gasLimit: ethers.utils.hexlify(6e6) });
+      logger.info('creating weth/dai pair');
       await factory.createPair(weth.address, dai.address); //, { gasLimit: ethers.utils.hexlify(6e6) });
+
       break;
     case "mainnet":
       renbtc = {address: networks[chain].renbtc};
@@ -161,8 +167,11 @@ module.exports = async (buidler) => {
     "zeroBTC",
     8,
   ]);
+  logger.info('deploying borrow proxy implementation');
   await (await shifterPool.deployBorrowProxyImplementation()).wait();
+  logger.info('deploying asset forwarder implementation');
   await (await shifterPool.deployAssetForwarderImplementation()).wait();
+  logger.info('doing setup');
   await (
     await shifterPool.setup(
       {
@@ -227,6 +236,7 @@ module.exports = async (buidler) => {
       ]
     )
   ).wait();
+  logger.info('done!');
   if (chain === "test") {
     const amountMax = bigNumberify("0x" + "f".repeat(64));
     const provider = new ethers.providers.Web3Provider(

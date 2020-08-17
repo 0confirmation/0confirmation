@@ -13,18 +13,26 @@ const logger = require("@0confirmation/logger")("@0confirmation/sol/setup");
 
 const fromEthers = require('@0confirmation/providers/from-ethers');
 const chalk = require('chalk');
-const fromPrivateKey = require('@0confirmation/providers/private-key-or-seed');
+const fromSecret = require('@0confirmation/providers/from-secret');
 const { InfuraProvider, Web3Provider } = require('@ethersproject/providers');
 const { fromV3 } = require('ethereumjs-wallet');
 const mainnet = require('../private/mainnet')
+const kovan = require('../private/kovan');
+
+const wallets = {
+  mainnet,
+  kovan
+};
+const chain = process.env.CHAIN === '1' ? 'mainnet' : 'testnet';
+const infuraChain = chain === 'testnet' ? 'kovan' : chain;
+
 const ShifterPool = require('@0confirmation/sdk/shifter-pool');
 const environment = require('@0confirmation/sdk/environments').getAddresses('mainnet');
 const yargs = require('yargs');
 
 (async () => {
-  const chain = 'mainnet';
-  const wallet = fromV3(mainnet, process.env.SECRET).getPrivateKeyString();
-  const provider = new Web3Provider(fromPrivateKey(wallet.substr(2), fromEthers(new InfuraProvider('mainnet'))));
+  const wallet = fromV3(wallets[infuraChain], process.env.SECRET).getPrivateKeyString();
+  const provider = new Web3Provider(fromSecret(wallet, fromEthers(new InfuraProvider(infuraChain))));
   const shifterPool = new ShifterPool(environment.shifterPool, provider);
   tx =  (
     await shifterPool.setup(
@@ -33,8 +41,8 @@ const yargs = require('yargs');
         minTimeout: chain === "test" ? "1" : "10000",
         daoFee: ethers.utils.parseEther("0.01"),
         poolFee: ethers.utils.parseEther("0.01"),
-        gasEstimate: '1200000',
-        maxGasPriceForRefund: ethers.utils.parseUnits('350', 9),
+        gasEstimate: '0',
+        maxGasPriceForRefund: '0',
         maxLoan:
           chain === "mainnet"
             ? ethers.utils.parseEther("0.1")

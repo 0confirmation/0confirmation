@@ -19,8 +19,8 @@ const UniswapV2Router01 = {
 const DAI = {
   kovan: require('@0confirmation/sol/deployments/kovan/DAI')
 };
-const MockWETH = {
-  kovan: require('@0confirmation/sol/deployments/kovan/MockWETH')
+const WETH9 = {
+  kovan: require('@0confirmation/sol/deployments/kovan/WETH9')
 };
 //const SwapEntireLoan = require('@0confirmation/sol/deployments/kovan/SwapEntireLoan');
 //const TransferAll = require('@0confirmation/sol/deployments/kovan/TransferAll');
@@ -119,7 +119,7 @@ const daiFromNetwork = (network) => {
 };
 
 const wethFromNetwork = (network) => ({
-  weth: (network === 'kovan' || network === 'testnet') ? fromArtifact(network, MockWETH) : '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
+  weth: (network === 'kovan' || network === 'testnet') ? fromArtifact(network, WETH9) : '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
 });
 
 const getAddresses = (network) => ({
