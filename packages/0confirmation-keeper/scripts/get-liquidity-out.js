@@ -3,8 +3,8 @@
 process.env.CHAIN = '42';
 const ethers = require('ethers');
 const path = require('path');
-const DB = require('./db');
-const makeZero = require('./make-zero');
+const DB = require('../db');
+const makeZero = require('../make-zero');
 const environments = require('@0confirmation/sdk/environments');
 const env = environments.getAddresses('testnet');
 
@@ -16,9 +16,11 @@ console.logKeeper = (v) => console.logBold(chalk.magenta('keeper: ') + v);
 
 (async () => {
   const zero = makeZero();
+	/*
   zero.setEnvironment({
     shifterPool: '0x07ee1838be2c8855fe5a66ab71f7aa20ccf4948f'
   });
+  */
   const liquidityToken = await zero.getLiquidityTokenFor(env.renbtc);
   const provider = zero.getProvider().asEthers();
   const [ from ] = await provider.listAccounts();

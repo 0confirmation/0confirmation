@@ -103,3 +103,5 @@ const logBalances = async (zero) => {
     }
   });
 })().catch((err) => console.errorKeeper(err.stack));
+
+process.title = 'keeper';

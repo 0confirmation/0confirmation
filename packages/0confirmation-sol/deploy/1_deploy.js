@@ -62,7 +62,11 @@ const alreadyDeployed = [
   'UniswapV2Adapter',
   'V2SwapAndDrop',
   'ERC20Adapter',
-  'SimpleBurnLiquidationModule'
+  'SimpleBurnLiquidationModule',
+  'DAI',
+  'WETH9',
+  'UniswapV2Router01',
+  'UniswapV2Factory',
 ];
 
 const makeDeploy = (deploy, deployments, wrap, push, deployer) => async (

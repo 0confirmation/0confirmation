@@ -6,15 +6,22 @@ const fromPrivateKey = require('@0confirmation/providers/private-key-or-seed');
 const { InfuraProvider, Web3Provider } = require('@ethersproject/providers');
 const { fromV3 } = require('ethereumjs-wallet');
 const mainnet = require('../private/mainnet')
+const testnet = require('../private/kovan');
+const wallets = {
+  mainnet,
+  testnet
+};
+const chain = process.env.CHAIN === '42' ? 'testnet' : 'mainnet';
+const infuraChain = chain === 'testnet' ? 'kovan' : chain;
 const ShifterPool = require('@0confirmation/sdk/shifter-pool');
-const environment = require('@0confirmation/sdk/environments').getAddresses('mainnet');
+const environment = require('@0confirmation/sdk/environments').getAddresses(chain);
 const yargs = require('yargs');
 
 (async () => {
-  const wallet = fromV3(mainnet, process.env.SECRET).getPrivateKeyString();
-  const provider = new Web3Provider(fromPrivateKey(wallet.substr(2), fromEthers(new InfuraProvider('mainnet'))));
+  const wallet = fromV3(wallets[chain], process.env.SECRET).getPrivateKeyString();
+  const provider = new Web3Provider(fromPrivateKey(wallet.substr(2), fromEthers(new InfuraProvider(infuraChain))));
   const shifterPool = new ShifterPool(environment.shifterPool, provider);
-  const tx = await shifterPool.setKeeper('0x' + yargs.argv.keeper, true);
+  const tx = await shifterPool.setKeeper('0x' + (yargs.argv.keeper || '5d557f7a73c7494be0dceb5dbf8c5c209811fda6'), true);
   console.log(chalk.bold('txhash: ' + tx.hash));
   await tx.wait();
   console.log(chalk.bold.cyan('mined!'));
