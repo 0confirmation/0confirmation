@@ -152,7 +152,7 @@ const makeZero = (provider) => {
     ? new Zero.ZeroMock(provider)
     : new Zero(
         provider,
-        CHAIN === "42" ? "testnet" : CHAIN === "1" ? "mainnet" : "ganache"
+        CHAIN === "42" ? "testnet" : CHAIN === "1" ? "mainnet" : "buidler"
       );
   if (USE_TESTNET_BTC)
     zero.driver.registerBackend(
@@ -224,17 +224,15 @@ const TradeRoom = (props) => {
   const [userAddress, setUserAddress] = useState(ethers.constants.AddressZero);
   const setup = async () => {
     if (provider.migrate) {
-      artifacts = await provider.migrate();
-      contracts = await getContractsFromArtifacts(artifacts);
       provider.setSigningProvider(makeTestWallet(window.ethereum || provider));
     }
     zero.setEnvironment(contracts);
     if (!["embedded", "test"].includes(CHAIN)) return;
-    const ganacheAddress = (
+    const buidlerAddress = (
       await provider.dataProvider.asEthers().send("eth_accounts", [])
     )[0];
     const keeperPvt = ethers.utils
-      .solidityKeccak256(["address"], [ganacheAddress])
+      .solidityKeccak256(["address"], [buidlerAddress])
       .substr(2);
     const keeperProvider = personalSignProviderFromPrivate(
       keeperPvt,
@@ -259,7 +257,7 @@ const TradeRoom = (props) => {
             gas: ethers.utils.hexlify(21000),
             gasPrice: "0x01",
             to: keeperAddress,
-            from: ganacheAddress,
+            from: buidlerAddress,
           },
         ]);
       await provider.asEthers().waitForTransaction(sendEtherTx);

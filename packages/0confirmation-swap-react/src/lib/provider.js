@@ -200,14 +200,14 @@ const makeFauxMetamaskSigner = (realProvider, metamask) => {
 };
 
 if (globalObject.ethereum) {
-  if (CHAIN === "embedded" || CHAIN === "external")
+  if (CHAIN === "embedded" || CHAIN === "external" || CHAIN === 'test')
     provider.setSigningProvider(
       makeFauxMetamaskSigner(provider.dataProvider, globalObject.ethereum)
     );
   else provider.setSigningProvider(globalObject.ethereum);
 } else provider.signingProvider = provider.dataProvider;
 provider.migrate = setupEmbeddedMocks;
-if (CHAIN === "embedded") globalObject.provider = provider;
+if (CHAIN === "embedded" || CHAIN === 'test') globalObject.provider = provider;
 
 //provider.builds = builds;
 provider.makeFauxMetamaskSigner = makeFauxMetamaskSigner;
