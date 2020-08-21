@@ -148,8 +148,10 @@ module.exports = async (buidler) => {
         factory.address,
         weth.address,
       ]);
-      await factory.createPair(weth.address, renbtc.address); // { gasLimit: ethers.utils.hexlify(6e6) });
-      await factory.createPair(weth.address, dai.address); //, { gasLimit: ethers.utils.hexlify(6e6) });
+      try {
+        await factory.createPair(weth.address, renbtc.address); // { gasLimit: ethers.utils.hexlify(6e6) });
+        await factory.createPair(weth.address, dai.address); //, { gasLimit: ethers.utils.hexlify(6e6) });
+      } catch (e) {}
   }
   const uniswapV2Adapter = await deploy("UniswapV2Adapter", [
     erc20Adapter.address,

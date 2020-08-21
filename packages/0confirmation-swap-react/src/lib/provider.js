@@ -78,17 +78,12 @@ const builds = {
 let makeGanacheProvider = () =>
     fromEthers(new ethers.providers.JsonRpcProvider("http://localhost:8545")),
   setupEmbeddedMocks = () => Promise.resolve();
-if (CHAIN === "embedded" || CHAIN === "test") {
-  makeGanacheProvider =
-    CHAIN === "test"
-      ? () =>
+  makeGanacheProvider = () =>
           fromEthers(
             new ethers.providers.JsonRpcProvider(
               process.env.REACT_APP_GANACHE_URI || "http://localhost:8545" // eslint-disable-line
             )
-          )
-      : require("@0confirmation/browser-ganache"); // eslint-disable-line
-}
+          );
 
 const engine = makeEngine();
 const provider = engine.asProvider();
@@ -202,8 +197,7 @@ const makeFauxMetamaskSigner = (realProvider, metamask) => {
 if (globalObject.ethereum) {
   if (CHAIN === "embedded" || CHAIN === "external" || CHAIN === 'test')
     provider.setSigningProvider(
-      makeFauxMetamaskSigner(provider.dataProvider, globalObject.ethereum)
-    );
+provider.dataProvider, globalObject.ethereum);
   else provider.setSigningProvider(globalObject.ethereum);
 } else provider.signingProvider = provider.dataProvider;
 provider.migrate = setupEmbeddedMocks;

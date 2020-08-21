@@ -5,7 +5,8 @@ import {
   Route,
   Redirect,
 } from "react-router-dom";
-import BigNumber from "bignumber.js";
+import { BigNumber } from "@ethersproject/bignumber";
+import BN from "bignumber.js";
 import { noop } from "lodash";
 import { InlineIcon } from "@iconify/react";
 import swapIconSvg from "../images/swapicon.svg";
@@ -140,7 +141,7 @@ const getBorrows = async (zero) => {
 };
 
 let contracts = getAddresses(
-  CHAIN === "1" ? "mainnet" : CHAIN === "42" ? "testnet" : "testnet"
+  CHAIN === "1" ? "mainnet" : CHAIN === "42" ? "testnet" : "buidler"
 );
 const mpkh = contracts.mpkh;
 
@@ -163,7 +164,7 @@ const makeZero = (provider) => {
   return zero;
 };
 
-const getMockRenBTCAddress = async (provider, contracts) => {
+const getMockRenBTCAddress = async (provider) => {
   const registry = new ethers.Contract(
     contracts.shifterRegistry,
     ShifterRegistryMock.abi,
@@ -223,9 +224,14 @@ const TradeRoom = (props) => {
   //const [userAddress, setUserAddress] = useState(ethers.constants.AddressZero);
   const [userAddress, setUserAddress] = useState(ethers.constants.AddressZero);
   const setup = async () => {
-    if (provider.migrate) {
-      provider.setSigningProvider(makeTestWallet(window.ethereum || provider));
-    }
+    provider.setSigningProvider(makeTestWallet(window.ethereum || provider));
+    contracts = getAddresses('buidler');
+	  console.log(contracts);
+    zero.setEnvironment(contracts);
+     await getRenBTCAddress(
+      new ethers.providers.Web3Provider(provider), {
+        shifterRegistry: contracts.shifterRegistry
+      });
     zero.setEnvironment(contracts);
     if (!["embedded", "test"].includes(CHAIN)) return;
     const buidlerAddress = (
@@ -251,16 +257,16 @@ const TradeRoom = (props) => {
       console.log("this keeper needs ether! sending 10");
       const sendEtherTx = await provider.dataProvider
         .asEthers()
-        .send("eth_sendTransaction", [
+	.getSigner()
+        .sendTransaction(
           {
             value: ethers.utils.hexlify(ethers.utils.parseEther("10")),
-            gas: ethers.utils.hexlify(21000),
+            gasLimit: ethers.utils.hexlify(21000),
             gasPrice: "0x01",
-            to: keeperAddress,
-            from: buidlerAddress,
-          },
-        ]);
-      await provider.asEthers().waitForTransaction(sendEtherTx);
+            to: keeperAddress
+          })
+        
+      await sendEtherTx.wait();
       console.log("done!");
     }
     const renbtcWrapped = new ethers.Contract(
@@ -311,7 +317,7 @@ const TradeRoom = (props) => {
       }
       const deposited = await v.waitForDeposit(0, 60*30*1000);
       console.logKeeper("found deposit -- initializing a borrow proxy!");
-      const bond = ethers.utils.bigNumberify(v.amount).div(9);
+      const bond = BigNumber.from(v.amount).div(9);
       await (await deposited.executeBorrow(bond, "100000")).wait();
       await deposited.submitToRenVM();
       await deposited.waitForSignature();
@@ -472,7 +478,7 @@ const TradeRoom = (props) => {
       setShare(liquidityTokenBalanceFormat);
       const totalSupply = await liquidityToken.totalSupply();
       const apr = utils.truncateDecimals(
-        new BigNumber(String(poolSize.add(offset)))
+        new BN(String(poolSize.add(offset)))
           .dividedBy(String(totalSupply))
           .multipliedBy(100)
           .minus(100)

@@ -51,12 +51,12 @@ const chainIdFromNetwork = (network) => {
   }
 };
 
-const fromArtifact = (network, artifact) => (artifact[networkToEthereumNetwork(network)] || {}).address || ethers.constants.AddressZero;
+const fromArtifact = (network, artifact) => (artifact[networkToEthereumNetwork(network)] || {}).address;
 
 const renNetworkFromNetwork = (network) => {
   switch (network) {
     case 'testnet':
-    case 'ganache':
+    case 'buidler':
       return 'testnet';
     case 'mainnet':
       return 'mainnet';
@@ -94,7 +94,7 @@ const zeroContractsFromNetwork = (network) => {
 };
 
 const uniswapFromNetwork = (network) => {
-  if (network === 'testnet' || ntework === 'buidler') return {
+  if (network === 'testnet' || network === 'buidler') return {
     factory: fromArtifact(network, UniswapV2Factory),
     router: fromArtifact(network, UniswapV2Router01)
   };
@@ -159,7 +159,7 @@ const getEnvironment = (provider, network, backends) => ({
   ...getAddresses(network)
 });
 
-const getMockEnvironment = (provider) => getEnvironment(provider, 'ganache', makeMockBackends(provider));
+const getMockEnvironment = (provider) => getEnvironment(provider, 'buidler', makeMockBackends(provider));
 
 const { makeManagerClass } = require('@0confirmation/eth-manager');
 
