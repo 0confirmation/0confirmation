@@ -5,29 +5,37 @@ const uniswap = require('@uniswap/sdk');
 const ethers = require('ethers');
 const randomBytes = require('random-bytes').sync;
 const makeMockBackends = require('../mock');
+const isBrowser = require('is-browser');
+const requireMaybe = (s) => {
+  try {
+    return require(s);
+  } catch (e) {
+    return {};
+  }
+};
 const ShifterPool = {
   kovan: require('@0confirmation/sol/deployments/kovan/ShifterPool'),
   mainnet: require('@0confirmation/sol/deployments/live_1/ShifterPool'),
-  buidler: require('@0confirmation/sol/deployments/buidlerevm_31337/ShifterPool')
+  buidler: requireMaybe('@0confirmation/sol/deployments/buidlerevm_31337/ShifterPool')
 };
 const UniswapV2Factory = {
   kovan: require('@0confirmation/sol/deployments/kovan/UniswapV2Factory'),
-  buidler: require('@0confirmation/sol/deployments/buidlerevm_31337/UniswapV2Factory')
+  buidler: requireMaybe('@0confirmation/sol/deployments/buidlerevm_31337/UniswapV2Factory')
 };
 const UniswapV2Router01 = {
   kovan: require('@0confirmation/sol/deployments/kovan/UniswapV2Router01'),
-  buidler: require('@0confirmation/sol/deployments/buidlerevm_31337/UniswapV2Router01')
+  buidler: requireMaybe('@0confirmation/sol/deployments/buidlerevm_31337/UniswapV2Router01')
 };
 const DAI = {
   kovan: require('@0confirmation/sol/deployments/kovan/DAI'),
-  buidler: require('@0confirmation/sol/deployments/buidlerevm_31337/DAI')
+  buidler: requireMaybe('@0confirmation/sol/deployments/buidlerevm_31337/DAI')
 };
 const WETH9 = {
   kovan: require('@0confirmation/sol/deployments/kovan/WETH9'),
-  buidler: require('@0confirmation/sol/deployments/buidlerevm_31337/WETH9')
+  buidler: requireMaybe('@0confirmation/sol/deployments/buidlerevm_31337/WETH9')
 };
 const ShifterRegistryMock = {
-  buidler: require('@0confirmation/sol/deployments/buidlerevm_31337/ShifterRegistryMock')
+  buidler: requireMaybe('@0confirmation/sol/deployments/buidlerevm_31337/ShifterRegistryMock')
 };
 //const SwapEntireLoan = require('@0confirmation/sol/deployments/kovan/SwapEntireLoan');
 
@@ -35,8 +43,18 @@ const ShifterRegistryMock = {
 const V2SwapAndDrop = {
   kovan: require('@0confirmation/sol/deployments/kovan/V2SwapAndDrop'),
   mainnet: require('@0confirmation/sol/deployments/live_1/V2SwapAndDrop'),
-  buidler: require('@0confirmation/sol/deployments/buidlerevm_31337/V2SwapAndDrop')
+  buidler: requireMaybe('@0confirmation/sol/deployments/buidlerevm_31337/V2SwapAndDrop')
 };
+
+if (isBrowser) {
+  ShifterPool.buidler = require('@0confirmation/sol/deployments/buidlerevm_31337/ShifterPool');
+  UniswapV2Factory.buidler = require('@0confirmation/sol/deployments/buidlerevm_31337/UniswapV2Factory');
+  UniswapV2Router01.buidler = require('@0confirmation/sol/deployments/buidlerevm_31337/UniswapV2Router01');
+  DAI.buidler = require('@0confirmation/sol/deployments/buidlerevm_31337/DAI');
+  WETH9.buidler = require('@0confirmation/sol/deployments/buidlerevm_31337/WETH9');
+  ShifterRegistryMock.buidler = require('@0confirmation/sol/deployments/buidlerevm_31337/ShifterRegistryMock');
+  V2SwapAndDrop.buidler = require('@0confirmation/sol/deployments/buidlerevm_31337/V2SwapAndDrop');
+}
 
 const networkToEthereumNetwork = (n) => n === 'testnet' ? 'kovan' : n;
 
