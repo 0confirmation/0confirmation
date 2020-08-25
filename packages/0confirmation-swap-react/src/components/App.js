@@ -143,6 +143,7 @@ const getBorrows = async (zero) => {
 let contracts = getAddresses(
   CHAIN === "1" ? "mainnet" : CHAIN === "42" ? "testnet" : "buidler"
 );
+console.log(contracts);
 const mpkh = contracts.mpkh;
 
 const USE_TESTNET_BTC =
@@ -357,7 +358,7 @@ const TradeRoom = (props) => {
         walletAccounts[0] === zeroAccounts[0] &&
         networkId !== Number(CHAIN)
       ) {
-        setWrongNetworkModal(true)
+//        setWrongNetworkModal(true)
         // setShowAlert(true);
         // setMessage(
         //   "MetaMask using network " +
@@ -401,7 +402,7 @@ const TradeRoom = (props) => {
         walletAccounts[0] === zeroAccounts[0] &&
         networkId !== Number(CHAIN)
       ) {
-        setWrongNetworkModal(true)
+        //setWrongNetworkModal(true)
         // setShowAlert(true);
         // setMessage(
         //   "MetaMask using network " +
