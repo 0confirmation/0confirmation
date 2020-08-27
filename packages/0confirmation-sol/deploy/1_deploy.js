@@ -12,6 +12,8 @@ const environments = require("@0confirmation/sdk/environments");
 const Zero = require("@0confirmation/sdk");
 const fromEthers = require("@0confirmation/providers/from-ethers");
 const {ZeroMock} = Zero;
+const { fromV3 } = require('ethereumjs-wallet');
+const keeper = fromV3(require('../private/keeper'), 'conf');
 const {mapSeries} = require("bluebird");
 const chalk = require("chalk");
 
@@ -148,10 +150,9 @@ module.exports = async (buidler) => {
         factory.address,
         weth.address,
       ]);
-      try {
-        await factory.createPair(weth.address, renbtc.address); // { gasLimit: ethers.utils.hexlify(6e6) });
-        await factory.createPair(weth.address, dai.address); //, { gasLimit: ethers.utils.hexlify(6e6) });
-      } catch (e) {}
+      await factory.createPair(weth.address, renbtc.address); // { gasLimit: ethers.utils.hexlify(6e6) });
+      await factory.createPair(weth.address, dai.address); //, { gasLimit: ethers.utils.hexlify(6e6) });
+      break;
   }
   const uniswapV2Adapter = await deploy("UniswapV2Adapter", [
     erc20Adapter.address,
@@ -240,6 +241,7 @@ module.exports = async (buidler) => {
   ).wait();
   logger.info('done!');
   if (chain === "test") {
+    await (await shifterPool.setKeeper(keeper.getAddressString(), true)).wait();
     const amountMax = bigNumberify("0x" + "f".repeat(64));
     const provider = new ethers.providers.Web3Provider(
       fromEthers(bre.ethereum)
@@ -301,6 +303,7 @@ module.exports = async (buidler) => {
         ethers.utils.parseUnits("5", 8).toString()
       )
     ).wait();
+    logger.info('test mocks deployed');
   }
   for (let i = 0; i < deployed.length; i++) {
     if (deployed[i].newlyDeployed)

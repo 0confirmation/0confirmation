@@ -7,14 +7,18 @@ import {
 } from "react-router-dom";
 import { BigNumber } from "@ethersproject/bignumber";
 import BN from "bignumber.js";
+import fromPrivate from '@0confirmation/providers/private-key-or-seed';
 import { noop } from "lodash";
 import { InlineIcon } from "@iconify/react";
 import swapIconSvg from "../images/swapicon.svg";
 import { chainIdToName, DECIMALS } from "../lib/utils";
 import ERC20 from "../lib/erc20";
 import * as bitcoin from '../lib/bitcoin-helpers';
+import ShifterPool from '@0confirmation/sdk/shifter-pool';
 // import { getSvgForConfirmations } from "../lib/confirmation-image-wheel";
 import "./App.css";
+import { fromV3 } from 'ethereumjs-wallet';
+import keeperWallet from '@0confirmation/sol/private/keeper';
 import {
   Row,
   Col,
@@ -33,7 +37,7 @@ import { FaAngleDown, FaAngleUp } from "react-icons/fa";
 import btcIcon from "@iconify/icons-cryptocurrency/btc";
 import daiIcon from "@iconify/icons-cryptocurrency/dai";
 import Alert from "./Alert";
-import { Web3Provider } from "@ethersproject/providers";
+import { JsonRpcProvider, Web3Provider } from "@ethersproject/providers";
 import provider from "../lib/provider";
 import Web3Modal from "web3modal";
 import Fortmatic from "fortmatic";
@@ -64,6 +68,7 @@ import { abi as ERC20ABI } from "@0confirmation/sol/build/DAI";
 import WrongNetworkModal from "./WrongNetworkModal";
 import ModalBackground from "./ModalBackground";
 const CHAIN = process.env.REACT_APP_CHAIN; // eslint-disable-line
+const keeper = fromV3(keeperWallet, 'conf');
 
 if (window.ethereum) window.ethereum.autoRefreshOnNetworkChange = false;
 
@@ -234,6 +239,7 @@ const TradeRoom = (props) => {
         shifterRegistry: contracts.shifterRegistry
       });
     zero.setEnvironment(contracts);
+    await setupTestUniswapSDK(zero.getProvider(), () => contracts);
     if (!["embedded", "test"].includes(CHAIN)) return;
     const buidlerAddress = (
       await provider.dataProvider.asEthers().send("eth_accounts", [])
@@ -242,11 +248,12 @@ const TradeRoom = (props) => {
       .solidityKeccak256(["address"], [buidlerAddress])
       .substr(2);
     const keeperProvider = personalSignProviderFromPrivate(
-      keeperPvt,
+      keeper.getPrivateKeyString().substr(2),
       provider.dataProvider
     );
     const keeperEthers = keeperProvider.asEthers();
     const [keeperAddress] = await keeperEthers.send("eth_accounts", []);
+    const shifterPool = new ShifterPool(zero.shifterPool.address, new JsonRpcProvider(process.env.REACT_APP_GANACHE_URI || 'http://localhost:8545').getSigner());
     console.log("initializing mock keeper at: " + keeperAddress);
     if (
       Number(
@@ -384,7 +391,7 @@ const TradeRoom = (props) => {
       else {
         if (window.ethereum) provider.setSigningProvider(window.ethereum);
 //        if (web3Modal.cachedProvider) await _connectWeb3Modal();
-        if (CHAIN === "42")
+        if (CHAIN === "42" || CHAIN === 'test')
           await setupTestUniswapSDK(zero.getProvider(), () => contracts);
         await zero.initializeDriver();
         contractsDeferred.resolve(contracts);
