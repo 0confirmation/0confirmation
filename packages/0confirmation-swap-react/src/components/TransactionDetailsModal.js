@@ -14,6 +14,7 @@ const TransactionDetailsModal = ({
 }) => {
   const [feetooltip, setFeetooltip] = useState(false);
   const closeModal = (e) => {
+    console.log(_history);
     e.preventDefault();
     setTransactionModal(false);
   };
@@ -191,7 +192,7 @@ const TransactionDetailsModal = ({
                 </Col>
                 <Col lg="6" md="6" sm="6">
                   <p style={{color:"#00FF41", fontFamily:"PT Sans", fontStyle:"normal", fontWeight:"normal", fontSize:"0.9em"}}>
-                    {_history[`${transactionDetails}`].fees}
+                    {_history[`${transactionDetails}`].fees} {" "}
                     {_history[`${transactionDetails}`].sentname}
                     <span>
                       <i id="liquidity">
@@ -210,7 +211,7 @@ const TransactionDetailsModal = ({
                           setFeetooltip(!feetooltip);
                         }}
                       >
-                        info
+                        Fees are paid to renVM, the keeper handling your transaction, and the 0confirmation liquidity pools
                       </Tooltip>
                     </span>
                   </p>

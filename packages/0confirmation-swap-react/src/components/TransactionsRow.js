@@ -60,7 +60,7 @@ export default function TransactionRow(props) {
                 transactionModal={transactionModal}
                 _history={props._history}
                 transactionDetails={transactionDetails}
-                setTransactionModal={false}
+                setTransactionModal={setTransactionModal}
             />
         </Fragment>
     )

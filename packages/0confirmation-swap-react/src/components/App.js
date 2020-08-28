@@ -720,7 +720,7 @@ const TradeRoom = (props) => {
         await new Promise((resolve) => setTimeout(resolve, 60000));
       new Promise((resolve) => setTimeout(resolve, 500)).then(async () => {
         setTransactionDetails(length);
-        setTransactionModal(true);
+        //setTransactionModal(true);
       }).catch((err) => console.error(err));
       await waitForRepayment(deposited);
       await getPendingTransfers(btcBlock);
