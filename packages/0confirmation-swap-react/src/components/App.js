@@ -511,6 +511,16 @@ const TradeRoom = (props) => {
     const ethersProvider = zero.getProvider().asEthers();
     if (!(await ethersProvider.listAccounts())[0]) return;
     const borrows = await getBorrows(zero);
+    const uninitialized = (persistence.loadLoans(zero)).filter((v) => v.state === 'deposited').filter((v) => {
+      const found = borrows.find((u) => v.depositAddress === u.depositAddress);
+      if (found) {
+        persistence.removeLoan(found.localIndex);
+        return false;
+      }
+      return true;
+    });
+
+
     const history = borrows.filter(
       (v) => v.pendingTransfers.length === 1 && v.pendingTransfers[0].sendEvent
     );
@@ -699,6 +709,7 @@ const TradeRoom = (props) => {
     (async () => {
       let proxy;
       const deposited = await parcel.waitForDeposit(0, 30*60*1000);
+      persistence.saveLoan(deposited);
       
       setWaiting(false);
       const length = _history.length;

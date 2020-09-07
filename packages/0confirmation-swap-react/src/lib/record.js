@@ -12,6 +12,10 @@ import * as utils from "./utils";
 import * as bitcoin from './bitcoin-helpers';
 
 export const getStatus = (borrowProxy) => {
+  if (!borrowProxy.pendingTransfers) {
+    if (borrowProxy.state === 'signed') return 'Awaiting Deposit';
+    if (borrowProxy.state === 'deposited') return 'Awaiting Keeper';
+  }
   const record = borrowProxy.pendingTransfers[0];
   if (record.sendEvent && !record.resolutionEvent) {
     return "Pending";
@@ -26,14 +30,17 @@ export const getAddress = (borrow) => {
   return borrow.address;
 };
 export const getEscrow = (borrow) => {
+  if (!borrow.pendingTransfers) return '';
   const transfer = borrow.pendingTransfers[0] || {};
   const sendEvent = transfer.sendEvent;
   return sendEvent && sendEvent.args.to || '';
 };
 export const getSent = (borrow) => {
+  if (!borrow.pendingTransfers) return utils.toFormat(borrow.amount, 'btc');
   return utils.toFormat(borrow.decodedRecord.request.amount, "btc");
 };
 export const getValue = (borrow) => {
+  if (!borrow.pendingTransfers) return '';
   return utils.toFormat(
     borrow.pendingTransfers[0].sendEvent.args.value,
     "dai"
@@ -75,6 +82,7 @@ export const getReceivedname = () => {
   return "DAI";
 };
 export const getBlocks = async (borrow, zero) => {
+  if (!borrow.pendingTransfers) return 'N/A';
   return Math.max(
     0,
     Number(borrow.decodedRecord.loan.params.timeoutExpiry) -
@@ -82,9 +90,11 @@ export const getBlocks = async (borrow, zero) => {
   );
 };
 export const getTarget = (borrow) => {
+  if (!borrow.pendingTransfers) return '';
   return borrow.pendingTransfers[0].recipient;
 };
 export const getFees = (borrow) => {
+  if (!borrow.pendingTransfers) return '';
   return utils.truncateDecimals(
     (Number(
       ethers.utils.formatEther(borrow.decodedRecord.loan.params.poolFee)
@@ -102,6 +112,7 @@ export const getFees = (borrow) => {
   );
 };
 export const getReceived = (borrow) => {
+  if (!borrow.pendingTransfers) return '';
   const { sendEvent } = borrow.pendingTransfers[0];
   return sendEvent
     ? utils.toFormat(
@@ -114,6 +125,7 @@ export const getSentfullname = () => {
   return "Bitcoin";
 };
 export const getConfirmations = async (borrow, btcBlock) => {
+  if (!borrow.pendingTransfers) return 'N/A';
   const depositAddress = borrow.getDepositAddress();
   if (!localStorage.getItem(depositAddress)) {
     localStorage.setItem(depositAddress, await bitcoin.getBlockCount(depositAddress));
@@ -125,9 +137,11 @@ export const getConfirmations = async (borrow, btcBlock) => {
 };
 
 export const getTransactionHash = (borrow) => {
+  if (!borrow.pendingTransfers) return '';
   return borrow.pendingTransfers[0].sendEvent.transactionHash;
 };
 export const getCreated = async (zero, borrow) => {
+  if (!borrow.pendingTransfers) return '';
   const block = await (zero
     .getProvider()
     .asEthers())
@@ -137,6 +151,7 @@ export const getCreated = async (zero, borrow) => {
   );
 };
 export const getReceiveTransactionHash = (borrow) => {
+  if (!borrow.pendingTransfers) return '';
   return (
     (borrow.pendingTransfers[0].resolutionEvent &&
       borrow.pendingTransfers[0].resolutionEvent.transactionHash) ||
@@ -144,6 +159,7 @@ export const getReceiveTransactionHash = (borrow) => {
   );
 };
 export const getDepositAddress = (borrow) => {
+  if (!borrow.pendingTransfers) return borrow.depositAddress;
   return borrow.getDepositAddress();
 };
 const wrapLink = (s) => {
