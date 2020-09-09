@@ -235,6 +235,7 @@ module.exports = async (buidler) => {
         {
           token: renbtc.address,
           liqToken: liquidityToken.address,
+          baseFee: ethers.utils.parseUnits('0.000035', 8)
         },
       ]
     )

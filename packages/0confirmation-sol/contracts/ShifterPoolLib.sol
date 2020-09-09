@@ -51,6 +51,7 @@ library ShifterPoolLib {
     mapping (address => bool) isKeeper;
     mapping (bytes32 => bool) provisionExecuted;
     mapping (address => address) tokenToLiquidityToken;
+    mapping (address => uint256) tokenToBaseFee;
     BorrowProxyLib.ControllerIsolate borrowProxyController;
     BorrowProxyLib.ModuleRegistry registry;
   }
@@ -100,6 +101,7 @@ library ShifterPoolLib {
   struct LiquidityTokenLaunch {
     address token;
     address liqToken;
+    uint256 baseFee;
   }
   function launchLiquidityToken(Isolate storage isolate, address weth, address router, address token, string memory name, string memory symbol, uint8 decimals) internal returns (address) {
     require(isolate.tokenToLiquidityToken[token] == address(0x0), "already deployed liquidity token for target token");

@@ -61,6 +61,7 @@ contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
     for (uint256 i = 0; i < tokenLaunches.length; i++) {
       ShifterPoolLib.LiquidityTokenLaunch memory launch = tokenLaunches[i];
       isolate.tokenToLiquidityToken[launch.token] = launch.liqToken;
+      isolate.tokenToBaseFee[launch.token] = launch.baseFee;
     }
   }
   function getGasReserved(address proxyAddress) view public returns (uint256) {
@@ -122,7 +123,7 @@ contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
         msg.sender,
         isolate.computeLoanParams(liquidityRequest.amount, bond, timeoutExpiry)
       ),
-      expected: liquidityRequest.amount.computeExpectedAmount(address(isolate.getShifter(liquidityRequest.token)), liquidityRequest.token).sub(35e3)
+      expected: liquidityRequest.amount.computeExpectedAmount(address(isolate.getShifter(liquidityRequest.token)), liquidityRequest.token).sub(isolate.tokenToBaseFee[liquidityRequest.token])
     });
     proxyAddress = address(uint160(deployBorrowProxyClone(borrowerSalt)));
     ShifterPoolLib.mapBorrowProxy(isolate, proxyAddress, proxyRecord);
