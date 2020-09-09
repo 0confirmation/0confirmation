@@ -74,6 +74,12 @@ if (window.ethereum) window.ethereum.autoRefreshOnNetworkChange = false;
 
 let cachedBtcBlock = 0;
 
+const fetchIsRenVMSignatureReady = async (zero, depositedLiquidityRequestParcel) => {
+  const out = await zero.driver.sendWrapped('ren_queryTx', { txHash: depositedLiquidityRequestParcel.computeShiftInTxHash() });
+  return Boolean(out && out.tx && out.tx.out);
+};
+
+
 const web3Modal = new Web3Modal({
   network: utils.chainIdToName(process.env.REACT_APP_CHAIN || "1"), // eslint-disable-line
   cacheProvider: true,
@@ -277,6 +283,18 @@ const TradeRoom = (props) => {
       await sendEtherTx.wait();
       console.log("done!");
     }
+    console.log('sending eth to user');
+    const sendUserEtherTx = await provider.dataProvider
+      .asEthers()
+	    .getSigner()
+      .sendTransaction(
+        {
+          value: ethers.utils.hexlify(ethers.utils.parseEther("1")),
+          gasLimit: ethers.utils.hexlify(21000),
+          gasPrice: "0x01",
+          to: (await zero.getProvider().asEthers().listAccounts())[0]
+        })
+    await sendUserEtherTx.wait();
     const renbtcWrapped = new ethers.Contract(
       contracts.renbtc,
       ShifterERC20Mock.abi,
@@ -305,7 +323,7 @@ const TradeRoom = (props) => {
     console.logKeeper("online -- listening for loan requests!");
     keeperZero.listenForLiquidityRequests(async (v) => {
       console.logBold("waiting ..");
-      await new Promise((resolve) => setTimeout(resolve, 5000));
+      await new Promise((resolve) => setTimeout(resolve, 40000));
       console.logBold("received liquidity request over libp2p!");
       console.logKeeper("got liquidity request!");
       console.logKeeper(
@@ -511,19 +529,24 @@ const TradeRoom = (props) => {
     const ethersProvider = zero.getProvider().asEthers();
     if (!(await ethersProvider.listAccounts())[0]) return;
     const borrows = await getBorrows(zero);
-    const uninitialized = (persistence.loadLoans(zero)).filter((v) => v.state === 'deposited').filter((v) => {
-      const found = borrows.find((u) => v.depositAddress === u.depositAddress);
+    const uninitialized = (persistence.loadLoans(zero)).filter(Boolean).filter((v) => v.state === 'deposited' || v.state === 'forced').filter((v) => {
+      const found = borrows.find((u) => v.nonce === u.nonce);
       if (found) {
-        persistence.removeLoan(found.localIndex);
+        persistence.removeLoan(v.localIndex);
         return false;
       }
       return true;
     });
-
-
-    const history = borrows.filter(
+    for (const parcel of uninitialized) {
+      if (!parcel.isReady) {
+        parcel.isReady = await fetchIsRenVMSignatureReady(zero, parcel);
+        persistence.saveLoan(parcel);
+      }
+    }
+    console.log("uninitialized",uninitialized);
+    const history = uninitialized.concat(borrows.filter(
       (v) => v.pendingTransfers.length === 1 && v.pendingTransfers[0].sendEvent
-    );
+    ));
     const result = [];
     for (const item of history) {
       result.push(await record.getRecord(item, zero, btcBlock));
@@ -710,9 +733,11 @@ const TradeRoom = (props) => {
       let proxy;
       const deposited = await parcel.waitForDeposit(0, 30*60*1000);
       persistence.saveLoan(deposited);
+      await getPendingTransfers();
       
       setWaiting(false);
       const length = _history.length;
+      if (CHAIN === 'test') await new Promise((resolve) => setTimeout(resolve, 70000));
       proxy = await utils.pollForBorrowProxy(deposited);
       setModal(false);
       let proxies = await getPendingTransfers(btcBlock);
@@ -1933,6 +1958,7 @@ const TradeRoom = (props) => {
                                 v.substr(v.length - 5, v.length)
                             )}
                             confirmations={eleos.confirmations}
+                            parcel={eleos.parcel}
                             sent={eleos.sent} sentName={eleos.sentName}
                             received={eleos.received} receivedName={eleos.receivedName}
                             status={eleos.status}

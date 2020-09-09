@@ -39,7 +39,11 @@ const ShifterRegistryMock = {
 };
 //const SwapEntireLoan = require('@0confirmation/sol/deployments/kovan/SwapEntireLoan');
 
-//const TransferAll = require('@0confirmation/sol/deployments/kovan/TransferAll');
+const TransferAll = {
+  kovan: require('@0confirmation/sol/deployments/kovan/TransferAll'),
+  mainnet: require('@0confirmation/sol/deployments/live_1/TransferAll'),
+  buidler: requireMaybe('@0confirmation/sol/deployments/local_31337/TransferAll')
+};
 const V2SwapAndDrop = {
   kovan: require('@0confirmation/sol/deployments/kovan/V2SwapAndDrop'),
   mainnet: require('@0confirmation/sol/deployments/live_1/V2SwapAndDrop'),
@@ -54,6 +58,7 @@ if (isBrowser) {
   WETH9.buidler = require('@0confirmation/sol/deployments/local_31337/WETH9');
   ShifterRegistryMock.buidler = require('@0confirmation/sol/deployments/local_31337/ShifterRegistryMock');
   V2SwapAndDrop.buidler = require('@0confirmation/sol/deployments/local_31337/V2SwapAndDrop');
+  TransferAll.buidler = require('@0confirmation/sol/deployments/local_31337/TransferAll');
 }
 
 const networkToEthereumNetwork = (n) => n === 'testnet' ? 'kovan' : n;
@@ -107,7 +112,8 @@ const zeroContractsFromNetwork = (network) => {
   const chainId = chainIdFromNetwork(network);
   return {
     shifterPool: fromArtifact(network, ShifterPool),
-    swapAndDrop: fromArtifact(network, V2SwapAndDrop)
+    swapAndDrop: fromArtifact(network, V2SwapAndDrop),
+    transferAll: fromArtifact(network, TransferAll)
   };
 };
 

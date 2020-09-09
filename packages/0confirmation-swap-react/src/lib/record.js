@@ -13,6 +13,7 @@ import * as bitcoin from './bitcoin-helpers';
 
 export const getStatus = (borrowProxy) => {
   if (!borrowProxy.pendingTransfers) {
+    if (borrowProxy.state === 'forced') return 'Forced';
     if (borrowProxy.state === 'signed') return 'Awaiting Deposit';
     if (borrowProxy.state === 'deposited') return 'Awaiting Keeper';
   }
@@ -27,6 +28,7 @@ export const getStatus = (borrowProxy) => {
   } else return "Completed";
 };
 export const getAddress = (borrow) => {
+  if (!borrow.pendingTransfers) return '';
   return borrow.address;
 };
 export const getEscrow = (borrow) => {
@@ -82,7 +84,7 @@ export const getReceivedname = () => {
   return "DAI";
 };
 export const getBlocks = async (borrow, zero) => {
-  if (!borrow.pendingTransfers) return 'N/A';
+  if (!borrow.pendingTransfers) return ''
   return Math.max(
     0,
     Number(borrow.decodedRecord.loan.params.timeoutExpiry) -
@@ -167,6 +169,7 @@ const wrapLink = (s) => {
 };
 export const getRecord = async (borrow, zero, btcBlock) => {
   return {
+    parcel: !borrow.pendingTransfers && borrow,
     created: await getCreated(zero, borrow),
     sentfullname: getSentfullname(borrow),
     address: wrapLink(getAddress(borrow)),
