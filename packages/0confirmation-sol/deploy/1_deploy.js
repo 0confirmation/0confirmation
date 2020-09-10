@@ -183,10 +183,10 @@ module.exports = async (buidler) => {
         daoFee: ethers.utils.parseEther("0.01"),
         poolFee: ethers.utils.parseEther("0.01"),
         gasEstimate: '1200000',
-        maxGasPriceForRefund: ethers.utils.parseUnits('80', 9),
+        maxGasPriceForRefund: ethers.utils.parseUnits('500', 9),
         maxLoan:
           chain === "mainnet"
-            ? ethers.utils.parseEther("0.1")
+            ? ethers.utils.parseEther("0.5")
             : ethers.utils.parseEther("10"),
       },
       ...((v) => [
@@ -235,7 +235,7 @@ module.exports = async (buidler) => {
         {
           token: renbtc.address,
           liqToken: liquidityToken.address,
-          baseFee: ethers.utils.parseUnits('0.000035', 8)
+          baseFee: ethers.utils.parseUnits('0.00007', 8)
         },
       ]
     )
