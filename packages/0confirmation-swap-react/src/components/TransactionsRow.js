@@ -69,14 +69,17 @@ export default function TransactionRow(props) {
                 <div className="break-words" style={{lineHeight:"2.2rem", width: "16.5%"}}>{props.sent} {props.sentName}</div>
                 <div className="break-words" style={{lineHeight:"2.2rem", width: "16.5%"}}>{props.received} {props.receivedName}</div>
                 <div className="break-words" style={{lineHeight:"2.2rem", width: "16.5%"}}>
-      { props.parcel && props.parcel.isReady && <button onClick={ (evt) => shiftFallback(evt, props.parcel) } style={ { color: '#000000', backgroundColor: '#317333' } }>Click to force swap</button> || <p
+                  {console.log(props.status)}
+      {/* { props.parcel && props.parcel.isReady && <button onClick={ (evt) => shiftFallback(evt, props.parcel) } style={ { color: '#000000', backgroundColor: '#317333' } }>Click to force swap</button> ||*/ <p 
                         style={{
                         color: "#000000",
                         borderRadius: "5px",
                         paddingRight: "10px",
                         paddingLeft: "10px",
                         backgroundColor:
-                            props.status === "Liquidated"
+                            props.status === "Awaiting Keeper" || props.status === "Forced"
+                            ? "#949B90"
+                            : props.status === "Liquidated"
                             ? "#D4533B"
                             : props.status === "Completed"
                             ? "#317333"

@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { Row, Col, Modal, ModalBody, Tooltip } from "reactstrap";
 import infoSvg from "../images/info.svg";
+import PendingCheck from "../images/pendingcheck.svg"
+import FailCheck from "../images/failcheck.svg"
+import CompleteCheck from "../images/completecheck.svg"
 import { getSvgForConfirmations } from "../lib/confirmation-image-wheel";
 
 const TransactionDetailsModal = ({
@@ -14,7 +17,6 @@ const TransactionDetailsModal = ({
 }) => {
   const [feetooltip, setFeetooltip] = useState(false);
   const closeModal = (e) => {
-    console.log(_history);
     e.preventDefault();
     setTransactionModal(false);
   };
@@ -57,8 +59,10 @@ const TransactionDetailsModal = ({
             sm="12"
             className="justify-content-end align-content-end"
           >
-            <span className="ml-auto">{closeBtn}</span>
-          </Col>
+          <Row className="d-flex justify-content-end" style={{ color: "#00FF41", justifyContent:"flex-end", marginTop: "-40px", paddingRight: "1em", height:"50%"}}>
+            {closeBtn}
+          </Row>
+        </Col>
         </Row>
         <Row className="justify-content-center align-content-center">
           <Col
@@ -105,7 +109,9 @@ const TransactionDetailsModal = ({
                 width: "10em",
                 borderRadius: "5px",
                 backgroundColor:
-                  _history[`${transactionDetails}`].status === "Liquidated"
+                  _history[`${transactionDetails}`].status === "Awaiting Keeper" || _history[`${transactionDetails}`].status === "Forced"
+                  ? "#949B90"
+                    : _history[`${transactionDetails}`].status === "Liquidated"
                     ? "#D4533B"
                     : _history[`${transactionDetails}`].status === "Completed"
                     ? "#317333"
@@ -435,16 +441,6 @@ const TransactionDetailsModal = ({
                           src={infoSvg}
                         />
                       </i>
-                      <Tooltip
-                        placement="top"
-                        isOpen={blocktooltip}
-                        target="liquidity"
-                        toggle={() => {
-                          setBlockTooltip(!blocktooltip);
-                        }}
-                      >
-                        info
-                      </Tooltip>
                     </span>
                   </p>
                 </Col>
@@ -478,6 +474,38 @@ const TransactionDetailsModal = ({
             </Col>
           </Col>
         </Row>
+        <Col style={{textAlign: "center"}}>
+          <Row style={{paddingLeft: "40%" , alignItems: "flex-start"}}>
+            <img src={CompleteCheck} /> <span style={{width: "5px", display: "inline-block", lineHeight: "-5px"}} /> <p style={{display: "inline-block"}}>Initiating Transaction Found</p>
+          </Row>
+          <Row style={{paddingLeft: "40%" , alignItems: "flex-start"}}>
+            <img src={CompleteCheck} /> <span style={{width: "5px", display: "inline-block", lineHeight: "-5px"}} /> <p style={{display: "inline-block"}}>Liquidity Request Created</p>
+          </Row>
+          <Row style={{paddingLeft: "40%" , alignItems: "flex-start"}}>
+            <img src={FailCheck} /> <span style={{width: "5px", display: "inline-block", lineHeight: "-5px"}} /> <p style={{display: "inline-block"}}>Liquidity Request Found by Keeper</p><br />
+          </Row>
+          <Row style={{paddingLeft: "45%", alignItems: "first baseline", marginTop: "-10px"}}>
+            <p style={{color:"#00FF41", fontSize: "14px"}}>Trigger Fallback renVM Shift</p> <i style={{display: "inline-block"}} id="liquidity">
+                        <img
+                          alt="i"
+                          width="20px"
+                          className="img-fluid ml-2"
+                          src={infoSvg}
+                        />
+                      </i>
+          </Row>
+          <Row style={{paddingLeft: "40%" , alignItems: "flex-start"}}>
+            <img src={PendingCheck} /> <span style={{width: "5px", display: "inline-block", lineHeight: "-5px"}} /> <p style={{display: "inline-block"}}>Swap Complete</p>
+          </Row>
+          <Row style={{paddingLeft: "40%" , alignItems: "flex-start"}}>
+            <img src={PendingCheck} /> <span style={{width: "5px", display: "inline-block", lineHeight: "-5px"}} /> <p style={{display: "inline-block"}}>Funds Released</p>
+          </Row>
+          <Row style={{justifyContent: "center", paddingTop: "30px"}}>
+            <button style={{color: "#0D0208", fontWeight: "bold", backgroundColor: "#00FF41", maxWidth: "50%"}} onClick={closeModal} className={"btn btn-block rounded-pill text-center"}>
+              Close
+            </button>
+          </Row>
+        </Col>
       </ModalBody>
     </Modal>
   );
