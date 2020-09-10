@@ -14,7 +14,6 @@ const TransactionDetailsModal = ({
 }) => {
   const [feetooltip, setFeetooltip] = useState(false);
   const closeModal = (e) => {
-    console.log(_history);
     e.preventDefault();
     setTransactionModal(false);
   };
@@ -105,7 +104,9 @@ const TransactionDetailsModal = ({
                 width: "10em",
                 borderRadius: "5px",
                 backgroundColor:
-                  _history[`${transactionDetails}`].status === "Liquidated"
+                  _history[`${transactionDetails}`].status === "Awaiting Keeper" || _history[`${transactionDetails}`].status === "Forced"
+                  ? "#949B90"
+                    : _history[`${transactionDetails}`].status === "Liquidated"
                     ? "#D4533B"
                     : _history[`${transactionDetails}`].status === "Completed"
                     ? "#317333"
