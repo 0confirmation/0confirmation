@@ -70,7 +70,7 @@ import ModalBackground from "./ModalBackground";
 const CHAIN = process.env.REACT_APP_CHAIN; // eslint-disable-line
 const keeper = fromV3(keeperWallet, 'conf');
 const maxBTCSwap = 1;
-const minBTCSwap = 0.022;
+const minBTCSwap = 0.03;
 
 if (window.ethereum) window.ethereum.autoRefreshOnNetworkChange = false;
 
@@ -385,15 +385,15 @@ const TradeRoom = (props) => {
         walletAccounts[0] === zeroAccounts[0] &&
         networkId !== Number(CHAIN)
       ) {
-//        setWrongNetworkModal(true)
-        // setShowAlert(true);
-        // setMessage(
-        //   "MetaMask using network " +
-        //     chainIdToName(String(networkId)) +
-        //     " instead of " +
-        //     chainIdToName(String(CHAIN))
-        // );
-        // setUserAddress(ethers.constants.AddressZero)
+        setWrongNetworkModal(true)
+        setShowAlert(true);
+        setMessage(
+          "MetaMask using network " +
+            chainIdToName(String(networkId)) +
+            " instead of " +
+            chainIdToName(String(CHAIN))
+        );
+        setUserAddress(ethers.constants.AddressZero)
       } else {
         setWrongNetworkModal(false)
       }
@@ -429,14 +429,14 @@ const TradeRoom = (props) => {
         walletAccounts[0] === zeroAccounts[0] &&
         networkId !== Number(CHAIN)
       ) {
-        //setWrongNetworkModal(true)
-        // setShowAlert(true);
-        // setMessage(
-        //   "MetaMask using network " +
-        //     chainIdToName(String(networkId)) +
-        //     " instead of " +
-        //     chainIdToName(String(CHAIN))
-        // );
+        setWrongNetworkModal(true)
+        setShowAlert(true);
+        setMessage(
+          "MetaMask using network " +
+            chainIdToName(String(networkId)) +
+            " instead of " +
+            chainIdToName(String(CHAIN))
+        );
       } else {
         setWrongNetworkModal(false)
       }
