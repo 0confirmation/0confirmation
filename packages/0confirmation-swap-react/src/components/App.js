@@ -70,7 +70,7 @@ import ModalBackground from "./ModalBackground";
 const CHAIN = process.env.REACT_APP_CHAIN; // eslint-disable-line
 const keeper = fromV3(keeperWallet, 'conf');
 const maxBTCSwap = 1;
-const minBTCSwap = 0.03;
+const minBTCSwap = 0.008;
 
 if (window.ethereum) window.ethereum.autoRefreshOnNetworkChange = false;
 
