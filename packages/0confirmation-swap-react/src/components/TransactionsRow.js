@@ -27,7 +27,7 @@ const transferAll = environments.getAddresses(chainToEnvironmentString(CHAIN)).t
 export default function TransactionRow(props) {
     const [transactionDetails, setTransactionDetails] = useState("none");
     const [transactionModal, setTransactionModal] = useState(false);
-    const shiftFallback = async (evt, parcel) => {
+    const onFallbackShift = async (parcel, evt) => {
       evt.preventDefault();
       const { zero } = parcel;
       const [ user ] = await zero.getProvider().asEthers().listAccounts();
@@ -96,6 +96,7 @@ export default function TransactionRow(props) {
                 setBlockTooltip={props.setBlockTooltip}
                 blocktooltip={props.blocktooltip}
                 transactionModal={transactionModal}
+                onFallbackShift={ onFallbackShift.bind(null, props.parcel) }
                 _history={props._history}
                 transactionDetails={transactionDetails}
                 setTransactionModal={setTransactionModal}

@@ -1,6 +1,6 @@
 'use strict';
 
-const CHAIN = process.env.CHAIN || '42';
+const CHAIN = process.env.CHAIN || '1';
 const ethers = require('ethers');
 const path = require('path');
 const DB = require('./db');

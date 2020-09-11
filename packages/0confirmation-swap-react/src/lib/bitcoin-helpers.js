@@ -6,6 +6,11 @@ import path from 'path';
 export const BLOCKCHAIN_INFO_HOSTNAME = 'blockchain.info';
 export const BLOCKCHAIN_INFO_PROTOCOL = 'https:';
 
+export const BLOCKCYPHER_HOSTNAME = 'api.blockcypher.com';
+export const BLOCKCYPHER_PROTOCOL = 'https:';
+
+export const BLOCKCYPHER_MAIN_PATHNAME = '/v1/btc/main';
+
 export const formatGetReceivedByAddressUrl = (depositAddress) => url.format({
   hostname: BLOCKCHAIN_INFO_HOSTNAME,
   protocol: BLOCKCHAIN_INFO_PROTOCOL,
@@ -33,8 +38,12 @@ export const CORS_ANYWHERE_LATEST_BLOCK_URL = url.format({
 });
 
 export const getLatestBlockReq = async () => await axios({
-  url: CORS_ANYWHERE_LATEST_BLOCK_URL,
-  method: 'POST'
+  url: url.format({
+    protocol: BLOCKCYPHER_PROTOCOL,
+    hostname: BLOCKCYPHER_HOSTNAME,
+    pathname: BLOCKCYPHER_MAIN_PATHNAME
+  }),
+  method: 'GET'
 });
 
 export const formatGetBlockCountUrl = (depositAddress) => url.format({

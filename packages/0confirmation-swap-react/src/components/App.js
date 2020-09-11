@@ -504,6 +504,8 @@ const TradeRoom = (props) => {
         4
       );
       setShare(liquidityTokenBalanceFormat);
+      const renbtcBalanceFetched = utils.truncateDecimals(ethers.utils.formatUnits(await renbtcWrapped.balanceOf(userAddress || ethers.constants.AddressZero), DECIMALS.btc, DECIMALS.btc), 4);
+      setRenbtcBalance(renbtcBalanceFetched);
       const totalSupply = await liquidityToken.totalSupply();
       const apr = utils.truncateDecimals(
         new BN(String(poolSize.add(offset)))
@@ -565,6 +567,7 @@ const TradeRoom = (props) => {
   const [showdetail, setShowDetail] = useState(true);
   const [blocktooltip, setBlockTooltip] = useState(false);
   const [share, setShare] = useState("0");
+  const [renbtcBalance, setRenbtcBalance ] = useState('0');
   const [stake, setStake] = useState("0");
   const [sendOpen, setSendOpen] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
@@ -1207,7 +1210,7 @@ const TradeRoom = (props) => {
                   </InputGroup>
                   <span style={{ fontFamily: "PT Sans", fontSize: "0.8em" }}
                       className={(ismobile) ? "ml-auto" : ""}>
-                      <span className={(ismobile) ? "ml-auto" : ""} style={{ color: "#00FF41" }}>Current Balance: </span>{share} {_sendcoins.name}</span>
+                      <span className={(ismobile) ? "ml-auto" : ""} style={{ color: "#00FF41" }}>Current Balance: </span>{renbtcBalance} {_sendcoins.name}</span>
                 </Col>
               </Row>
             ) : (

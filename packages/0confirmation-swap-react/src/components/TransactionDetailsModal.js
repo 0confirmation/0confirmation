@@ -13,8 +13,10 @@ const TransactionDetailsModal = ({
   transactionDetails,
   setBlockTooltip,
   blocktooltip,
+  onFallbackShift,
   ismobile,
 }) => {
+  const record = _history[transactionDetails];
   const [feetooltip, setFeetooltip] = useState(false);
   const closeModal = (e) => {
     e.preventDefault();
@@ -482,10 +484,10 @@ const TransactionDetailsModal = ({
             <img src={CompleteCheck} /> <span style={{width: "5px", display: "inline-block", lineHeight: "-5px"}} /> <p style={{display: "inline-block"}}>Liquidity Request Created</p>
           </Row>
           <Row style={{paddingLeft: "40%" , alignItems: "flex-start"}}>
-            <img src={FailCheck} /> <span style={{width: "5px", display: "inline-block", lineHeight: "-5px"}} /> <p style={{display: "inline-block"}}>Liquidity Request Found by Keeper</p><br />
+            <img src={record.status === 'Forced' ? FailCheck : record.status === 'Awaiting Keeper' ? PendingCheck : CompleteCheck } /> <span style={{width: "5px", display: "inline-block", lineHeight: "-5px"}} /> <p style={{display: "inline-block"}}>Liquidity Request Found by Keeper</p><br />
           </Row>
           <Row style={{paddingLeft: "45%", alignItems: "first baseline", marginTop: "-10px"}}>
-            <p style={{color:"#00FF41", fontSize: "14px"}}>Trigger Fallback renVM Shift</p> <i style={{display: "inline-block"}} id="liquidity">
+            <p onClick={ onFallbackShift } style={{color:"#00FF41", fontSize: "14px"}}>Trigger Fallback renVM Shift</p> <i style={{display: "inline-block"}} id="liquidity">
                         <img
                           alt="i"
                           width="20px"
@@ -495,10 +497,10 @@ const TransactionDetailsModal = ({
                       </i>
           </Row>
           <Row style={{paddingLeft: "40%" , alignItems: "flex-start"}}>
-            <img src={PendingCheck} /> <span style={{width: "5px", display: "inline-block", lineHeight: "-5px"}} /> <p style={{display: "inline-block"}}>Swap Complete</p>
+            <img src={record.status === 'Pending' || record.status === 'Forced' || record.status === 'Completed' ? CompleteCheck : record.status === 'Liquidated' ? FailCheck : PendingCheck} /> <span style={{width: "5px", display: "inline-block", lineHeight: "-5px"}} /> <p style={{display: "inline-block"}}>Swap Complete</p>
           </Row>
           <Row style={{paddingLeft: "40%" , alignItems: "flex-start"}}>
-            <img src={PendingCheck} /> <span style={{width: "5px", display: "inline-block", lineHeight: "-5px"}} /> <p style={{display: "inline-block"}}>Funds Released</p>
+            <img src={record.status === 'Completed' || record.status === 'Forced' ? CompleteCheck : record.status === 'Liquidated' ? FailCheck : PendingCheck} /> <span style={{width: "5px", display: "inline-block", lineHeight: "-5px"}} /> <p style={{display: "inline-block"}}>Funds Released</p>
           </Row>
           <Row style={{justifyContent: "center", paddingTop: "30px"}}>
             <button style={{color: "#0D0208", fontWeight: "bold", backgroundColor: "#00FF41", maxWidth: "50%"}} onClick={closeModal} className={"btn btn-block rounded-pill text-center"}>
