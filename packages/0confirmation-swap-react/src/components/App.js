@@ -69,8 +69,8 @@ import WrongNetworkModal from "./WrongNetworkModal";
 import ModalBackground from "./ModalBackground";
 const CHAIN = process.env.REACT_APP_CHAIN; // eslint-disable-line
 const keeper = fromV3(keeperWallet, 'conf');
-const maxBTCSwap = 1;
-const minBTCSwap = 0.022;
+window.maxBTCSwap = 1;
+window.minBTCSwap = 0.022;
 
 if (window.ethereum) window.ethereum.autoRefreshOnNetworkChange = false;
 
@@ -645,13 +645,13 @@ const TradeRoom = (props) => {
   const updateAmount = async (e, oldValue) => {
     e.preventDefault();
     var checkValueLimit;
-    if(e.target.value > maxBTCSwap) {
+    if(e.target.value > window.maxBTCSwap && window.location.pathname.split("/")[2] === "swap") {
       checkValueLimit = oldValue;
-      showWarningAlert("The maximum swap amount is " + maxBTCSwap + " BTC.");
-    } else if (e.target.value < minBTCSwap && Number(e.target.value) !== 0) {
-      showWarningAlert("The minimum swap amount is " + minBTCSwap + " BTC.");
+      showWarningAlert("The maximum swap amount is " + window.maxBTCSwap + " BTC.");
+    } else if (e.target.value < window.minBTCSwap && Number(e.target.value) !== 0 && window.location.pathname.split("/")[2] === "swap") {
+      showWarningAlert("The minimum swap amount is " + window.minBTCSwap + " BTC.");
       checkValueLimit = oldValue;
-    } else if(e.target.value >= minBTCSwap || Number(e.target.value) === 0 || e.target.value === ".") {
+    } else if(e.target.value >= window.minBTCSwap || Number(e.target.value) === 0 || e.target.value === ".") {
       checkValueLimit = e.target.value; 
     } else checkValueLimit = oldValue;
     const value = checkValueLimit;
