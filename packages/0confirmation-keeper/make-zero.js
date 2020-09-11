@@ -8,7 +8,9 @@ const NETWORK = CHAIN === '1' ? 'mainnet' : CHAIN === '42' ? 'testnet' : 'mainne
 const ETH_NETWORK = NETWORK === 'testnet' ? 'kovan' : NETWORK;
 const Zero = require('@0confirmation/sdk');
 
-const provider = fromPrivate(process.env.PRIVATE_KEY, fromEthers(new ethers.providers.InfuraProvider(ETH_NETWORK)));
+const INFURA_PROJECT_ID = process.env.INFURA_PROJECT_ID || '2f1de898efb74331bf933d3ac469b98d';
+
+const provider = fromPrivate(process.env.PRIVATE_KEY, fromEthers(new ethers.providers.InfuraProvider(ETH_NETWORK, INFURA_PROJECT_ID)));
 console.log(NETWORK);
 
 const makeZero = () => {

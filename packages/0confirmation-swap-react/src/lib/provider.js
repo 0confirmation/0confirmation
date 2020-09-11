@@ -116,12 +116,14 @@ engine.push(async (req, res, next, end) => {
   end();
 });
 
+const INFURA_PROJECT_ID = process.env.REACT_APP_INFURA_PROJECT_ID || '2f1de898efb74331bf933d3ac469b98d';
+
 const chainToProvider = (chainId) => {
   switch (chainId) {
     case "1":
-      return fromEthers(new ethers.providers.InfuraProvider("mainnet"));
+      return fromEthers(new ethers.providers.InfuraProvider("mainnet", INFURA_PROJECT_ID));
     case "42":
-      return fromEthers(new ethers.providers.InfuraProvider("kovan"));
+      return fromEthers(new ethers.providers.InfuraProvider("kovan", INFURA_PROJECT_ID));
     case "embedded":
     default:
       return makeGanacheProvider();
