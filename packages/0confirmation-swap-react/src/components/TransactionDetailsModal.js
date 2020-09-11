@@ -17,6 +17,7 @@ const TransactionDetailsModal = ({
   ismobile,
 }) => {
   const record = _history[transactionDetails];
+  const canFallback = record.parcel && record.parcel.isReady && record.status !== 'Forced';
   const [feetooltip, setFeetooltip] = useState(false);
   const closeModal = (e) => {
     e.preventDefault();
@@ -486,8 +487,8 @@ const TransactionDetailsModal = ({
           <Row style={{paddingLeft: "40%" , alignItems: "flex-start"}}>
             <img src={record.status === 'Forced' ? FailCheck : record.status === 'Awaiting Keeper' ? PendingCheck : CompleteCheck } /> <span style={{width: "5px", display: "inline-block", lineHeight: "-5px"}} /> <p style={{display: "inline-block"}}>Liquidity Request Found by Keeper</p><br />
           </Row>
-          <Row style={{paddingLeft: "45%", alignItems: "first baseline", marginTop: "-10px"}}>
-            <p onClick={ onFallbackShift } style={{color:"#00FF41", fontSize: "14px"}}>Trigger Fallback renVM Shift</p> <i style={{display: "inline-block"}} id="liquidity">
+    { canFallback ? <Row style={{paddingLeft: "45%", alignItems: "first baseline", marginTop: "-10px"}}>
+            <p onClick={ onFallbackShift } style={{ color:"#00FF41", fontSize: "14px"}}>Trigger Fallback renVM Shift</p> <i style={{display: "inline-block"}} id="liquidity">
                         <img
                           alt="i"
                           width="20px"
@@ -495,7 +496,7 @@ const TransactionDetailsModal = ({
                           src={infoSvg}
                         />
                       </i>
-          </Row>
+          </Row> : <span></span> }
           <Row style={{paddingLeft: "40%" , alignItems: "flex-start"}}>
             <img src={record.status === 'Pending' || record.status === 'Forced' || record.status === 'Completed' ? CompleteCheck : record.status === 'Liquidated' ? FailCheck : PendingCheck} /> <span style={{width: "5px", display: "inline-block", lineHeight: "-5px"}} /> <p style={{display: "inline-block"}}>Swap Complete</p>
           </Row>

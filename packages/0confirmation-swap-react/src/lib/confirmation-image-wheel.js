@@ -7,6 +7,7 @@ import fiveCfSvg from "../images/5.svg";
 import sixCfSvg from "../images/6.svg";
 
 export const confirmationSvgs = {
+  'N/A': zeroCfSvg,
   "0": zeroCfSvg,
   "1": oneCfSvg,
   "2": twoCfSvg,

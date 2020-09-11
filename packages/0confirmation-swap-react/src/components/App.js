@@ -383,7 +383,8 @@ const TradeRoom = (props) => {
       const zeroAccounts = await ethersProvider.listAccounts();
       if (
         walletAccounts[0] === zeroAccounts[0] &&
-        networkId !== Number(CHAIN)
+        networkId !== Number(CHAIN) &&
+        CHAIN !== 'test'
       ) {
         setWrongNetworkModal(true)
         setShowAlert(true);
@@ -427,7 +428,8 @@ const TradeRoom = (props) => {
       setCurrentNetwork(networkId)
       if (
         walletAccounts[0] === zeroAccounts[0] &&
-        networkId !== Number(CHAIN)
+        networkId !== Number(CHAIN) &&
+        CHAIN !== 'test'
       ) {
         setWrongNetworkModal(true)
         setShowAlert(true);
@@ -533,8 +535,9 @@ const TradeRoom = (props) => {
     const ethersProvider = zero.getProvider().asEthers();
     if (!(await ethersProvider.listAccounts())[0]) return;
     const borrows = await getBorrows(zero);
-    const uninitialized = (persistence.loadLoans(zero)).filter(Boolean).filter((v) => v.state === 'deposited' || v.state === 'forced').filter((v) => {
-      const found = borrows.find((u) => v.nonce === u.nonce);
+    const [ address ] = await ethersProvider.listAccounts();
+    const uninitialized = (persistence.loadLoans(zero)).filter(Boolean).filter((v) => v.borrower.toLowerCase() === address.toLowerCase()).filter((v) => v.state === 'deposited' || v.state === 'forced').filter((v) => {
+      const found = v.state !== 'forced' && borrows.find((u) => v.nonce === u.nonce);
       if (found) {
         persistence.removeLoan(v.localIndex);
         return false;
@@ -1971,6 +1974,7 @@ const TradeRoom = (props) => {
                             setBlockTooltip={setBlockTooltip}
                             blocktooltip={blocktooltip}
                             _history={_history}
+                            getPendingTransfers={ getPendingTransfers }
                            />
                            </div>)
                         })}                      

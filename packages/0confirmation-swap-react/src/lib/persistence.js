@@ -17,6 +17,7 @@ export const saveLoan = (loan) => {
         amount: String(loan.amount),
         gasRequested: String(loan.gasRequested),
         shifterPool: loan.shifterPool,
+        borrower: loan.borrower,
         signature: String(loan.signature),
         nonce: String(loan.nonce),
         actions: loan.actions,
@@ -44,6 +45,7 @@ export const loadLoan = (i, zero) => {
         nonce: parsed.nonce,
         amount: parsed.amount,
         actions: parsed.actions,
+        borrower: parsed.borrower,
         forbidLoan: parsed.forbidLoan
       });
       parcel.isReady = parsed.isReady;
@@ -57,6 +59,7 @@ export const loadLoan = (i, zero) => {
         token: parsed.token,
         amount: parsed.amount,
         gasRequested: parsed.gasRequested,
+        borrower: parsed.borrower,
         signature: parsed.signature,
         nonce: parsed.nonce,
         actions: parsed.actions,

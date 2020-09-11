@@ -38,6 +38,7 @@ export default function TransactionRow(props) {
       if (receipt.logs.length) {
         parcel.state = 'forced';
         persistence.saveLoan(parcel);
+        await props.getPendingTransfers();
       };
     };
     return (
