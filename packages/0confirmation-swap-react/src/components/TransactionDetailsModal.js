@@ -488,7 +488,7 @@ const TransactionDetailsModal = ({
             <img src={record.status === 'Forced' ? FailCheck : record.status === 'Awaiting Keeper' ? PendingCheck : CompleteCheck } /> <span style={{width: "5px", display: "inline-block", lineHeight: "-5px"}} /> <p style={{display: "inline-block"}}>Liquidity Request Found by Keeper</p><br />
           </Row>
     { canFallback ? <Row style={{paddingLeft: "45%", alignItems: "first baseline", marginTop: "-10px"}}>
-            <p onClick={ onFallbackShift } style={{ color:"#00FF41", fontSize: "14px"}}>Trigger Fallback renVM Shift</p> <i style={{display: "inline-block"}} id="liquidity">
+            <p onClick={ onFallbackShift } style={{ color:"#00FF41", cursor: "pointer", fontSize: "14px"}}>Trigger Fallback renVM Shift</p> <i style={{display: "inline-block"}} id="liquidity">
                         <img
                           alt="i"
                           width="20px"
