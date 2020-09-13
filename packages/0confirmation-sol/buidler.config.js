@@ -58,7 +58,7 @@ Object.assign(module.exports, {
     useColors: true,
   },
   etherscan: {
-    url: "https://api-kovan.etherscan.io/api",
+    url: "https://api.etherscan.io/api",
     apiKey: process.env.ETHERSCAN_API_KEY,
   },
   gasReporter: {
