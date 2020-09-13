@@ -41,11 +41,11 @@ const yargs = require('yargs');
         minTimeout: chain === "test" ? "1" : "10000",
         daoFee: ethers.utils.parseEther("0.01"),
         poolFee: ethers.utils.parseEther("0.01"),
-        gasEstimate: '0',
-        maxGasPriceForRefund: '0',
+        gasEstimate: '1460000',
+        maxGasPriceForRefund: ethers.utils.parseUnits('500', 9),
         maxLoan:
           chain === "mainnet"
-            ? ethers.utils.parseEther("0.1")
+            ? ethers.utils.parseEther("1")
             : ethers.utils.parseEther("10"),
       }, [], [], [])
     );
