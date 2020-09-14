@@ -582,6 +582,7 @@ const TradeRoom = (props) => {
   const [networkModal, setWrongNetworkModal] = useState(false)
   const [currentNetwork, setCurrentNetwork] = useState("")
   const [correctNetwork, setCorrectNetwork] = useState(Number(CHAIN))
+  const [validAmount, setValidAmount] = useState(true)
   //  const [gets, setGets] = useState(0);
   const [rate, setRate] = useState("0");
   if (rate || setRate) noop(); // eslint silencer
@@ -646,14 +647,17 @@ const TradeRoom = (props) => {
     e.preventDefault();
     var checkValueLimit;
     if(e.target.value > window.maxBTCSwap && window.location.pathname.split("/")[2] === "swap") {
-      checkValueLimit = oldValue;
+      //checkValueLimit = oldValue;
+      setValidAmount(false);
       showWarningAlert("The maximum swap amount is " + window.maxBTCSwap + " BTC.");
     } else if (e.target.value < window.minBTCSwap && Number(e.target.value) !== 0 && window.location.pathname.split("/")[2] === "swap") {
       showWarningAlert("The minimum swap amount is " + window.minBTCSwap + " BTC.");
-      checkValueLimit = oldValue;
+      //checkValueLimit = oldValue;
+      setValidAmount(false);
     } else if(e.target.value >= window.minBTCSwap || Number(e.target.value) === 0 || e.target.value === ".") {
-      checkValueLimit = e.target.value; 
-    } else checkValueLimit = oldValue;
+      checkValueLimit = e.target.value;
+      setValidAmount(true); 
+    } else setValidAmount(false);
     const value = checkValueLimit;
     setValue(value);
     if (isNaN(value)) return;
@@ -1128,7 +1132,7 @@ const TradeRoom = (props) => {
             {window.location.pathname.split("/")[2] === "earn" ? (
               <Row className="justify-content-center align-content-center text-center mx-auto my-3 text-light">
                 <Col lg="4" md="12" sm="12" className="mt-2">
-                  <InputGroup style={{ height: "52px",border: "2px solid #008F11", borderRadius: "8px", }}>
+                  <InputGroup style={{ height: "52px",border: "2px solid #008F11", borderRadius: "8px" }}>
                     <Input
                       type="text"
                       value={value}
@@ -1205,7 +1209,11 @@ const TradeRoom = (props) => {
                       </DropdownMenu>
                     </InputGroupButtonDropdown> */}
                     <InputGroupAddon style={{ userSelect: "none", cursor: "default", backgroundColor: "#003B00", borderRadius: "0px 8px 8px 0px", color: "#ffffff" }} addonType="append">
-                         <InputGroupText style={{ backgroundColor: "#003B00", borderRadius: "0px 8px 8px 0px", color: "#ffffff", border: "none", outline: "none" }}>
+                         <InputGroupText style={validAmount ? {
+                        backgroundColor: "#003B00", borderRadius: "0px 8px 8px 0px", color: "#ffffff", border: "none", outline: "none" 
+                      } : 
+                      { backgroundColor: "#800000", borderRadius: "0px 5px 5px 0px", 
+                        color: "#ffffff", border: "1px #800000", outline: "none", }}>
                             <InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={btcIcon} />{' '}
                                 renBTC
                           </InputGroupText>
@@ -1219,7 +1227,8 @@ const TradeRoom = (props) => {
             ) : (
               <Row className="justify-content-center align-content-center text-center mx-auto my-3 text-light">
                 <Col lg="4" md="12" sm="12" className="mt-2">
-                  <InputGroup style={{  height: "52px",border: "2px solid #008F11", borderRadius: "8px", }}>
+                  <InputGroup style={validAmount ? { height: "52px",border: "2px solid #008F11", borderRadius: "8px" }
+                      : { height: "52px", border: "2px solid #8B0000", boxShadow: "0 0 8px #8B0000", borderRadius: "8px"}}>
                     <Input
                       type="text"
                       value={value}
@@ -1232,7 +1241,11 @@ const TradeRoom = (props) => {
                             }}
                       />
                       <InputGroupAddon style={{ userSelect: "none", cursor: "default", backgroundColor: "#003B00", borderRadius: "0px 8px 8px 0px", color: "#ffffff" }} addonType="append">
-                         <InputGroupText style={{ backgroundColor: "#003B00", borderRadius: "0px 8px 8px 0px", color: "#ffffff", border: "none", outline: "none" }}>
+                         <InputGroupText style={validAmount ? {
+                            backgroundColor: "#003B00", borderRadius: "0px 8px 8px 0px", color: "#ffffff", border: "none", outline: "none" 
+                          } : 
+                          { backgroundColor: "#800000", borderRadius: "0px 5px 5px 0px", 
+                            color: "#ffffff", border: "1px #800000", outline: "none", }}>
                             <InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={btcIcon} />{' '}
                                 BTC
                           </InputGroupText>
@@ -1424,7 +1437,7 @@ const TradeRoom = (props) => {
                   Connect Wallet to Provide Liquidity
                 </button>)
               ) : (
-                userAddress != null && userAddress !== ethers.constants.AddressZero ?
+                userAddress != null && userAddress !== ethers.constants.AddressZero && validAmount ?
                 <button
                   onClick={async (evt) => {
                     requestLoan(evt).catch((err) => console.error(err));
@@ -1440,7 +1453,7 @@ const TradeRoom = (props) => {
                 </button> :
                 <button
                 className="btn button-small btn-sm px-5"
-                onClick={(evt) => connectWeb3Modal(evt)}
+                onClick={ userAddress == null || userAddress === ethers.constants.AddressZero ? (evt) => connectWeb3Modal(evt) : null}
                 style={{
                   fontSize: "24dp",
                   backgroundColor: "#008F11",
@@ -1449,7 +1462,7 @@ const TradeRoom = (props) => {
                   opacity: "0.38"
                 }}
               >
-                  Connect Wallet to Swap
+                  { userAddress == null || userAddress === ethers.constants.AddressZero ? "Connect Wallet to Swap" : "Enter Valid Amount" }
                 </button>
               )}
             </div>
