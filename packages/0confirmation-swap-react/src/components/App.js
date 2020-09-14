@@ -649,15 +649,26 @@ const TradeRoom = (props) => {
     if(e.target.value > window.maxBTCSwap && window.location.pathname.split("/")[2] === "swap") {
       //checkValueLimit = oldValue;
       setValidAmount(false);
+      setCalcValue("0");
+      setRate("0");
+      setSlippage("0");
       showWarningAlert("The maximum swap amount is " + window.maxBTCSwap + " BTC.");
-    } else if (e.target.value < window.minBTCSwap && Number(e.target.value) !== 0 && window.location.pathname.split("/")[2] === "swap") {
+    } else if (e.target.value < window.minBTCSwap && window.location.pathname.split("/")[2] === "swap") {
       showWarningAlert("The minimum swap amount is " + window.minBTCSwap + " BTC.");
       //checkValueLimit = oldValue;
       setValidAmount(false);
+      setCalcValue("0");
+      setRate("0");
+      setSlippage("0");
     } else if(e.target.value >= window.minBTCSwap || Number(e.target.value) === 0 || e.target.value === ".") {
       checkValueLimit = e.target.value;
       setValidAmount(true); 
-    } else setValidAmount(false);
+    } else {
+      setValidAmount(false);
+      setCalcValue("0");
+      setRate("0");
+      setSlippage("0");
+    }
     const value = checkValueLimit;
     setValue(value);
     if (isNaN(value)) return;
