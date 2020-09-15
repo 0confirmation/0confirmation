@@ -1415,7 +1415,7 @@ const TradeRoom = (props) => {
             <div className="justify-content-center align-content-center text-center mx-auto my-auto pt-3">
               {window.location.pathname.split("/")[2] === "earn" ? (
                 (
-                  earnWL.includes(userAddress.toLowerCase()) && userAddress != null && userAddress !== ethers.constants.AddressZero ?
+                  userAddress != null && earnWL.includes(userAddress.toLowerCase()) && userAddress !== ethers.constants.AddressZero ?
                 <button
                   onClick={async (e) => {
                     e.preventDefault();
