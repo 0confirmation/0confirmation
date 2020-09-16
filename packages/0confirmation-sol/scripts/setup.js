@@ -10,7 +10,10 @@ const ModuleTypes = {
 };
 
 const logger = require("@0confirmation/logger")("@0confirmation/sol/setup");
+const Zero = require('@0confirmation/sdk');
 
+const DAI = require('../build/DAI');
+const ERC20Adapter = require('../deployments/live_1/ERC20Adapter');
 const fromEthers = require('@0confirmation/providers/from-ethers');
 const chalk = require('chalk');
 const fromSecret = require('@0confirmation/providers/from-secret');
@@ -47,7 +50,26 @@ const yargs = require('yargs');
           chain === "mainnet"
             ? ethers.utils.parseEther("1")
             : ethers.utils.parseEther("10"),
-      }, [], [], [])
+      }, ...((v) => [
+        v.map((v) => ({
+          moduleType: v.moduleType,
+          target: v.target,
+          sigs: v.sigs,
+        })),
+        v.map((v) => v.module),
+      ])([
+        {
+          moduleType: ModuleTypes.BY_ADDRESS,
+          target: environment.usdc,
+          sigs: Zero.getSignatures(DAI.abi),
+          module: {
+            isPrecompiled: false,
+            assetSubmodule: ERC20Adapter.address,
+            repaymentSubmodule: ERC20Adapter.address,
+            liquidationSubmodule: ethers.constants.AddressZero
+          },
+        }
+      ]), [])
     );
   
   console.log(chalk.bold('txhash: ' + tx.hash));

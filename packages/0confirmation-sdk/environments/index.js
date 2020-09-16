@@ -18,6 +18,9 @@ const ShifterPool = {
   mainnet: require('@0confirmation/sol/deployments/live_1/ShifterPool'),
   buidler: requireMaybe('@0confirmation/sol/deployments/local_31337/ShifterPool')
 };
+const USDC = {
+  buidler: requireMaybe('@0confirmation/sol/deployments/local_31337/USDC')
+};
 const UniswapV2Factory = {
   kovan: require('@0confirmation/sol/deployments/kovan/UniswapV2Factory'),
   buidler: requireMaybe('@0confirmation/sol/deployments/local_31337/UniswapV2Factory')
@@ -55,6 +58,7 @@ if (isBrowser) {
   UniswapV2Factory.buidler = require('@0confirmation/sol/deployments/local_31337/UniswapV2Factory');
   UniswapV2Router01.buidler = require('@0confirmation/sol/deployments/local_31337/UniswapV2Router01');
   DAI.buidler = require('@0confirmation/sol/deployments/local_31337/DAI');
+  USDC.buidler = require('@0confiramtion/sol/deployments/local_31337/USDC');
   WETH9.buidler = require('@0confirmation/sol/deployments/local_31337/WETH9');
   ShifterRegistryMock.buidler = require('@0confirmation/sol/deployments/local_31337/ShifterRegistryMock');
   V2SwapAndDrop.buidler = require('@0confirmation/sol/deployments/local_31337/V2SwapAndDrop');
@@ -135,6 +139,22 @@ const curveFromNetwork = (network) => ({
 });
 */
 
+const usdcFromNetwork = (network) => {
+  if (network === 'buidler') {
+    return {
+      usdc: fromArtifact(network, USDC)
+    };
+  } else if (network === 'mainnet') {
+    return {
+      usdc: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
+    };
+  } else {
+    return {
+      usdc: ethers.constants.AddressZero
+    };
+  }
+};
+
 const daiFromNetwork = (network) => {
   if (network === 'buidler') {
     return {
@@ -161,7 +181,8 @@ const getAddresses = (network) => ({
   ...zeroContractsFromNetwork(network),
   ...renvmFromEnvironment(network),
   ...daiFromNetwork(network),
-  ...wethFromNetwork(network)
+  ...wethFromNetwork(network),
+  ...usdcFromNetwork(network)
 });
 
 const getEnvironment = (provider, network, backends) => ({

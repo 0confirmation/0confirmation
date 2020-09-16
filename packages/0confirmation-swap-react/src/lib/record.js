@@ -12,6 +12,7 @@ import * as utils from "./utils";
 import * as bitcoin from './bitcoin-helpers';
 
 export const getStatus = (borrowProxy) => {
+  console.log(borrowProxy.pendingTransfers);
   if (!borrowProxy.pendingTransfers) {
     if (borrowProxy.state === 'forced') return 'Forced';
     if (borrowProxy.state === 'signed') return 'Awaiting Deposit';

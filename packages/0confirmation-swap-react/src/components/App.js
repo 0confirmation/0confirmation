@@ -116,6 +116,8 @@ const getDAIToken = () =>
     "DAI",
     "DAI Stablecoin"
   );
+
+const getUSDCToken = () => new Token(ChainId.MAINNET, contracts.usdc, DECIMALS.usdc, "USDC", "USDC Stablecoin");
 const getRenBTCToken = () =>
   new Token(
     ChainId.MAINNET,
@@ -127,20 +129,27 @@ const getRenBTCToken = () =>
 const getWETHToken = () =>
   new Token(ChainId.MAINNET, contracts.weth, DECIMALS.weth, "WETH", "WETH");
 
-const getDAIBTCMarket = async (provider) => {
+const getters = {
+  BTC: getRenBTCToken,
+  WETH: getWETHToken,
+  USDC: getUSDCToken,
+  DAI: getDAIToken
+};
+
+const getUniswapMarket = async (provider, token) => {
   const route = new UniRoute(
     [
       await Pair.fetchData(getRenBTCToken(), getWETHToken(), provider),
-      await Pair.fetchData(getDAIToken(), getWETHToken(), provider),
+      await Pair.fetchData(getters[token](), getWETHToken(), provider),
     ],
     getRenBTCToken()
   );
   return route;
 };
 
-const getTradeExecution = async (provider, route, amount) => {
+const getTradeExecution = async (provider, route, amount, token) => {
   return new Trade(
-    route || (await getDAIBTCMarket(provider)),
+    route || (await getUniswapMarket(provider, token)),
     new TokenAmount(getRenBTCToken(), amount),
     TradeType.EXACT_INPUT
   );
@@ -238,6 +247,7 @@ const TradeRoom = (props) => {
   const { ismobile } = props;
   //const [userAddress, setUserAddress] = useState(ethers.constants.AddressZero);
   const [userAddress, setUserAddress] = useState(ethers.constants.AddressZero);
+  const [ getCoin, setGetCoin ] = useState('DAI');
   const setup = async () => {
     provider.setSigningProvider(makeTestWallet(window.ethereum || provider));
     contracts = getAddresses('buidler');
@@ -613,6 +623,20 @@ const TradeRoom = (props) => {
       id: 0,
       name: "DAI",
     },
+    {
+      coin: (
+        <Fragment>
+          <InlineIcon
+            color="#ffffff"
+            style={{ fontSize: "1.5em" }}
+            className="mr-2"
+            icon={daiIcon}
+          />
+        </Fragment>
+      ),
+      id: 1,
+      name: "USDC",
+    }
   ]);
   const [_sendcoins, setSendcoins] = useState([
     {
@@ -636,6 +660,10 @@ const TradeRoom = (props) => {
     await updateMarket();
     setRate("N/A");
   };
+
+  useEffect(() => {
+    updateMarket().catch((err) => console.error(err));
+  }, [ getCoin ]);
 
   const showWarningAlert = function (message) {
     setWarningAlert(true);
@@ -676,7 +704,7 @@ const TradeRoom = (props) => {
     await getTradeDetails(value);
   };
   const updateMarket = async () => {
-    const market = await getDAIBTCMarket(new Web3Provider(zero.getProvider()));
+    const market = await getUniswapMarket(new Web3Provider(zero.getProvider()), getCoin);
     setMarket(market);
     return market;
   };
@@ -692,7 +720,8 @@ const TradeRoom = (props) => {
     const trade = await getTradeExecution(
       new Web3Provider(zero.getProvider()),
       market,
-      utils.toParsed(value, "btc")
+      utils.toParsed(value, "btc"),
+      getCoin
     );
     setTrade(trade);
     setCalcValue(utils.truncateDecimals(trade.outputAmount.toExact(), 2));
@@ -739,7 +768,7 @@ const TradeRoom = (props) => {
             []
           )
         )[0],
-        dai: contracts.dai,
+        dai: contracts[getCoin.toLowerCase()],
         router: contracts.router,
         swapAndDrop: contracts.swapAndDrop,
       }),
@@ -753,6 +782,7 @@ const TradeRoom = (props) => {
     waitOnResult(parcel);
   };
   const waitOnResult = async (parcel) => {
+    const _getCoin = getCoin;
     (async () => {
       let proxy;
       const deposited = await parcel.waitForDeposit(0, 30*60*1000);
@@ -770,7 +800,7 @@ const TradeRoom = (props) => {
       if (amount) {
         setShowAlert(true);
         setMessage(
-          `BTC/DAI swap executed: ${amount} DAI locked -- await RenVM message to release`
+          `BTC/${_getCoin} swap executed: ${amount} ${_getCoin} locked -- await RenVM message to release`
         );
       } else {
           setShowAlert(true);
@@ -786,7 +816,7 @@ const TradeRoom = (props) => {
       await getPendingTransfers(btcBlock);
       setShowAlert(true);
       setMessage(
-        "RenVM response made it to the network! DAI forwarded to your wallet!"
+        `RenVM response made it to the network! ${_getCoin} forwarded to your wallet!`
       );
     })().catch((err) => console.error(err));
   };
@@ -821,6 +851,20 @@ const TradeRoom = (props) => {
       ),
       id: 1,
       name: "DAI",
+    },
+    {
+      coin: (
+        <Fragment>
+          <InlineIcon
+            color="#ffffff"
+            style={{ fontSize: "1.5em" }}
+            className="mr-2"
+            icon={daiIcon}
+          />
+        </Fragment>
+      ),
+      id: 2,
+      name: "USDC",
     },
   ];
   const connectWeb3Modal = async (evt) => {
@@ -1344,7 +1388,7 @@ const TradeRoom = (props) => {
                     <InputGroupAddon style={{ backgroundColor: "#003B00", borderRadius: "0px 8px 8px 0px", color: "#ffffff" }} addonType="append">
                        <InputGroupText style={{ backgroundColor: "#003B00", borderRadius: "0px 8px 8px 0px", color: "#ffffff", border: "none", outline: "none" }}>
                           <InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={daiIcon} />{' '}
-                          DAI
+                          { getCoin } 
                         </InputGroupText>
                     </InputGroupAddon>
                     {/*<InputGroupButtonDropdown
@@ -1824,7 +1868,7 @@ const TradeRoom = (props) => {
                           </b>{" "}
                           for at least{" "}
                           <b>
-                            {calcValue} DAI
+                            {calcValue} { getCoin } 
                             {/* {_getcoins.name} */}
                           </b>
                           <br />

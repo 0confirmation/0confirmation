@@ -112,11 +112,12 @@ module.exports = async (buidler) => {
   await deploy("V2SwapAndDrop");
   await deploy("TransferAll");
   const ethersProvider = new bre.ethers.providers.Web3Provider(fromEthers(bre.ethereum));
-  let weth, shifterRegistry, dai, renbtc, factory, router, from;
+  let weth, shifterRegistry, dai, renbtc, factory, router, from, usdc;
   switch (chain) {
     case "kovan":
       weth = await deploy("WETH9");
       dai = await deploy("DAI");
+      usdc = await deploy("USDC");
       factory = await deploy("UniswapV2Factory", [deployer]);
       router = await deploy("UniswapV2Router01", [
         factory.address,
@@ -137,10 +138,12 @@ module.exports = async (buidler) => {
       factory = {address: networks[chain].factory};
       weth = {address: networks[chain].weth};
       dai = {address: networks[chain].dai};
+      usdc = {address: networks[chain].usdc};
       break;
     case "test":
       weth = await deploy("WETH9");
       dai = await deploy("DAI");
+      usdc = await deploy("USDC");
       shifterRegistry = await deploy("ShifterRegistryMock");
       renbtc = {
         address: await shifterRegistry.token(),
@@ -152,6 +155,7 @@ module.exports = async (buidler) => {
       ]);
       await factory.createPair(weth.address, renbtc.address); // { gasLimit: ethers.utils.hexlify(6e6) });
       await factory.createPair(weth.address, dai.address); //, { gasLimit: ethers.utils.hexlify(6e6) });
+      await factory.createPair(weth.address, usdc.address);
       break;
   }
   const uniswapV2Adapter = await deploy("UniswapV2Adapter", [
@@ -182,7 +186,7 @@ module.exports = async (buidler) => {
         minTimeout: chain === "test" ? "1" : "10000",
         daoFee: ethers.utils.parseEther("0.01"),
         poolFee: ethers.utils.parseEther("0.01"),
-        gasEstimate: '1200000',
+        gasEstimate: '1460000',
         maxGasPriceForRefund: ethers.utils.parseUnits('500', 9),
         maxLoan:
           chain === "mainnet"
@@ -200,6 +204,17 @@ module.exports = async (buidler) => {
         {
           moduleType: ModuleTypes.BY_ADDRESS,
           target: renbtc.address,
+          sigs: Zero.getSignatures(DAI.abi),
+          module: {
+            isPrecompiled: false,
+            assetSubmodule: erc20Adapter.address,
+            repaymentSubmodule: erc20Adapter.address,
+            liquidationSubmodule: NO_SUBMODULE,
+          },
+        },
+        {
+          moduleType: ModuleTypes.BY_ADDRESS,
+          target: usdc.address,
           sigs: Zero.getSignatures(DAI.abi),
           module: {
             isPrecompiled: false,
@@ -253,6 +268,7 @@ module.exports = async (buidler) => {
       [
         [renbtc.address, 8, "0.34"],
         [dai.address, 18, "7724680"],
+        [usdc.address, 18, "7505000"],
       ],
       async ([token, decimals, amount]) => {
         const tokenWrapped = new ethers.Contract(
