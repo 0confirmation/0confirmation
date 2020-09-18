@@ -1363,6 +1363,10 @@ const TradeRoom = (props) => {
                             <Col className="text-left" style={{color:"#00FF41"}}>Estimated Gas Cost<br/><span style={{color:"#87888C"}}>@ 100 Gwei</span></Col>
                             <Col className="text-right text-light">.12 ETH / <br/>23.12 DAI</Col>
                           </Row>
+
+                          <Row className="mx-2 mt-3 mb-1">
+                            <Col className="text-center" ><Link to="#" style={{color:"#00FF41",textDecoration:"none", borderBottom:"1px solid #00FF41"}}>view fee details</Link></Col>
+                          </Row>
                         </Col>
                     </Row>
                   </Col>
@@ -1835,57 +1839,65 @@ const TradeRoom = (props) => {
                         </Row>
                       )}
                   </Col>
-                ) : (
-                    <Col
-                      lg="9"
-                      md="9"
-                      sm="9"
-                      style={{ border: "1px solid #008F11", borderRadius: "10px", fontSize: "18px" }}
-                      className=" mx-4  pt-3 mt-4"
-                    >
-                      <Row className="align-content-center justify-content-center">
-                        <Col
-                          lg="7"
-                          md="7"
-                          sm="7"
-                          className="justify-content-center align-content-center"
-                        >
-                          <p
-                            className="text-center text-break"
-                            style={{
-                              fontWeight: "normal",
-                              fontStyle: "normal",
-                              fontSize: "0.8em",
-                              fontFamily: "PT Sans",
-                              color: "#ffffff",
-                              userSelect: "none",
-                              cursor: "default"
-                            }}
-                          >
-                            You are selling{" "}
-                            <b>
-                              {value} BTC
-                            {/* {_sendcoins.name} */}
-                            </b>{" "}
-                          for at least{" "}
-                            <b>
-                              {calcValue} DAI
-                            {/* {_getcoins.name} */}
-                            </b>
-                            <br />
-                          Expected Price Slippage: <b>{slippage}%</b>
-                            <br />
-                          Additional slippage limit: <b>{slippage}%</b>
-                          </p>
-                        </Col>
-                      </Row>
-                      {/* <p className="text-center text-break" style={{ fontWeight: "normal", fontStyle: "normal", fontSize: "0.8em", fontFamily: "PT Sans", color: "#ffffff" }}>
-                                        You are selling <b>{sendvalue} {_sendcoins.name}</b> for at least <b>{sendvalue * rate} {_getcoins.name}</b> <br />Expected Price Slippage: <b>{slippage}%</b>  <br />Additional slippage limit: <b>{slippage}%</b>  <br />fee disclosures
-                                    </p> */}
-                    </Col>
-                  )}
+                ) : null
+                // (
+                    // <Col
+                    //   lg="9"
+                    //   md="9"
+                    //   sm="9"
+                    //   style={{ border: "1px solid #008F11", borderRadius: "10px", fontSize: "18px" }}
+                    //   className=" mx-4  pt-3 mt-4"
+                    // >
+                    //   <Row className="align-content-center justify-content-center">
+                    //     <Col
+                    //       lg="7"
+                    //       md="7"
+                    //       sm="7"
+                    //       className="justify-content-center align-content-center"
+                    //     >
+                    //       <p
+                    //         className="text-center text-break"
+                    //         style={{
+                    //           fontWeight: "normal",
+                    //           fontStyle: "normal",
+                    //           fontSize: "0.8em",
+                    //           fontFamily: "PT Sans",
+                    //           color: "#ffffff",
+                    //           userSelect: "none",
+                    //           cursor: "default"
+                    //         }}
+                    //       >
+                    //         You are selling{" "}
+                    //         <b>
+                    //           {value} BTC
+                    //         {/* {_sendcoins.name} */}
+                    //         </b>{" "}
+                    //       for at least{" "}
+                    //         <b>
+                    //           {calcValue} DAI
+                    //         {/* {_getcoins.name} */}
+                    //         </b>
+                    //         <br />
+                    //       Expected Price Slippage: <b>{slippage}%</b>
+                    //         <br />
+                    //       Additional slippage limit: <b>{slippage}%</b>
+                    //       </p>
+                    //     </Col>
+                    //   </Row>
+                    //   {/* <p className="text-center text-break" style={{ fontWeight: "normal", fontStyle: "normal", fontSize: "0.8em", fontFamily: "PT Sans", color: "#ffffff" }}>
+                    //                     You are selling <b>{sendvalue} {_sendcoins.name}</b> for at least <b>{sendvalue * rate} {_getcoins.name}</b> <br />Expected Price Slippage: <b>{slippage}%</b>  <br />Additional slippage limit: <b>{slippage}%</b>  <br />fee disclosures
+                    //                 </p> */}
+                    // </Col>
+                  // )
+                  
+                  }
               </Row>
             ) : null}
+
+
+
+
+
             {window.location.pathname.split("/")[2] === "earn" ? null : (
               <Row className="justify-content-center align-content-center mx-auto">
                 {_history.length > 0 ? (
@@ -2054,6 +2066,10 @@ const TradeRoom = (props) => {
             )}
           </Col>
         </Row>
+
+
+
+
         <Row className="align-content-center justify-content-center mt-5 pt-5 mb-2">
           <Col lg="10" md="10" sm="10" className="align-content-center justify-content-center mt-5 mx-auto text-center text-white-50"
             style={{
