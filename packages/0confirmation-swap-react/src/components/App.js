@@ -14,6 +14,7 @@ import swapIconSvg from "../images/swapicon.svg";
 import { chainIdToName, DECIMALS } from "../lib/utils";
 import ERC20 from "../lib/erc20";
 import * as bitcoin from '../lib/bitcoin-helpers';
+
 import ShifterPool from '@0confirmation/sdk/shifter-pool';
 // import { getSvgForConfirmations } from "../lib/confirmation-image-wheel";
 import "./App.css";
@@ -116,7 +117,7 @@ const getDAIToken = () =>
     "DAI",
     "DAI Stablecoin"
   );
-const getRenBTCToken = () =>
+export const getRenBTCToken = () =>
   new Token(
     ChainId.MAINNET,
     contracts.renbtc,
@@ -124,7 +125,7 @@ const getRenBTCToken = () =>
     "RenBTC",
     "RenBTC"
   );
-const getWETHToken = () =>
+export const getWETHToken = () =>
   new Token(ChainId.MAINNET, contracts.weth, DECIMALS.weth, "WETH", "WETH");
 
 const getDAIBTCMarket = async (provider) => {
