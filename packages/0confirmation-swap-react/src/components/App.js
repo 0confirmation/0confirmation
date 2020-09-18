@@ -22,11 +22,11 @@ import keeperWallet from '@0confirmation/sol/private/keeper';
 import {
   Row,
   Col,
-  InputGroup, InputGroupText,InputGroupAddon,
+  InputGroup, InputGroupText, InputGroupAddon,
   Input,
   DropdownToggle,
   DropdownMenu,
-  DropdownItem,ButtonDropdown,
+  DropdownItem, ButtonDropdown,
   Tooltip
 } from "reactstrap";
 import LoanModal from "./LoanModal";
@@ -167,9 +167,9 @@ const makeZero = (provider) => {
   const zero = ["test", "external"].includes(CHAIN)
     ? new Zero.ZeroMock(provider)
     : new Zero(
-        provider,
-        CHAIN === "42" ? "testnet" : CHAIN === "1" ? "mainnet" : "buidler"
-      );
+      provider,
+      CHAIN === "42" ? "testnet" : CHAIN === "1" ? "mainnet" : "buidler"
+    );
   if (USE_TESTNET_BTC)
     zero.driver.registerBackend(
       new BTCBackend({
@@ -241,12 +241,12 @@ const TradeRoom = (props) => {
   const setup = async () => {
     provider.setSigningProvider(makeTestWallet(window.ethereum || provider));
     contracts = getAddresses('buidler');
-	  console.log(contracts);
+    console.log(contracts);
     zero.setEnvironment(contracts);
-     await getRenBTCAddress(
+    await getRenBTCAddress(
       new ethers.providers.Web3Provider(provider), {
-        shifterRegistry: contracts.shifterRegistry
-      });
+      shifterRegistry: contracts.shifterRegistry
+    });
     zero.setEnvironment(contracts);
     await setupTestUniswapSDK(zero.getProvider(), () => contracts);
     if (!["embedded", "test"].includes(CHAIN)) return;
@@ -274,7 +274,7 @@ const TradeRoom = (props) => {
       console.log("this keeper needs ether! sending 10");
       const sendEtherTx = await provider.dataProvider
         .asEthers()
-	.getSigner()
+        .getSigner()
         .sendTransaction(
           {
             value: ethers.utils.hexlify(ethers.utils.parseEther("10")),
@@ -282,14 +282,14 @@ const TradeRoom = (props) => {
             gasPrice: "0x01",
             to: keeperAddress
           })
-        
+
       await sendEtherTx.wait();
       console.log("done!");
     }
     console.log('sending eth to user');
     const sendUserEtherTx = await provider.dataProvider
       .asEthers()
-	    .getSigner()
+      .getSigner()
       .sendTransaction(
         {
           value: ethers.utils.hexlify(ethers.utils.parseEther("1")),
@@ -331,20 +331,20 @@ const TradeRoom = (props) => {
       console.logKeeper("got liquidity request!");
       console.logKeeper(
         "computing BTC address from liquidity request parameters: " +
-          v.depositAddress
+        v.depositAddress
       );
       console.logKeeper(
         "OK! " +
-          v.proxyAddress +
-          " is a borrow proxy derived from a deposit of " +
-          ethers.utils.formatUnits(v.amount, 8) +
-          " BTC at the target address"
+        v.proxyAddress +
+        " is a borrow proxy derived from a deposit of " +
+        ethers.utils.formatUnits(v.amount, 8) +
+        " BTC at the target address"
       );
       if (Number(ethers.utils.formatEther(v.gasRequested)) > 0.1) {
         console.logKeeper("request is for too much gas -- abort");
         return;
       }
-      const deposited = await v.waitForDeposit(0, 60*30*1000);
+      const deposited = await v.waitForDeposit(0, 60 * 30 * 1000);
       console.logKeeper("found deposit -- initializing a borrow proxy!");
       const bond = BigNumber.from(v.amount).div(9);
       await (await deposited.executeBorrow(bond, "100000")).wait();
@@ -391,9 +391,9 @@ const TradeRoom = (props) => {
         setShowAlert(true);
         setMessage(
           "MetaMask using network " +
-            chainIdToName(String(networkId)) +
-            " instead of " +
-            chainIdToName(String(CHAIN))
+          chainIdToName(String(networkId)) +
+          " instead of " +
+          chainIdToName(String(CHAIN))
         );
         setUserAddress(ethers.constants.AddressZero)
       } else {
@@ -412,7 +412,7 @@ const TradeRoom = (props) => {
       if (CHAIN === "test" || CHAIN === "embedded") await setup();
       else {
         if (window.ethereum) provider.setSigningProvider(window.ethereum);
-//        if (web3Modal.cachedProvider) await _connectWeb3Modal();
+        //        if (web3Modal.cachedProvider) await _connectWeb3Modal();
         if (CHAIN === "42" || CHAIN === 'test')
           await setupTestUniswapSDK(zero.getProvider(), () => contracts);
         await zero.initializeDriver();
@@ -436,9 +436,9 @@ const TradeRoom = (props) => {
         setShowAlert(true);
         setMessage(
           "MetaMask using network " +
-            chainIdToName(String(networkId)) +
-            " instead of " +
-            chainIdToName(String(CHAIN))
+          chainIdToName(String(networkId)) +
+          " instead of " +
+          chainIdToName(String(CHAIN))
         );
       } else {
         setWrongNetworkModal(false)
@@ -460,8 +460,8 @@ const TradeRoom = (props) => {
       return () => ethersProvider.removeListener("block", listener);
     })().catch((err) => console.error(err));
   }, []);
-  const [ btcBlock, setBTCBlock ] = useState(0);
-  const [ changeWalletTooltip, setChangeWalletTooltip ] = useState(false);
+  const [btcBlock, setBTCBlock] = useState(0);
+  const [changeWalletTooltip, setChangeWalletTooltip] = useState(false);
   const getBTCBlock = async () => {
     const blockNumber = (await bitcoin.getLatestBlock());
     cachedBtcBlock = Number(blockNumber);
@@ -531,12 +531,12 @@ const TradeRoom = (props) => {
     listener().catch((err) => console.error(err));
     ethersProvider.on("block", listener);
     return () => ethersProvider.removeListener("block", listener);
-  }, [ userAddress ]);
+  }, [userAddress]);
   const getPendingTransfers = async (btcBlock) => {
     const ethersProvider = zero.getProvider().asEthers();
     if (!(await ethersProvider.listAccounts())[0]) return;
     const borrows = await getBorrows(zero);
-    const [ address ] = await ethersProvider.listAccounts();
+    const [address] = await ethersProvider.listAccounts();
     const uninitialized = (persistence.loadLoans(zero)).filter(Boolean).filter((v) => v.borrower.toLowerCase() === address.toLowerCase()).filter((v) => v.state === 'deposited' || v.state === 'forced').filter((v) => {
       const found = v.state !== 'forced' && borrows.find((u) => v.nonce === u.nonce);
       if (found) {
@@ -551,7 +551,7 @@ const TradeRoom = (props) => {
         persistence.saveLoan(parcel);
       }
     }
-    console.log("uninitialized",uninitialized);
+    console.log("uninitialized", uninitialized);
     const history = uninitialized.concat(borrows.filter(
       (v) => v.pendingTransfers.length === 1 && v.pendingTransfers[0].sendEvent
     ));
@@ -571,7 +571,7 @@ const TradeRoom = (props) => {
   const [showdetail, setShowDetail] = useState(true);
   const [blocktooltip, setBlockTooltip] = useState(false);
   const [share, setShare] = useState("0");
-  const [renbtcBalance, setRenbtcBalance ] = useState('0');
+  const [renbtcBalance, setRenbtcBalance] = useState('0');
   const [stake, setStake] = useState("0");
   const [sendOpen, setSendOpen] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
@@ -647,7 +647,7 @@ const TradeRoom = (props) => {
   const updateAmount = async (e, oldValue) => {
     e.preventDefault();
     var checkValueLimit;
-    if(e.target.value > window.maxBTCSwap && window.location.pathname.split("/")[2] === "swap") {
+    if (e.target.value > window.maxBTCSwap && window.location.pathname.split("/")[2] === "swap") {
       //checkValueLimit = oldValue;
       setValidAmount(false);
       setCalcValue("0");
@@ -661,9 +661,9 @@ const TradeRoom = (props) => {
       setCalcValue("0");
       setRate("0");
       setSlippage("0");
-    } else if(e.target.value >= window.minBTCSwap || Number(e.target.value) === 0 || e.target.value === ".") {
+    } else if (e.target.value >= window.minBTCSwap || Number(e.target.value) === 0 || e.target.value === ".") {
       checkValueLimit = e.target.value;
-      setValidAmount(true); 
+      setValidAmount(true);
     } else {
       setValidAmount(false);
       setCalcValue("0");
@@ -755,10 +755,10 @@ const TradeRoom = (props) => {
   const waitOnResult = async (parcel) => {
     (async () => {
       let proxy;
-      const deposited = await parcel.waitForDeposit(0, 30*60*1000);
+      const deposited = await parcel.waitForDeposit(0, 30 * 60 * 1000);
       persistence.saveLoan(deposited);
       await getPendingTransfers();
-      
+
       setWaiting(false);
       const length = _history.length;
       if (CHAIN === 'test') await new Promise((resolve) => setTimeout(resolve, 70000));
@@ -773,8 +773,8 @@ const TradeRoom = (props) => {
           `BTC/DAI swap executed: ${amount} DAI locked -- await RenVM message to release`
         );
       } else {
-          setShowAlert(true);
-          setMessage("something went wrong");
+        setShowAlert(true);
+        setMessage("something went wrong");
       }
       if (CHAIN === "embedded" || CHAIN === "test" || CHAIN === "external")
         await new Promise((resolve) => setTimeout(resolve, 60000));
@@ -846,7 +846,7 @@ const TradeRoom = (props) => {
   };
   return (
     <>
-      <ModalBackground isOpen={networkModal || modal}/>
+      <ModalBackground isOpen={networkModal || modal} />
       <LoanModal
         waiting={waiting}
         ismobile={ismobile}
@@ -860,14 +860,14 @@ const TradeRoom = (props) => {
         parcel={parcel}
         transactionModal={transactionModal}
       />
-      <WrongNetworkModal 
+      <WrongNetworkModal
         modal={networkModal}
-        closeModal={closeModal} 
+        closeModal={closeModal}
         currentNetwork={currentNetwork}
         correctNetwork={correctNetwork}
       />
       <div
-        className= {(ismobile ? "justify-content-center align-content-center pt-1" : "justify-content-center align-content-center pt-1 swap" )} 
+        className={(ismobile ? "justify-content-center align-content-center pt-1" : "justify-content-center align-content-center pt-1 swap")}
         style={{
           zIndex: "1",
           overflowX: "hidden",
@@ -875,52 +875,42 @@ const TradeRoom = (props) => {
           opacity: modal || transactionModal ? "0.1" : "1",
         }}
       >
-        <div className={ window.innerWidth < 600 ? "d-flex pt-3 connect-wallet-btn":"d-flex pt-3 connect-wallet-btn" }>
-          {(userAddress != null && userAddress !== ethers.constants.AddressZero?
+        <div className={window.innerWidth < 600 ? "d-flex pt-3 connect-wallet-btn" : "d-flex pt-3 connect-wallet-btn"}>
+          {(userAddress != null && userAddress !== ethers.constants.AddressZero ?
             <Fragment>
               <span
-                      className="text-light"
-                      id="connectedAddress"
-                      onClick={(evt) => connectWeb3Modal(evt)}
-                      style={{ cursor: "pointer", fontSize: "0.8em", fontFamily: "PT Sans", color: "#00FF41" }}
-                    >
-                      <b>Connected Address:</b>{" "}
-                      {userAddress &&
-                        userAddress.substr(0, 6) +
-                          "..." +
-                          userAddress.substr(
-                            userAddress.length - 5,
-                            userAddress.length
-                          )}
-              </span> 
+                className="text-light"
+                id="connectedAddress"
+                onClick={(evt) => connectWeb3Modal(evt)}
+                style={{ cursor: "pointer", fontSize: "0.8em", fontFamily: "PT Sans", color: "#00FF41" }}
+              >
+                <b>Connected Address:</b>{" "}
+                {userAddress &&
+                  userAddress.substr(0, 6) +
+                  "..." +
+                  userAddress.substr(
+                    userAddress.length - 5,
+                    userAddress.length
+                  )}
+              </span>
               <Tooltip placement="top" isOpen={changeWalletTooltip} target="connectedAddress" toggle={() => setChangeWalletTooltip(!changeWalletTooltip)}>Click to Change Wallet</Tooltip>
-            </Fragment>:
-              <button
-                  className="btn text-light"
-                  style={{
-                    fontSize: "24dp",
-                    backgroundColor: "#008F11",
-                    width: "248dp",
-                    borderRadius: "10px",
-                  }}
-                  onClick={(evt) => connectWeb3Modal(evt)}
-                >
-                    Connect Wallet
+            </Fragment> :
+            <button
+              className="btn text-light"
+              style={{
+                fontSize: "24dp",
+                backgroundColor: "#008F11",
+                width: "248dp",
+                borderRadius: "10px",
+              }}
+              onClick={(evt) => connectWeb3Modal(evt)}
+            >
+              Connect Wallet
                 </button>
           )
-        }
+          }
         </div>
-        <Row className="justify-content-center align-content-center text-center my-5">
-          <Col lg="3" md="3" sm="3" className="py-2 mx-4" style={{ border:"1px solid #008F11", userSelect: "none", cursor: "default", borderRadius:"10px", fontWeight: "normal",
-                      fontStyle: "normal",
-                      fontSize: "0.8em",
-                      fontFamily: "PT Sans",
-                      color: "#00FF41" }}>
-            <span>0confirmation is beta software and <span style={{ color:"#F80C0C"}}>HAS NOT BEEN AUDITED.</span></span><br />
-            <span>Do not use any more than you can afford to lose.<br />
-            Read more about the risks <a href="https://docs.0confirmation.com/security-considerations" target="_blank" style={{color: "#008F11", textDecoration: "none"}}>here</a></span>
-          </Col>
-        </Row>
+
         <div className="alert-box">
           {showAlert ? (
             <Alert
@@ -941,12 +931,12 @@ const TradeRoom = (props) => {
             />
           ) : null}
         </div>
-        <Row className="justify-content-center align-content-center text-center mx-auto">
+        <Row className="justify-content-center align-content-center text-center mx-auto mt-5">
           <Col
-            lg="4"
+            lg="3"
             md="6"
             sm="6"
-            className="justify-content-center align-content-center mx-auto w-50"
+            className="justify-content-center align-content-center mx-auto w-50 h-50"
             style={{ backgroundColor: "#003B00", borderRadius: "10px" }}
           >
             <Row className="justify-content-center align-content-center p-1 text-light">
@@ -957,26 +947,26 @@ const TradeRoom = (props) => {
                 sm="6"
               >
                 <Link
-                    to="swap"
+                  to="swap"
+                  style={{
+                    outline: "none",
+                    textDecoration: "none",
+                    color: "#ffffff",
+                    width: "100%"
+                  }}
+                  href="/#"
+                  onClick={() => { setValue("0"); setCalcValue("0"); setSlippage("0"); }}
+                >
+                  <div className="btn text-light"
                     style={{
-                      outline: "none",
-                      textDecoration: "none",
-                      color: "#ffffff",
-                      width: "100%"
-                    }}
-                    href="/#"
-                    onClick={() => {setValue("0"); setCalcValue("0"); setSlippage("0");}}
-                  >
-                <div className="btn text-light"
-                style={{
-                  width: "100%",
-                  borderRadius: ismobile ? "10px" : "13px",
-                  backgroundColor:
-                    window.location.pathname.split("/")[2] === "swap"
-                      ? "#008F11"
-                      : "",
-                }}>
-                  
+                      width: "100%",
+                      borderRadius: ismobile ? "10px" : "13px",
+                      backgroundColor:
+                        window.location.pathname.split("/")[2] === "swap"
+                          ? "#008F11"
+                          : "",
+                    }}>
+
                     Swap
                 </div>
                 </Link>
@@ -988,49 +978,49 @@ const TradeRoom = (props) => {
                 sm="6"
               >
                 <Link
-                    to="earn"
+                  to="earn"
                   style={{
                     outline: "none",
                     textDecoration: "none",
                     color: "#ffffff",
                   }}
                   href="/#"
-                  onClick={() => {setValue("0"); setCalcValue("0"); setSlippage("0");}}
+                  onClick={() => { setValue("0"); setCalcValue("0"); setSlippage("0"); }}
                 >
-                <div className="btn text-light"
-                  style={{
-                    width: "100%",
-                    borderRadius: ismobile ? "10px" : "13px",
-                    backgroundColor:
-                      window.location.pathname.split("/")[2] === "earn"
-                        ? "#008F11"
-                        : "",
-                }}>
-                  Earn
+                  <div className="btn text-light"
+                    style={{
+                      width: "100%",
+                      borderRadius: ismobile ? "10px" : "13px",
+                      backgroundColor:
+                        window.location.pathname.split("/")[2] === "earn"
+                          ? "#008F11"
+                          : "",
+                    }}>
+                    Earn
                 </div>
-              </Link>
+                </Link>
               </Col>
             </Row>
           </Col>
         </Row>
-        <Row className="justify-content-center align-content-center text-center mx-auto my-3"></Row>
+        <Row className="justify-content-center align-content-center text-center mx-auto mt-2"></Row>
         <Row className="justify-content-center align-content-center text-center">
           <Col
             lg="8"
             md="8"
             sm="8"
             style={{
-//               backgroundColor: "#1F2820",
+              //               backgroundColor: "#1F2820",
               borderRadius: "10px 10px 0px 0px",
               minHeight: "70vh",
             }}
             className=" mx-4"
           >
-            <Row className="justify-content-center align-content-center text-center mx-auto mt-3">
+            <Row className="justify-content-center align-content-center text-center mx-auto">
               {window.location.pathname.split("/")[2] === "earn" ? (
                 <Col lg="6" md="6" sm="6">
                   <Row>
-                    <Col lg="12" md="12" sm="12">
+                    {/* <Col lg="12" md="12" sm="12">
                       <p
                         style={{
                           fontWeight: "bold",
@@ -1042,7 +1032,7 @@ const TradeRoom = (props) => {
                       >
                         0cf Earn
                       </p>
-                    </Col>
+                    </Col> */}
                     <Col lg="12" md="12" sm="12">
                       <ButtonDropdown
                         className="mb-3"
@@ -1051,7 +1041,7 @@ const TradeRoom = (props) => {
                       >
                         <DropdownToggle
                           style={{
-                            width: "11em", padding: "0.200em", border:"2px solid #008F11",
+                            width: "11em", padding: "0.200em", border: "2px solid #008F11",
                             backgroundColor: "#0D0208", borderRadius: "8px 8px 8px 8px",
                             color: "#ffffff", outline: "none"
                           }}
@@ -1064,8 +1054,8 @@ const TradeRoom = (props) => {
                         <DropdownMenu
                           className="dhover text-light"
                           style={{
-                             backgroundColor: "#0D0208", borderRadius: "0px 0px 8px 8px",
-                             color: "#ffffff", border: "none", outline: "none",
+                            backgroundColor: "#0D0208", borderRadius: "0px 0px 8px 8px",
+                            color: "#ffffff", border: "none", outline: "none",
                           }}
                         >
                           {["Add Liquidity", "Remove Liquidity"].map((a, i) => {
@@ -1092,21 +1082,23 @@ const TradeRoom = (props) => {
                     </Col>
                   </Row>
                 </Col>
-              ) : (
-                <Col lg="6" md="6" sm="6">
-                  <p
-                    style={{
-                      fontWeight: "bold",
-                      fontStyle: "normal",
-                      fontSize: "2em",
-                      fontFamily: "PT Sans",
-                      color: "#ffffff",
-                    }}
-                  >
-                    0cf Swap
-                  </p>
-                </Col>
-              )}
+              ) : null
+                // (
+                //     <Col lg="6" md="6" sm="6">
+                //       <p
+                //         style={{
+                //           fontWeight: "bold",
+                //           fontStyle: "normal",
+                //           fontSize: "2em",
+                //           fontFamily: "PT Sans",
+                //           color: "#ffffff",
+                //         }}
+                //       >
+                //         0cf Swap
+                //     </p>
+                //     </Col>
+                //   )
+              }
             </Row>
             <Row className="justify-content-center align-content-center text-center mx-auto">
               {window.location.pathname.split("/")[2] === "earn" ? (
@@ -1120,42 +1112,55 @@ const TradeRoom = (props) => {
                       color: "#00FF41",
                     }}
                   >
-                    {(liquidityvalue==="Add Liquidity" )?
-                        "Add renBTC to the 0cf liquidity pool" :"Withdrawal renBTC from the 0cf liquidity pool"}
+                    {(liquidityvalue === "Add Liquidity") ?
+                      "Add renBTC to the 0cf liquidity pool" : "Withdrawal renBTC from the 0cf liquidity pool"}
                   </p>
                 </Col>
               ) : (
-                <Col lg="12" md="12" sm="12">
-                  <p
-                    style={{
-                      fontWeight: "normal",
-                      fontStyle: "normal",
-                      fontSize: "0.8em",
-                      fontFamily: "PT Sans",
-                      color: "#00FF41"
-                    }}
-                  >
-                    Instantly Swap BTC for ETH assets using decentralized
-                    exchanges
+                  <Col lg="12" md="12" sm="12">
+                    <p
+                      style={{
+                        fontWeight: "normal",
+                        fontStyle: "normal",
+                        fontSize: "0.8em",
+                        fontFamily: "PT Sans",
+                        color: "#00FF41"
+                      }}
+                    >
+                      Instantly Swap BTC for ETH assets using decentralized
+                      exchanges
                   </p>
-                </Col>
-              )}
+                  </Col>
+                )}
+            </Row>
+            <Row className="justify-content-center align-content-center text-center mt-0">
+              <Col lg="5" md="5" sm="5" className="py-2" style={{
+                border: "1px solid #008F11", userSelect: "none", cursor: "default", borderRadius: "6px", fontWeight: "normal",
+                fontStyle: "normal",
+                fontSize: "0.8em",
+                fontFamily: "PT Sans",
+                color: "#fff"
+              }}>
+                <span>0confirmation is beta software and <span style={{ color: "#F80C0C" }}>HAS NOT BEEN AUDITED.</span></span><br />
+                <span>Do not use any more than you can afford to lose.<br />
+            Read more about the risks <a href="https://docs.0confirmation.com/security-considerations" target="_blank" style={{ color: "#008F11", textDecoration: "none" }}>here</a></span>
+              </Col>
             </Row>
             {window.location.pathname.split("/")[2] === "earn" ? (
               <Row className="justify-content-center align-content-center text-center mx-auto my-3 text-light">
                 <Col lg="4" md="12" sm="12" className="mt-2">
-                  <InputGroup style={{ height: "52px",border: "2px solid #008F11", borderRadius: "8px" }}>
+                  <InputGroup style={{ height: "52px", border: "2px solid #008F11", borderRadius: "8px" }}>
                     <Input
                       type="text"
                       value={value}
                       onChange={(event) => updateAmount(event, value)}
-                      className={liquidityvalue==="Add Liquidity" ? "sendcoin h-100" : "getcoin h-100"}
+                      className={liquidityvalue === "Add Liquidity" ? "sendcoin h-100" : "getcoin h-100"}
                       style={{
-                       backgroundColor: "#0D0208", paddingTop: "1em",
-                       borderRadius: "8px 0px 0px 8px", color: "#ffffff", border: "none", outline: "none"
+                        backgroundColor: "#0D0208", paddingTop: "1em",
+                        borderRadius: "8px 0px 0px 8px", color: "#ffffff", border: "none", outline: "none"
                       }}
                     />
-                      {/* <InputGroupText style={{ backgroundColor: "#008F11", borderRadius: "0px 8px 8px 0px", 
+                    {/* <InputGroupText style={{ backgroundColor: "#008F11", borderRadius: "0px 8px 8px 0px", 
                        color: "#ffffff", border: "none", outline: "none" }}>
                           <InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={btcIcon} />{' '}
                                                       BTC
@@ -1221,48 +1226,54 @@ const TradeRoom = (props) => {
                       </DropdownMenu>
                     </InputGroupButtonDropdown> */}
                     <InputGroupAddon style={{ userSelect: "none", cursor: "default", backgroundColor: "#003B00", borderRadius: "0px 8px 8px 0px", color: "#ffffff" }} addonType="append">
-                         <InputGroupText style={validAmount ? {
-                        backgroundColor: "#003B00", borderRadius: "0px 8px 8px 0px", color: "#ffffff", border: "none", outline: "none" 
-                      } : 
-                      { backgroundColor: "#800000", borderRadius: "0px 5px 5px 0px", 
-                        color: "#ffffff", border: "1px #800000", outline: "none", }}>
-                            <InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={btcIcon} />{' '}
+                      <InputGroupText style={validAmount ? {
+                        backgroundColor: "#003B00", borderRadius: "0px 8px 8px 0px", color: "#ffffff", border: "none", outline: "none"
+                      } :
+                        {
+                          backgroundColor: "#800000", borderRadius: "0px 5px 5px 0px",
+                          color: "#ffffff", border: "1px #800000", outline: "none",
+                        }}>
+                        <InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={btcIcon} />{' '}
                                 renBTC
                           </InputGroupText>
-                      </InputGroupAddon>
+                    </InputGroupAddon>
                   </InputGroup>
                   <span style={{ fontFamily: "PT Sans", fontSize: "0.8em" }}
-                      className={(ismobile) ? "ml-auto" : ""}>
-                      <span className={(ismobile) ? "ml-auto" : ""} style={{ color: "#00FF41" }}>Current Balance: </span>{renbtcBalance} {_sendcoins.name}</span>
+                    className={(ismobile) ? "ml-auto" : ""}>
+                    <span className={(ismobile) ? "ml-auto" : ""} style={{ color: "#00FF41" }}>Current Balance: </span>{renbtcBalance} {_sendcoins.name}</span>
                 </Col>
               </Row>
             ) : (
-              <Row className="justify-content-center align-content-center text-center mx-auto my-3 text-light">
-                <Col lg="4" md="12" sm="12" className="mt-2">
-                  <InputGroup style={validAmount ? { height: "52px",border: "2px solid #008F11", borderRadius: "8px" }
-                      : { height: "52px", border: "2px solid #8B0000", boxShadow: "0 0 8px #8B0000", borderRadius: "8px"}}>
-                    <Input
-                      type="text"
-                      value={value}
-                      placeholder="0"
-                      onChange={(event) => updateAmount(event, value)}
-                      className="sendcoin h-100"
-                      style={{
-                             backgroundColor: "transparent", paddingTop:"1em", color: "#ffffff", border: "none", outline: "none",
-                              borderRadius: "8px 0px 0px 8px",
+                <Row className="justify-content-center align-content-center text-center mx-auto my-3">
+                  <Col lg="12" md="12" sm="12">
+                    <Row className="justify-content-center align-content-center text-center mx-auto text-light">
+                      <Col lg="5" md="12" sm="12" className="mt-2">
+                        <InputGroup style={validAmount ? { height: "52px", border: "2px solid #008F11", borderRadius: "0px" }
+                          : { height: "52px", border: "2px solid #8B0000", boxShadow: "0 0 8px #8B0000", borderRadius: "0px" }}>
+                          <Input
+                            type="text"
+                            value={value}
+                            placeholder="0"
+                            onChange={(event) => updateAmount(event, value)}
+                            className="sendcoin h-100"
+                            style={{
+                              backgroundColor: "transparent", paddingTop: "1em", color: "#ffffff", border: "none", outline: "none",
+                              borderRadius: "0px 0px 0px 0px",
                             }}
-                      />
-                      <InputGroupAddon style={{ userSelect: "none", cursor: "default", backgroundColor: "#003B00", borderRadius: "0px 8px 8px 0px", color: "#ffffff" }} addonType="append">
-                         <InputGroupText style={validAmount ? {
-                            backgroundColor: "#003B00", borderRadius: "0px 8px 8px 0px", color: "#ffffff", border: "none", outline: "none" 
-                          } : 
-                          { backgroundColor: "#800000", borderRadius: "0px 5px 5px 0px", 
-                            color: "#ffffff", border: "1px #800000", outline: "none", }}>
-                            <InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={btcIcon} />{' '}
+                          />
+                          <InputGroupAddon  style={{ userSelect: "none", cursor: "default", backgroundColor: "#003B00", borderRadius: "0px 0px 0px 0px", color: "#ffffff" }} addonType="append">
+                            <InputGroupText style={validAmount ? {
+                              backgroundColor: "#003B00", borderRadius: "0px 0px 0px 0px", color: "#ffffff", border: "none", outline: "none"
+                            } :
+                              {
+                                backgroundColor: "#800000", borderRadius: "0px 0px 0px 0px",
+                                color: "#ffffff", border: "1px #800000", outline: "none",
+                              }}>
+                              <InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={btcIcon} />{' '}
                                 BTC
                           </InputGroupText>
-                      </InputGroupAddon>
-                    {/*<InputGroupButtonDropdown
+                          </InputGroupAddon>
+                          {/*<InputGroupButtonDropdown
                       style={{
                         backgroundColor: "#354737",
                         borderRadius: "0px 8px 8px 0px",
@@ -1324,30 +1335,62 @@ const TradeRoom = (props) => {
                         })}
                       </DropdownMenu>
                     </InputGroupButtonDropdown>*/}
-                  </InputGroup>
-                </Col>
-                <Col lg="2" md="6" sm="6" className="mt-2">
-                  <img className="img-fluid" src={swapIconSvg} alt="Swap" />
-                </Col>
-                <Col lg="4" md="12" sm="12" className="mt-2">
-                  <InputGroup style={{  userSelect: "none", cursor: "default", height: "52px", border: "2px solid #008F11", borderRadius: "8px", }}>
-                    <Input
-                    readOnly={true}
-                      type="text"
-                      value={calcValue}
-                      className="getcoin h-100"
-                      style={{
-                             backgroundColor: "transparent", userSelect: "none", cursor: "default", paddingTop:"1em", color: "#ffffff", border: "none", outline: "none",
-                              borderRadius: "8px 0px 0px 8px",
+                        </InputGroup>
+                      </Col>
+                    </Row>
+
+                  </Col>
+                  <Col lg="12" md="12" sm="12">
+                    <Row className="justify-content-center align-content-center text-center mx-auto">
+                        <Col className="py-2" lg="4" md="10" sm="12" style={{backgroundColor:"#003B00", fontSize:"0.75rem", minHeight:"12rem"}}>
+                          <Row className="mx-2 mt-3 mb-1">
+                            <Col className="text-left" style={{color:"#00FF41"}}>0cf Loan Fee (0.1%)</Col>
+                            <Col className="text-right text-light">.0001 BTC</Col>
+                          </Row>
+                          <Row className="mx-2 mt-3 mb-1">
+                            <Col className="text-left" style={{color:"#00FF41"}}>renVM Fee (0.1%)</Col>
+                            <Col className="text-right text-light">.0001 BTC</Col>
+                          </Row>
+                          <Row className="mx-2 mt-3 mb-1">
+                            <Col className="text-left" style={{color:"#00FF41"}}>BTC Network Fee</Col>
+                            <Col className="text-right text-light">.00002 BTC</Col>
+                          </Row>
+                          <Row className="mx-2 mt-3 mb-1">
+                            <Col className="text-left" style={{color:"#00FF41"}}>Est. Slippage</Col>
+                            <Col className="text-right text-light"><b>{slippage}%</b></Col>
+                          </Row>
+                          <Row className="mx-2 mt-3 mb-1">
+                            <Col className="text-left" style={{color:"#00FF41"}}>Estimated Gas Cost<br/><span style={{color:"#87888C"}}>@ 100 Gwei</span></Col>
+                            <Col className="text-right text-light">.12 ETH / <br/>23.12 DAI</Col>
+                          </Row>
+                        </Col>
+                    </Row>
+                  </Col>
+
+                  {/* <Col lg="2" md="6" sm="6" className="mt-2">
+                    <img className="img-fluid" src={swapIconSvg} alt="Swap" />
+                  </Col> */}
+                  <Col lg="12" md="12" sm="12">
+                    <Row className="justify-content-center align-content-center text-center mx-auto text-light">
+                      <Col lg="5" md="12" sm="12">
+                        <InputGroup style={{ userSelect: "none", cursor: "default", height: "52px", border: "2px solid #008F11", borderRadius: "0px", }}>
+                          <Input
+                            readOnly={true}
+                            type="text"
+                            value={calcValue}
+                            className="getcoin h-100"
+                            style={{
+                              backgroundColor: "transparent", userSelect: "none", cursor: "default", paddingTop: "1em", color: "#ffffff", border: "none", outline: "none",
+                              borderRadius: "0px 0px 0px 0px",
                             }}
-                    />
-                    <InputGroupAddon style={{ backgroundColor: "#003B00", borderRadius: "0px 8px 8px 0px", color: "#ffffff" }} addonType="append">
-                       <InputGroupText style={{ backgroundColor: "#003B00", borderRadius: "0px 8px 8px 0px", color: "#ffffff", border: "none", outline: "none" }}>
-                          <InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={daiIcon} />{' '}
+                          />
+                          <InputGroupAddon style={{ backgroundColor: "#003B00", borderRadius: "0px 0px 0px 0px", color: "#ffffff" }} addonType="append">
+                            <InputGroupText style={{ backgroundColor: "#003B00", borderRadius: "0px 0px 0px 0px", color: "#ffffff", border: "none", outline: "none" }}>
+                              <InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={daiIcon} />{' '}
                           DAI
                         </InputGroupText>
-                    </InputGroupAddon>
-                    {/*<InputGroupButtonDropdown
+                          </InputGroupAddon>
+                          {/*<InputGroupButtonDropdown
                       style={{
                         backgroundColor: "#354737",
                         borderRadius: "0px 8px 8px 0px",
@@ -1407,76 +1450,78 @@ const TradeRoom = (props) => {
                         })}
                       </DropdownMenu>
                     </InputGroupButtonDropdown>*/}
-                  </InputGroup>
-                </Col>
-              </Row>
-            )}
+                        </InputGroup>
+                      </Col>
+                    </Row>
+                  </Col>
+                </Row>
+              )}
 
             <div className="justify-content-center align-content-center text-center mx-auto my-auto pt-3">
               {window.location.pathname.split("/")[2] === "earn" ? (
                 (
                   userAddress != null && earnWL.includes(userAddress.toLowerCase()) && userAddress !== ethers.constants.AddressZero ?
-                <button
-                  onClick={async (e) => {
-                    e.preventDefault();
-                    if (liquidityvalue === "Add Liquidity") {
-                      await addLiquidity();
-                    } else {
-                      await removeLiquidity();
-                    }
-                  }}
-                  className="btn text-light button-small btn-sm px-5"
-                  style={{
-                    fontSize: "24dp",
-                    backgroundColor: "#008F11",
-                    borderRadius: "10px",
-                    marginBottom: "2rem"
-                  }}
-                >
-                  {liquidityvalue === "Add Liquidity" ? "Add" : "Remove"}
-                </button> : <button
-                className="btn button-small btn-sm px-5"
-                onClick={!earnWL.includes(userAddress.toLowerCase()) ? null : (evt) => connectWeb3Modal(evt)}
-                style={{
-                  fontSize: "24dp",
-                  backgroundColor: "#008F11",
-                  color: "#FFFFFF",
-                  borderRadius: "10px",
-                  marginBottom: "2rem",
-                  opacity: "0.38"
-                }}
-              >
-                  {!earnWL.includes(userAddress.toLowerCase()) ? "Earn Not Enabled" : "Connect Wallet to Provide Liquidity"}
-                </button>)
+                    <button
+                      onClick={async (e) => {
+                        e.preventDefault();
+                        if (liquidityvalue === "Add Liquidity") {
+                          await addLiquidity();
+                        } else {
+                          await removeLiquidity();
+                        }
+                      }}
+                      className="btn text-light button-small btn-sm px-5"
+                      style={{
+                        fontSize: "24dp",
+                        backgroundColor: "#008F11",
+                        borderRadius: "10px",
+                        marginBottom: "2rem"
+                      }}
+                    >
+                      {liquidityvalue === "Add Liquidity" ? "Add" : "Remove"}
+                    </button> : <button
+                      className="btn button-small btn-sm px-5"
+                      onClick={!earnWL.includes(userAddress.toLowerCase()) ? null : (evt) => connectWeb3Modal(evt)}
+                      style={{
+                        fontSize: "24dp",
+                        backgroundColor: "#008F11",
+                        color: "#FFFFFF",
+                        borderRadius: "10px",
+                        marginBottom: "2rem",
+                        opacity: "0.38"
+                      }}
+                    >
+                      {!earnWL.includes(userAddress.toLowerCase()) ? "Earn Not Enabled" : "Connect Wallet to Provide Liquidity"}
+                    </button>)
               ) : (
-                userAddress != null && userAddress !== ethers.constants.AddressZero && validAmount ?
-                <button
-                  onClick={async (evt) => {
-                    requestLoan(evt).catch((err) => console.error(err));
-                  }}
-                  className="btn text-light button-small btn-sm px-5"
-                  style={{
-                    fontSize: "24dp",
-                    backgroundColor: "#008F11",
-                    borderRadius: "10px",
-                  }}
-                >
-                  Swap
+                  userAddress != null && userAddress !== ethers.constants.AddressZero && validAmount ?
+                    <button
+                      onClick={async (evt) => {
+                        requestLoan(evt).catch((err) => console.error(err));
+                      }}
+                      className="btn text-light button-small btn-sm px-5"
+                      style={{
+                        fontSize: "24dp",
+                        backgroundColor: "#008F11",
+                        borderRadius: "10px",
+                      }}
+                    >
+                      Swap
                 </button> :
-                <button
-                className="btn button-small btn-sm px-5"
-                onClick={ userAddress == null || userAddress === ethers.constants.AddressZero ? (evt) => connectWeb3Modal(evt) : null}
-                style={{
-                  fontSize: "24dp",
-                  backgroundColor: "#008F11",
-                  borderRadius: "10px",
-                  color: "#FFFFFF",
-                  opacity: "0.38"
-                }}
-              >
-                  { userAddress == null || userAddress === ethers.constants.AddressZero ? "Connect Wallet to Swap" : "Enter Valid Amount" }
-                </button>
-              )}
+                    <button
+                      className="btn button-small btn-sm px-5"
+                      onClick={userAddress == null || userAddress === ethers.constants.AddressZero ? (evt) => connectWeb3Modal(evt) : null}
+                      style={{
+                        fontSize: "24dp",
+                        backgroundColor: "#008F11",
+                        borderRadius: "10px",
+                        color: "#FFFFFF",
+                        opacity: "0.38"
+                      }}
+                    >
+                      {userAddress == null || userAddress === ethers.constants.AddressZero ? "Connect Wallet to Swap" : "Enter Valid Amount"}
+                    </button>
+                )}
             </div>
             {/*<Row className="justify-content-center align-content-center text-center mx-auto py-3">
               <Col lg="6" md="6" sm="6">
@@ -1504,7 +1549,7 @@ const TradeRoom = (props) => {
                     lg="9"
                     md="9"
                     sm="9"
-                    style={{  backgroundColor: "#0D0208", border: "1px solid #008F11", borderRadius: "10px" }}
+                    style={{ backgroundColor: "#0D0208", border: "1px solid #008F11", borderRadius: "10px" }}
                     className=" mx-4  pt-3"
                   >
                     {liquidityvalue === "Add Liquidity" ? (
@@ -1603,242 +1648,242 @@ const TradeRoom = (props) => {
                         </Col>
                       </Row>
                     ) : (
-                      <Row>
-                        <Col sm="12" lg="12" md="12">
-                          <Row>
-                            <Col
-                              className="text-light align-content-start justify-content-start"
-                              sm="6"
-                              lg="6"
-                              md="6"
-                            >
-                              <p
-                                className={ismobile ? "" : "text-right"}
-                                style={{
-                                  fontWeight: "normal",
-                                  fontStyle: "normal",
-                                  fontSize: "0.8em",
-                                  fontFamily: "PT Sans",
-                                  color: "#ffffff",
-                                }}
+                        <Row>
+                          <Col sm="12" lg="12" md="12">
+                            <Row>
+                              <Col
+                                className="text-light align-content-start justify-content-start"
+                                sm="6"
+                                lg="6"
+                                md="6"
                               >
-                                Current Pool Size
+                                <p
+                                  className={ismobile ? "" : "text-right"}
+                                  style={{
+                                    fontWeight: "normal",
+                                    fontStyle: "normal",
+                                    fontSize: "0.8em",
+                                    fontFamily: "PT Sans",
+                                    color: "#ffffff",
+                                  }}
+                                >
+                                  Current Pool Size
                               </p>
-                            </Col>
-                            <Col
-                              className="text-light align-content-end justify-content-end"
-                              sm="1"
-                              lg="1"
-                              md="1"
-                            >
-                              <p
-                                className={ismobile ? "" : "text-right"}
-                                style={{
-                                  fontWeight: "normal",
-                                  fontStyle: "normal",
-                                  fontSize: "0.8em",
-                                  fontFamily: "PT Sans",
-                                  color: "#ffffff",
-                                }}
+                              </Col>
+                              <Col
+                                className="text-light align-content-end justify-content-end"
+                                sm="1"
+                                lg="1"
+                                md="1"
                               >
-                                {pool}
-                              </p>
-                            </Col>
-                            <Col
-                              className="text-light align-content-start justify-content-start"
-                              sm="1"
-                              lg="1"
-                              md="1"
-                            >
-                              <p
-                                className={ismobile ? "" : "text-left"}
-                                style={{
-                                  fontWeight: "normal",
-                                  fontStyle: "normal",
-                                  fontSize: "0.8em",
-                                  fontFamily: "PT Sans",
-                                  color: "#ffffff",
-                                }}
+                                <p
+                                  className={ismobile ? "" : "text-right"}
+                                  style={{
+                                    fontWeight: "normal",
+                                    fontStyle: "normal",
+                                    fontSize: "0.8em",
+                                    fontFamily: "PT Sans",
+                                    color: "#ffffff",
+                                  }}
+                                >
+                                  {pool}
+                                </p>
+                              </Col>
+                              <Col
+                                className="text-light align-content-start justify-content-start"
+                                sm="1"
+                                lg="1"
+                                md="1"
                               >
-                                {_sendcoins.name}
-                              </p>
-                            </Col>
-                          </Row>
-                        </Col>
-                        <Col sm="12" lg="12" md="12">
-                          <Row>
-                            <Col
-                              className="text-light align-content-start justify-content-start"
-                              sm="6"
-                              lg="6"
-                              md="6"
-                            >
-                              <p
-                                className={ismobile ? "" : "text-right"}
-                                style={{
-                                  fontWeight: "normal",
-                                  fontStyle: "normal",
-                                  fontSize: "0.8em",
-                                  fontFamily: "PT Sans",
-                                  color: "#ffffff",
-                                }}
+                                <p
+                                  className={ismobile ? "" : "text-left"}
+                                  style={{
+                                    fontWeight: "normal",
+                                    fontStyle: "normal",
+                                    fontSize: "0.8em",
+                                    fontFamily: "PT Sans",
+                                    color: "#ffffff",
+                                  }}
+                                >
+                                  {_sendcoins.name}
+                                </p>
+                              </Col>
+                            </Row>
+                          </Col>
+                          <Col sm="12" lg="12" md="12">
+                            <Row>
+                              <Col
+                                className="text-light align-content-start justify-content-start"
+                                sm="6"
+                                lg="6"
+                                md="6"
                               >
-                                Your Share Size
+                                <p
+                                  className={ismobile ? "" : "text-right"}
+                                  style={{
+                                    fontWeight: "normal",
+                                    fontStyle: "normal",
+                                    fontSize: "0.8em",
+                                    fontFamily: "PT Sans",
+                                    color: "#ffffff",
+                                  }}
+                                >
+                                  Your Share Size
                               </p>
-                            </Col>
-                            <Col
-                              className="text-light align-content-end justify-content-end"
-                              sm="1"
-                              lg="1"
-                              md="1"
-                            >
-                              <p
-                                className={ismobile ? "" : "text-right"}
-                                style={{
-                                  fontWeight: "normal",
-                                  fontStyle: "normal",
-                                  fontSize: "0.8em",
-                                  fontFamily: "PT Sans",
-                                  color: "#ffffff",
-                                }}
+                              </Col>
+                              <Col
+                                className="text-light align-content-end justify-content-end"
+                                sm="1"
+                                lg="1"
+                                md="1"
                               >
-                                {share}
-                              </p>
-                            </Col>
-                            <Col
-                              className="text-light align-content-start justify-content-start"
-                              sm="1"
-                              lg="1"
-                              md="1"
-                            >
-                              <p
-                                className={ismobile ? "" : "text-left"}
-                                style={{
-                                  fontWeight: "normal",
-                                  fontStyle: "normal",
-                                  fontSize: "0.8em",
-                                  fontFamily: "PT Sans",
-                                  color: "#ffffff",
-                                }}
+                                <p
+                                  className={ismobile ? "" : "text-right"}
+                                  style={{
+                                    fontWeight: "normal",
+                                    fontStyle: "normal",
+                                    fontSize: "0.8em",
+                                    fontFamily: "PT Sans",
+                                    color: "#ffffff",
+                                  }}
+                                >
+                                  {share}
+                                </p>
+                              </Col>
+                              <Col
+                                className="text-light align-content-start justify-content-start"
+                                sm="1"
+                                lg="1"
+                                md="1"
                               >
-                                {_sendcoins.name}
-                              </p>
-                            </Col>
-                          </Row>
-                        </Col>
-                        <Col sm="12" lg="12" md="12">
-                          <Row>
-                            <Col
-                              className="text-light align-content-start justify-content-start"
-                              sm="6"
-                              lg="6"
-                              md="6"
-                            >
-                              <p
-                                className={ismobile ? "" : "text-right"}
-                                style={{
-                                  fontWeight: "normal",
-                                  fontStyle: "normal",
-                                  fontSize: "0.8em",
-                                  fontFamily: "PT Sans",
-                                  color: "#ffffff",
-                                }}
+                                <p
+                                  className={ismobile ? "" : "text-left"}
+                                  style={{
+                                    fontWeight: "normal",
+                                    fontStyle: "normal",
+                                    fontSize: "0.8em",
+                                    fontFamily: "PT Sans",
+                                    color: "#ffffff",
+                                  }}
+                                >
+                                  {_sendcoins.name}
+                                </p>
+                              </Col>
+                            </Row>
+                          </Col>
+                          <Col sm="12" lg="12" md="12">
+                            <Row>
+                              <Col
+                                className="text-light align-content-start justify-content-start"
+                                sm="6"
+                                lg="6"
+                                md="6"
                               >
-                                Original Stake
+                                <p
+                                  className={ismobile ? "" : "text-right"}
+                                  style={{
+                                    fontWeight: "normal",
+                                    fontStyle: "normal",
+                                    fontSize: "0.8em",
+                                    fontFamily: "PT Sans",
+                                    color: "#ffffff",
+                                  }}
+                                >
+                                  Original Stake
                               </p>
-                            </Col>
-                            <Col
-                              className="text-light align-content-end justify-content-end"
-                              sm="1"
-                              lg="1"
-                              md="1"
-                            >
-                              <p
-                                className={ismobile ? "" : "text-right"}
-                                style={{
-                                  fontWeight: "normal",
-                                  fontStyle: "normal",
-                                  fontSize: "0.8em",
-                                  fontFamily: "PT Sans",
-                                  color: "#ffffff",
-                                }}
+                              </Col>
+                              <Col
+                                className="text-light align-content-end justify-content-end"
+                                sm="1"
+                                lg="1"
+                                md="1"
                               >
-                                {stake}
-                              </p>
-                            </Col>
-                            <Col
-                              className="text-light align-content-start justify-content-start"
-                              sm="1"
-                              lg="1"
-                              md="1"
-                            >
-                              <p
-                                className={ismobile ? "" : "text-left"}
-                                style={{
-                                  fontWeight: "normal",
-                                  fontStyle: "normal",
-                                  fontSize: "0.8em",
-                                  fontFamily: "PT Sans",
-                                  color: "#ffffff",
-                                }}
+                                <p
+                                  className={ismobile ? "" : "text-right"}
+                                  style={{
+                                    fontWeight: "normal",
+                                    fontStyle: "normal",
+                                    fontSize: "0.8em",
+                                    fontFamily: "PT Sans",
+                                    color: "#ffffff",
+                                  }}
+                                >
+                                  {stake}
+                                </p>
+                              </Col>
+                              <Col
+                                className="text-light align-content-start justify-content-start"
+                                sm="1"
+                                lg="1"
+                                md="1"
                               >
-                                {_sendcoins.name}
-                              </p>
-                            </Col>
-                          </Row>
-                        </Col>
-                      </Row>
-                    )}
+                                <p
+                                  className={ismobile ? "" : "text-left"}
+                                  style={{
+                                    fontWeight: "normal",
+                                    fontStyle: "normal",
+                                    fontSize: "0.8em",
+                                    fontFamily: "PT Sans",
+                                    color: "#ffffff",
+                                  }}
+                                >
+                                  {_sendcoins.name}
+                                </p>
+                              </Col>
+                            </Row>
+                          </Col>
+                        </Row>
+                      )}
                   </Col>
                 ) : (
-                  <Col
-                    lg="9"
-                    md="9"
-                    sm="9"
-                    style={{ border:"1px solid #008F11", borderRadius:"10px", fontSize:"18px"}}
-                    className=" mx-4  pt-3 mt-4"
-                  >
-                    <Row className="align-content-center justify-content-center">
-                      <Col
-                        lg="7"
-                        md="7"
-                        sm="7"
-                        className="justify-content-center align-content-center"
-                      >
-                        <p
-                          className="text-center text-break"
-                          style={{
-                            fontWeight: "normal",
-                            fontStyle: "normal",
-                            fontSize: "0.8em",
-                            fontFamily: "PT Sans",
-                            color: "#ffffff",
-                            userSelect: "none",
-                            cursor: "default"
-                          }}
+                    <Col
+                      lg="9"
+                      md="9"
+                      sm="9"
+                      style={{ border: "1px solid #008F11", borderRadius: "10px", fontSize: "18px" }}
+                      className=" mx-4  pt-3 mt-4"
+                    >
+                      <Row className="align-content-center justify-content-center">
+                        <Col
+                          lg="7"
+                          md="7"
+                          sm="7"
+                          className="justify-content-center align-content-center"
                         >
-                          You are selling{" "}
-                          <b>
-                            {value} BTC
+                          <p
+                            className="text-center text-break"
+                            style={{
+                              fontWeight: "normal",
+                              fontStyle: "normal",
+                              fontSize: "0.8em",
+                              fontFamily: "PT Sans",
+                              color: "#ffffff",
+                              userSelect: "none",
+                              cursor: "default"
+                            }}
+                          >
+                            You are selling{" "}
+                            <b>
+                              {value} BTC
                             {/* {_sendcoins.name} */}
-                          </b>{" "}
+                            </b>{" "}
                           for at least{" "}
-                          <b>
-                            {calcValue} DAI
+                            <b>
+                              {calcValue} DAI
                             {/* {_getcoins.name} */}
-                          </b>
-                          <br />
+                            </b>
+                            <br />
                           Expected Price Slippage: <b>{slippage}%</b>
-                          <br />
+                            <br />
                           Additional slippage limit: <b>{slippage}%</b>
-                        </p>
-                      </Col>
-                    </Row>
-                    {/* <p className="text-center text-break" style={{ fontWeight: "normal", fontStyle: "normal", fontSize: "0.8em", fontFamily: "PT Sans", color: "#ffffff" }}>
+                          </p>
+                        </Col>
+                      </Row>
+                      {/* <p className="text-center text-break" style={{ fontWeight: "normal", fontStyle: "normal", fontSize: "0.8em", fontFamily: "PT Sans", color: "#ffffff" }}>
                                         You are selling <b>{sendvalue} {_sendcoins.name}</b> for at least <b>{sendvalue * rate} {_getcoins.name}</b> <br />Expected Price Slippage: <b>{slippage}%</b>  <br />Additional slippage limit: <b>{slippage}%</b>  <br />fee disclosures
                                     </p> */}
-                  </Col>
-                )}
+                    </Col>
+                  )}
               </Row>
             ) : null}
             {window.location.pathname.split("/")[2] === "earn" ? null : (
@@ -1861,11 +1906,11 @@ const TradeRoom = (props) => {
                       <b>Connected Address:</b>{" "}
                       {userAddress &&
                         userAddress.substr(0, 6) +
-                          "..." +
-                          userAddress.substr(
-                            userAddress.length - 5,
-                            userAddress.length
-                          )}
+                        "..." +
+                        userAddress.substr(
+                          userAddress.length - 5,
+                          userAddress.length
+                        )}
                     </span>
                     {/* <Table responsive hover borderless className="mt-4">
                       <thead
@@ -1951,39 +1996,39 @@ const TradeRoom = (props) => {
                     </div>
                     </Table> */}
                     <div className="px-2" style={{
+                      height: "4.2rem",
+                      display: "flex",
+                      flexDirection: "column",
+                      flexGrow: "1"
+                    }}>
+                      <div style={{
+                        flexDirection: "row",
+                        display: "flex",
+                        justifyContent: "space-around",
+                        color: "white",
+                        backgroundColor: "#008F11",
+                        borderRadius: "10px",
+                        height: "2.2rem"
+                      }}>
+                        <div style={{ width: "16.5%", marginTop: "auto", marginBottom: "auto" }}>Created</div>
+                        <div style={{ width: "16.5%", marginTop: "auto", marginBottom: "auto" }}>Escrow Address</div>
+                        <div style={{ width: "16.5%", marginTop: "auto", marginBottom: "auto" }}>Confirmations</div>
+                        <div style={{ width: "16.5%", marginTop: "auto", marginBottom: "auto" }}>Sent</div>
+                        <div style={{ width: "16.5%", marginTop: "auto", marginBottom: "auto" }}>Received</div>
+                        <div style={{ width: "16.5%", marginTop: "auto", marginBottom: "auto" }}>Status</div>
+                      </div>
+                    </div>
+                    {_history.map((eleos, i) => {
+                      return (
+                        <div className="px-2" style={{
                           height: "4.2rem",
                           display: "flex",
                           flexDirection: "column",
                           flexGrow: "1"
-                          }}>
-                          <div style={{
-                            flexDirection: "row",
-                            display: "flex",
-                            justifyContent: "space-around",
-                            color: "white",
-                            backgroundColor: "#008F11",
-                            borderRadius: "10px",
-                            height: "2.2rem"
-                          }}>
-                            <div style={{width: "16.5%", marginTop: "auto", marginBottom: "auto"}}>Created</div>
-                            <div style={{width: "16.5%", marginTop: "auto", marginBottom: "auto"}}>Escrow Address</div>
-                            <div style={{width: "16.5%", marginTop: "auto", marginBottom: "auto"}}>Confirmations</div>
-                            <div style={{width: "16.5%", marginTop: "auto", marginBottom: "auto"}}>Sent</div>
-                            <div style={{width: "16.5%", marginTop: "auto", marginBottom: "auto"}}>Received</div>
-                            <div style={{width: "16.5%", marginTop: "auto", marginBottom: "auto"}}>Status</div>
-                          </div>
-                    </div>
-                    {_history.map((eleos, i) => {
-                          return(
-                            <div className="px-2" style={{
-                              height: "4.2rem",
-                              display: "flex",
-                              flexDirection: "column",
-                              flexGrow: "1"
-                              }}>
-                          <TransactionRow 
-                            i={i} 
-                            created={eleos.created} 
+                        }}>
+                          <TransactionRow
+                            i={i}
+                            created={eleos.created}
                             escrowAddress={eleos.escrowAddress(
                               (v) =>
                                 v.substr(0, 6) +
@@ -1999,10 +2044,10 @@ const TradeRoom = (props) => {
                             setBlockTooltip={setBlockTooltip}
                             blocktooltip={blocktooltip}
                             _history={_history}
-                            getPendingTransfers={ getPendingTransfers }
-                           />
-                           </div>)
-                        })}                      
+                            getPendingTransfers={getPendingTransfers}
+                          />
+                        </div>)
+                    })}
                   </Col>
                 ) : null}
               </Row>
@@ -2010,13 +2055,13 @@ const TradeRoom = (props) => {
           </Col>
         </Row>
         <Row className="align-content-center justify-content-center mt-5 pt-5 mb-2">
-            <Col lg="10" md="10" sm="10" className="align-content-center justify-content-center mt-5 mx-auto text-center text-white-50"
-                  style={{
-                          fontStyle: "normal",
-                          fontFamily: "PT Sans",
-                        }}
-              >
-                Fully decentralized, maintained and operated by the 0cf community.<br /> <b>Original software build by JKR Labs LLC.</b></Col>
+          <Col lg="10" md="10" sm="10" className="align-content-center justify-content-center mt-5 mx-auto text-center text-white-50"
+            style={{
+              fontStyle: "normal",
+              fontFamily: "PT Sans",
+            }}
+          >
+            Fully decentralized, maintained and operated by the 0cf community.<br /> <b>Original software build by JKR Labs LLC.</b></Col>
         </Row>
       </div>
       {/* <TransactionDetailsModal
