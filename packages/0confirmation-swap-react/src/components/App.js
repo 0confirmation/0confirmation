@@ -14,6 +14,7 @@ import swapIconSvg from "../images/swapicon.svg";
 import { chainIdToName, DECIMALS } from "../lib/utils";
 import ERC20 from "../lib/erc20";
 import * as bitcoin from '../lib/bitcoin-helpers';
+import { getFees, DEFAULT_FEES } from "../lib/fees"
 
 import ShifterPool from '@0confirmation/sdk/shifter-pool';
 // import { getSvgForConfirmations } from "../lib/confirmation-image-wheel";
@@ -236,6 +237,7 @@ const makeTestWallet = (proxyTarget) =>
   );
 
 const TradeRoom = (props) => {
+  const [value, setValue] = useState("0");
   const { ismobile } = props;
   //const [userAddress, setUserAddress] = useState(ethers.constants.AddressZero);
   const [userAddress, setUserAddress] = useState(ethers.constants.AddressZero);
@@ -364,6 +366,17 @@ const TradeRoom = (props) => {
     });
     contractsDeferred.resolve(contracts);
   };
+  const [ fees, setFees ] = useState(DEFAULT_FEES);
+  const getAndSetFees = async (value) => {
+    (async () => {
+      setFees(await getFees(value));
+    })().catch((err) => console.error(err));
+  };
+  useEffect(() => {
+    (async () => {
+      await getAndSetFees(value);
+    })().catch((err) => console.error(err));
+  }, [ value ]);
   useEffect(() => {
     if (!window.ethereum) return;
     const ethersProvider = zero.getProvider().asEthers();
@@ -424,7 +437,7 @@ const TradeRoom = (props) => {
       let busy = false;
       const walletAccounts = await ethersProvider.listAccounts();
       const zeroAccounts = await ethersProvider.listAccounts();
-      let currentProvider = await new ethers.providers.Web3Provider(window.ethereum)
+      let currentProvider = window.ethereum && new ethers.providers.Web3Provider(window.ethereum) || ethersProvider;
       let network = await currentProvider.getNetwork()
       let networkId = Number(network.chainId)
       setCurrentNetwork(networkId)
@@ -449,6 +462,7 @@ const TradeRoom = (props) => {
           busy = true;
           try {
             await getPendingTransfers(cachedBtcBlock);
+            await getAndSetFees();
           } catch (e) {
             console.error(e);
           }
@@ -594,7 +608,6 @@ const TradeRoom = (props) => {
   const [modal, setModal] = useState(false);
   const [message, setMessage] = useState("");
   const [warningMessage, setWarningMessage] = useState("");
-  const [value, setValue] = useState("0");
   const [calcValue, setCalcValue] = useState("0");
   const [market, setMarket] = useState(null);
   const [trade, setTrade] = useState(null);
@@ -1345,24 +1358,24 @@ const TradeRoom = (props) => {
                     <Row className="justify-content-center align-content-center text-center mx-auto">
                         <Col className="py-2" lg="4" md="10" sm="12" style={{backgroundColor:"#003B00", fontSize:"0.75rem", minHeight:"12rem"}}>
                           <Row className="mx-2 mt-3 mb-1">
-                            <Col className="text-left" style={{color:"#00FF41"}}>0cf Loan Fee (0.1%)</Col>
-                            <Col className="text-right text-light">.0001 BTC</Col>
+                            <Col className="text-left" style={{color:"#00FF41"}}>0cf Loan Fee ({ fees.loanFee.percentage })</Col>
+                            <Col className="text-right text-light">{ fees.loanFee.prettyAmount } BTC</Col>
                           </Row>
                           <Row className="mx-2 mt-3 mb-1">
-                            <Col className="text-left" style={{color:"#00FF41"}}>renVM Fee (0.1%)</Col>
-                            <Col className="text-right text-light">.0001 BTC</Col>
+                            <Col className="text-left" style={{color:"#00FF41"}}>renVM Fee ({ fees.mintFee.percentage })</Col>
+                            <Col className="text-right text-light">{ fees.mintFee.prettyAmount } BTC</Col>
                           </Row>
                           <Row className="mx-2 mt-3 mb-1">
                             <Col className="text-left" style={{color:"#00FF41"}}>BTC Network Fee</Col>
-                            <Col className="text-right text-light">.00002 BTC</Col>
+                            <Col className="text-right text-light">{ fees.baseFee.prettyAmount } BTC</Col>
                           </Row>
                           <Row className="mx-2 mt-3 mb-1">
                             <Col className="text-left" style={{color:"#00FF41"}}>Est. Slippage</Col>
                             <Col className="text-right text-light"><b>{slippage}%</b></Col>
                           </Row>
                           <Row className="mx-2 mt-3 mb-1">
-                            <Col className="text-left" style={{color:"#00FF41"}}>Estimated Gas Cost<br/><span style={{color:"#87888C"}}>@ 100 Gwei</span></Col>
-                            <Col className="text-right text-light">.12 ETH / <br/>23.12 DAI</Col>
+                            <Col className="text-left" style={{color:"#00FF41"}}>Estimated Gas Cost<br/><span style={{color:"#87888C"}}>@ { fees.fastGasPrice } Gwei</span></Col>
+                            <Col className="text-right text-light">{ fees.ethGasFee } ETH / { fees.btcGasFee.prettyAmount } BTC</Col>
                           </Row>
 
                           <Row className="mx-2 mt-3 mb-1">
