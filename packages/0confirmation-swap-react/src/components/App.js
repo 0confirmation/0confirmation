@@ -1,4 +1,5 @@
 import React, { useState, useEffect, Fragment } from "react";
+import { getFees, DEFAULT_FEES } from "../lib/fees"
 import {
   BrowserRouter as Router,
   Switch,
@@ -14,7 +15,6 @@ import swapIconSvg from "../images/swapicon.svg";
 import { chainIdToName, DECIMALS } from "../lib/utils";
 import ERC20 from "../lib/erc20";
 import * as bitcoin from '../lib/bitcoin-helpers';
-import { getFees, DEFAULT_FEES } from "../lib/fees"
 
 import ShifterPool from '@0confirmation/sdk/shifter-pool';
 // import { getSvgForConfirmations } from "../lib/confirmation-image-wheel";
@@ -118,10 +118,10 @@ const getDAIToken = () =>
     "DAI",
     "DAI Stablecoin"
   );
-export const getRenBTCToken = () =>
+export const getRenBTCToken = async () =>
   new Token(
     ChainId.MAINNET,
-    contracts.renbtc,
+    await getRenBTCAddress(),
     DECIMALS.btc,
     "RenBTC",
     "RenBTC"
@@ -130,12 +130,13 @@ export const getWETHToken = () =>
   new Token(ChainId.MAINNET, contracts.weth, DECIMALS.weth, "WETH", "WETH");
 
 const getDAIBTCMarket = async (provider) => {
+  const renbtc = await getRenBTCToken();
   const route = new UniRoute(
     [
-      await Pair.fetchData(getRenBTCToken(), getWETHToken(), provider),
+      await Pair.fetchData(renbtc, getWETHToken(), provider),
       await Pair.fetchData(getDAIToken(), getWETHToken(), provider),
     ],
-    getRenBTCToken()
+    renbtc
   );
   return route;
 };
@@ -143,7 +144,7 @@ const getDAIBTCMarket = async (provider) => {
 const getTradeExecution = async (provider, route, amount) => {
   return new Trade(
     route || (await getDAIBTCMarket(provider)),
-    new TokenAmount(getRenBTCToken(), amount),
+    new TokenAmount(await getRenBTCToken(), amount),
     TradeType.EXACT_INPUT
   );
 };
@@ -369,14 +370,9 @@ const TradeRoom = (props) => {
   const [ fees, setFees ] = useState(DEFAULT_FEES);
   const getAndSetFees = async (value) => {
     (async () => {
-      setFees(await getFees(value));
+      setFees(await getFees(value, await getRenBTCToken(), await getWETHToken(), zero.getProvider().asEthers()));
     })().catch((err) => console.error(err));
   };
-  useEffect(() => {
-    (async () => {
-      await getAndSetFees(value);
-    })().catch((err) => console.error(err));
-  }, [ value ]);
   useEffect(() => {
     if (!window.ethereum) return;
     const ethersProvider = zero.getProvider().asEthers();
@@ -462,7 +458,7 @@ const TradeRoom = (props) => {
           busy = true;
           try {
             await getPendingTransfers(cachedBtcBlock);
-            await getAndSetFees();
+            await getAndSetFees(value);
           } catch (e) {
             console.error(e);
           }
@@ -501,7 +497,7 @@ const TradeRoom = (props) => {
     const listener = async () => {
       await contractsDeferred.promise;
       const renbtcWrapped = new ethers.Contract(
-        contracts.renbtc,
+        await getRenBTCAddress(),
         ERC20ABI,
         ethersProvider
       );
@@ -661,8 +657,10 @@ const TradeRoom = (props) => {
   const updateAmount = async (e, oldValue) => {
     e.preventDefault();
     var checkValueLimit;
+    if (!isNaN(e.target.value)) getAndSetFees(e.target.value).catch((err) => console.error(err));
     if (e.target.value > window.maxBTCSwap && window.location.pathname.split("/")[2] === "swap") {
       //checkValueLimit = oldValue;
+        
       setValidAmount(false);
       setCalcValue("0");
       setRate("0");

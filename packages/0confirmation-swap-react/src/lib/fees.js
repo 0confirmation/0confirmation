@@ -4,13 +4,12 @@ import {ChainId, Token, WETH, Route, Pair} from "@uniswap/sdk";
 import {RenVM} from '@0confirmation/renvm';
 import {ethers} from 'ethers';
 import {InfuraProvider} from '@ethersproject/providers';
-
 const { RenJS } = RenVM;
 
 const renBTC = new Token (ChainId.MAINNET, '0xeb4c2781e4eba804ce9a9803c67d0893436bb27d', 18);
-const getPair = async() =>  (await Pair.fetchData(renBTC, WETH[renBTC.chainId]));
-const getRoute = async() => new Route([await getPair()], WETH[renBTC.chainId]);
-export var getPrice = async() => new BN((await getRoute()).midPrice.toSignificant(5)*10000000000);
+const getPair = async(renbtc, weth, provider) =>  (await Pair.fetchData(renbtc, weth, provider));
+const getRoute = async(renbtc, weth, provider) => new Route([await getPair(renbtc, weth, provider)], weth);
+export var getPrice = async(renbtc, weth, provider) => new BN((await getRoute(renbtc, weth, provider)).midPrice.toSignificant(5)*10000000000);
 
 let renjs = new RenJS('mainnet')
 let btcGatewayAddress = renjs.network.addresses.gateways.BTCGateway.artifact.networks[1].address
@@ -102,13 +101,13 @@ export const DEFAULT_FEES = addData({
   }
 }, 0, 0);
 
-export const getFees = async (swapAmount) => {
+export const getFees = async (swapAmount, renbtc, weth, provider) => {
   const mintFeeProportion = new BN(String(await renGatewayContract.mintFee())).dividedBy(new BN('1e8'));
   const mintFee = mintFeeProportion.multipliedBy(swapAmount);
   const fast = new BN(await getFast());
   const ethGasFee = gasEstimate.multipliedBy(divisorForGwei).multipliedBy(fast).dividedBy(oneEther);
-  const btcGasFee = ethGasFee.multipliedBy(await getPrice());
-  const btcGasFeeProportion = btcGasFee.dividedBy(swapAmount);
+  const btcGasFee = ethGasFee.multipliedBy(await getPrice(renbtc, weth, provider));
+    const btcGasFeeProportion = Number(swapAmount) == 0 ? new BN(0) : btcGasFee.dividedBy(swapAmount);
   const keeperFeeProportion = DEFAULT_FEES.keeperFee.ratio;
   const keeperFee = keeperFeeProportion.multipliedBy(swapAmount);
   const daoFeeProportion = DEFAULT_FEES.daoFee.ratio;
@@ -116,7 +115,7 @@ export const getFees = async (swapAmount) => {
   const liquidityPoolFeeProportion = DEFAULT_FEES.liquidityPoolFee.ratio;
   const liquidityPoolFee = liquidityPoolFeeProportion.multipliedBy(swapAmount);
   const baseFee = DEFAULT_FEES.baseFee.amount.multipliedBy('1');
-  const baseFeeProportion = new BN(baseFee).dividedBy(swapAmount);
+    const baseFeeProportion = Number(swapAmount) != 0 ? new BN(baseFee).dividedBy(swapAmount) : new BN(0);
   const totalFeeProportion = [ mintFeeProportion, btcGasFeeProportion, keeperFeeProportion, daoFeeProportion, liquidityPoolFeeProportion, baseFeeProportion ].reduce((r, v) => r.plus(v), new BN(0));
   const totalFee = totalFeeProportion.multipliedBy(swapAmount);
   return addData({
