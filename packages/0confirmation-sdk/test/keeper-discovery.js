@@ -5,6 +5,8 @@ const fromPrivate = require('@0confirmation/providers/private-key-or-seed');
 const fromEthers = require('@0confirmation/providers/from-ethers');
 const { InfuraProvider } = require('@ethersproject/providers');
 
+const TIMEOUT = 2500;
+
 const randomBytes = require('random-bytes').sync;
 
 const createRandomWalletZero = async () => {
@@ -13,7 +15,7 @@ const createRandomWalletZero = async () => {
   return zero;
 };
 
-const timeout = (n) => new Promise((resolve) => setTimeout(resolve, 7000));
+const timeout = (n) => new Promise((resolve) => setTimeout(resolve, TIMEOUT));
 
 (async () => {
   const keeper = await createRandomWalletZero();

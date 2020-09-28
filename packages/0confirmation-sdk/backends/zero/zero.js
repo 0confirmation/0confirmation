@@ -4,9 +4,18 @@ const { createNode } = require('@0confirmation/p2p');
 const { RPCWrapper, resultToJsonRpc } = require('../../util');
 const EventEmitter = require('events');
 const pipe = require('it-pipe');
+const PeerId = require('peer-id');
+const PeerInfo = require('peer-info');
+
 const { Buffer } = require('buffer');
 
 const DISCOVER_INTERVAL = 30000;
+
+const fromB58 = async (socket, from) => {
+  const peerId = PeerId.createFromB58String(from);
+  const peerInfo = await socket.peerRouting.findPeer(peerId);
+  return peerInfo;
+};
 
 class KeeperEmitter extends EventEmitter {
   constructor(socket) {
@@ -14,15 +23,15 @@ class KeeperEmitter extends EventEmitter {
     this.discoverInterval = DISCOVER_INTERVAL;
     this.socket = socket;
     this.socket.handle('/1.0.0/respondDiscoverKeepers', async ({ stream }) => {
-        await pipe(stream, async (source) => {
-          for await (const msg of source) {
-            try {
-              this.emit('keeper', JSON.parse(msg.toString()).address);
-            } catch (e) {
-              console.error(e.stack);
-            } 
-          }
-        });
+      await pipe(stream, async (source) => {
+        for await (const msg of source) {
+          try {
+            this.emit('keeper', JSON.parse(msg.toString()).address);
+          } catch (e) {
+            console.error(e.stack);
+          } 
+        }
+      });
     });
   }
   poll() {
@@ -86,13 +95,12 @@ class ZeroBackend extends RPCWrapper {
   }
   async startHandlingKeeperDiscovery() {
       await this.node.socket.pubsub.subscribe('/1.0.0/discoverKeepers', async (msg) => {
-        console.log(msg);
-          process.exit(0);
-        const { stream } = await this.node.socket.dialProtocol(peer.peerInfo, '/1.0.0/respondDiscoverKeepers');
+        const peerInfo = await fromB58(this.node.socket, msg.from); 
+        const { stream } = await this.node.socket.dialProtocol(peerInfo, '/1.0.0/respondDiscoverKeepers');
         const [ address ] = await (this.driver.getBackendByPrefix('eth')).sendWrapped('eth_accounts', []);
-        await pipe(Buffer.from(JSON.stringify({
+        await pipe([JSON.stringify({
           address
-        })), stream);
+        })], stream);
       });
   }
   async stopHandlingKeeperDiscovery() {
