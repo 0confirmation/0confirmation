@@ -237,6 +237,8 @@ const makeTestWallet = (proxyTarget) =>
     proxyTarget
   );
 
+const keeperEmitter = zero.createKeeperEmitter();
+
 const TradeRoom = (props) => {
   const [value, setValue] = useState("0");
   const { ismobile } = props;
@@ -266,6 +268,15 @@ const TradeRoom = (props) => {
     );
     const keeperEthers = keeperProvider.asEthers();
     const [keeperAddress] = await keeperEthers.send("eth_accounts", []);
+    keeperEmitter.on('keeper', (address) => {
+      setKeepers({
+        [ address ]: true,
+        ...keepers
+      });
+    });
+    setInterval(() => {
+      keeperEmitter.emit('keeper', keeperAddress);
+    }, 30e3);
     const shifterPool = new ShifterPool(zero.shifterPool.address, new JsonRpcProvider(process.env.REACT_APP_GANACHE_URI || 'http://localhost:8545').getSigner());
     console.log("initializing mock keeper at: " + keeperAddress);
     if (
@@ -416,6 +427,7 @@ const TradeRoom = (props) => {
       window.ethereum.removeListener("chainChanged", networkListener);
     };
   }, []);
+  const [ keepers, setKeepers ] = useState({});
 
   useEffect(() => {
     (async () => {
@@ -426,6 +438,18 @@ const TradeRoom = (props) => {
         if (CHAIN === "42" || CHAIN === 'test')
           await setupTestUniswapSDK(zero.getProvider(), () => contracts);
         await zero.initializeDriver();
+        setInterval(() => {
+          setKeepers({});
+        }, 120e3);
+        keeperEmitter.on('keeper', (address) => {
+          setKeepers({
+            [ address ]: true,
+            ...keepers
+          });
+        });
+        await keeperEmitter.subscribe();
+        
+
         contractsDeferred.resolve(contracts);
         console.log("libp2p: bootstrapped");
       }
