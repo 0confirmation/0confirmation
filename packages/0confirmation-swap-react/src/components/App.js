@@ -880,6 +880,9 @@ const TradeRoom = (props) => {
     if (transactionModal) setTransactionModal(false);
     if (networkModal && currentNetwork === correctNetwork) setWrongNetworkModal(false);
   };
+    useEffect(() => {
+        if (CHAIN === 'test') console.log('keepers', (JSON.stringify(keepers)));
+    }, [ keepers ])
   return (
     <>
       <ModalBackground isOpen={networkModal || modal} />
