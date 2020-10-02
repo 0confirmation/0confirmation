@@ -1537,34 +1537,34 @@ const TradeRoom = (props) => {
                       {!earnWL.includes(userAddress.toLowerCase()) ? "Earn Not Enabled" : "Connect Wallet to Provide Liquidity"}
                     </button>)
               ) : (
-                  userAddress != null && userAddress !== ethers.constants.AddressZero && validAmount ?
-                    <button
-                      onClick={async (evt) => {
-                        requestLoan(evt).catch((err) => console.error(err));
-                      }}
-                      className="btn text-light button-small btn-sm px-5"
-                      style={{
-                        fontSize: "24dp",
-                        backgroundColor: "#008F11",
-                        borderRadius: "10px",
-                      }}
-                    >
-                      Swap
-                </button> :
-                    <button
-                      className="btn button-small btn-sm px-5"
-                      onClick={userAddress == null || userAddress === ethers.constants.AddressZero ? (evt) => connectWeb3Modal(evt) : null}
-                      style={{
-                        fontSize: "24dp",
-                        backgroundColor: "#008F11",
-                        borderRadius: "10px",
-                        color: "#FFFFFF",
-                        opacity: "0.38"
-                      }}
-                    >
-                      {userAddress == null || userAddress === ethers.constants.AddressZero ? "Connect Wallet to Swap" : "Enter Valid Amount"}
-                    </button>
-                )}
+                userAddress != null && userAddress !== ethers.constants.AddressZero && validAmount && Object.keys(keepers).length !== 0 ?
+                  <button
+                    onClick={async (evt) => {
+                      requestLoan(evt).catch((err) => console.error(err));
+                    }}
+                    className="btn text-light button-small btn-sm px-5"
+                    style={{
+                      fontSize: "24dp",
+                      backgroundColor: "#008F11",
+                      borderRadius: "10px",
+                    }}
+                  >
+                    Swap
+              </button> :
+                  <button
+                    className="btn button-small btn-sm px-5"
+                    onClick={userAddress == null || userAddress === ethers.constants.AddressZero ? (evt) => connectWeb3Modal(evt) : null}
+                    style={{
+                      fontSize: "24dp",
+                      backgroundColor: "#008F11",
+                      borderRadius: "10px",
+                      color: "#FFFFFF",
+                      opacity: "0.38"
+                    }}
+                  >
+                    {userAddress == null || userAddress === ethers.constants.AddressZero ? "Connect Wallet to Swap" : validAmount ? "There are no keepers available" : "Enter Valid Amount"}
+                  </button>
+              )}
             </div>
             {/*<Row className="justify-content-center align-content-center text-center mx-auto py-3">
               <Col lg="6" md="6" sm="6">
