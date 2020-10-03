@@ -1287,8 +1287,8 @@ const TradeRoom = (props) => {
                   <Col lg="12" md="12" sm="12">
                     <Row className="justify-content-center align-content-center text-center mx-auto text-light">
                       <Col lg="5" md="12" sm="12" className="mt-2">
-                        <InputGroup style={validAmount ? { height: "52px", border: "2px solid #008F11", borderRadius: "0px" }
-                          : { height: "52px", border: "2px solid #8B0000", boxShadow: "0 0 8px #8B0000", borderRadius: "0px" }}>
+                        <InputGroup style={validAmount ? { height: "52px", border: "2px solid #008F11", borderRadius: "6px" }
+                          : { height: "52px", border: "2px solid #8B0000", boxShadow: "0 0 8px #8B0000", borderRadius: "6px" }}>
                           <Input
                             type="text"
                             value={value}
@@ -1297,15 +1297,15 @@ const TradeRoom = (props) => {
                             className="sendcoin h-100"
                             style={{
                               backgroundColor: "transparent", paddingTop: "1em", color: "#ffffff", border: "none", outline: "none",
-                              borderRadius: "0px 0px 0px 0px",
+                              borderRadius: "6px",
                             }}
                           />
-                          <InputGroupAddon  style={{ userSelect: "none", cursor: "default", backgroundColor: "#003B00", borderRadius: "0px 0px 0px 0px", color: "#ffffff" }} addonType="append">
+                          <InputGroupAddon  style={{ userSelect: "none", cursor: "default", backgroundColor: "#003B00", borderRadius: "6px", color: "#ffffff" }} addonType="append">
                             <InputGroupText style={validAmount ? {
-                              backgroundColor: "#003B00", borderRadius: "0px 0px 0px 0px", color: "#ffffff", border: "none", outline: "none"
+                              backgroundColor: "#003B00", borderRadius: "6px", color: "#ffffff", border: "none", outline: "none"
                             } :
                               {
-                                backgroundColor: "#800000", borderRadius: "0px 0px 0px 0px",
+                                backgroundColor: "#800000", borderRadius: "6px",
                                 color: "#ffffff", border: "1px #800000", outline: "none",
                               }}>
                               <InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={btcIcon} />{' '}
@@ -1398,14 +1398,14 @@ const TradeRoom = (props) => {
                             <Col className="text-left" style={{color:"#00FF41"}}>Est. Slippage</Col>
                             <Col className="text-right text-light"><b>{slippage}%</b></Col>
                           </Row>
-                          <Row className="mx-2 mt-3 mb-1">
+                          <Row className="mx-2 mt-3 mb-3">
                             <Col className="text-left" style={{color:"#00FF41"}}>Estimated Gas Cost<br/><span style={{color:"#87888C"}}>@ { fees.fastGasPrice } Gwei</span></Col>
                             <Col className="text-right text-light">{ fees.ethGasFee } ETH / { fees.btcGasFee.prettyAmount } BTC</Col>
                           </Row>
 
-                          <Row className="mx-2 mt-3 mb-1">
+                          {/* <Row className="mx-2 mt-3 mb-1">
                             <Col className="text-center" ><Link to="#" style={{color:"#00FF41",textDecoration:"none", borderBottom:"1px solid #00FF41"}}>view fee details</Link></Col>
-                          </Row>
+                          </Row> */}
                         </Col>
                     </Row>
                   </Col>
@@ -1416,7 +1416,7 @@ const TradeRoom = (props) => {
                   <Col lg="12" md="12" sm="12">
                     <Row className="justify-content-center align-content-center text-center mx-auto text-light">
                       <Col lg="5" md="12" sm="12">
-                        <InputGroup style={{ userSelect: "none", cursor: "default", height: "52px", border: "2px solid #008F11", borderRadius: "0px", }}>
+                        <InputGroup style={{ userSelect: "none", cursor: "default", height: "52px", border: "2px solid #008F11", borderRadius: "6px", }}>
                           <Input
                             readOnly={true}
                             type="text"
@@ -1424,11 +1424,11 @@ const TradeRoom = (props) => {
                             className="getcoin h-100"
                             style={{
                               backgroundColor: "transparent", userSelect: "none", cursor: "default", paddingTop: "1em", color: "#ffffff", border: "none", outline: "none",
-                              borderRadius: "0px 0px 0px 0px",
+                              borderRadius: "6px",
                             }}
                           />
-                          <InputGroupAddon style={{ backgroundColor: "#003B00", borderRadius: "0px 0px 0px 0px", color: "#ffffff" }} addonType="append">
-                            <InputGroupText style={{ backgroundColor: "#003B00", borderRadius: "0px 0px 0px 0px", color: "#ffffff", border: "none", outline: "none" }}>
+                          <InputGroupAddon style={{ backgroundColor: "#003B00", borderRadius: "6px", color: "#ffffff" }} addonType="append">
+                            <InputGroupText style={{ backgroundColor: "#003B00", borderRadius: "6px", color: "#ffffff", border: "none", outline: "none" }}>
                               <InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={daiIcon} />{' '}
                           DAI
                         </InputGroupText>
