@@ -1297,15 +1297,15 @@ const TradeRoom = (props) => {
                             className="sendcoin h-100"
                             style={{
                               backgroundColor: "transparent", paddingTop: "1em", color: "#ffffff", border: "none", outline: "none",
-                              borderRadius: "6px",
+                              borderRadius: "0px 0px 0px 0px",
                             }}
                           />
-                          <InputGroupAddon  style={{ userSelect: "none", cursor: "default", backgroundColor: "#003B00", borderRadius: "6px", color: "#ffffff" }} addonType="append">
+                          <InputGroupAddon  style={{ userSelect: "none", cursor: "default", backgroundColor: "#003B00", borderRadius: "0px 6px 6px 0px", color: "#ffffff" }} addonType="append">
                             <InputGroupText style={validAmount ? {
-                              backgroundColor: "#003B00", borderRadius: "6px", color: "#ffffff", border: "none", outline: "none"
+                              backgroundColor: "#003B00", borderRadius: "0px 6px 6px 0px", color: "#ffffff", border: "none", outline: "none"
                             } :
                               {
-                                backgroundColor: "#800000", borderRadius: "6px",
+                                backgroundColor: "#800000", borderRadius: "0px 0px 0px 0px",
                                 color: "#ffffff", border: "1px #800000", outline: "none",
                               }}>
                               <InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={btcIcon} />{' '}
@@ -1424,11 +1424,11 @@ const TradeRoom = (props) => {
                             className="getcoin h-100"
                             style={{
                               backgroundColor: "transparent", userSelect: "none", cursor: "default", paddingTop: "1em", color: "#ffffff", border: "none", outline: "none",
-                              borderRadius: "6px",
+                              borderRadius: "0px 0px 0px 0px",
                             }}
                           />
-                          <InputGroupAddon style={{ backgroundColor: "#003B00", borderRadius: "6px", color: "#ffffff" }} addonType="append">
-                            <InputGroupText style={{ backgroundColor: "#003B00", borderRadius: "6px", color: "#ffffff", border: "none", outline: "none" }}>
+                          <InputGroupAddon style={{ backgroundColor: "#003B00", borderRadius: "0px 6px 6px 0px", color: "#ffffff" }} addonType="append">
+                            <InputGroupText style={{ backgroundColor: "#003B00", borderRadius: "0px 6px 6px 0px", color: "#ffffff", border: "none", outline: "none" }}>
                               <InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={daiIcon} />{' '}
                           DAI
                         </InputGroupText>
