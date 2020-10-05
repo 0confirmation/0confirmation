@@ -182,8 +182,10 @@ module.exports = async (buidler) => {
         minTimeout: chain === "test" ? "1" : "10000",
         daoFee: ethers.utils.parseEther("0.01"),
         poolFee: ethers.utils.parseEther("0.01"),
+          /*
         gasEstimate: '1200000',
         maxGasPriceForRefund: ethers.utils.parseUnits('500', 9),
+        */
         maxLoan:
           chain === "mainnet"
             ? ethers.utils.parseEther("0.5")
