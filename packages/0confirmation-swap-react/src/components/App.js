@@ -237,7 +237,8 @@ const makeTestWallet = (proxyTarget) =>
     proxyTarget
   );
 
-const keeperEmitter = zero.createKeeperEmitter();
+
+const keeperEmitter = utils.defer();
 
 const TradeRoom = (props) => {
   const [value, setValue] = useState("0");
@@ -268,14 +269,16 @@ const TradeRoom = (props) => {
     );
     const keeperEthers = keeperProvider.asEthers();
     const [keeperAddress] = await keeperEthers.send("eth_accounts", []);
-    keeperEmitter.on('keeper', (address) => {
+    let emitter = zero.createKeeperEmitter();
+    keeperEmitter.resolve(emitter);
+    emitter.on('keeper', (address) => {
       setKeepers({
         [ address ]: true,
         ...keepers
       });
     });
     setInterval(() => {
-      keeperEmitter.emit('keeper', keeperAddress);
+      emitter.emit('keeper', keeperAddress);
     }, 30e3);
     const shifterPool = new ShifterPool(zero.shifterPool.address, new JsonRpcProvider(process.env.REACT_APP_GANACHE_URI || 'http://localhost:8545').getSigner());
     console.log("initializing mock keeper at: " + keeperAddress);
@@ -438,16 +441,18 @@ const TradeRoom = (props) => {
         if (CHAIN === "42" || CHAIN === 'test')
           await setupTestUniswapSDK(zero.getProvider(), () => contracts);
         await zero.initializeDriver();
+        let emitter = zero.createKeeperEmitter();
+        keeperEmitter.resolve(emitter);
         setInterval(() => {
           setKeepers({});
         }, 120e3);
-        keeperEmitter.on('keeper', (address) => {
+        emitter.on('keeper', (address) => {
           setKeepers({
             [ address ]: true,
             ...keepers
           });
         });
-        await keeperEmitter.subscribe();
+        await emitter.subscribe();
         
 
         contractsDeferred.resolve(contracts);
