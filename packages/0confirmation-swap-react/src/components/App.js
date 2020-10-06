@@ -1381,7 +1381,7 @@ const TradeRoom = (props) => {
                   </Col>
                   <Col lg="12" md="12" sm="12">
                     <Row className="justify-content-center align-content-center text-center mx-auto">
-                        <Col className="py-2" lg="4" md="10" sm="12" style={{backgroundColor:"#003B00", fontSize:"0.75rem", minHeight:"12rem"}}>
+                        <Col className="py-2" lg="4" md="4" sm="4" style={ismobile ? {backgroundColor:"#003B00", fontSize:"0.75rem", minHeight:"12rem", maxWidth:"22rem"} : {backgroundColor:"#003B00", fontSize:"0.75rem", minHeight:"12rem"}}>
                           <Row className="mx-2 mt-3 mb-1">
                             <Col className="text-left" style={{color:"#00FF41"}}>0cf Loan Fee ({ fees.loanFee.percentage })</Col>
                             <Col className="text-right text-light">{ fees.loanFee.prettyAmount } BTC</Col>
