@@ -52,8 +52,8 @@ const logBalances = async (zero) => {
   const db = new DB(path.join(process.env.HOME, '.0cf-keeper'));
   const liquidityToken = await zero.getLiquidityTokenFor(environment.renbtc);
   const renbtc = new ERC20(environment.renbtc, ethersProvider);
-  const allowance = await renbtc.allowance(from, liquidityToken.address);
-  if (allowance.lt('0x' + 'ff'.repeat(30))) {
+  const allowance = await renbtc.allowance(from, zero.shifterPool.address);
+  if (allowance.lt('0x' + 'ff'.repeat(15))) {
     console.logKeeper('sending approve(address,uint256) to pool');
     const tx = await zero.approvePool(environment.renbtc);
     console.logKeeper('transaction: ' + tx.hash);
