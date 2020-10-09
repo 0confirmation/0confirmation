@@ -59,9 +59,21 @@ class Zero {
     const backend = this.driver.getBackendByPrefix('0cf');
     await backend.stopHandlingKeeperDiscovery();
   }
+  async startHandlingBTCBlock() {
+    const backend = this.driver.getBackendByPrefix('0cf');
+    await backend.startHandlingBTCBlock();
+  }
+  async stopHandlingBTCBlock() {
+    const backend = this.driver.getBackendByPrefix('0cf');
+    await backend.stopHandlingBTCBlock();
+  }
   createKeeperEmitter() {
     const backend = this.driver.getBackendByPrefix('0cf');
     return backend.createKeeperEmitter();
+  }
+  createBTCBlockEmitter() {
+    const backend = this.driver.getBackendByPrefix('0cf');
+    return backend.createBTCBlockEmitter();
   }
   static async fromProvider(ethProvider, presetName = 'default') {
     const provider = new Web3Provider(ethProvider);

@@ -44,6 +44,7 @@ const logBalances = async (zero) => {
   const ethersProvider = zero.getProvider().asEthers();
   await zero.initializeDriver();
   await zero.startHandlingKeeperDiscovery();
+  await zero.startHandlingBTCBlock();
   const [ from ] = await ethersProvider.listAccounts();
   console.logKeeper('using network: ' + chainIdToName(CHAIN));
   console.logKeeper('using address ' + from);

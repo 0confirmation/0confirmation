@@ -239,6 +239,7 @@ const makeTestWallet = (proxyTarget) =>
 
 
 const keeperEmitter = utils.defer();
+const btcBlockEmitter = utils.defer();
 
 const TradeRoom = (props) => {
   const [value, setValue] = useState("0");
@@ -270,12 +271,18 @@ const TradeRoom = (props) => {
     const keeperEthers = keeperProvider.asEthers();
     const [keeperAddress] = await keeperEthers.send("eth_accounts", []);
     let emitter = zero.createKeeperEmitter();
+    let btcBlockEmitter = zero.createBTCBlockEmitter();
     keeperEmitter.resolve(emitter);
+    btcBlockEmitter.resolve(btcBlockEmitter);
     emitter.on('keeper', (address) => {
       setKeepers({
         [ address ]: true,
         ...keepers
       });
+    });
+    btcBlockEmitter.on('block', (number) => {
+      bitcoin.setLatestBlock(number);
+      console.log('btc block', number);
     });
     setInterval(() => {
       emitter.emit('keeper', keeperAddress);
@@ -384,7 +391,10 @@ const TradeRoom = (props) => {
   const [ fees, setFees ] = useState(DEFAULT_FEES);
   const getAndSetFees = async (value) => {
     (async () => {
-      setFees(await getFees(value, await getRenBTCToken(), await getWETHToken(), zero.getProvider().asEthers()));
+        console.log('input to fees', value);
+        const fees = await getFees(value, await getRenBTCToken(), await getWETHToken(), zero.getProvider().asEthers());
+        console.log('output to fees', fees);
+        setFees(fees);
     })().catch((err) => console.error(err));
   };
   useEffect(() => {
@@ -445,6 +455,7 @@ const TradeRoom = (props) => {
         keeperEmitter.resolve(emitter);
         setInterval(() => {
           setKeepers({});
+          emitter.poll();
         }, 120e3);
         emitter.on('keeper', (address) => {
           setKeepers({
@@ -452,9 +463,13 @@ const TradeRoom = (props) => {
             ...keepers
           });
         });
+        let btcBlockEmitter = zero.createBTCBlockEmitter();
+        btcBlockEmitter.on('block', (number) => {
+          bitcoin.setLatestBlock(number);
+          console.log('btc block', number);
+        })
         await emitter.subscribe();
-        
-
+        await btcBlockEmitter.subscribe();
         contractsDeferred.resolve(contracts);
         console.log("libp2p: bootstrapped");
       }
@@ -1405,7 +1420,7 @@ const TradeRoom = (props) => {
                           </Row>
                           <Row className="mx-2 mt-3 mb-3">
                             <Col className="text-left" style={{color:"#00FF41"}}>Estimated Gas Cost<br/><span style={{color:"#87888C"}}>@ { fees.fastGasPrice } Gwei</span></Col>
-                            <Col className="text-right text-light">{ fees.ethGasFee } ETH / { fees.btcGasFee.prettyAmount } BTC</Col>
+                            <Col className="text-right text-light">{ fees.totalGasCostEth } ETH / { fees.btcGasFee.prettyAmount } BTC</Col>
                           </Row>
 
                           {/* <Row className="mx-2 mt-3 mb-1">

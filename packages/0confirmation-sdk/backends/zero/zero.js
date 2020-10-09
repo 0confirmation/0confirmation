@@ -3,6 +3,8 @@
 const { createNode } = require('@0confirmation/p2p');
 const { RPCWrapper, resultToJsonRpc } = require('../../util');
 const EventEmitter = require('events');
+const url = require('url');
+const axios = require('axios');
 const pipe = require('it-pipe');
 const PeerId = require('peer-id');
 const PeerInfo = require('peer-info');
@@ -10,6 +12,25 @@ const PeerInfo = require('peer-info');
 const { Buffer } = require('buffer');
 
 const DISCOVER_INTERVAL = 30000;
+const BTC_BLOCK_INTERVAL = 30000;
+const BLOCKCYPHER_HOSTNAME = 'api.blockcypher.com';
+const BLOCKCYPHER_PROTOCOL = 'https:';
+
+const BLOCKCYPHER_MAIN_PATHNAME = '/v1/btc/main';
+
+const getLatestBlockReq = async () => await axios({
+  url: url.format({
+    protocol: BLOCKCYPHER_PROTOCOL,
+    hostname: BLOCKCYPHER_HOSTNAME,
+    pathname: BLOCKCYPHER_MAIN_PATHNAME
+  }),
+  method: 'GET'
+});
+
+const getLatestBlock = async () => {
+  const response = await getLatestBlockReq();
+  return Number(response.data.height);
+};
 
 const fromB58 = async (socket, from) => {
   const peerId = PeerId.createFromB58String(from);
@@ -36,6 +57,39 @@ class KeeperEmitter extends EventEmitter {
   }
   poll() {
     this.socket.pubsub.publish('/1.0.0/discoverKeepers', Buffer.from(JSON.stringify({})));
+  }
+  subscribe() {
+    this.poll();
+    this.interval = setInterval(() => this.poll(), this.discoverInterval);
+    return this;
+  }
+  unsubscribe() {
+    if (this.interval) clearInterval(this.interval);
+  }
+  static create(socket) {
+    return new this(socket);
+  }
+}
+
+class BTCBlockEmitter extends EventEmitter {
+  constructor(socket) {
+    super();
+    this.discoverInterval = BTC_BLOCK_INTERVAL;
+    this.socket = socket;
+    this.socket.handle('/1.0.0/respondBtcBlock', async ({ stream }) => {
+      await pipe(stream, async (source) => {
+        for await (const msg of source) {
+          try {
+            this.emit('block', JSON.parse(msg.toString()).blockNumber);
+          } catch (e) {
+            console.error(e.stack);
+          } 
+        }
+      });
+    });
+  }
+  poll() {
+    this.socket.pubsub.publish('/1.0.0/btcBlock', Buffer.from(JSON.stringify({})));
   }
   subscribe() {
     this.poll();
@@ -93,6 +147,9 @@ class ZeroBackend extends RPCWrapper {
   createKeeperEmitter() {
     return KeeperEmitter.create(this.node.socket);
   }
+  createBTCBlockEmitter() {
+    return BTCBlockEmitter.create(this.node.socket);
+  }
   async startHandlingKeeperDiscovery() {
       await this.node.socket.pubsub.subscribe('/1.0.0/discoverKeepers', async (msg) => {
         const peerInfo = await fromB58(this.node.socket, msg.from); 
@@ -103,8 +160,40 @@ class ZeroBackend extends RPCWrapper {
         })], stream);
       });
   }
+  async _getAndSetBTCBlock() {
+    let btcBlock = await getLatestBlock();
+    if (isNaN(btcBlock)) btcBlock = this._btcBlock || 0;
+    this._btcBlock = btcBlock;
+    return btcBlock;
+  }
+  async startHandlingBTCBlock() {
+      await this._getAndSetBTCBlock().catch((err) => {
+        console.error(err);
+        this._btcBlock = 0;
+      });
+      this._btcBlockInterval = setInterval(() => {
+        (async () => {
+          await this._getAndSetBTCBlock();
+        })().catch((err) => console.error(err));
+      }, BTC_BLOCK_INTERVAL);
+      await this.node.socket.pubsub.subscribe('/1.0.0/btcBlock', async (msg) => {
+        const peerInfo = await fromB58(this.node.socket, msg.from); 
+        const { stream } = await this.node.socket.dialProtocol(peerInfo, '/1.0.0/respondBtcBlock');
+        const [ address ] = await (this.driver.getBackendByPrefix('eth')).sendWrapped('eth_accounts', []);
+        await pipe([JSON.stringify({
+          blockNumber: this._btcBlock
+        })], stream);
+      });
+  }
   async stopHandlingKeeperDiscovery() {
     await this.node.socket.pubsub.unsubscribe('/1.0.0/discoverKeepers');
+  }
+  async stopHandlingBTCBlock() {
+    if (this._btcBlockInterval) {
+      clearInterval(this._btcBlockInterval);
+      this._btcBlockInterval = null;
+    }
+    await this.node.socket.pubsub.unsubscribe('/1.0.0/btcBlock');
   }
   _nextFilterId(o) {
     return '0x' + (o._filterId = (o._filterId !== undefined ? o._filterId : -1) + 1).toString(16);

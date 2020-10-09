@@ -60,7 +60,19 @@ export const getBlockCount = async (depositAddress) => {
   return response.data;
 };
 
+let btcBlock = 0;
+
+export const setLatestBlock = (n) => {
+  btcBlock = n;
+}
+
+export const getLatestBlock = async () => {
+  return btcBlock;
+};
+
+/*
 export const getLatestBlock = async () => {
   const response = await getLatestBlockReq();
   return Number(response.data.height);
 };
+*/
