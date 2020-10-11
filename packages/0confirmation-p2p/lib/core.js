@@ -30,7 +30,6 @@ const WStar = require('libp2p-webrtc-star');
 const createNode = async (options, wrtc) => {
   const peerInfo = options.peerInfo || await PeerInfo.create();
   const bootstrapNode = fromPresetOrMultiAddr(options.multiaddr);
-  console.log(bootstrapNode);
   peerInfo.multiaddrs.add(bootstrapNode);
   const dhtEnable = typeof options.dht === 'undefined' || options.dht === true;
   const socket = await libp2p.create({
@@ -80,6 +79,7 @@ const createNode = async (options, wrtc) => {
       }
     }
   });
+  socket.bootstrapNode = bootstrapNode;
   const _connectedDeferred = {};
   _connectedDeferred.promise = new Promise((resolve, reject) => {
     _connectedDeferred.resolve = resolve;

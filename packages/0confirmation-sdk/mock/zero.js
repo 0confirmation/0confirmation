@@ -42,6 +42,16 @@ class MockZeroBackend extends EventEmitterAndRPCWrapper {
       data: evt
     })));
   }
+  createKeeperEmitter() {
+    const ee = new EventEmitter();
+    ee.subscribe = () =>  {};
+    return ee;
+  }
+  createBTCBlockEmitter() {
+    const ee = new EventEmitter();
+    ee.subscribe = () =>  {};
+    return ee;
+  }
   async _unsubscribeLiquidityRequests() {
     this.filtering = false;
     this.filterTargets.forEach((instance) => instance.removeAllListeners());

@@ -51,6 +51,30 @@ const getSignatures = (abi) => {
 const { timeout } = require('./util');
 
 class Zero {
+  async startHandlingKeeperDiscovery() {
+    const backend = this.driver.getBackendByPrefix('0cf');
+    await backend.startHandlingKeeperDiscovery();
+  }
+  async stopHandlingKeeperDiscovery() {
+    const backend = this.driver.getBackendByPrefix('0cf');
+    await backend.stopHandlingKeeperDiscovery();
+  }
+  async startHandlingBTCBlock() {
+    const backend = this.driver.getBackendByPrefix('0cf');
+    await backend.startHandlingBTCBlock();
+  }
+  async stopHandlingBTCBlock() {
+    const backend = this.driver.getBackendByPrefix('0cf');
+    await backend.stopHandlingBTCBlock();
+  }
+  createKeeperEmitter() {
+    const backend = this.driver.getBackendByPrefix('0cf');
+    return backend.createKeeperEmitter();
+  }
+  createBTCBlockEmitter() {
+    const backend = this.driver.getBackendByPrefix('0cf');
+    return backend.createBTCBlockEmitter();
+  }
   static async fromProvider(ethProvider, presetName = 'default') {
     const provider = new Web3Provider(ethProvider);
     const chainId = Number(await provider.send('eth_chainId', []));
@@ -67,7 +91,7 @@ class Zero {
     this.shifterPool = new ShifterPool(this.network.shifterPool, this.getProvider().asEthers(), this);
   }
   constructor(o, ...args) {
-    if (o.send) {
+    if (o.send || o.sendAsync) {
       if (args.length && args[0]) {
         if (args[0] === 'mock') o = environment.getMockEnvironment(o);
         else o = environment.getEnvironment(o, ...args);
