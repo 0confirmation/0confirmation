@@ -87,7 +87,7 @@ const addAggregateFees = (o) => {
 
 export const DEFAULT_FEES = addData({
   keeperFee: {
-    ratio: new BN('0.001'),
+    ratio: new BN('0.0005'),
     amount: new BN('0')
   },
   daoFee: {
@@ -103,7 +103,7 @@ export const DEFAULT_FEES = addData({
     amount: new BN('0')
   },
   liquidityPoolFee: {
-    ratio: new BN('0.001'),
+    ratio: new BN('0.0005'),
     amount: new BN('0')
   },
   baseFee: {

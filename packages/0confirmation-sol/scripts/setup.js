@@ -39,8 +39,8 @@ const yargs = require('yargs');
       {
         shifterRegistry: environment.shifterRegistry,
         minTimeout: chain === "test" ? "1" : "10000",
-        daoFee: ethers.utils.parseEther("0.01"),
-        poolFee: ethers.utils.parseEther("0.01"),
+        daoFee: ethers.utils.parseEther("0.005"),
+        poolFee: ethers.utils.parseEther("0.005"),
         gasEstimate: '1460000',
         maxGasPriceForRefund: ethers.utils.parseUnits('500', 9),
         maxLoan:
