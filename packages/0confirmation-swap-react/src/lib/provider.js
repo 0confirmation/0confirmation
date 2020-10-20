@@ -121,7 +121,8 @@ const INFURA_PROJECT_ID = process.env.REACT_APP_INFURA_PROJECT_ID || '2f1de898ef
 const chainToProvider = (chainId) => {
   switch (chainId) {
     case "1":
-      return fromEthers(new ethers.providers.InfuraProvider("mainnet", INFURA_PROJECT_ID));
+//        return fromEthers(new ethers.providers.JsonRpcProvider('https://cloudflare-eth.com'));
+          return window.ethereum || fromEthers(new ethers.providers.InfuraProvider("mainnet", INFURA_PROJECT_ID));
     case "42":
       return fromEthers(new ethers.providers.InfuraProvider("kovan", INFURA_PROJECT_ID));
     case "embedded":

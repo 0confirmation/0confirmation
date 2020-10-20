@@ -751,7 +751,9 @@ const TradeRoom = (props) => {
       utils.toParsed(value, "btc")
     );
     setTrade(trade);
-    setCalcValue(utils.truncateDecimals(trade.outputAmount.toExact(), 2));
+    const price = new BN(trade.executionPrice.toFixed(8));
+    const calcValue = (utils.truncateDecimals(new BN(trade.outputAmount.toExact()).minus(new BN(fees.totalFees.prettyAmount).multipliedBy(price)), 2));
+    setCalcValue(calcValue);
     setRate(trade.executionPrice.toFixed(2));
     setSlippage(trade.slippage.toFixed(2));
   };

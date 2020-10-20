@@ -1,6 +1,6 @@
 'use strict';
 
-const fromPrivate = require('@0confirmation/providers/private-key-or-seed');
+const fromSecret = require('@0confirmation/providers/from-secret');
 const fromEthers = require('@0confirmation/providers/from-ethers');
 const ethers = require('ethers');
 const CHAIN = process.env.CHAIN;
@@ -10,7 +10,7 @@ const Zero = require('@0confirmation/sdk');
 
 const INFURA_PROJECT_ID = process.env.INFURA_PROJECT_ID || '2f1de898efb74331bf933d3ac469b98d';
 
-const provider = fromPrivate(process.env.PRIVATE_KEY, fromEthers(new ethers.providers.InfuraProvider(ETH_NETWORK, INFURA_PROJECT_ID)));
+const provider = fromSecret(process.env.PRIVATE_KEY, fromEthers(new ethers.providers.InfuraProvider(ETH_NETWORK, INFURA_PROJECT_ID)));
 console.log(NETWORK);
 
 const makeZero = () => {

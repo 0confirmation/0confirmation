@@ -5,6 +5,7 @@ import {RenVM} from '@0confirmation/renvm';
 import {ethers} from 'ethers';
 import {InfuraProvider} from '@ethersproject/providers';
 import { mapValues } from 'lodash';
+import  provider  from './provider';
 const { RenJS } = RenVM;
 
 const renBTC = new Token (ChainId.MAINNET, '0xeb4c2781e4eba804ce9a9803c67d0893436bb27d', 18);
@@ -24,7 +25,7 @@ const abi =[{
         type:'uint256',
         name:'some-output-name-doesnt-matter'}]}]
 ;
-const renGatewayContract = new ethers.Contract(btcGatewayAddress, abi, new InfuraProvider('mainnet','2f1de898efb74331bf933d3ac469b98d' ))
+const renGatewayContract = new ethers.Contract(btcGatewayAddress, abi, provider.asEthers());
 
 export let getFast = async () => (await axios.get('https://ethgasstation.info/api/ethgasAPI.json')).data.fast;
 var gasEstimate=new  BN('1.46e6');
