@@ -21,7 +21,7 @@ const yargs = require('yargs');
   const wallet = fromV3(wallets[chain], process.env.SECRET).getPrivateKeyString();
   const provider = new Web3Provider(fromPrivateKey(wallet.substr(2), fromEthers(new InfuraProvider(infuraChain))));
   const shifterPool = new ShifterPool(environment.shifterPool, provider);
-  const tx = await shifterPool.setKeeper('0x' + (yargs.argv.keeper || '5d557f7a73c7494be0dceb5dbf8c5c209811fda6'), true);
+  const tx = await shifterPool.setKeeper('0x' + (yargs.argv.keeper || 'C4d5902eb258828d03085183ee29296338993cfa'), true);
   console.log(chalk.bold('txhash: ' + tx.hash));
   await tx.wait();
   console.log(chalk.bold.cyan('mined!'));
