@@ -389,10 +389,10 @@ const TradeRoom = (props) => {
     contractsDeferred.resolve(contracts);
   };
   const [ fees, setFees ] = useState(DEFAULT_FEES);
-  const getAndSetFees = async (value) => {
+  const getAndSetFees = async (inValue) => {
     (async () => {
-        console.log('input to fees', value);
-        const fees = await getFees(value, await getRenBTCToken(), await getWETHToken(), zero.getProvider().asEthers());
+        console.log('input to fees', inValue > 0 ? inValue : value);
+        const fees = await getFees(inValue > 0 ? inValue : value, await getRenBTCToken(), await getWETHToken(), zero.getProvider().asEthers());
         console.log('output to fees', fees);
         setFees(fees);
     })().catch((err) => console.error(err));
@@ -502,6 +502,7 @@ const TradeRoom = (props) => {
           busy = true;
           try {
             await getPendingTransfers(cachedBtcBlock);
+            console.log("value: ", value)
             await getAndSetFees(value);
           } catch (e) {
             console.error(e);
