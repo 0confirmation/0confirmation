@@ -727,9 +727,9 @@ const TradeRoom = (props) => {
       setRate("0");
       setSlippage("0");
     }
-    const value = checkValueLimit;
-    console.log("setting value: ", value)
-    setValue(value);
+    const inputValue = checkValueLimit;
+    console.log("setting value: ", inputValue)
+    setValue(inputValue);
     if (isNaN(value)) return;
     await getTradeDetails(value);
     console.log("value from input: ", value)
