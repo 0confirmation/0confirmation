@@ -532,11 +532,6 @@ const TradeRoom = (props) => {
       await getPendingTransfers(btcBlock);
     })().catch((err) => console.error(err));
   }, [userAddress, btcBlock]);
-  useEffect(() => {
-    (async () => {
-      await getAndSetFees(value)
-    })().catch((err) => console.error(err));
-  }, [getAndSetFees]) // uses a function to initialize and never update again
   const [apr, setAPR] = useState("0.00%");
   const [totalLiquidityToken, setTotalLiquidityToken] = useState("0");
   useEffect(() => {
