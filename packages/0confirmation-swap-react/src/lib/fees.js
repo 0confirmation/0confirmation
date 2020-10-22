@@ -14,7 +14,7 @@ const getRoute = async(renbtc, weth, provider) => new Route([await getPair(renbt
 export var getPrice = async(renbtc, weth, provider) => new BN((await getRoute(renbtc, weth, provider)).midPrice.toSignificant(5)*10000000000);
 
 let renjs = new RenJS('mainnet')
-let btcGatewayAddress = renjs.network.addresses.gateways.BTCGateway.artifact.networks[1].address
+let btcGatewayAddress = '0xe4b679400F0f267212D5D812B95f58C83243EE71'
 
 const abi =[{
     type: 'function',
@@ -114,7 +114,7 @@ export const DEFAULT_FEES = addData({
 }, 0, 0);
 
 export const getFees = async (swapAmount, renbtc, weth, provider) => {
-  const mintFeeProportion = new BN(String(await renGatewayContract.mintFee())).multipliedBy(new BN('0.00000001'));
+  const mintFeeProportion = new BN(String(await renGatewayContract.mintFee())).multipliedBy(new BN('0.0001'));
   const mintFee = mintFeeProportion.multipliedBy(swapAmount);
   const fast = new BN(await getFast());
   const ethGasFee = gasEstimate.multipliedBy(divisorForGwei).multipliedBy(fast).dividedBy(oneEther);
