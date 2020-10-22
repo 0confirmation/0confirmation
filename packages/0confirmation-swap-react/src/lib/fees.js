@@ -58,8 +58,7 @@ const addData = (o, fast, ethGasFee) => {
 const addPercentages = (o) => Object.keys(o).reduce((r, v) => {
   r[v] = {
     prettyAmount: o[v].amount.toFixed(PRETTY_AMOUNT_PRECISION),
-    percentage: o[v].ratio.multipliedBy(100) + '%',
-    //o[v].ratio.multipliedBy(100).toFixed(PERCENTAGE_PRECISION) + '%',
+    percentage: o[v].ratio.multipliedBy(100).toFixed(PERCENTAGE_PRECISION) + '%',
     ...o[v]
   };
   return r;
@@ -115,7 +114,7 @@ export const DEFAULT_FEES = addData({
 }, 0, 0);
 
 export const getFees = async (swapAmount, renbtc, weth, provider) => {
-  const mintFeeProportion = new BN(String(await renGatewayContract.mintFee())).multipliedBy(new BN('0.0001'));
+  const mintFeeProportion = new BN(String(await renGatewayContract.mintFee())).multipliedBy(new BN('0.00000001'));
   const mintFee = mintFeeProportion.multipliedBy(swapAmount);
   const fast = new BN(await getFast());
   const ethGasFee = gasEstimate.multipliedBy(divisorForGwei).multipliedBy(fast).dividedBy(oneEther);

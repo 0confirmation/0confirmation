@@ -536,7 +536,7 @@ const TradeRoom = (props) => {
     (async () => {
       await getAndSetFees(value)
     })().catch((err) => console.error(err));
-  }, [value])
+  }, [getAndSetFees]) // uses a function to initialize and never update again
   const [apr, setAPR] = useState("0.00%");
   const [totalLiquidityToken, setTotalLiquidityToken] = useState("0");
   useEffect(() => {
