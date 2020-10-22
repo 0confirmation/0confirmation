@@ -389,10 +389,10 @@ const TradeRoom = (props) => {
     contractsDeferred.resolve(contracts);
   };
   const [ fees, setFees ] = useState(DEFAULT_FEES);
-  const getAndSetFees = async (value) => {
+  const getAndSetFees = async (inValue) => {
     (async () => {
-        console.log('input to fees', value);
-        const fees = await getFees(value, await getRenBTCToken(), await getWETHToken(), zero.getProvider().asEthers());
+        console.log('input to fees', parseFloat(inValue) > 0 ? inValue : value);
+        const fees = await getFees(parseFloat(inValue) > 0 ? inValue : value, await getRenBTCToken(), await getWETHToken(), zero.getProvider().asEthers());
         console.log('output to fees', fees);
         setFees(fees);
     })().catch((err) => console.error(err));
@@ -502,7 +502,7 @@ const TradeRoom = (props) => {
           busy = true;
           try {
             await getPendingTransfers(cachedBtcBlock);
-            await getAndSetFees(value);
+            //await getAndSetFees(value);
           } catch (e) {
             console.error(e);
           }
@@ -726,10 +726,12 @@ const TradeRoom = (props) => {
       setRate("0");
       setSlippage("0");
     }
-    const value = checkValueLimit;
-    setValue(value);
+    const inputValue = checkValueLimit;
+    console.log("setting value: ", inputValue)
+    setValue(inputValue);
     if (isNaN(value)) return;
     await getTradeDetails(value);
+    console.log("value from input: ", value)
   };
   const updateMarket = async () => {
     const market = await getDAIBTCMarket(new Web3Provider(zero.getProvider()));
