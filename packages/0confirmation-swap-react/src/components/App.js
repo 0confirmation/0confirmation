@@ -502,7 +502,6 @@ const TradeRoom = (props) => {
           busy = true;
           try {
             await getPendingTransfers(cachedBtcBlock);
-            console.log("value: ", value)
             //await getAndSetFees(value);
           } catch (e) {
             console.error(e);
@@ -533,6 +532,11 @@ const TradeRoom = (props) => {
       await getPendingTransfers(btcBlock);
     })().catch((err) => console.error(err));
   }, [userAddress, btcBlock]);
+  useEffect(() => {
+    (async () => {
+      await getAndSetFees(value)
+    })().catch((err) => console.error(err));
+  }, [value])
   const [apr, setAPR] = useState("0.00%");
   const [totalLiquidityToken, setTotalLiquidityToken] = useState("0");
   useEffect(() => {

@@ -58,7 +58,8 @@ const addData = (o, fast, ethGasFee) => {
 const addPercentages = (o) => Object.keys(o).reduce((r, v) => {
   r[v] = {
     prettyAmount: o[v].amount.toFixed(PRETTY_AMOUNT_PRECISION),
-    percentage: o[v].ratio.multipliedBy(100).toFixed(PERCENTAGE_PRECISION) + '%',
+    percentage: o[v].ratio.multipliedBy(100) + '%',
+    //o[v].ratio.multipliedBy(100).toFixed(PERCENTAGE_PRECISION) + '%',
     ...o[v]
   };
   return r;
