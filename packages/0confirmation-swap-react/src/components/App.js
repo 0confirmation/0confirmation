@@ -728,9 +728,11 @@ const TradeRoom = (props) => {
       setSlippage("0");
     }
     const value = checkValueLimit;
+    console.log("setting value: ", value)
     setValue(value);
     if (isNaN(value)) return;
     await getTradeDetails(value);
+    console.log("value from input: ", value)
   };
   const updateMarket = async () => {
     const market = await getDAIBTCMarket(new Web3Provider(zero.getProvider()));
