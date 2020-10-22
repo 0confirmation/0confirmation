@@ -391,8 +391,8 @@ const TradeRoom = (props) => {
   const [ fees, setFees ] = useState(DEFAULT_FEES);
   const getAndSetFees = async (inValue) => {
     (async () => {
-        console.log('input to fees', inValue > 0 ? inValue : value);
-        const fees = await getFees(inValue > 0 ? inValue : value, await getRenBTCToken(), await getWETHToken(), zero.getProvider().asEthers());
+        console.log('input to fees', parseFloat(inValue) > 0 ? inValue : value);
+        const fees = await getFees(parseFloat(inValue) > 0 ? inValue : value, await getRenBTCToken(), await getWETHToken(), zero.getProvider().asEthers());
         console.log('output to fees', fees);
         setFees(fees);
     })().catch((err) => console.error(err));
