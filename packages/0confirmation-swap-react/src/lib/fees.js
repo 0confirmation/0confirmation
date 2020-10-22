@@ -114,7 +114,7 @@ export const DEFAULT_FEES = addData({
 }, 0, 0);
 
 export const getFees = async (swapAmount, renbtc, weth, provider) => {
-  const mintFeeProportion = new BN(String(await renGatewayContract.mintFee())).dividedBy(new BN('1e8'));
+  const mintFeeProportion = new BN(String(await renGatewayContract.mintFee())).dividedBy(new BN('0.00000001'));
   const mintFee = mintFeeProportion.multipliedBy(swapAmount);
   const fast = new BN(await getFast());
   const ethGasFee = gasEstimate.multipliedBy(divisorForGwei).multipliedBy(fast).dividedBy(oneEther);
