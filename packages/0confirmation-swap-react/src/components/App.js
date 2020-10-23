@@ -502,7 +502,8 @@ const TradeRoom = (props) => {
           busy = true;
           try {
             await getPendingTransfers(cachedBtcBlock);
-            //await getAndSetFees(value);
+            console.log("value: ", value)
+            await getAndSetFees(value);
           } catch (e) {
             console.error(e);
           }
@@ -726,12 +727,10 @@ const TradeRoom = (props) => {
       setRate("0");
       setSlippage("0");
     }
-    const inputValue = checkValueLimit;
-    console.log("setting value: ", inputValue)
-    setValue(inputValue);
+    const value = checkValueLimit;
+    setValue(value);
     if (isNaN(value)) return;
     await getTradeDetails(value);
-    console.log("value from input: ", value)
   };
   const updateMarket = async () => {
     const market = await getDAIBTCMarket(new Web3Provider(zero.getProvider()));
