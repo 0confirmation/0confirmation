@@ -117,7 +117,7 @@ export const DEFAULT_FEES = addData({
 let last;
 
 const cacheResult = (v) => {
-  if (v && v.totalFees && isNaN(Number(v.totalFees.amount))) v = DEFAULT_FEES;
+  if (v && v.totalFees && isNaN(Number(v.totalFees.amount))) v = last || DEFAULT_FEES;
   last = v;
   return last;
 };
