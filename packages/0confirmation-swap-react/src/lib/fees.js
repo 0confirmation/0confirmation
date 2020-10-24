@@ -6,6 +6,7 @@ import {ethers} from 'ethers';
 import {InfuraProvider} from '@ethersproject/providers';
 import { mapValues } from 'lodash';
 import  provider  from './provider';
+import { BigNumber } from '@ethersproject/bignumber';
 const { RenJS } = RenVM;
 
 const renBTC = new Token (ChainId.MAINNET, '0xeb4c2781e4eba804ce9a9803c67d0893436bb27d', 18);
@@ -113,8 +114,21 @@ export const DEFAULT_FEES = addData({
   }
 }, 0, 0);
 
+let last;
+
+const cacheResult = (v) => {
+  if (v && v.totalFees && isNaN(Number(v.totalFees.amount))) v = DEFAULT_FEES;
+  last = v;
+  return last;
+};
+
+const getMintFee = async () => {
+  return process.env.JEST_WORKER_ID ? BigNumber.from(7e8) : await renGatewayContract.mintFee();
+};
+
 export const getFees = async (swapAmount, renbtc, weth, provider) => {
-  const mintFeeProportion = new BN(String(await renGatewayContract.mintFee())).multipliedBy(new BN('0.0001'));
+  if (!swapAmount || swapAmount === '.') return cacheResult(DEFAULT_FEES);
+  const mintFeeProportion = new BN(String(await getMintFee())).multipliedBy(new BN('0.0001'));
   const mintFee = mintFeeProportion.multipliedBy(swapAmount);
   const fast = new BN(await getFast());
   const ethGasFee = gasEstimate.multipliedBy(divisorForGwei).multipliedBy(fast).dividedBy(oneEther);
@@ -130,7 +144,7 @@ export const getFees = async (swapAmount, renbtc, weth, provider) => {
     const baseFeeProportion = Number(swapAmount) != 0 ? new BN(baseFee).dividedBy(swapAmount) : new BN(0);
   const totalFeeProportion = [ mintFeeProportion, btcGasFeeProportion, keeperFeeProportion, daoFeeProportion, liquidityPoolFeeProportion, baseFeeProportion ].reduce((r, v) => r.plus(v), new BN(0));
   const totalFee = totalFeeProportion.multipliedBy(swapAmount);
-  return coerceNaNsToZero(addData({
+  return cacheResult(addData({
     mintFee: {
       ratio: mintFeeProportion,
       amount: mintFee
