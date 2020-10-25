@@ -503,7 +503,7 @@ const TradeRoom = (props) => {
           try {
             await getPendingTransfers(cachedBtcBlock);
             console.log("value: ", value)
-            //await getAndSetFees(value);
+            await getAndSetFees(value);
           } catch (e) {
             console.error(e);
           }
