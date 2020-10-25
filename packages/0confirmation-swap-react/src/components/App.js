@@ -247,6 +247,9 @@ const TradeRoom = (props) => {
   //const [userAddress, setUserAddress] = useState(ethers.constants.AddressZero);
   const [userAddress, setUserAddress] = useState(ethers.constants.AddressZero);
   const setup = async () => {
+    if(userAddress == null) {
+      setUserAddress(ethers.constants.AddressZero)
+    }
     provider.setSigningProvider(makeTestWallet(window.ethereum || provider));
     contracts = getAddresses('buidler');
     console.log(contracts);
@@ -1545,7 +1548,7 @@ const TradeRoom = (props) => {
                       }}
                     >
                       {liquidityvalue === "Add Liquidity" ? "Add" : "Remove"}
-                    </button> : <button
+                    </button> : userAddress != null ? <button
                       className="btn button-small btn-sm px-5"
                       onClick={!earnWL.includes(userAddress.toLowerCase()) ? null : (evt) => connectWeb3Modal(evt)}
                       style={{
@@ -1558,6 +1561,19 @@ const TradeRoom = (props) => {
                       }}
                     >
                       {!earnWL.includes(userAddress.toLowerCase()) ? "Earn Not Enabled" : "Connect Wallet to Provide Liquidity"}
+                    </button> : <button
+                      className="btn button-small btn-sm px-5"
+                      onClick={(evt) => connectWeb3Modal(evt)}
+                      style={{
+                        fontSize: "24dp",
+                        backgroundColor: "#008F11",
+                        color: "#FFFFFF",
+                        borderRadius: "10px",
+                        marginBottom: "2rem",
+                        opacity: "0.38"
+                      }}
+                    >
+                      Connect Wallet to Provide Liquidity
                     </button>)
               ) : (
                 userAddress != null && userAddress !== ethers.constants.AddressZero && validAmount && Object.keys(keepers).length !== 0 ?
