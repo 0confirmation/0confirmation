@@ -712,6 +712,9 @@ const TradeRoom = (props) => {
     }
     return
   }
+  useEffect(() => {
+    getAndSetFees(0)
+  },[]) // run on page load
   const updateAmount = async (e, oldValue) => {
     e.preventDefault();
     var checkValueLimit;
