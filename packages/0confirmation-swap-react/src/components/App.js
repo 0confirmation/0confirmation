@@ -738,6 +738,7 @@ const TradeRoom = (props) => {
     } else if (e.target.value >= window.minBTCSwap || Number(e.target.value) === 0 || e.target.value === ".") {
       checkValueLimit = e.target.value;
       setValidAmount(true);
+      setErrorAmount(0);
     } else {
       setValidAmount(false);
       setErrorAmount(0);
