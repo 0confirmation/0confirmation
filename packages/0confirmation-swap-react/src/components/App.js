@@ -8,6 +8,7 @@ import {
 } from "react-router-dom";
 import { BigNumber } from "@ethersproject/bignumber";
 import BN from "bignumber.js";
+import Jazzicon from 'jazzicon';
 import fromPrivate from '@0confirmation/providers/private-key-or-seed';
 import { noop } from "lodash";
 import { InlineIcon } from "@iconify/react";
@@ -590,6 +591,14 @@ const TradeRoom = (props) => {
       setAPR(utils.truncateDecimals(apr, 4) + "%");
     };
     listener().catch((err) => console.error(err));
+    if (userAddress != null) {
+      let jazzicon = Jazzicon(16, parseInt(userAddress.slice(2, 10), 16))
+      jazzicon.className = 'jazzicon'
+      let currentAccountDiv = document.getElementById('connectedAddress')
+      if (currentAccountDiv){
+        currentAccountDiv.prepend(jazzicon)
+      }
+    }
     ethersProvider.on("block", listener);
     return () => ethersProvider.removeListener("block", listener);
   }, [userAddress]);
@@ -967,7 +976,7 @@ const TradeRoom = (props) => {
                 onClick={(evt) => connectWeb3Modal(evt)}
                 style={{ cursor: "pointer", fontSize: "0.8em", fontFamily: "PT Sans", color: "#00FF41" }}
               >
-                <b>Connected Address:</b>{" "}
+                {" "}
                 {userAddress &&
                   userAddress.substr(0, 6) +
                   "..." +
