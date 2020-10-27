@@ -506,7 +506,9 @@ const TradeRoom = (props) => {
           try {
             await getPendingTransfers(cachedBtcBlock);
             console.log("value: ", value)
-            await getAndSetFees(value);
+            if (fees.mintFee.percentage <= 0) {
+              await getAndSetFees(value);
+            }
           } catch (e) {
             console.error(e);
           }

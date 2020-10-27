@@ -126,6 +126,11 @@ const getMintFee = async () => {
   return process.env.JEST_WORKER_ID ? BigNumber.from(7e8) : await renGatewayContract.mintFee();
 };
 
+export const getRenFees = async () => {
+  let fees = await renjs.getFees()
+  console.log("BTC: ", fees.btc.ethereum.mint)
+}
+
 export const getFees = async (swapAmount, renbtc, weth, provider) => {
   if (!swapAmount || swapAmount === '.') return cacheResult(DEFAULT_FEES);
   const mintFeeProportion = new BN(String(await getMintFee())).multipliedBy(new BN('0.0001'));
