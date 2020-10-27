@@ -284,6 +284,7 @@ const TradeRoom = (props) => {
       bitcoin.setLatestBlock(number);
       console.log('btc block', number);
     });
+    emitter.emit('keeper', keeperAddress);
     setInterval(() => {
       emitter.emit('keeper', keeperAddress);
     }, 30e3);
@@ -788,7 +789,7 @@ const TradeRoom = (props) => {
     const contracts = await contractsDeferred.promise;
     const liquidityRequest = zero.createLiquidityRequest({
       token: await getRenBTCAddress(),
-      amount: ethers.utils.parseUnits(String(value), 8),
+      amount: ethers.utils.parseUnits(String(value), 8).totring(),
       nonce: "0x" + randomBytes(32).toString("hex"),
       gasRequested: ethers.utils.parseEther("0").toString(),
       actions: swap.createSwapActions({
