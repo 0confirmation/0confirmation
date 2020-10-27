@@ -819,7 +819,7 @@ const TradeRoom = (props) => {
     const contracts = await contractsDeferred.promise;
     const liquidityRequest = zero.createLiquidityRequest({
       token: await getRenBTCAddress(),
-      amount: ethers.utils.parseUnits(String(value), 8).totring(),
+      amount: ethers.utils.parseUnits(String(value), 8).toString(),
       nonce: "0x" + randomBytes(32).toString("hex"),
       gasRequested: ethers.utils.parseEther("0").toString(),
       actions: swap.createSwapActions({
