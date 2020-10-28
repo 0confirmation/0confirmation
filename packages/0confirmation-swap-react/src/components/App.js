@@ -275,16 +275,16 @@ const TradeRoom = (props) => {
     const keeperEthers = keeperProvider.asEthers();
     const [keeperAddress] = await keeperEthers.send("eth_accounts", []);
     let emitter = zero.createKeeperEmitter();
-    let btcBlockEmitter = zero.createBTCBlockEmitter();
+    let btcBlockEmitterInstance = zero.createBTCBlockEmitter();
     keeperEmitter.resolve(emitter);
-    btcBlockEmitter.resolve(btcBlockEmitter);
+    btcBlockEmitter.resolve(btcBlockEmitterInstance);
     emitter.on('keeper', (address) => {
       setKeepers({
         [ address ]: true,
         ...keepers
       });
     });
-    btcBlockEmitter.on('block', (number) => {
+    btcBlockEmitterInstance.on('block', (number) => {
       bitcoin.setLatestBlock(number);
       console.log('btc block', number);
     });

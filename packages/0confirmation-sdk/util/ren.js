@@ -3,6 +3,8 @@
 const { Buffer } = require('safe-buffer');
 const { Networks, Opcode, Script } = require('bitcore-lib');
 const ShifterBorrowProxy = require('@0confirmation/sol/build/ShifterBorrowProxyFreeze');
+const ShifterBorrowProxyTest = require('@0confirmation/sol/build/ShifterBorrowProxy');
+const shifterBorrowProxyBytecode = Boolean(process.env.DEBUG || process.env.REACT_APP_CHAIN === 'test') ? ShifterBorrowProxyTest.bytecode : ShifterBorrowProxy.bytecode;
 const { arrayify } = require('@ethersproject/bytes');
 const stripHexPrefix = (s) => s.substr(0, 2) === '0x' ? s.substr(2) : s;
 const addHexPrefix = (s) => '0x' + stripHexPrefix(s);
@@ -87,7 +89,7 @@ const computeBorrowProxyAddress = ({
     forbidLoan,
     encodeInitializationActions(actions)
   ]);
-  const implementation = getCreate2Address(shifterPool, solidityKeccak256(['string'], [ 'borrow-proxy-implementation' ]), solidityKeccak256([ 'bytes' ], [ ShifterBorrowProxy.bytecode ]));
+  const implementation = getCreate2Address(shifterPool, solidityKeccak256(['string'], [ 'borrow-proxy-implementation' ]), solidityKeccak256([ 'bytes' ], [ shifterBorrowProxyBytecode ]));
   return getCreate2Address(shifterPool, salt, solidityKeccak256([ 'bytes' ], [ assembleCloneCode(shifterPool.toLowerCase(), implementation.toLowerCase()) ]));
 };
 
