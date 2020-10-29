@@ -43,7 +43,7 @@ class LiquidityRequest {
     }
   }
   async sign(from) {
-    const signature = await this.zero.driver.sendWrapped('personal_sign', [ utils.computeLiquidityRequestHash({
+    const signature = utils.fixSignature(await this.zero.driver.sendWrapped('personal_sign', [ utils.computeLiquidityRequestHash({
       shifterPool: this.shifterPool,
       borrowProxyLib: this.borrowProxyLib,
       token: this.token,
@@ -52,7 +52,7 @@ class LiquidityRequest {
       forbidLoan: this.forbidLoan,
       actions: this.actions || [],
       gasRequested: this.gasRequested
-    }), from || (await this.zero.driver.sendWrapped('eth_accounts', []))[0] ]);
+    }), from || (await this.zero.driver.sendWrapped('eth_accounts', []))[0] ]));
     return this.toParcel(signature);
   }
   toParcel(signature) {

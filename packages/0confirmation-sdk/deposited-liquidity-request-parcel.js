@@ -53,7 +53,9 @@ class DepositedLiquidityRequestParcel extends LiquidityRequestParcel {
   async waitForSignature() {
     this.zero.driver.getBackendByPrefix('ren')._amount = BigNumber.from(this.amount).toString();
     while (true) {
+        console.log('woop');
       const result = await this.queryTx();
+      if (process.env.RENVM_DEBUG) console.log(require('util').inspect(result, { colors: true, depth: 15 }));
       if (result && result.tx && result.tx.out) {
         const {
           tx: {

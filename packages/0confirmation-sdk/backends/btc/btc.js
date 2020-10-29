@@ -20,7 +20,7 @@ class BTCBackend extends RPCWrapper {
   }) {
     switch (method) {
       case 'btc_getUTXOs':
-        return await resultToJsonRpc(id, async () => await this.handler.getUTXOs(this.testnet, ...params));
+        return await resultToJsonRpc(id, async () => await this.handler.BTCHandler.getUTXOs(this.testnet, ...params));
       case 'btc_broadcastTransaction':
         return await resultToJsonRpc(id, () => this.handler._apiFallbacks.broadcastTransaction(this.testnet, ...params));
     }

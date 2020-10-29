@@ -98,7 +98,6 @@ module.exports = async (buidler) => {
   const [signer] = await ethers.getSigners();
   const wrap = makeWrapper(ethers, signer);
   const {deployer} = await getNamedAccounts();
-  logger.info(deployments.deploy)
   const deploy = makeDeploy(deployments.deploy, deployments, wrap, push, deployer);
   const {AddressZero: NO_SUBMODULE} = ethers.constants;
   const chain = chainIdToNetwork(Number(await bre.getChainId()));
