@@ -1,6 +1,6 @@
 'use strict';
 
-const { RenJS } = require('@renproject/ren');
+const RenJS = require('@renproject/ren');
 const LiquidityRequestParcel = require('./liquidity-request-parcel');
 const ethers = require('ethers');
 const { BigNumber } = require('@ethersproject/bignumber');

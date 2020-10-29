@@ -1,6 +1,6 @@
 'use strict';
 
-const { RenJS } = require('@renproject/ren');
+const RenJS = require('@renproject/ren');
 const uniswap = require('@uniswap/sdk');
 const ethers = require('ethers');
 const randomBytes = require('random-bytes').sync;
