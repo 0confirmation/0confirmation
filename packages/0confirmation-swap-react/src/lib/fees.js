@@ -1,7 +1,6 @@
 import axios from 'axios';
 import BN from 'bignumber.js';
 import {ChainId, Token, WETH, Route, Pair} from "@uniswap/sdk";
-import {RenVM} from '@0confirmation/renvm';
 import {ethers} from 'ethers';
 import {InfuraProvider} from '@ethersproject/providers';
 import { mapValues } from 'lodash';
