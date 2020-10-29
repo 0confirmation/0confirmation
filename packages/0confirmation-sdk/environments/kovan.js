@@ -1,4 +1,4 @@
-const RenJS = require('@renproject/ren');
+const RenJS = require('../renvm');
 const testnet = new RenJS('testnet');
 const BorrowProxyLib = require('@0confirmation/sol/build/BorrowProxyLib');
 const ShifterPool = require('@0confirmation/sol/build/ShifterPool');
