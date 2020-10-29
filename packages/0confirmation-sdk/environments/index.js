@@ -1,6 +1,6 @@
 'use strict';
 
-const { RenVM } = require('@0confirmation/renvm');
+const { RenJS } = require('@renproject/ren');
 const uniswap = require('@uniswap/sdk');
 const ethers = require('ethers');
 const randomBytes = require('random-bytes').sync;
@@ -94,7 +94,7 @@ const renvmFromEnvironment = (network) => {
       mpkh: '0x' + randomBytes(20).toString('hex')
     }
   }
-  const renvm = new RenVM(renNetworkFromNetwork(network));
+  const renvm = new RenJS(renNetworkFromNetwork(network));
   const chainId = chainIdFromNetwork(network);
   const renbtcShifter = renvm.network.addresses.gateways.BTCGateway._address;
   const renbtc = renvm.network.addresses.tokens.BTC.address;

@@ -7,7 +7,7 @@ import {InfuraProvider} from '@ethersproject/providers';
 import { mapValues } from 'lodash';
 import  provider  from './provider';
 import { BigNumber } from '@ethersproject/bignumber';
-const { RenJS } = RenVM;
+const { RenJS } = require('@renproject/ren');
 
 const renBTC = new Token (ChainId.MAINNET, '0xeb4c2781e4eba804ce9a9803c67d0893436bb27d', 18);
 const getPair = async(renbtc, weth, provider) =>  (await Pair.fetchData(renbtc, weth, provider));

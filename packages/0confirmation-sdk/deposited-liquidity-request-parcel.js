@@ -1,6 +1,6 @@
 'use strict';
 
-const { RenVM } = require('@0confirmation/renvm');
+const { RenJS } = require('@renproject/ren');
 const LiquidityRequestParcel = require('./liquidity-request-parcel');
 const ethers = require('ethers');
 const { BigNumber } = require('@ethersproject/bignumber');
@@ -114,7 +114,7 @@ class DepositedLiquidityRequestParcel extends LiquidityRequestParcel {
   }
   computeShiftInTxHash() {
     return utils.computeShiftInTxHash({
-      renContract: RenVM.Tokens.BTC.Mint,
+      renContract: RenJS.Tokens.BTC.Mint,
       g: {
         to: this.proxyAddress,
         p: constants.CONST_PHASH,

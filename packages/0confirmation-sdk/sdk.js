@@ -11,12 +11,8 @@ const BN = require('bignumber.js');
 const resultToJsonRpc = require('./util/result-to-jsonrpc');
 const { AddressZero } = require('@ethersproject/constants');
 const { Buffer } = require('safe-buffer');
-const {
-  Common: {
-    RenVMType
-  },
-  RenVM
-} = require('@0confirmation/renvm');
+const { RenVMType } = require('@renproject/interfaces');
+const { RenJS } = require('@renproject/ren');
 const makeBaseProvider = require('@0confirmation/providers/base-provider');
 const { toHex, toBase64 } = require('./util');
 const { joinSignature } = require('@ethersproject/bytes');
@@ -254,7 +250,7 @@ class Zero {
   }) {
     return await this.driver.sendWrapped('ren_submitTx', {
       tx: {
-        to: RenVM.Tokens.BTC.Mint,
+        to: RenJS.Tokens.BTC.Mint,
         in: [{
           name: 'p',
           type: RenVMType.ExtEthCompatPayload,
