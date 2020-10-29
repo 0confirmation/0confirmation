@@ -235,10 +235,10 @@ describe("ShifterPool", () => {
       const sig = await deposited.waitForSignature();
       try {
 	fixtures.keeperEthers = new ethers.providers.Web3Provider(fixtures.keeper.getProvider());
-	console.log(ethers.utils.formatEther(await fixtures.keeperEthers.getBalance(fixtures.keeperAddress)));
+	//console.log(ethers.utils.formatEther(await fixtures.keeperEthers.getBalance(fixtures.keeperAddress)));
         const receipt = await (await deposited.executeBorrow(ethers.utils.parseUnits('0.1', 8).toString(), '100000', { gasPrice: ethers.utils.parseUnits('50', 9) })).wait();
-          console.log(receipt);
-	console.log(ethers.utils.formatEther(await fixtures.keeperEthers.getBalance(fixtures.keeperAddress)));
+          //console.log(receipt);
+	//console.log(ethers.utils.formatEther(await fixtures.keeperEthers.getBalance(fixtures.keeperAddress)));
         deferred.resolve({
           borrowProxy: await deposited.getBorrowProxy(),
           deposited
