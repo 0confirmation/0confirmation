@@ -1,6 +1,7 @@
 'use strict';
 
 const RenJS = require('@renproject/ren');
+console.log(RenJS);
 const uniswap = require('@uniswap/sdk');
 const ethers = require('ethers');
 const randomBytes = require('random-bytes').sync;
