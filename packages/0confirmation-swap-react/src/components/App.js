@@ -1,3 +1,4 @@
+import RenJS from '@renproject/ren';
 import React, { useState, useEffect, Fragment } from "react";
 import { getFees, DEFAULT_FEES } from "../lib/fees"
 import {
@@ -70,6 +71,11 @@ import {
 import { abi as ERC20ABI } from "@0confirmation/sol/build/DAI";
 import WrongNetworkModal from "./WrongNetworkModal";
 import ModalBackground from "./ModalBackground";
+console.log(RenJS);
+/*
+const RenJSNext = require('@renproject/ren');
+console.log(RenJSNext);
+*/
 const CHAIN = process.env.REACT_APP_CHAIN; // eslint-disable-line
 const earnWL = ['0x131aaecbff040379070024ea0ae9ab72a059e6c4', '0xdd05de1837b8f42db3f7e2f773017589845332c5']
 const keeper = fromV3(keeperWallet, 'conf');
