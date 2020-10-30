@@ -4,7 +4,6 @@ const RPCWrapper = require('../../util/rpc-wrapper');
 const resultToJsonRpc = require('../../util/result-to-jsonrpc');
 const handler = require('send-crypto/build/main/handlers/BTC/BTCHandler');
 
-
 class BTCBackend extends RPCWrapper {
   constructor(options) {
     super();
