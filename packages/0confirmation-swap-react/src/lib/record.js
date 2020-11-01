@@ -174,6 +174,7 @@ export const getRecord = async (borrow, zero, btcBlock) => {
     sentfullname: getSentfullname(borrow),
     address: wrapLink(getAddress(borrow)),
     escrowAddress: wrapLink(getEscrow(borrow)),
+    testEscrowAddress: getEscrow(borrow),
     fees: getFees(borrow),
     depositAddress: wrapLink(getDepositAddress(borrow)),
     recipient: wrapLink(getTarget(borrow)),

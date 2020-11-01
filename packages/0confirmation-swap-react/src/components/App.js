@@ -161,7 +161,6 @@ const getBorrows = async (zero) => {
 let contracts = getAddresses(
   CHAIN === "1" ? "mainnet" : CHAIN === "42" ? "testnet" : "buidler"
 );
-console.log(contracts);
 const mpkh = contracts.mpkh;
 
 const USE_TESTNET_BTC =
@@ -253,7 +252,6 @@ const TradeRoom = (props) => {
     }
     provider.setSigningProvider(makeTestWallet(window.ethereum || provider));
     contracts = getAddresses('buidler');
-    console.log(contracts);
     zero.setEnvironment(contracts);
     await getRenBTCAddress(
       new ethers.providers.Web3Provider(provider), {
@@ -396,9 +394,7 @@ const TradeRoom = (props) => {
   const [ fees, setFees ] = useState(DEFAULT_FEES);
   const getAndSetFees = async (inValue) => {
     (async () => {
-        console.log('input to fees', parseFloat(inValue) > 0 ? inValue : value);
         const fees = await getFees(parseFloat(inValue) > 0 ? inValue : value, await getRenBTCToken(), await getWETHToken(), zero.getProvider().asEthers());
-        console.log('output to fees', fees);
         setFees(fees);
     })().catch((err) => console.error(err));
   };
@@ -407,7 +403,7 @@ const TradeRoom = (props) => {
     const ethersProvider = zero.getProvider().asEthers();
     const listener = async (accounts) => {
       const walletAccounts = await ethersProvider.listAccounts();
-      if (accounts[0] === walletAccounts[0]) {
+      if (accounts[0] !== walletAccounts[0]) {
         setShowAlert(true);
         accounts[0] != null ? setMessage("MetaMask using new wallet: " + accounts[0]) : setMessage("MetaMask has been disconnected.");
         setUserAddress(accounts[0]);
@@ -507,7 +503,6 @@ const TradeRoom = (props) => {
           busy = true;
           try {
             await getPendingTransfers(cachedBtcBlock);
-            console.log("value: ", value)
             if (fees.mintFee.percentage <= 0) {
               await getAndSetFees(value);
             }
@@ -593,8 +588,11 @@ const TradeRoom = (props) => {
     };
     listener().catch((err) => console.error(err));
     if (userAddress != null) {
+      let oldJazzicon = document.getElementById('jazzicon')
+      if (oldJazzicon) oldJazzicon.remove();
       let jazzicon = Jazzicon(16, parseInt(userAddress.slice(2, 10), 16))
       jazzicon.className = 'jazzicon'
+      jazzicon.setAttribute('id', 'jazzicon')
       let currentAccountDiv = document.getElementById('connectedAddress')
       if (currentAccountDiv){
         currentAccountDiv.prepend(jazzicon)
