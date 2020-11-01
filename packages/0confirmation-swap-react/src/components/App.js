@@ -76,6 +76,33 @@ const keeper = fromV3(keeperWallet, 'conf');
 window.maxBTCSwap = 1;
 window.minBTCSwap = 0.026;
 
+const BLOCK_POLL_INTERVAL = 15000;
+
+const subscribeToBlockChanges = (provider, listener, interval = BLOCK_POLL_INTERVAL) => {
+  let cancelFlag = false;
+  const timeout = (n) => new Promise((resolve, reject) => setTimeout(resolve, n));
+  let last;
+  const unsubscribe = () => (cancelFlag = true);
+  (async () => {
+    while (true) {
+      if (cancelFlag) break;
+      try {
+        const blockNumber = Number(await provider.send('eth_blockNumber', []));
+        if (last === undefined || blockNumber > last) {
+          last = blockNumber;
+          if (cancelFlag) break; // check one more time
+          await listener(blockNumber);
+        }
+        await timeout(interval);
+      } catch (e) {
+        if (process.env.REACT_APP_CHAIN === 'test') console.error(e);
+        await timeout(interval);
+      }
+    }
+  })().catch(() => {});
+  return unsubscribe;
+};
+
 if (window.ethereum) window.ethereum.autoRefreshOnNetworkChange = false;
 
 let cachedBtcBlock = 0;
@@ -512,10 +539,11 @@ const TradeRoom = (props) => {
           busy = false;
         }
       };
-      ethersProvider.on("block", listener);
+      //ethersProvider.on("block", listener); // too much polling
+      const unsubscribe = subscribeToBlockChanges(ethersProvider, listener, BLOCK_POLL_INTERVAL); // just pass in the interval explicitly to be clear
       const userAddresses = await ethersProvider.listAccounts();
       if (userAddresses) setUserAddress(userAddresses[0]);
-      return () => ethersProvider.removeListener("block", listener);
+      return unsubscribe;
     })().catch((err) => console.error(err));
   }, []);
   const [btcBlock, setBTCBlock] = useState(0);
@@ -598,8 +626,7 @@ const TradeRoom = (props) => {
         currentAccountDiv.prepend(jazzicon)
       }
     }
-    ethersProvider.on("block", listener);
-    return () => ethersProvider.removeListener("block", listener);
+    return subscribeToBlockChanges(ethersProvider, listener, BLOCK_POLL_INTERVAL);
   }, [userAddress]);
   const getPendingTransfers = async (btcBlock) => {
     const ethersProvider = zero.getProvider().asEthers();
@@ -845,9 +872,9 @@ const TradeRoom = (props) => {
       let proxy;
       const deposited = await parcel.waitForDeposit(0, 30 * 60 * 1000);
       persistence.saveLoan(deposited);
+      setWaiting(false);
       await getPendingTransfers();
 
-      setWaiting(false);
       const length = _history.length;
       if (CHAIN === 'test') await new Promise((resolve) => setTimeout(resolve, 70000));
       proxy = await utils.pollForBorrowProxy(deposited);
