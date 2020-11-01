@@ -2181,6 +2181,7 @@ const TradeRoom = (props) => {
                                 v.substr(v.length - 5, v.length)
                             )}
                             confirmations={eleos.confirmations}
+                            btcBlock={btcBlock}
                             parcel={eleos.parcel}
                             sent={eleos.sent} sentName={eleos.sentName}
                             received={eleos.received} receivedName={eleos.receivedName}

@@ -59,15 +59,15 @@ export default function TransactionRow(props) {
                   <a href={props.escrowAddress.props.href} target="_blank" referrerPolicy="no-referrer" style={{color:"white", textDecoration:"none"}}>{props.escrowAddress.props.children}</a>
                 </div>
                 <div className="break-words" style={{width: "16.5%"}}>
-                    <img
+                  {Number(props.btcBlock) === 0 ? getSvgForConfirmations('N/A') : 
+                  (<img
                         alt={`${props.confirmations} of 6`}
                         // width="30%"
                         // height="30%"
-                        src={getSvgForConfirmations(
-                            props.confirmations
-                        )}
+                        src={getSvgForConfirmations(props.confirmations)}
                         className="img-fluid"
-                    />
+                    />) 
+                  }
                 </div>
                 <div className="break-words" style={{lineHeight:"2.2rem", width: "16.5%"}}>{props.sent} {props.sentName}</div>
                 <div className="break-words" style={{lineHeight:"2.2rem", width: "16.5%"}}>{props.received} {props.receivedName}</div>
@@ -100,6 +100,7 @@ export default function TransactionRow(props) {
                 transactionModal={transactionModal}
                 onFallbackShift={ onFallbackShift.bind(null, props.parcel) }
                 _history={props._history}
+                btcBlock={props.btcBlock}
                 transactionDetails={transactionDetails}
                 setTransactionModal={setTransactionModal}
             />

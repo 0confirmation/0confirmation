@@ -13,6 +13,7 @@ const TransactionDetailsModal = ({
   transactionDetails,
   setBlockTooltip,
   blocktooltip,
+  btcBlock,
   onFallbackShift,
   ismobile,
 }) => {
@@ -261,17 +262,20 @@ const TransactionDetailsModal = ({
                     }}
                   >
                     {" "}
-                    <img
-                      alt={`${
-                        _history[`${transactionDetails}`].confirmations
-                      } of 6`}
-                      width="30%"
-                      height="30%"
-                      src={getSvgForConfirmations(
-                        _history[transactionDetails].confirmations
-                      )}
-                      className="img-fluid"
-                    />{" "}
+                    {Number(btcBlock) === 0 ? getSvgForConfirmations('N/A') : 
+                  (<img
+                    alt={`${
+                      _history[`${transactionDetails}`].confirmations
+                    } of 6`}
+                    width="30%"
+                    height="30%"
+                    src={getSvgForConfirmations(
+                      _history[transactionDetails].confirmations
+                    )}
+                    className="img-fluid"
+                  />) 
+                  }
+                    {" "}
                   </p>
                 </Col>
               </Row>

@@ -26,7 +26,6 @@ export const createEtherscanLinkFor = (s) =>
             "etherscan.io/" +
             (s.length === 66 ? "tx/" : "address/") +
             s)
-      console.log("etherscan link: ", r)
     } else {
       let btcPrefix = 'btc'
       let txOrAddress = '/address/'
@@ -34,9 +33,6 @@ export const createEtherscanLinkFor = (s) =>
       if (s.length === 64) txOrAddress = '/tx/'
       r = ("https://www.blockchain.com/" + 
            btcPrefix + txOrAddress + s);  
-
-      console.log("bitcoin link: ", r)
-
     }
     return r
   }

@@ -64,6 +64,7 @@ const logBalances = async (zero) => {
   const node = zero.driver.getBackend('zero').node;
   node.socket.on('peer:discovery', (peer) => {
     console.logKeeper('found a peer: ' + peer.id.toB58String());
+    await zero.startHandlingBTCBlock();
   });
   zero.listenForLiquidityRequests(async (v) => {
     console.logBold('received liquidity request over libp2p!');

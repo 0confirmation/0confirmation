@@ -5,9 +5,12 @@ import threeCfSvg from "../images/3.svg";
 import fourCfSvg from "../images/4.svg";
 import fiveCfSvg from "../images/5.svg";
 import sixCfSvg from "../images/6.svg";
+import React from 'react'
+
+const confLoader = <div class="loading-ring"></div>
 
 export const confirmationSvgs = {
-  'N/A': zeroCfSvg,
+  'N/A': confLoader,
   "0": zeroCfSvg,
   "1": oneCfSvg,
   "2": twoCfSvg,
