@@ -655,7 +655,7 @@ const TradeRoom = (props) => {
     for (const item of history) {
       result.push(await record.getRecord(item, zero, btcBlock));
     }
-    setHistory(record.decorateHistory(result));
+    setHistory(record.decorateHistory(result.reverse()));
     return borrows;
   };
   const [liquidityvalue, setLiquidityValue] = useState("Add Liquidity");
