@@ -681,6 +681,8 @@ const TradeRoom = (props) => {
   const [correctNetwork, setCorrectNetwork] = useState(Number(CHAIN))
   const [validAmount, setValidAmount] = useState(true)
   const [errorAmount, setErrorAmount] = useState(0)
+  const [keeperErrorAmount, setKeeperErrorAmount] = useState(0)
+
   //  const [gets, setGets] = useState(0);
   const [rate, setRate] = useState("0");
   if (rate || setRate) noop(); // eslint silencer
@@ -741,12 +743,13 @@ const TradeRoom = (props) => {
     }, 5500)
   }
   const checkAmount = async () => {
-    console.log("error aomunt: ", errorAmount)
     if(errorAmount > window.maxBTCSwap && window.location.pathname.split("/")[2] === "swap") {
       showWarningAlert("The maximum swap amount is " + window.maxBTCSwap + " BTC.");
     }else if (errorAmount != 0 && errorAmount < window.minBTCSwap && window.location.pathname.split("/")[2] === "swap") {
       showWarningAlert("The minimum swap amount is " + window.minBTCSwap + " BTC.");
-    }
+    }else if (keeperErrorAmount > 0) {
+      showWarningAlert("You are trying to swap " + keeperErrorAmount + " BTC but there is only " + pool + " BTC in the pool")
+    } 
     return
   }
   useEffect(() => {
@@ -755,6 +758,8 @@ const TradeRoom = (props) => {
   const updateAmount = async (e, oldValue) => {
     e.preventDefault();
     var checkValueLimit;
+    console.log("pool size: ", pool)
+    console.log("value > pool? ", e.target.value > pool)
     if (!isNaN(e.target.value)) getAndSetFees(e.target.value).catch((err) => console.error(err));
     if (e.target.value > window.maxBTCSwap && window.location.pathname.split("/")[2] === "swap") {
       //checkValueLimit = oldValue;
@@ -772,11 +777,18 @@ const TradeRoom = (props) => {
       setCalcValue("0");
       setRate("0");
       setSlippage("0");
+    } else if (e.target.value > Number(pool)) {
+      setValidAmount(false);
+      setKeeperErrorAmount(e.target.value);
+      setCalcValue("0");
+      setRate("0");
+      setSlippage("0");
     } else if (e.target.value >= window.minBTCSwap || Number(e.target.value) === 0 || e.target.value === ".") {
       checkValueLimit = e.target.value;
       setValidAmount(true);
       setErrorAmount(0);
-    } else {
+    } 
+    else {
       setValidAmount(false);
       setErrorAmount(0);
       setCalcValue("0");
