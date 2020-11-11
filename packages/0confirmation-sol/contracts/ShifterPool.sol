@@ -76,13 +76,18 @@ contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
   }
   bytes32 constant BORROW_PROXY_IMPLEMENTATION_SALT = 0xfe1e3164ba4910db3c9afd049cd8feb4552390569c846692e6df4ac68aeaa90e;
   function deployBorrowProxyImplementation() public {
+    require(isolate.borrowProxyImplementation == address(0x0), "already deployed");
     isolate.borrowProxyImplementation = isolate.makeBorrowProxy(BORROW_PROXY_IMPLEMENTATION_SALT);
+    address payable borrowProxyImplementation = address(uint160(isolate.borrowProxyImplementation));
+    borrowProxyImplementation.setupBorrowProxy(address(0x1), address(0x1), false);
   }
   function computeProxyAddress(bytes32 salt) public view returns (address) {
     return isolate.borrowProxyImplementation.deriveBorrowerAddress(salt);
   }
   function deployAssetForwarderImplementation() public {
+    require(isolate.assetForwarderImplementation == address(0x0), "already deployed");
     isolate.assetForwarderImplementation = AssetForwarderLib.deployAssetForwarder();
+    AssetForwarder(isolate.assetForwarderImplementation).lock();
   }
 
   function deployAssetForwarderClone(bytes32 salt) public returns (address created) {

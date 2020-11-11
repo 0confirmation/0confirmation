@@ -229,6 +229,7 @@ describe("ShifterPool", () => {
     const deferred = defer();
     const [ keeperAddress ] = await fixtures.keeper.driver.sendWrapped('eth_accounts', []);
     const [ borrowerAddress ] = await fixtures.borrower.driver.sendWrapped('eth_accounts', []);
+    const balanceStart = Number(ethers.utils.formatUnits(await fixtures.renbtcWrapped.balanceOf(keeperAddress), await fixtures.renbtcWrapped.decimals()));
     await fixtures.keeper.listenForLiquidityRequests(async (v) => {
       const deposited = await v.waitForDeposit(0, 60*1000*30);
       const result = await deposited.submitToRenVM();
@@ -269,6 +270,8 @@ describe("ShifterPool", () => {
     const daiWrapped = new ethers.Contract(fixtures.DAI.address, fixtures.DAI.abi, fixtures.borrower.getProvider().asEthers());
     expect(Number(ethers.utils.formatUnits(await daiWrapped.balanceOf(fixtures.borrowerAddress), 18))).to.be.gt(1);
     const renbtcWrapped = new ethers.Contract(fixtures.renbtc.address, fixtures.DAI.abi, fixtures.daoZero.getProvider().asEthers());
+    const balanceEnd = Number(ethers.utils.formatUnits(await fixtures.renbtcWrapped.balanceOf(keeperAddress), await fixtures.renbtcWrapped.decimals()));
+    expect(balanceEnd).to.be.gt(balanceStart);
     await fixtures.keeper.stopListeningForLiquidityRequests();
   });
   it('should default properly', async () => {

@@ -31,6 +31,7 @@ contract BorrowProxy {
     return IBorrowProxyController(isolate.masterAddress).validateProxyRecordHandler(record);
   }
   function proxy(address to, uint256 value, bytes memory payload) public onlyOwnerOrPool {
+    require(to != isolate.masterAddress, "can't target the ShifterPool");
     bytes4 sig = bytes4(uint32(uint256(payload.toSlice(0, 4).asWord())));
     BorrowProxyLib.ModuleExecution memory module = isolate.fetchModule(to, sig);
     module.token = isolate.token;
