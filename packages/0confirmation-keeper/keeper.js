@@ -6,8 +6,8 @@ const path = require('path');
 const DB = require('./db');
 const makeZero = require('./make-zero');
 const environments = require('@0confirmation/sdk/environments');
-const { makeManagerClass } = require('@0confirmation/eth-manager');
-const ERC20 = makeManagerClass(require('@0confirmation/sol/build/DAI'));
+const { makeEthersBase } = require('ethers-base');
+const ERC20 = makeEthersBase(require('@0confirmation/sol/build/DAI'));
 const THIRTY_MINUTES = 60*1000*30;
 
 const chalk = require('chalk');
@@ -31,9 +31,9 @@ const environment = environments.getAddresses(chainIdToName(CHAIN));
 
 const logBalances = async (zero) => {
   const ethersProvider = zero.getProvider().asEthers();
-  const [ from ] = await ethersProvider.listAccounts();
+  const from = await zero.getAddress();
   const balance = await ethersProvider.getBalance(from);
-  const renbtc = new ERC20(environment.renbtc, ethersProvider);
+  const renbtc = new ERC20(environment.renbtc, zero.getSigner());
   const renbtcBalance = await renbtc.balanceOf(from);
   console.logKeeper('ether balance: ' + chalk.cyan(ethers.utils.formatEther(balance)));
   console.logKeeper('renbtc balance: ' + chalk.cyan(ethers.utils.formatUnits(renbtcBalance, 8)));
@@ -45,13 +45,13 @@ const logBalances = async (zero) => {
   await zero.initializeDriver();
   await zero.startHandlingKeeperDiscovery();
   await zero.startHandlingBTCBlock();
-  const [ from ] = await ethersProvider.listAccounts();
+  const from = await zero.getAddress();
   console.logKeeper('using network: ' + chainIdToName(CHAIN));
   console.logKeeper('using address ' + from);
   await logBalances(zero);
   const db = new DB(path.join(process.env.HOME, '.0cf-keeper'));
   const liquidityToken = await zero.getLiquidityTokenFor(environment.renbtc);
-  const renbtc = new ERC20(environment.renbtc, ethersProvider);
+  const renbtc = new ERC20(environment.renbtc, zero.getSigner());
   const allowance = await renbtc.allowance(from, zero.shifterPool.address);
   if (allowance.lt('0x' + 'ff'.repeat(15))) {
     console.logKeeper('sending approve(address,uint256) to pool');

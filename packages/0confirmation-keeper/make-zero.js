@@ -14,7 +14,7 @@ const signer = new ethers.Wallet(process.env.PRIVATE_KEY).connect(new ethers.pro
 console.log(NETWORK);
 
 const makeZero = () => {
-  const zero = new Zero(fromEthers(signer), NETWORK);
+  const zero = new Zero(signer, NETWORK);
   return zero;
 };
 

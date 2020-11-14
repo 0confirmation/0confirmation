@@ -185,14 +185,14 @@ const getEnvironment = (provider, network, backends) => ({
 
 const getMockEnvironment = (provider) => getEnvironment(provider, 'buidler', makeMockBackends(provider));
 
-const { makeManagerClass } = require('@0confirmation/eth-manager');
 
+const { makeEthersBase } = require('ethers-base');
 /*
-const CurvefiManager = makeManagerClass(Curvefi);
+const CurvefiManager = makeEthersBase(Curvefi);
 */
-const ShifterPoolManager = makeManagerClass(ShifterPool.mainnet);
+const ShifterPoolManager = makeEthersBase(ShifterPool.mainnet);
 /*
-const CurveTokenManager = makeManagerClass(CurveToken);
+const CurveTokenManager = makeEthersBase(CurveToken);
 */
 
 Object.assign(module.exports, {

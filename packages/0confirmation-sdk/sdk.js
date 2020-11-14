@@ -2,6 +2,8 @@
 
 const staticPreprocessor = require('./static-preprocessor');
 const ISafeViewExecutor = require('@0confirmation/sol/build/ISafeViewExecutor');
+const { Provider } = require('@ethersproject/providers');
+const { VoidSigner } = require('@ethersproject/abstract-signer');
 const pendingTransfersQuery = require('./queries/query-pending-transfers');
 const genesisQuery = require('./queries/query-genesis');
 const { makeEthersBase } = require('ethers-base');
@@ -92,7 +94,7 @@ class Zero {
     this.shifterPool = new ShifterPool(this.network.shifterPool, this.getSigner(), this);
   }
   constructor(o, ...args) {
-    if (o.send || o.sendAsync) {
+    if (o.send || o.sendAsync || Provider.isProvider(o) || VoidSigner.isSigner(o)) {
       if (args.length && args[0]) {
         if (args[0] === 'mock') o = environment.getMockEnvironment(o);
         else o = environment.getEnvironment(o, ...args);
@@ -216,12 +218,12 @@ class Zero {
     return () => contract.removeListener(filter);
   }
   async getAddress() {
-    const signerOrProvider = this.getProvider().asEthers();
+    const signerOrProvider = this.getSigner();
+    if (signerOrProvider.addressPromise) return await signerOrProvider.addressPromise;
+    if (signerOrProvider.address) return await signerOrProvider.address;
     if (signerOrProvider.getAddress) return await signerOrProvider.getAddress();
     const accounts = await signerOrProvider.listAccounts();
-    return accounts[0] || (() => {
-      throw Error('must have an account active on provider');
-    })();
+    return accounts[0] || null;
   }
   async getBorrowProxies(borrower) {
     if (!borrower) {
