@@ -16,11 +16,17 @@ const TriggerParcelABI = Exports.abi.find((v) => v.name === 'TriggerParcelExport
 
 const decodeProxyRecord = (input) => abi.decode([ ProxyRecordABI ], input)[0];
 const encodeTriggerParcel = (input) => abi.encode([ TriggerParcelABI ], [ input ]);
+const { VoidSigner } = require('@ethersproject/abstract-signer');
 
 const getProvider = (borrowProxy) => {
-  const provider = this.signer && this.signer.provider || this.provider;
-  return provider;
-}
+  const provider = borrowProxy.zero.getSigner();
+  return VoidSigner.isSigner(provider) ? provider.provider : provider;
+};
+
+const getSigner = (borrowProxy) => {
+  const signer = borrowProxy.zero.getSigner();
+  return signer;
+};
 
 class BorrowProxy extends makeEthersBase(ShifterBorrowProxy) {
   constructor ({
@@ -35,7 +41,7 @@ class BorrowProxy extends makeEthersBase(ShifterBorrowProxy) {
     proxyAddress,
     record
   }) {
-    super(proxyAddress, zero.getProvider().asEthers());
+    super(proxyAddress, zero.getSigner());
     this.transactionHash = transactionHash;
     this.zero = zero;
     this.shifterPool = shifterPool; 

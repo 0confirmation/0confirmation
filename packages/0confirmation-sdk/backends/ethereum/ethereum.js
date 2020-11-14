@@ -1,6 +1,7 @@
 'use strict';
 
-const { Web3Provider } = require('@ethersproject/providers');
+const { Provider, Web3Provider } = require('@ethersproject/providers');
+const { VoidSigner } = require('@ethersproject/abstract-signer');
 const { id } = require('@ethersproject/hash');
 const {
   Provider: {
@@ -112,7 +113,7 @@ class EthereumBackend extends RPCWrapper {
     this.name = 'ethereum';
     this.prefixes = ['eth', 'personal', 'net'];
     this.driver = driver;
-    if (provider.getAddress || provider.listAccounts) provider = ethersToWeb3(provider);
+    if (VoidSigner.isSigner(provider) || Provider.isProvider(provider)) provider = ethersToWeb3(provider);
     this.provider = provider;
     this._cache = {
       provider,

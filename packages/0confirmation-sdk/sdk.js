@@ -39,9 +39,8 @@ const shifterBorrowProxyInterface = new Interface(filterABI(ShifterBorrowProxy.a
 const uniq = require('lodash/uniq');
 
 const getProvider = (zero) => {
-  const provider = zero.getProvider();
-  const ethersProvider = provider.asEthers();
-  return ethersProvider.signer && ethersProvider.signer.provider || ethersProvider.provider;
+  const provider = zero.getProvider().asEthers();
+  return provider;
 };
 
 const getSignatures = (abi) => {
@@ -90,7 +89,7 @@ class Zero {
   setEnvironment(env) {
     this.network = env;
     this.network.shifterPool = this.network.shifterPool || AddressZero;
-    this.shifterPool = new ShifterPool(this.network.shifterPool, this.getProvider().asEthers(), this);
+    this.shifterPool = new ShifterPool(this.network.shifterPool, this.getSigner(), this);
   }
   constructor(o, ...args) {
     if (o.send || o.sendAsync) {
@@ -133,12 +132,8 @@ class Zero {
     const eth = this.driver.getBackend('ethereum');
     const provider = eth.provider;
     provider.asEthers = () => {
-      const ethersObject = provider._ethers
-      let internalEthers = ethersObject._ethers;
-      if (internalEthers) {
-        if (internalEthers.provider && internalEthers.provider.listAccounts) internalEthers = internalEthers.provider;
-      } else internalEthers = new Web3Provider(provider);
-      return internalEthers;
+      const signer = this.getSigner();
+      return signer.getAddress && signer.provider || signer;
     };
     return provider;
   }
