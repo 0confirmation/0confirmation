@@ -125,6 +125,10 @@ class Zero {
   async setBorrowProxy(address) {
     return await this.driver.sendWrapped('0cf_setBorrowProxy', [ address ]);
   }
+  getSigner() {
+    const backend = this.driver.getBackend('ethereum');
+    return backend.provider._ethers;
+  }
   getProvider() {
     const eth = this.driver.getBackend('ethereum');
     const provider = eth.provider;
@@ -136,6 +140,7 @@ class Zero {
       } else internalEthers = new Web3Provider(provider);
       return internalEthers;
     };
+    return provider;
   }
   getBorrowProvider() {
     const wrappedEthProvider = this.getProvider(this.driver);
@@ -336,17 +341,17 @@ class Zero {
     return await (this.driver.getBackend('zero'))._unsubscribeLiquidityRequests();
   }
   async approvePool(token, overrides) {
-    const contract = new LiquidityToken(token, this.getProvider().asEthers());
+    const contract = new LiquidityToken(token, this.getSigner());
     return await contract.approve(this.network.shifterPool, '0x' + Array(64).fill('f').join(''), overrides || {});
   }
   async getLiquidityTokenFor(token) {
     const contract = this.shifterPool;
-    const liquidityToken = new LiquidityToken(await contract.getLiquidityTokenHandler(token), this.getProvider().asEthers());
+    const liquidityToken = new LiquidityToken(await contract.getLiquidityTokenHandler(token), this.getSigner());
     return liquidityToken;
   }
   async approveLiquidityToken(token, overrides) {
     const liquidityToken = await this.getLiquidityTokenFor(token);
-    const contract = new LiquidityToken(token, this.getProvider().asEthers());
+    const contract = new LiquidityToken(token, this.getSigner());
     return await contract.approve(liquidityToken.address, '0x' + Array(62).fill('f').join(''), overrides || {});
   }
   async addLiquidity(token, value, overrides) {
