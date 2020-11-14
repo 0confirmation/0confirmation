@@ -75,6 +75,7 @@ const earnWL = ['0x131aaecbff040379070024ea0ae9ab72a059e6c4', '0xdd05de1837b8f42
 const keeper = fromV3(keeperWallet, 'conf');
 window.maxBTCSwap = 1;
 window.minBTCSwap = 0.026;
+const signer = provider.asEthers().getSigner();
 
 const BLOCK_POLL_INTERVAL = 15000;
 
@@ -213,7 +214,7 @@ const getMockRenBTCAddress = async (provider) => {
   const registry = new ethers.Contract(
     contracts.shifterRegistry,
     ShifterRegistryMock.abi,
-    provider
+    signer
   );
   return await registry.token();
 };
@@ -574,7 +575,7 @@ const TradeRoom = (props) => {
       const renbtcWrapped = new ethers.Contract(
         await getRenBTCAddress(),
         ERC20ABI,
-        ethersProvider
+        signer
       );
       const liquidityToken = await zero.getLiquidityTokenFor(contracts.renbtc);
       const poolSize = await renbtcWrapped.balanceOf(liquidityToken.address);
@@ -860,12 +861,8 @@ const TradeRoom = (props) => {
       nonce: "0x" + randomBytes(32).toString("hex"),
       gasRequested: ethers.utils.parseEther("0").toString(),
       actions: swap.createSwapActions({
-        borrower: (
-          await new ethers.providers.Web3Provider(provider).send(
-            "eth_accounts",
-            []
-          )
-        )[0],
+        borrower: 
+          await zero.getAddress(),
         dai: contracts.dai,
         router: contracts.router,
         swapAndDrop: contracts.swapAndDrop,

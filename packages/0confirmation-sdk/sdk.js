@@ -127,7 +127,15 @@ class Zero {
   }
   getProvider() {
     const eth = this.driver.getBackend('ethereum');
-    return eth.provider;
+    const provider = eth.provider;
+    provider.asEthers = () => {
+      const ethersObject = provider._ethers
+      let internalEthers = ethersObject._ethers;
+      if (internalEthers) {
+        if (internalEthers.provider && internalEthers.provider.listAccounts) internalEthers = internalEthers.provider;
+      } else internalEthers = new Web3Provider(provider);
+      return internalEthers;
+    };
   }
   getBorrowProvider() {
     const wrappedEthProvider = this.getProvider(this.driver);

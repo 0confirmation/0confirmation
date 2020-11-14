@@ -1,7 +1,7 @@
 "use strict";
 
 import globalObject from "the-global-object";
-import fromEthers from "@0confirmation/providers/from-ethers";
+import fromEthers from "ethers-to-web3";
 import { makeEngine, makeBaseProvider } from "@0confirmation/providers";
 import makeWalletSelectorFromProvider from "@0confirmation/providers/selector";
 
