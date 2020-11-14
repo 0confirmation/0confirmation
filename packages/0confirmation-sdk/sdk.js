@@ -4,7 +4,7 @@ const staticPreprocessor = require('./static-preprocessor');
 const ISafeViewExecutor = require('@0confirmation/sol/build/ISafeViewExecutor');
 const pendingTransfersQuery = require('./queries/query-pending-transfers');
 const genesisQuery = require('./queries/query-genesis');
-const { makeManagerClass } = require('@0confirmation/eth-manager');
+const { makeEthersBase } = require('ethers-base');
 const environment = require('./environments');
 const constants = require('./constants');
 const BN = require('bignumber.js');
@@ -24,7 +24,7 @@ const Driver = require('./driver');
 const { getDefaultProvider, Web3Provider, JsonRpcProvider } = require('@ethersproject/providers');
 const defaultProvider = getDefaultProvider();
 const Web3ProviderEngine = require('web3-provider-engine');
-const LiquidityToken = makeManagerClass(require('@0confirmation/sol/build/LiquidityToken'));
+const LiquidityToken = makeEthersBase(require('@0confirmation/sol/build/LiquidityToken'));
 const LiquidityRequestParcel = require('./liquidity-request-parcel');
 const LiquidityRequest = require('./liquidity-request');
 const DepositedLiquidityRequestParcel = require('./deposited-liquidity-request-parcel');
@@ -37,6 +37,12 @@ const filterABI = (abi) => abi.filter((v) => v.type !== 'receive');
 const shifterPoolInterface = new Interface(filterABI(ShifterPoolArtifact.abi));
 const shifterBorrowProxyInterface = new Interface(filterABI(ShifterBorrowProxy.abi));
 const uniq = require('lodash/uniq');
+
+const getProvider = (zero) => {
+  const provider = zero.getProvider();
+  const ethersProvider = provider.asEthers();
+  return ethersProvider.signer && ethersProvider.signer.provider || ethersProvider.provider;
+};
 
 const getSignatures = (abi) => {
   const iface = new Interface(filterABI(abi));
@@ -121,7 +127,7 @@ class Zero {
   }
   getProvider() {
     const eth = this.driver.getBackend('ethereum');
-    return makeBaseProvider(eth.provider);
+    return eth.provider;
   }
   getBorrowProvider() {
     const wrappedEthProvider = this.getProvider(this.driver);
@@ -189,7 +195,7 @@ class Zero {
   }
   subscribeBorrows(filterArgs, callback) {
     const contract = this.shifterPool;
-    const filter = contract.contract.filters.BorrowProxyMade(...filterArgs);
+    const filter = contract.filters.BorrowProxyMade(...filterArgs);
     contract.on(filter, (user, proxyAddress, data) => callback(new BorrowProxy({
       zero: this,
       user,
@@ -201,12 +207,20 @@ class Zero {
     })));
     return () => contract.removeListener(filter);
   }
+  async getAddress() {
+    const signerOrProvider = this.getProvider().asEthers();
+    if (signerOrProvider.getAddress) return await signerOrProvider.getAddress();
+    const accounts = await signerOrProvider.listAccounts();
+    return accounts[0] || (() => {
+      throw Error('must have an account active on provider');
+    })();
+  }
   async getBorrowProxies(borrower) {
     if (!borrower) {
-      borrower = (await (this.getProvider().asEthers()).send('eth_accounts', []))[0];
+      borrower = await this.getAddress();
     }
-    const provider = this.getProvider().asEthers();
-    const contract = this.shifterPool.contract;
+    const provider = getProvider(this);
+    const contract = this.shifterPool;
     const filter = contract.filters.BorrowProxyMade(...[ borrower ]);
     const logs = await provider.getLogs(Object.assign({
       fromBlock: await this.shifterPool.getGenesis() 

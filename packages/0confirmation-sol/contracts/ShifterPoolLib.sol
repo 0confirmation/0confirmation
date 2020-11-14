@@ -64,7 +64,7 @@ library ShifterPoolLib {
   function deployAssetForwarder(BorrowProxyLib.ProxyIsolate storage isolate, bytes32 salt) internal returns (address created) {
     return ShifterPool(isolate.masterAddress).deployAssetForwarderClone(salt);
   }
-  function sendMint(address proxyAddress, address shifter, ShifterBorrowProxyLib.SansBorrowShiftParcel memory parcel, bytes32 nHash, uint256 fee) internal {
+  function sendMint(address proxyAddress, address shifter, ShifterBorrowProxyLib.SansBorrowShiftParcel memory parcel, bytes32 nHash, uint256 fee) internal  {
     ShifterBorrowProxy(address(uint160(proxyAddress))).relayMint(shifter, parcel.liquidityRequestParcel.request.token, parcel.shiftParameters.pHash, parcel.shiftParameters.amount, nHash, parcel.shiftParameters.darknodeSignature, fee);
   }
   function makeBorrowProxy(Isolate storage isolate, bytes32 salt) internal returns (address payable proxyAddress) {

@@ -8,6 +8,7 @@ const {
   }
 } = require('@ethersproject/providers');
 const abi = require('@ethersproject/abi').defaultAbiCoder;
+const ethersToWeb3 = require('ethers-to-web3');
 const { RPCWrapper }  = require('../../util');
 
 const stripHexPrefix = (s) => s.substr(0, 2) === '0x' ? s.substr(2) : s;
@@ -111,6 +112,7 @@ class EthereumBackend extends RPCWrapper {
     this.name = 'ethereum';
     this.prefixes = ['eth', 'personal', 'net'];
     this.driver = driver;
+    if (provider.getAddress || provider.listAccounts) provider = ethersToWeb3(provider);
     this.provider = provider;
     this._cache = {
       provider,

@@ -32,17 +32,17 @@ const stripNumericKeys = (o) => {
 
 const pendingTransfersQuery = async (borrowProxy, fromBlock) => {
   const { shifterPool } = borrowProxy.zero;
-  const provider = shifterPool.contract.provider;
-  const log = ((await provider.getLogs(Object.assign({}, shifterPool.contract.filters.BorrowProxyMade(null, borrowProxy.contract.address), {
+  const provider = shifterPool.provider;
+  const log = ((await provider.getLogs(Object.assign({}, shifterPool.filters.BorrowProxyMade(null, borrowProxy.address), {
     fromBlock: fromBlock || '0x0',
     toBlock: 'latest',
-    address: shifterPool.contract.address
+    address: shifterPool.address
   }))).map((v) => Object.assign({}, ShifterPool.interface.parseLog(v), v)))[0] || { values: {} };
   const result = await borrowProxy.query(PendingTransfersQuery.bytecode, '0x');
   if (!result.success) throw Error('borrow proxy query failed: ' + result.data);
   const pendingTransfers = ethers.utils.defaultAbiCoder.decode(PendingTransfersQuery.abi.find((v) => v.name === 'execute').outputs, result.data)[0].map((v) => Object.assign({}, v)).map((v) => stripNumericKeys(v));
   for (const { transfer, i } of pendingTransfers.map((transfer, i) => ({ transfer, i }))) {
-    transfer.escrowAddress = computeAssetForwarderAddress(shifterPool.contract.address, borrowProxy.contract.address, i);
+    transfer.escrowAddress = computeAssetForwarderAddress(shifterPool.address, borrowProxy.address, i);
     transfer.sendEvent = await getParsedTransfer(provider, null, transfer.escrowAddress, log.blockNumber);
     transfer.resolutionEvent = await getParsedTransfer(provider, transfer.escrowAddress, null, log.blockNumber);
   }

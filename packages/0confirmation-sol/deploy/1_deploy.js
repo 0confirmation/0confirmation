@@ -10,7 +10,7 @@ const UniswapV2Router01 = require("../build/UniswapV2Router01");
 const bre = require("@nomiclabs/buidler");
 const environments = require("@0confirmation/sdk/environments");
 const Zero = require("@0confirmation/sdk");
-const fromEthers = require("@0confirmation/providers/from-ethers");
+const fromEthers = require("ethers-to-web3");
 const {ZeroMock} = Zero;
 const { fromV3 } = require('ethereumjs-wallet');
 const keeper = fromV3(require('../private/keeper'), 'conf');
@@ -89,8 +89,8 @@ const makeDeploy = (deploy, deployments, wrap, push, deployer) => async (
   return wrap(push(deployed));
 };
 
-module.exports = async (buidler) => {
-  const {getNamedAccounts, deployments} = buidler;
+module.exports = async (bre) => {
+  const {getNamedAccounts, deployments} = bre;
   const {log} = deployments;
   const {ethers} = bre;
   const deployed = [];
@@ -98,7 +98,7 @@ module.exports = async (buidler) => {
   const [signer] = await ethers.getSigners();
   const wrap = makeWrapper(ethers, signer);
   const {deployer} = await getNamedAccounts();
-  const deploy = makeDeploy(deployments.deploy, deployments, wrap, push, deployer);
+  const deploy = makeDeploy(deployments.deploy.bind(deployments), deployments, wrap, push, deployer);
   const {AddressZero: NO_SUBMODULE} = ethers.constants;
   const chain = chainIdToNetwork(Number(await bre.getChainId()));
   const shifterBorrowProxyFactoryLib = await deploy(
@@ -235,7 +235,7 @@ module.exports = async (buidler) => {
         {
           token: renbtc.address,
           liqToken: liquidityToken.address,
-          baseFee: ethers.utils.parseUnits('0.00007', 8)
+          baseFee: ethers.utils.parseUnits('0.0007', 8)
         },
       ]
     )
@@ -244,21 +244,19 @@ module.exports = async (buidler) => {
   if (chain === "test") {
     await (await shifterPool.setKeeper(keeper.getAddressString(), true)).wait();
     const amountMax = bigNumberify("0x" + "f".repeat(64));
-    const provider = new ethers.providers.Web3Provider(
-      fromEthers(bre.ethereum)
-    );
-    const [deployerAddress] = await provider.listAccounts();
+    const provider = signer.provider;
+    const deployerAddress = await signer.getAddress();
     from = deployerAddress;
     await mapSeries(
       [
-        [renbtc.address, 8, "0.34"],
+        [renbtc.address, 8, "3.4"],
         [dai.address, 18, "7724680"],
       ],
       async ([token, decimals, amount]) => {
         const tokenWrapped = new ethers.Contract(
           token,
           DAI.abi,
-          provider.getSigner()
+          signer
         );
         await (
           await tokenWrapped.mint(
@@ -269,7 +267,7 @@ module.exports = async (buidler) => {
         const routerWrapped = new ethers.Contract(
           router.address,
           UniswapV2Router01.abi,
-          provider.getSigner()
+          signer
         );
         await (await tokenWrapped.approve(router.address, amountMax)).wait();
         await (
@@ -288,12 +286,12 @@ module.exports = async (buidler) => {
     const renbtcWrapped = new ethers.Contract(
       renbtc.address,
       ShifterERC20Mock.abi,
-      provider.getSigner()
+      signer
     );
     await (
       await renbtcWrapped.mint(from, ethers.utils.parseUnits("10", 8))
     ).wait();
-    const zero = new ZeroMock(fromEthers(bre.ethereum));
+    const zero = new ZeroMock(fromEthers(signer));
     zero.setEnvironment({
       shifterPool: shifterPool.address,
     });
@@ -308,7 +306,7 @@ module.exports = async (buidler) => {
   }
   for (let i = 0; i < deployed.length; i++) {
     if (deployed[i].newlyDeployed)
-      log(
+      logger.info(
         `Contract deployed at ${deployed[i].address} using ${deployed[i].receipt.gasUsed} gas on chain ${chain}`
       );
   }

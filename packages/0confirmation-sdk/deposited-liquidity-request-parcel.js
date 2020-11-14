@@ -78,12 +78,12 @@ class DepositedLiquidityRequestParcel extends LiquidityRequestParcel {
       } else await timeout(constants.DARKNODE_QUERY_TX_INTERVAL);
     }
   }
-  async executeShiftFallback(actions = []) {
+  async executeShiftFallback(actions = [], overrides) {
     const {
       signature: darknodeSignature,
       amount: darknodeAmount
     }  = await this.waitForSignature();
-    return this.zero.shifterPool.executeShiftSansBorrow({
+    return await this.zero.shifterPool.executeShiftSansBorrow({
       liquidityRequestParcel: {
         signature: this.signature,
         gasRequested: this.gasRequested,
@@ -110,7 +110,7 @@ class DepositedLiquidityRequestParcel extends LiquidityRequestParcel {
         txData: v.txData || v.calldata,
         to: v.to
       }))
-    });
+    }, overrides || {});
   }
   computeShiftInTxHash() {
     return utils.computeShiftInTxHash({
