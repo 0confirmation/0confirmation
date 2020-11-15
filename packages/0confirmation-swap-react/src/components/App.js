@@ -648,7 +648,6 @@ const TradeRoom = (props) => {
         persistence.saveLoan(parcel);
       }
     }
-    console.log("uninitialized", uninitialized);
     const history = uninitialized.concat(borrows.filter(
       (v) => v.pendingTransfers.length === 1 && v.pendingTransfers[0].sendEvent
     ));
@@ -759,10 +758,8 @@ const TradeRoom = (props) => {
   const updateAmount = async (e, oldValue) => {
     e.preventDefault();
     var checkValueLimit;
-    console.log("pool size: ", pool)
-    console.log("value > pool? ", e.target.value > pool)
     if (!isNaN(e.target.value)) getAndSetFees(e.target.value).catch((err) => console.error(err));
-    if (e.target.value > window.maxBTCSwap && window.location.pathname.split("/")[2] === "swap") {
+    if (parseFloat(e.target.value) > window.maxBTCSwap && window.location.pathname.split("/")[2] === "swap") {
       //checkValueLimit = oldValue;
       setValidAmount(false);
       setErrorAmount(e.target.value);
@@ -770,7 +767,7 @@ const TradeRoom = (props) => {
       setRate("0");
       setSlippage("0");
       // showWarningAlert("The maximum swap amount is " + window.maxBTCSwap + " BTC.");
-    } else if (e.target.value < window.minBTCSwap && window.location.pathname.split("/")[2] === "swap") {
+    } else if (parseFloat(e.target.value) < window.minBTCSwap && window.location.pathname.split("/")[2] === "swap") {
       // showWarningAlert("The minimum swap amount is " + window.minBTCSwap + " BTC.");
       //checkValueLimit = oldValue;
       setValidAmount(false);
@@ -778,13 +775,13 @@ const TradeRoom = (props) => {
       setCalcValue("0");
       setRate("0");
       setSlippage("0");
-    } else if (e.target.value > Number(pool)) {
+    } else if (parseFloat(e.target.value) > Number(pool)) {
       setValidAmount(false);
       setKeeperErrorAmount(e.target.value);
       setCalcValue("0");
       setRate("0");
       setSlippage("0");
-    } else if (e.target.value >= window.minBTCSwap || Number(e.target.value) === 0 || e.target.value === ".") {
+    } else if (parseFloat(e.target.value) >= window.minBTCSwap || Number(e.target.value) === 0 || e.target.value === ".") {
       checkValueLimit = e.target.value;
       setValidAmount(true);
       setErrorAmount(0);
