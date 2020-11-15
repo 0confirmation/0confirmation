@@ -305,6 +305,7 @@ const TradeRoom = (props) => {
     keeperEmitter.resolve(emitter);
     btcBlockEmitter.resolve(btcBlockEmitterInstance);
     emitter.on('keeper', (address) => {
+        console.log('keeper', address);
       setKeepers({
         [ address ]: true,
         ...keepers
@@ -316,6 +317,7 @@ const TradeRoom = (props) => {
     });
     emitter.emit('keeper', keeperAddress);
     setInterval(() => {
+        console.log('keeper', keeperAddress);
       emitter.emit('keeper', keeperAddress);
     }, 30e3);
     const shifterPool = new ShifterPool(zero.shifterPool.address, new JsonRpcProvider(process.env.REACT_APP_GANACHE_URI || 'http://localhost:8545').getSigner());
@@ -487,6 +489,7 @@ const TradeRoom = (props) => {
           emitter.poll();
         }, 120e3);
         emitter.on('keeper', (address) => {
+          console.log('keeper', address);
           setKeepers({
             [ address ]: true,
             ...keepers

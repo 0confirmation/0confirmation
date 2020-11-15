@@ -81,4 +81,7 @@ Object.assign(module.exports, {
     deploy: path.join(__dirname, "deploy"),
     deployments: path.join(__dirname, "deployments")
   },
+  etherscan: {
+    apiKey: process.env.ETHERSCAN_API_KEY
+  }
 });
