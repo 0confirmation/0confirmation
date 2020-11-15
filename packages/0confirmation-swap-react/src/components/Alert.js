@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 const Alert = (props) => {
   const [boldText] = useState(props.boldText);
   const [alertType] = useState(props.alertType);
-  const [delay] = useState(props.delay || 4000);
+  // const [delay] = useState(props.delay || 4000);
   const [visible, setVisible] = useState(true);
   useEffect(() => {
     triggerTimer();
