@@ -364,7 +364,7 @@ const TradeRoom = (props) => {
       await renbtcWrapped.mint(keeperAddress, ethers.utils.parseUnits("100", 8))
     ).wait();
     console.log("done!");
-    const keeperZero = makeZero(keeperProvider);
+    const keeperZero = makeZero(keeperProvider.asEthers().getSigner());
     keeperZero.setEnvironment(contracts);
     keeperZero.connectMock(zero);
     await (await keeperZero.approveLiquidityToken(contracts.renbtc)).wait();
