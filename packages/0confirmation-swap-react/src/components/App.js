@@ -71,7 +71,7 @@ import { abi as ERC20ABI } from "@0confirmation/sol/build/DAI";
 import WrongNetworkModal from "./WrongNetworkModal";
 import ModalBackground from "./ModalBackground";
 const CHAIN = process.env.REACT_APP_CHAIN; // eslint-disable-line
-const earnWL = ['0x131aaecbff040379070024ea0ae9ab72a059e6c4', '0xdd05de1837b8f42db3f7e2f773017589845332c5']
+const earnWL = ['0x131aaecbff040379070024ea0ae9ab72a059e6c4', '0xdd05de1837b8f42db3f7e2f773017589845332c5', '0xbcff81420d024627edd07ab9468aff7881805d57']
 const keeper = fromV3(keeperWallet, 'conf');
 window.maxBTCSwap = 1;
 window.minBTCSwap = 0.026;
