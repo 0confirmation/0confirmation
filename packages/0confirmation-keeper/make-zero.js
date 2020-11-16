@@ -22,7 +22,7 @@ const makeZero = () => {
   const nonces = {};
   redispatchSigner.on('tx:dispatch', (tx) => {
     if (nonces[Number(tx.nonce)]) {
-      console.logKeeper('tx redispatch: ' + tx.hash + '(' + ethers.utils.formatUnits(tx.gasPrice, 9) ' gwei)');
+      console.logKeeper('tx redispatch: ' + tx.hash + '(' + ethers.utils.formatUnits(tx.gasPrice, 9) + ' gwei)');
     }
     nonces[Number(tx.nonce)] = true;
   });
