@@ -1287,7 +1287,7 @@ const TradeRoom = (props) => {
                       value={value}
                       onChange={(event) => updateAmount(event, value)}
                       onBlur={() => checkAmount()}
-                      className={liquidityvalue === "Add Liquidity" ? "sendcoin h-100" : "getcoin h-100"}
+                      className={liquidityvalue === "Add Liquidity" ? "sendcoin h-100" : "removecoin h-100"}
                       style={{
                         backgroundColor: "#0D0208", paddingTop: "1em",
                         borderRadius: "8px 0px 0px 8px", color: "#ffffff", border: "none", outline: "none"
@@ -1366,14 +1366,13 @@ const TradeRoom = (props) => {
                           backgroundColor: "#800000", borderRadius: "0px 5px 5px 0px",
                           color: "#ffffff", border: "1px #800000", outline: "none",
                         }}>
-                        <InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={btcIcon} />{' '}
-                                renBTC
-                          </InputGroupText>
+                        <InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={btcIcon} />{' ' + liquidityvalue === "Add Liquidity" ? 'renBTC' : 'zeroBTC'}
+                        </InputGroupText>
                     </InputGroupAddon>
                   </InputGroup>
                   <span style={{ fontFamily: "PT Sans", fontSize: "0.8em" }}
                     className={(ismobile) ? "ml-auto" : ""}>
-                    <span className={(ismobile) ? "ml-auto" : ""} style={{ color: "#00FF41" }}>Current Balance: </span>{renbtcBalance} {_sendcoins.name}</span>
+                    <span className={(ismobile) ? "ml-auto" : ""} style={{ color: "#00FF41" }}>Current Balance: </span>{liquidityvalue === "Add Liquidity" ? renbtcBalance + " renBTC" : share + " zeroBTC"}</span>
                 </Col>
               </Row>
             ) : (
