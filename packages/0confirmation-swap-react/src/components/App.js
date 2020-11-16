@@ -595,12 +595,8 @@ const TradeRoom = (props) => {
         )
       );
       const zeroBTCPoolSize = await liquidityToken.totalSupply();
-      setZeroPool(
-        utils.truncateDecimals(
-          ethers.utils.formatUnits(zeroBTCPoolSize, DECIMALS.btc),
-          4
-        )
-      )
+      const zeroBTCPoolSizeFormat = ethers.utils.formatUnits(zeroBTCPoolSize, DECIMALS.btc);
+      setZeroPool(zeroBTCPoolSizeFormat)
       const liquidityTokenBalance = await liquidityToken.balanceOf(
         userAddress || ethers.constants.AddressZero
       );
