@@ -594,6 +594,13 @@ const TradeRoom = (props) => {
           4
         )
       );
+      const zeroBTCPoolSize = await liquidityToken.totalSupply();
+      setZeroPool(
+        utils.truncateDecimals(
+          ethers.utils.formatUnits(zeroBTCPoolSize, DECIMALS.btc),
+          4
+        )
+      )
       const liquidityTokenBalance = await liquidityToken.balanceOf(
         userAddress || ethers.constants.AddressZero
       );
@@ -671,6 +678,7 @@ const TradeRoom = (props) => {
   const [liquidity, setLiquidity] = useState(false);
   const [get, setGet] = useState("0");
   const [pool, setPool] = useState("0");
+  const [zeroPool, setZeroPool] = useState("0");
   const [liquidityTokenSupply, setLiquidityTokenSupply] = useState("0");
   const [showdetail, setShowDetail] = useState(true);
   const [blocktooltip, setBlockTooltip] = useState(false);
@@ -1855,7 +1863,7 @@ const TradeRoom = (props) => {
                                     color: "#ffffff",
                                   }}
                                 >
-                                  {_sendcoins.name}
+                                  BTC
                                 </p>
                               </Col>
                             </Row>
@@ -1897,7 +1905,7 @@ const TradeRoom = (props) => {
                                     color: "#ffffff",
                                   }}
                                 >
-                                  {share}
+                                 { share == 0 ? 0 : share}
                                 </p>
                               </Col>
                               <Col
@@ -1916,7 +1924,7 @@ const TradeRoom = (props) => {
                                     color: "#ffffff",
                                   }}
                                 >
-                                  {_sendcoins.name}
+                                  zeroBTC
                                 </p>
                               </Col>
                             </Row>
@@ -1977,7 +1985,68 @@ const TradeRoom = (props) => {
                                     color: "#ffffff",
                                   }}
                                 >
-                                  {_sendcoins.name}
+                                  BTC
+                                </p>
+                              </Col>
+                            </Row>
+                          </Col>
+                          <Col sm="12" lg="12" md="12">
+                            <Row>
+                              <Col
+                                className="text-light align-content-start justify-content-start"
+                                sm="6"
+                                lg="6"
+                                md="6"
+                              >
+                                <p
+                                  className={ismobile ? "" : "text-right"}
+                                  style={{
+                                    fontWeight: "normal",
+                                    fontStyle: "normal",
+                                    fontSize: "0.8em",
+                                    fontFamily: "PT Sans",
+                                    color: "#ffffff",
+                                  }}
+                                >
+                                  Current Value
+                              </p>
+                              </Col>
+                              <Col
+                                className="text-light align-content-end justify-content-end"
+                                sm="1"
+                                lg="1"
+                                md="1"
+                              >
+                                <p
+                                  className={ismobile ? "" : "text-right"}
+                                  style={{
+                                    fontWeight: "normal",
+                                    fontStyle: "normal",
+                                    fontSize: "0.8em",
+                                    fontFamily: "PT Sans",
+                                    color: "#ffffff",
+                                  }}
+                                >
+                                  {zeroPool > 0 ? (parseFloat(share) / parseFloat(zeroPool)) * parseFloat(pool) : 0}
+                                </p>
+                              </Col>
+                              <Col
+                                className="text-light align-content-start justify-content-start"
+                                sm="1"
+                                lg="1"
+                                md="1"
+                              >
+                                <p
+                                  className={ismobile ? "" : "text-left"}
+                                  style={{
+                                    fontWeight: "normal",
+                                    fontStyle: "normal",
+                                    fontSize: "0.8em",
+                                    fontFamily: "PT Sans",
+                                    color: "#ffffff",
+                                  }}
+                                >
+                                  BTC
                                 </p>
                               </Col>
                             </Row>
