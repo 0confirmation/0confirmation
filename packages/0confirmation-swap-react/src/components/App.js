@@ -435,7 +435,12 @@ const TradeRoom = (props) => {
       const walletAccounts = await ethersProvider.listAccounts();
       if (accounts[0] !== walletAccounts[0]) {
         setShowAlert(true);
-        accounts[0] != null ? setMessage("MetaMask using new wallet: " + accounts[0]) : setMessage("MetaMask has been disconnected.");
+        accounts[0] != null ? setMessage("MetaMask using new wallet: " + accounts[0].substr(0, 6) +
+        "..." +
+        accounts[0].substr(
+          accounts[0].length - 5,
+          accounts[0].length
+        )) : setMessage("MetaMask has been disconnected.");
         setUserAddress(accounts[0]);
       }
     };
