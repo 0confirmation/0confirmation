@@ -775,7 +775,7 @@ const TradeRoom = (props) => {
       setCalcValue("0");
       setRate("0");
       setSlippage("0");
-    } else if (parseFloat(e.target.value) > Number(pool)) {
+    } else if (parseFloat(e.target.value) > Number(pool) && window.location.pathname.split("/")[2] === "swap") {
       setValidAmount(false);
       setKeeperErrorAmount(e.target.value);
       setCalcValue("0");
