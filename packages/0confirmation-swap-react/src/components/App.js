@@ -793,7 +793,7 @@ const TradeRoom = (props) => {
       setCalcValue("0");
       setRate("0");
       setSlippage("0");
-    } else if (parseFloat(e.target.value) >= window.minBTCSwap || Number(e.target.value) === 0 || e.target.value === ".") {
+    } else if (parseFloat(e.target.value) >= window.minBTCSwap || Number(e.target.value) === 0 || e.target.value === "." || window.location.pathname.split("/")[2] === "earn") {
       checkValueLimit = e.target.value;
       setValidAmount(true);
       setErrorAmount(0);
@@ -851,12 +851,14 @@ const TradeRoom = (props) => {
         "0x" + "ff".repeat(31)
       );
     }
+    console.log(value)
     await liquidityToken.addLiquidity(
-      ethers.utils.parseUnits(value.toString(), DECIMALS.btc)
+      ethers.utils.parseUnits(value, DECIMALS.btc)
     );
   };
   const removeLiquidity = async () => {
     const liquidityToken = await zero.getLiquidityTokenFor(contracts.renbtc);
+    
     await liquidityToken.removeLiquidity(
       ethers.utils.parseUnits(value, DECIMALS.btc)
     );
