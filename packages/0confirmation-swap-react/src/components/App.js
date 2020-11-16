@@ -852,7 +852,7 @@ const TradeRoom = (props) => {
       );
     }
     await liquidityToken.addLiquidity(
-      ethers.utils.parseUnits(value, DECIMALS.btc)
+      ethers.utils.parseUnits(value.toString(), DECIMALS.btc)
     );
   };
   const removeLiquidity = async () => {
