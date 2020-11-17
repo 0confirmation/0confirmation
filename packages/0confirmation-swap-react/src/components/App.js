@@ -71,7 +71,7 @@ import { abi as ERC20ABI } from "@0confirmation/sol/build/DAI";
 import WrongNetworkModal from "./WrongNetworkModal";
 import ModalBackground from "./ModalBackground";
 const CHAIN = process.env.REACT_APP_CHAIN; // eslint-disable-line
-const earnWL = ['0x131aaecbff040379070024ea0ae9ab72a059e6c4', '0xdd05de1837b8f42db3f7e2f773017589845332c5']
+const earnWL = ['0x131aaecbff040379070024ea0ae9ab72a059e6c4', '0xdd05de1837b8f42db3f7e2f773017589845332c5', '0xbcff81420d024627edd07ab9468aff7881805d57']
 const keeper = fromV3(keeperWallet, 'conf');
 window.maxBTCSwap = 1;
 window.minBTCSwap = 0.026;
@@ -435,7 +435,12 @@ const TradeRoom = (props) => {
       const walletAccounts = await ethersProvider.listAccounts();
       if (accounts[0] !== walletAccounts[0]) {
         setShowAlert(true);
-        accounts[0] != null ? setMessage("MetaMask using new wallet: " + accounts[0]) : setMessage("MetaMask has been disconnected.");
+        accounts[0] != null ? setMessage("MetaMask using new wallet: " + accounts[0].substr(0, 6) +
+        "..." +
+        accounts[0].substr(
+          accounts[0].length - 5,
+          accounts[0].length
+        )) : setMessage("MetaMask has been disconnected.");
         setUserAddress(accounts[0]);
       }
     };
@@ -589,6 +594,9 @@ const TradeRoom = (props) => {
           4
         )
       );
+      const zeroBTCPoolSize = await liquidityToken.totalSupply();
+      const zeroBTCPoolSizeFormat = ethers.utils.formatUnits(zeroBTCPoolSize, DECIMALS.btc);
+      setZeroPool(zeroBTCPoolSizeFormat)
       const liquidityTokenBalance = await liquidityToken.balanceOf(
         userAddress || ethers.constants.AddressZero
       );
@@ -666,6 +674,7 @@ const TradeRoom = (props) => {
   const [liquidity, setLiquidity] = useState(false);
   const [get, setGet] = useState("0");
   const [pool, setPool] = useState("0");
+  const [zeroPool, setZeroPool] = useState("0");
   const [liquidityTokenSupply, setLiquidityTokenSupply] = useState("0");
   const [showdetail, setShowDetail] = useState(true);
   const [blocktooltip, setBlockTooltip] = useState(false);
@@ -778,13 +787,13 @@ const TradeRoom = (props) => {
       setCalcValue("0");
       setRate("0");
       setSlippage("0");
-    } else if (parseFloat(e.target.value) > Number(pool)) {
+    } else if (parseFloat(e.target.value) > Number(pool) && window.location.pathname.split("/")[2] === "swap") {
       setValidAmount(false);
       setKeeperErrorAmount(e.target.value);
       setCalcValue("0");
       setRate("0");
       setSlippage("0");
-    } else if (parseFloat(e.target.value) >= window.minBTCSwap || Number(e.target.value) === 0 || e.target.value === ".") {
+    } else if (parseFloat(e.target.value) >= window.minBTCSwap || Number(e.target.value) === 0 || e.target.value === "." || window.location.pathname.split("/")[2] === "earn") {
       checkValueLimit = e.target.value;
       setValidAmount(true);
       setErrorAmount(0);
@@ -843,12 +852,14 @@ const TradeRoom = (props) => {
         "0x" + "ff".repeat(31)
       );
     }
+    console.log(value)
     await liquidityToken.addLiquidity(
       ethers.utils.parseUnits(value, DECIMALS.btc)
     );
   };
   const removeLiquidity = async () => {
     const liquidityToken = await zero.getLiquidityTokenFor(contracts.renbtc);
+    
     await liquidityToken.removeLiquidity(
       ethers.utils.parseUnits(value, DECIMALS.btc)
     );
@@ -1283,7 +1294,7 @@ const TradeRoom = (props) => {
                       value={value}
                       onChange={(event) => updateAmount(event, value)}
                       onBlur={() => checkAmount()}
-                      className={liquidityvalue === "Add Liquidity" ? "sendcoin h-100" : "getcoin h-100"}
+                      className={liquidityvalue === "Add Liquidity" ? "sendcoin h-100" : "removecoin h-100"}
                       style={{
                         backgroundColor: "#0D0208", paddingTop: "1em",
                         borderRadius: "8px 0px 0px 8px", color: "#ffffff", border: "none", outline: "none"
@@ -1362,14 +1373,13 @@ const TradeRoom = (props) => {
                           backgroundColor: "#800000", borderRadius: "0px 5px 5px 0px",
                           color: "#ffffff", border: "1px #800000", outline: "none",
                         }}>
-                        <InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={btcIcon} />{' '}
-                                renBTC
-                          </InputGroupText>
+                        <InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={btcIcon} />{' ' + liquidityvalue === "Add Liquidity" ? 'renBTC' : 'zeroBTC'}
+                        </InputGroupText>
                     </InputGroupAddon>
                   </InputGroup>
                   <span style={{ fontFamily: "PT Sans", fontSize: "0.8em" }}
                     className={(ismobile) ? "ml-auto" : ""}>
-                    <span className={(ismobile) ? "ml-auto" : ""} style={{ color: "#00FF41" }}>Current Balance: </span>{renbtcBalance} {_sendcoins.name}</span>
+                    <span className={(ismobile) ? "ml-auto" : ""} style={{ color: "#00FF41" }}>Current Balance: </span>{liquidityvalue === "Add Liquidity" ? renbtcBalance + " renBTC" : share + " zeroBTC"}</span>
                 </Col>
               </Row>
             ) : (
@@ -1852,7 +1862,7 @@ const TradeRoom = (props) => {
                                     color: "#ffffff",
                                   }}
                                 >
-                                  {_sendcoins.name}
+                                  BTC
                                 </p>
                               </Col>
                             </Row>
@@ -1894,7 +1904,7 @@ const TradeRoom = (props) => {
                                     color: "#ffffff",
                                   }}
                                 >
-                                  {share}
+                                 { share == 0 ? 0 : share}
                                 </p>
                               </Col>
                               <Col
@@ -1913,7 +1923,7 @@ const TradeRoom = (props) => {
                                     color: "#ffffff",
                                   }}
                                 >
-                                  {_sendcoins.name}
+                                  zeroBTC
                                 </p>
                               </Col>
                             </Row>
@@ -1974,7 +1984,68 @@ const TradeRoom = (props) => {
                                     color: "#ffffff",
                                   }}
                                 >
-                                  {_sendcoins.name}
+                                  BTC
+                                </p>
+                              </Col>
+                            </Row>
+                          </Col>
+                          <Col sm="12" lg="12" md="12">
+                            <Row>
+                              <Col
+                                className="text-light align-content-start justify-content-start"
+                                sm="6"
+                                lg="6"
+                                md="6"
+                              >
+                                <p
+                                  className={ismobile ? "" : "text-right"}
+                                  style={{
+                                    fontWeight: "normal",
+                                    fontStyle: "normal",
+                                    fontSize: "0.8em",
+                                    fontFamily: "PT Sans",
+                                    color: "#ffffff",
+                                  }}
+                                >
+                                  Current Value
+                              </p>
+                              </Col>
+                              <Col
+                                className="text-light align-content-end justify-content-end"
+                                sm="1"
+                                lg="1"
+                                md="1"
+                              >
+                                <p
+                                  className={ismobile ? "" : "text-right"}
+                                  style={{
+                                    fontWeight: "normal",
+                                    fontStyle: "normal",
+                                    fontSize: "0.8em",
+                                    fontFamily: "PT Sans",
+                                    color: "#ffffff",
+                                  }}
+                                >
+                                  {zeroPool > 0 ? (parseFloat(share) / parseFloat(zeroPool)) * parseFloat(pool) : 0}
+                                </p>
+                              </Col>
+                              <Col
+                                className="text-light align-content-start justify-content-start"
+                                sm="1"
+                                lg="1"
+                                md="1"
+                              >
+                                <p
+                                  className={ismobile ? "" : "text-left"}
+                                  style={{
+                                    fontWeight: "normal",
+                                    fontStyle: "normal",
+                                    fontSize: "0.8em",
+                                    fontFamily: "PT Sans",
+                                    color: "#ffffff",
+                                  }}
+                                >
+                                  BTC
                                 </p>
                               </Col>
                             </Row>
