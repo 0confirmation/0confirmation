@@ -830,8 +830,9 @@ const TradeRoom = (props) => {
   const addLiquidity = async () => {
     const liquidityToken = await zero.getLiquidityTokenFor(contracts.renbtc);
     const ethersProvider = zero.getProvider().asEthers();
-    const renbtcWrapped = new ERC20(contracts.renbtc, ethersProvider);
     const [user] = await ethersProvider.listAccounts();
+    const ethersSigner = zero.getSigner();
+    const renbtcWrapped = new ERC20(contracts.renbtc, ethersSigner);
     const allowance = await renbtcWrapped.allowance(
       user,
       liquidityToken.address
