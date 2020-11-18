@@ -1373,7 +1373,7 @@ const TradeRoom = (props) => {
                           backgroundColor: "#800000", borderRadius: "0px 5px 5px 0px",
                           color: "#ffffff", border: "1px #800000", outline: "none",
                         }}>
-                        <InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={btcIcon} />{' ' + liquidityvalue === "Add Liquidity" ? 'renBTC' : 'zeroBTC'}
+                        <InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={btcIcon} />{' ' + (liquidityvalue === "Add Liquidity" ? 'renBTC' : 'zeroBTC')}
                         </InputGroupText>
                     </InputGroupAddon>
                   </InputGroup>
