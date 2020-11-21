@@ -493,6 +493,7 @@ const TradeRoom = (props) => {
           setKeepers({});
           emitter.poll();
         }, 120e3);
+        emitter.poll();
         emitter.on('keeper', (address) => {
           console.log('keeper', address);
           setKeepers({
@@ -500,7 +501,6 @@ const TradeRoom = (props) => {
             ...keepers
           });
         });
-        emitter.subscribe();
         let btcBlockEmitter = zero.createBTCBlockEmitter();
         btcBlockEmitter.on('block', (number) => {
           bitcoin.setLatestBlock(number);
