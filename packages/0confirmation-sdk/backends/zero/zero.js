@@ -184,13 +184,12 @@ class ZeroBackend extends RPCWrapper {
   }
   async startHandlingBTCBlock() {
       await this._getAndSetBTCBlock().catch((err) => {
-        console.error(err);
-        this._btcBlock = 0;
+        this._btcBlock = this._btcBlock || 0;
       });
       this._btcBlockInterval = setInterval(() => {
         (async () => {
           await this._getAndSetBTCBlock();
-        })().catch((err) => console.error(err));
+        })().catch((err) => {});
       }, BTC_BLOCK_INTERVAL);
       await this.node.socket.pubsub.subscribe('/btcBlock/1.0.0', async (msg) => {
         const peerInfo = await fromB58(this.node.socket, msg.from); 

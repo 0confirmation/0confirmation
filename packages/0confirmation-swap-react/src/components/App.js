@@ -500,6 +500,7 @@ const TradeRoom = (props) => {
             ...keepers
           });
         });
+        emitter.subscribe();
         let btcBlockEmitter = zero.createBTCBlockEmitter();
         btcBlockEmitter.on('block', (number) => {
           bitcoin.setLatestBlock(number);
