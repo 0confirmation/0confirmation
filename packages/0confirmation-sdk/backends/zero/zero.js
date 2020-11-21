@@ -59,6 +59,7 @@ class KeeperEmitter extends EventEmitter {
     this.socket.pubsub.publish('/discoverKeepers/1.0.0', Buffer.from(JSON.stringify({})));
   }
   subscribe() {
+    this.unsubscribe();
     this.poll();
     this.interval = setInterval(() => this.poll(), this.discoverInterval);
     return this;
@@ -92,6 +93,7 @@ class BTCBlockEmitter extends EventEmitter {
     this.socket.pubsub.publish('/btcBlock/1.0.0', Buffer.from(JSON.stringify({})));
   }
   subscribe() {
+    this.unsubscribe();
     this.poll();
     this.interval = setInterval(() => this.poll(), this.discoverInterval);
     return this;
@@ -128,6 +130,12 @@ class ZeroBackend extends RPCWrapper {
     });
     await this.node.start();
   }
+  async subscribe() {
+    this.keeperEmitter = this.createKeeperEmitter();
+    this.btcBlockEmitter = this.createBTCBlockEmitter();
+    await this.keeperEmitter.subscribe();
+    await this.btcBlockEmitter.subscribe();
+  }
   async stop() {
     await this.node.stop();
   }
@@ -145,10 +153,10 @@ class ZeroBackend extends RPCWrapper {
     }
   }
   createKeeperEmitter() {
-    return KeeperEmitter.create(this.node.socket);
+    return this.keeperEmitter || KeeperEmitter.create(this.node.socket);
   }
   createBTCBlockEmitter() {
-    return BTCBlockEmitter.create(this.node.socket);
+    return this.btcBlockEmitter || BTCBlockEmitter.create(this.node.socket);
   }
   async startHandlingKeeperDiscovery() {
       const [ address ] = await (this.driver.getBackendByPrefix('eth')).sendWrapped('eth_accounts', []);
