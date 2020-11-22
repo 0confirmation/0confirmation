@@ -487,6 +487,7 @@ const TradeRoom = (props) => {
         if (CHAIN === "42" || CHAIN === 'test')
           await setupTestUniswapSDK(zero.getProvider(), () => contracts);
         await zero.initializeDriver();
+        zero.driver.getBackendByPrefix('0cf').node.socket.on('peer:discovery', (peerInfo) => console.log(peerInfo));
         let emitter = zero.createKeeperEmitter();
         keeperEmitter.resolve(emitter);
         setInterval(() => {

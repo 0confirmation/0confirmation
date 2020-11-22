@@ -89,7 +89,6 @@ const TEST_MODE = process.env.CHAIN === "31337";
   }
   console.logKeeper("initializing -- ");
   const node = zero.driver.getBackend("zero").node;
-  await zero.startHandlingBTCBlock();
   node.socket.on("peer:discovery", (peer) => {
     console.logKeeper("found a peer: " + peer.id.toB58String());
   });
@@ -123,13 +122,13 @@ const TEST_MODE = process.env.CHAIN === "31337";
       let deposited;
       deposited = await v.waitForDeposit(0, THIRTY_MINUTES);
       console.logKeeper("found deposit -- initializing a borrow proxy!");
+      const result = await deposited.submitToRenVM();
       const bond = BigNumber.from(v.amount).div(9);
       await (
         await deposited.executeBorrow(bond, "10000", {
-          gasLimit: "0x" + (1200000).toString(16),
+          gasLimit: "0x" + (1440000).toString(16),
         })
       ).wait();
-      const result = await deposited.submitToRenVM();
       console.logKeeper("submitted to RenVM");
       const sig = await deposited.waitForSignature();
       const borrowProxy = await deposited.getBorrowProxy();
