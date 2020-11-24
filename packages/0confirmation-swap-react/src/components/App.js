@@ -70,12 +70,16 @@ import {
 import { abi as ERC20ABI } from "@0confirmation/sol/build/DAI";
 import WrongNetworkModal from "./WrongNetworkModal";
 import ModalBackground from "./ModalBackground";
+import { createGetGasPrice } from 'ethers-gasnow';
+ethers.providers.BaseProvider.prototype.getGasPrice = createGetGasPrice('rapid');
 const CHAIN = process.env.REACT_APP_CHAIN; // eslint-disable-line
-const earnWL = ['0x131aaecbff040379070024ea0ae9ab72a059e6c4', '0xdd05de1837b8f42db3f7e2f773017589845332c5', '0xbcff81420d024627edd07ab9468aff7881805d57', '0x5b908e3a23823fd9da157726736bacbff472976a']
+window.earnWL = ['0x131aaecbff040379070024ea0ae9ab72a059e6c4', '0xdd05de1837b8f42db3f7e2f773017589845332c5', '0xbcff81420d024627edd07ab9468aff7881805d57', '0x5b908e3a23823fd9da157726736bacbff472976a']
+window.earnEnabled = true;
 const keeper = fromV3(keeperWallet, 'conf');
 window.maxBTCSwap = 1;
 window.minBTCSwap = 0.026;
 const signer = provider.asEthers().getSigner();
+
 
 const BLOCK_POLL_INTERVAL = 15000;
 
@@ -855,7 +859,7 @@ const TradeRoom = (props) => {
       );
     }
     console.log(value)
-    await liquidityToken.addLiquidity(
+    await liquidityToken.connect(signer).addLiquidity(
       ethers.utils.parseUnits(value, DECIMALS.btc)
     );
   };
@@ -1606,7 +1610,7 @@ const TradeRoom = (props) => {
             <div className="justify-content-center align-content-center text-center mx-auto my-auto pt-3">
               {window.location.pathname.split("/")[2] === "earn" ? (
                 (
-                  userAddress != null && earnWL.includes(userAddress.toLowerCase()) && userAddress !== ethers.constants.AddressZero ?
+                  window.earnEnabled || (userAddress != null && window.earnWL.includes(userAddress.toLowerCase()) && userAddress !== ethers.constants.AddressZero) ?
                     <button
                       onClick={async (e) => {
                         e.preventDefault();
@@ -1627,7 +1631,7 @@ const TradeRoom = (props) => {
                       {liquidityvalue === "Add Liquidity" ? "Add" : "Remove"}
                     </button> : userAddress != null ? <button
                       className="btn button-small btn-sm px-5"
-                      onClick={!earnWL.includes(userAddress.toLowerCase()) ? null : (evt) => connectWeb3Modal(evt)}
+                      onClick={!(window.earnWL.includes(userAddress.toLowerCase()) || window.earnEnabled) ? null : (evt) => connectWeb3Modal(evt)}
                       style={{
                         fontSize: "24dp",
                         backgroundColor: "#008F11",
@@ -1637,7 +1641,7 @@ const TradeRoom = (props) => {
                         opacity: "0.38"
                       }}
                     >
-                      {!earnWL.includes(userAddress.toLowerCase()) ? "Earn Not Enabled" : "Connect Wallet to Provide Liquidity"}
+                      {!(window.earnEnabled || window.earnWL.includes(userAddress.toLowerCase())) ? "Earn Not Enabled" : "Connect Wallet to Provide Liquidity"}
                     </button> : <button
                       className="btn button-small btn-sm px-5"
                       onClick={(evt) => connectWeb3Modal(evt)}
