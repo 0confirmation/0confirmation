@@ -864,7 +864,7 @@ const TradeRoom = (props) => {
   const removeLiquidity = async () => {
     const liquidityToken = await zero.getLiquidityTokenFor(contracts.renbtc);
     
-    await liquidityToken.removeLiquidity(
+    await liquidityToken.connect(signer).removeLiquidity(
       ethers.utils.parseUnits(value, DECIMALS.btc)
     );
   };
