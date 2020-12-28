@@ -47,6 +47,8 @@ contract ShifterPool is Ownable, SafeViewExecutor, NullCloneConstructor {
     isolate.minTimeout = params.minTimeout;
     isolate.poolFee = params.poolFee;
     isolate.daoFee = params.daoFee;
+    isolate.keeperFee = params.keeperFee;
+    isolate.keeperBondRequirement = params.keeperBondRequirement;
     isolate.gasEstimate = params.gasEstimate;
     isolate.maxGasPriceForRefund = params.maxGasPriceForRefund;
     for (uint256 i = 0; i < modules.length; i++) {

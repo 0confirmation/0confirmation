@@ -180,8 +180,10 @@ module.exports = async (bre) => {
       {
         shifterRegistry: shifterRegistry.address,
         minTimeout: chain === "test" ? "1" : "10000",
-        daoFee: ethers.utils.parseEther("0.01"),
-        poolFee: ethers.utils.parseEther("0.01"),
+        daoFee: ethers.utils.parseEther("0.001"),
+        keeperFee: ethers.utils.parseEther('0.001'),
+        keeperBondRequirement: ethers.utils.parseEther('0.01'),
+        poolFee: ethers.utils.parseEther("0.001"),
         gasEstimate: '1450000',
         maxGasPriceForRefund: ethers.utils.parseUnits('500', 9),
         maxLoan:

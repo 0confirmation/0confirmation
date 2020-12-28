@@ -27,6 +27,8 @@ library ShifterPoolLib {
     uint256 minTimeout;
     uint256 poolFee;
     uint256 daoFee;
+    uint256 keeperFee;
+    uint256 keeperBondRequirement;
     uint256 maxLoan;
     uint256 gasEstimate;
     uint256 maxGasPriceForRefund;
@@ -45,6 +47,8 @@ library ShifterPoolLib {
     uint256 poolFee;
     uint256 daoFee;
     uint256 maxLoan;
+    uint256 keeperBondRequirement;
+    uint256 keeperFee;
     uint256 gasEstimate;
     uint256 maxGasPriceForRefund;
     mapping (address => uint256) gasReserved;
@@ -81,9 +85,8 @@ library ShifterPoolLib {
   }
   function computeLoanParams(Isolate storage isolate, uint256 amount, uint256 bond, uint256 timeoutExpiry) internal view returns (ShifterBorrowProxyLib.LenderParams memory) {
     require(timeoutExpiry >= isolate.minTimeout, "timeout insufficient");
-    uint256 baseKeeperFee = uint256(1 ether).div(100); // 1%
-    require(bond.mul(uint256(1 ether)).div(amount) > uint256(1 ether).div(100), "bond below minimum");
-    uint256 keeperFee = amount < bond ? baseKeeperFee : uint256(baseKeeperFee).mul(bond).div(amount);
+    require(bond.mul(uint256(1 ether)).div(amount) > isolate.keeperBondRequirement, "bond below minimum");
+    uint256 keeperFee = isolate.keeperFee;
     return ShifterBorrowProxyLib.LenderParams({
       keeperFee: keeperFee,
       poolFee: isolate.poolFee,

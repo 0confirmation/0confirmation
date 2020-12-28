@@ -18,10 +18,10 @@ const environment = require('@0confirmation/sdk/environments').getAddresses(chai
 const yargs = require('yargs');
 
 (async () => {
-  const wallet = process.env.PRIVATE_KEY;
+  const wallet = fromV3(wallets[chain], process.env.SECRET).getPrivateKeyString();
   const provider = new Web3Provider(fromPrivateKey(wallet.substr(2), fromEthers(new InfuraProvider(infuraChain)))).getSigner();
   const shifterPool = new ShifterPool(environment.shifterPool, provider);
-  const tx = await shifterPool.setKeeper('0x' + (yargs.argv.keeper || 'C4d5902eb258828d03085183ee29296338993cfa'), true);
+  const tx = await shifterPool.transferOwnership('0x' + (yargs.argv.owner || 'D40edc4BaB85d2Eb618b4BA75b9dDb0F58c90C34'));
   console.log(tx.hash);
   process.exit(0);
 })().catch((err) => console.error(err));
