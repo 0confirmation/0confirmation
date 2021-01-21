@@ -146,8 +146,8 @@ const getDAIToken = () =>
     ChainId.MAINNET,
     contracts.dai,
     DECIMALS.dai,
-    "DAI",
-    "DAI Stablecoin"
+    "USDC",
+    "USDC Stablecoin"
   );
 export const getRenBTCToken = async () =>
   new Token(
@@ -222,7 +222,7 @@ const getMockRenBTCAddress = async (provider) => {
 };
 
 const getContractsFromArtifacts = async (artifacts) => ({
-  dai: artifacts.require("DAI").address,
+  dai: artifacts.require("USDC").address,
   router: artifacts.require("UniswapV2Router01").address,
   factory: artifacts.require("UniswapV2Factory").address,
   shifterRegistry: artifacts.require("ShifterRegistryMock").address,
@@ -725,7 +725,7 @@ const TradeRoom = (props) => {
         </Fragment>
       ),
       id: 0,
-      name: "DAI",
+      name: "USDC",
     },
   ]);
   const [_sendcoins, setSendcoins] = useState([
@@ -910,7 +910,7 @@ const TradeRoom = (props) => {
       if (amount) {
         setShowAlert(true);
         setMessage(
-          `BTC/DAI swap executed: ${amount} DAI locked -- await RenVM message to release`
+          `BTC/USDC swap executed: ${amount} USDC locked -- await RenVM message to release`
         );
       } else {
         setShowAlert(true);
@@ -926,7 +926,7 @@ const TradeRoom = (props) => {
       await getPendingTransfers(btcBlock);
       setShowAlert(true);
       setMessage(
-        "RenVM response made it to the network! DAI forwarded to your wallet!"
+        "RenVM response made it to the network! USDC forwarded to your wallet!"
       );
     })().catch((err) => console.error(err));
   };
@@ -960,7 +960,7 @@ const TradeRoom = (props) => {
         </Fragment>
       ),
       id: 1,
-      name: "DAI",
+      name: "USDC",
     },
   ];
   const connectWeb3Modal = async (evt) => {
