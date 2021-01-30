@@ -149,7 +149,6 @@ const getDAIToken = () =>
     "DAI",
     "DAI Stablecoin"
   );
-<<<<<<< HEAD
 
 const getUSDCToken = () => new Token(ChainId.MAINNET, contracts.usdc, DECIMALS.usdc, "USDC", "USDC Stablecoin");
 const getRenBTCToken = () =>
