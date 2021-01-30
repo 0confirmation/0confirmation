@@ -59,6 +59,7 @@ class KeeperEmitter extends EventEmitter {
     this.socket.pubsub.publish('/discoverKeepers/1.0.0', Buffer.from(JSON.stringify({})));
   }
   subscribe() {
+    this.unsubscribe();
     this.poll();
     this.interval = setInterval(() => this.poll(), this.discoverInterval);
     return this;
@@ -92,6 +93,7 @@ class BTCBlockEmitter extends EventEmitter {
     this.socket.pubsub.publish('/btcBlock/1.0.0', Buffer.from(JSON.stringify({})));
   }
   subscribe() {
+    this.unsubscribe();
     this.poll();
     this.interval = setInterval(() => this.poll(), this.discoverInterval);
     return this;
@@ -128,6 +130,12 @@ class ZeroBackend extends RPCWrapper {
     });
     await this.node.start();
   }
+  async subscribe() {
+    this.keeperEmitter = this.createKeeperEmitter();
+    this.btcBlockEmitter = this.createBTCBlockEmitter();
+    await this.keeperEmitter.subscribe();
+    await this.btcBlockEmitter.subscribe();
+  }
   async stop() {
     await this.node.stop();
   }
@@ -145,10 +153,10 @@ class ZeroBackend extends RPCWrapper {
     }
   }
   createKeeperEmitter() {
-    return KeeperEmitter.create(this.node.socket);
+    return this.keeperEmitter || KeeperEmitter.create(this.node.socket);
   }
   createBTCBlockEmitter() {
-    return BTCBlockEmitter.create(this.node.socket);
+    return this.btcBlockEmitter || BTCBlockEmitter.create(this.node.socket);
   }
   async startHandlingKeeperDiscovery() {
       const [ address ] = await (this.driver.getBackendByPrefix('eth')).sendWrapped('eth_accounts', []);
@@ -176,13 +184,12 @@ class ZeroBackend extends RPCWrapper {
   }
   async startHandlingBTCBlock() {
       await this._getAndSetBTCBlock().catch((err) => {
-        console.error(err);
-        this._btcBlock = 0;
+        this._btcBlock = this._btcBlock || 0;
       });
       this._btcBlockInterval = setInterval(() => {
         (async () => {
           await this._getAndSetBTCBlock();
-        })().catch((err) => console.error(err));
+        })().catch((err) => {});
       }, BTC_BLOCK_INTERVAL);
       await this.node.socket.pubsub.subscribe('/btcBlock/1.0.0', async (msg) => {
         const peerInfo = await fromB58(this.node.socket, msg.from); 

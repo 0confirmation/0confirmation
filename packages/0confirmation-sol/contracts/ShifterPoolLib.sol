@@ -27,6 +27,8 @@ library ShifterPoolLib {
     uint256 minTimeout;
     uint256 poolFee;
     uint256 daoFee;
+    uint256 keeperFee;
+    uint256 keeperBondRequirement;
     uint256 maxLoan;
     uint256 gasEstimate;
     uint256 maxGasPriceForRefund;
@@ -45,6 +47,8 @@ library ShifterPoolLib {
     uint256 poolFee;
     uint256 daoFee;
     uint256 maxLoan;
+    uint256 keeperBondRequirement;
+    uint256 keeperFee;
     uint256 gasEstimate;
     uint256 maxGasPriceForRefund;
     mapping (address => uint256) gasReserved;
@@ -64,7 +68,7 @@ library ShifterPoolLib {
   function deployAssetForwarder(BorrowProxyLib.ProxyIsolate storage isolate, bytes32 salt) internal returns (address created) {
     return ShifterPool(isolate.masterAddress).deployAssetForwarderClone(salt);
   }
-  function sendMint(address proxyAddress, address shifter, ShifterBorrowProxyLib.SansBorrowShiftParcel memory parcel, bytes32 nHash, uint256 fee) internal {
+  function sendMint(address proxyAddress, address shifter, ShifterBorrowProxyLib.SansBorrowShiftParcel memory parcel, bytes32 nHash, uint256 fee) internal  {
     ShifterBorrowProxy(address(uint160(proxyAddress))).relayMint(shifter, parcel.liquidityRequestParcel.request.token, parcel.shiftParameters.pHash, parcel.shiftParameters.amount, nHash, parcel.shiftParameters.darknodeSignature, fee);
   }
   function makeBorrowProxy(Isolate storage isolate, bytes32 salt) internal returns (address payable proxyAddress) {
@@ -81,9 +85,8 @@ library ShifterPoolLib {
   }
   function computeLoanParams(Isolate storage isolate, uint256 amount, uint256 bond, uint256 timeoutExpiry) internal view returns (ShifterBorrowProxyLib.LenderParams memory) {
     require(timeoutExpiry >= isolate.minTimeout, "timeout insufficient");
-    uint256 baseKeeperFee = uint256(1 ether).div(100); // 1%
-    require(bond.mul(uint256(1 ether)).div(amount) > uint256(1 ether).div(100), "bond below minimum");
-    uint256 keeperFee = amount < bond ? baseKeeperFee : uint256(baseKeeperFee).mul(bond).div(amount);
+    require(bond.mul(uint256(1 ether)).div(amount) > isolate.keeperBondRequirement, "bond below minimum");
+    uint256 keeperFee = isolate.keeperFee;
     return ShifterBorrowProxyLib.LenderParams({
       keeperFee: keeperFee,
       poolFee: isolate.poolFee,

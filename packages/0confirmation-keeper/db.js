@@ -3,11 +3,12 @@
 const level = require('level');
 const PromiseQueue = require('promiseq');
 const ethers = require('ethers');
+const { BigNumber } = require('@ethersproject/bignumber');
 const LiquidityRequestParcel = require('@0confirmation/sdk/liquidity-request-parcel');
 
-const toNumber = (v) => Number(ethers.utils.bigNumberify(ethers.utils.arrayify(Buffer.from(v))));
+const toNumber = (v) => Number(BigNumber.from(ethers.utils.arrayify(Buffer.from(v))));
 
-const toBuffer = (v) => Buffer.from(ethers.utils.arrayify(ethers.utils.bigNumberify(v)));
+const toBuffer = (v) => Buffer.from(ethers.utils.arrayify(BigNumber.from(v)));
 
 const toAscii = (v) => ethers.utils.toUtf8String(ethers.utils.arrayify(v));
 
@@ -27,7 +28,7 @@ class DB {
   }
   async getLoan(k, zero = {}) {
     const data = JSON.parse(await this.get(DB.toBuffer(Number(k))));
-    data.amount = ethers.utils.bigNumberify(data.amount._hex).toString();
+    data.amount = BigNumber.from(data.amount._hex).toString();
     delete data.borrower;
     delete data.proxyAddress;
     delete data.depositAddress;

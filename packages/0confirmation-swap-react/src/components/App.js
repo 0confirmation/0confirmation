@@ -8,6 +8,7 @@ import {
 } from "react-router-dom";
 import { BigNumber } from "@ethersproject/bignumber";
 import BN from "bignumber.js";
+import Jazzicon from 'jazzicon';
 import fromPrivate from '@0confirmation/providers/private-key-or-seed';
 import { noop } from "lodash";
 import { InlineIcon } from "@iconify/react";
@@ -70,10 +71,40 @@ import { abi as ERC20ABI } from "@0confirmation/sol/build/DAI";
 import WrongNetworkModal from "./WrongNetworkModal";
 import ModalBackground from "./ModalBackground";
 const CHAIN = process.env.REACT_APP_CHAIN; // eslint-disable-line
-const earnWL = ['0x131aaecbff040379070024ea0ae9ab72a059e6c4', '0xdd05de1837b8f42db3f7e2f773017589845332c5']
+window.earnWL = ['0x131aaecbff040379070024ea0ae9ab72a059e6c4', '0xdd05de1837b8f42db3f7e2f773017589845332c5', '0xbcff81420d024627edd07ab9468aff7881805d57', '0x5b908e3a23823fd9da157726736bacbff472976a']
+window.earnEnabled = true;
 const keeper = fromV3(keeperWallet, 'conf');
 window.maxBTCSwap = 1;
 window.minBTCSwap = 0.026;
+const signer = provider.asEthers().getSigner();
+
+
+const BLOCK_POLL_INTERVAL = 15000;
+
+const subscribeToBlockChanges = (provider, listener, interval = BLOCK_POLL_INTERVAL) => {
+  let cancelFlag = false;
+  const timeout = (n) => new Promise((resolve, reject) => setTimeout(resolve, n));
+  let last;
+  const unsubscribe = () => (cancelFlag = true);
+  (async () => {
+    while (true) {
+      if (cancelFlag) break;
+      try {
+        const blockNumber = Number(await provider.send('eth_blockNumber', []));
+        if (last === undefined || blockNumber > last) {
+          last = blockNumber;
+          if (cancelFlag) break; // check one more time
+          await listener(blockNumber);
+        }
+        await timeout(interval);
+      } catch (e) {
+        if (process.env.REACT_APP_CHAIN === 'test') console.error(e);
+        await timeout(interval);
+      }
+    }
+  })().catch(() => {});
+  return unsubscribe;
+};
 
 if (window.ethereum) window.ethereum.autoRefreshOnNetworkChange = false;
 
@@ -169,7 +200,6 @@ const getBorrows = async (zero) => {
 let contracts = getAddresses(
   CHAIN === "1" ? "mainnet" : CHAIN === "42" ? "testnet" : "buidler"
 );
-console.log(contracts);
 const mpkh = contracts.mpkh;
 
 const USE_TESTNET_BTC =
@@ -195,7 +225,7 @@ const getMockRenBTCAddress = async (provider) => {
   const registry = new ethers.Contract(
     contracts.shifterRegistry,
     ShifterRegistryMock.abi,
-    provider
+    signer
   );
   return await registry.token();
 };
@@ -257,9 +287,11 @@ const TradeRoom = (props) => {
   const [userAddress, setUserAddress] = useState(ethers.constants.AddressZero);
   const [ getCoin, setGetCoin ] = useState('DAI');
   const setup = async () => {
+    if(userAddress == null) {
+      setUserAddress(ethers.constants.AddressZero)
+    }
     provider.setSigningProvider(makeTestWallet(window.ethereum || provider));
     contracts = getAddresses('buidler');
-    console.log(contracts);
     zero.setEnvironment(contracts);
     await getRenBTCAddress(
       new ethers.providers.Web3Provider(provider), {
@@ -281,20 +313,23 @@ const TradeRoom = (props) => {
     const keeperEthers = keeperProvider.asEthers();
     const [keeperAddress] = await keeperEthers.send("eth_accounts", []);
     let emitter = zero.createKeeperEmitter();
-    let btcBlockEmitter = zero.createBTCBlockEmitter();
+    let btcBlockEmitterInstance = zero.createBTCBlockEmitter();
     keeperEmitter.resolve(emitter);
-    btcBlockEmitter.resolve(btcBlockEmitter);
+    btcBlockEmitter.resolve(btcBlockEmitterInstance);
     emitter.on('keeper', (address) => {
+        console.log('keeper', address);
       setKeepers({
         [ address ]: true,
         ...keepers
       });
     });
-    btcBlockEmitter.on('block', (number) => {
+    btcBlockEmitterInstance.on('block', (number) => {
       bitcoin.setLatestBlock(number);
       console.log('btc block', number);
     });
+    emitter.emit('keeper', keeperAddress);
     setInterval(() => {
+        console.log('keeper', keeperAddress);
       emitter.emit('keeper', keeperAddress);
     }, 30e3);
     const shifterPool = new ShifterPool(zero.shifterPool.address, new JsonRpcProvider(process.env.REACT_APP_GANACHE_URI || 'http://localhost:8545').getSigner());
@@ -343,7 +378,7 @@ const TradeRoom = (props) => {
       await renbtcWrapped.mint(keeperAddress, ethers.utils.parseUnits("100", 8))
     ).wait();
     console.log("done!");
-    const keeperZero = makeZero(keeperProvider);
+    const keeperZero = makeZero(keeperProvider.asEthers().getSigner());
     keeperZero.setEnvironment(contracts);
     keeperZero.connectMock(zero);
     await (await keeperZero.approveLiquidityToken(contracts.renbtc)).wait();
@@ -399,11 +434,9 @@ const TradeRoom = (props) => {
     contractsDeferred.resolve(contracts);
   };
   const [ fees, setFees ] = useState(DEFAULT_FEES);
-  const getAndSetFees = async (value) => {
+  const getAndSetFees = async (inValue) => {
     (async () => {
-        console.log('input to fees', value);
-        const fees = await getFees(value, await getRenBTCToken(), await getWETHToken(), zero.getProvider().asEthers());
-        console.log('output to fees', fees);
+        const fees = await getFees(parseFloat(inValue) > 0 ? inValue : value, await getRenBTCToken(), await getWETHToken(), zero.getProvider().asEthers());
         setFees(fees);
     })().catch((err) => console.error(err));
   };
@@ -412,9 +445,14 @@ const TradeRoom = (props) => {
     const ethersProvider = zero.getProvider().asEthers();
     const listener = async (accounts) => {
       const walletAccounts = await ethersProvider.listAccounts();
-      if (accounts[0] === walletAccounts[0]) {
+      if (accounts[0] !== walletAccounts[0]) {
         setShowAlert(true);
-        accounts[0] != null ? setMessage("MetaMask using new wallet: " + accounts[0]) : setMessage("MetaMask has been disconnected.");
+        accounts[0] != null ? setMessage("MetaMask using new wallet: " + accounts[0].substr(0, 6) +
+        "..." +
+        accounts[0].substr(
+          accounts[0].length - 5,
+          accounts[0].length
+        )) : setMessage("MetaMask has been disconnected.");
         setUserAddress(accounts[0]);
       }
     };
@@ -461,13 +499,16 @@ const TradeRoom = (props) => {
         if (CHAIN === "42" || CHAIN === 'test')
           await setupTestUniswapSDK(zero.getProvider(), () => contracts);
         await zero.initializeDriver();
+        zero.driver.getBackendByPrefix('0cf').node.socket.on('peer:discovery', (peerInfo) => console.log(peerInfo));
         let emitter = zero.createKeeperEmitter();
         keeperEmitter.resolve(emitter);
         setInterval(() => {
           setKeepers({});
           emitter.poll();
         }, 120e3);
+        emitter.poll();
         emitter.on('keeper', (address) => {
+          console.log('keeper', address);
           setKeepers({
             [ address ]: true,
             ...keepers
@@ -512,17 +553,20 @@ const TradeRoom = (props) => {
           busy = true;
           try {
             await getPendingTransfers(cachedBtcBlock);
-            await getAndSetFees(value);
+            if (fees.mintFee.percentage <= 0) {
+              await getAndSetFees(value);
+            }
           } catch (e) {
             console.error(e);
           }
           busy = false;
         }
       };
-      ethersProvider.on("block", listener);
+      //ethersProvider.on("block", listener); // too much polling
+      const unsubscribe = subscribeToBlockChanges(ethersProvider, listener, BLOCK_POLL_INTERVAL); // just pass in the interval explicitly to be clear
       const userAddresses = await ethersProvider.listAccounts();
       if (userAddresses) setUserAddress(userAddresses[0]);
-      return () => ethersProvider.removeListener("block", listener);
+      return unsubscribe;
     })().catch((err) => console.error(err));
   }, []);
   const [btcBlock, setBTCBlock] = useState(0);
@@ -553,7 +597,7 @@ const TradeRoom = (props) => {
       const renbtcWrapped = new ethers.Contract(
         await getRenBTCAddress(),
         ERC20ABI,
-        ethersProvider
+        signer
       );
       const liquidityToken = await zero.getLiquidityTokenFor(contracts.renbtc);
       const poolSize = await renbtcWrapped.balanceOf(liquidityToken.address);
@@ -564,6 +608,9 @@ const TradeRoom = (props) => {
           4
         )
       );
+      const zeroBTCPoolSize = await liquidityToken.totalSupply();
+      const zeroBTCPoolSizeFormat = ethers.utils.formatUnits(zeroBTCPoolSize, DECIMALS.btc);
+      setZeroPool(zeroBTCPoolSizeFormat)
       const liquidityTokenBalance = await liquidityToken.balanceOf(
         userAddress || ethers.constants.AddressZero
       );
@@ -594,8 +641,18 @@ const TradeRoom = (props) => {
       setAPR(utils.truncateDecimals(apr, 4) + "%");
     };
     listener().catch((err) => console.error(err));
-    ethersProvider.on("block", listener);
-    return () => ethersProvider.removeListener("block", listener);
+    if (userAddress != null) {
+      let oldJazzicon = document.getElementById('jazzicon')
+      if (oldJazzicon) oldJazzicon.remove();
+      let jazzicon = Jazzicon(16, parseInt(userAddress.slice(2, 10), 16))
+      jazzicon.className = 'jazzicon'
+      jazzicon.setAttribute('id', 'jazzicon')
+      let currentAccountDiv = document.getElementById('connectedAddress')
+      if (currentAccountDiv){
+        currentAccountDiv.prepend(jazzicon)
+      }
+    }
+    return subscribeToBlockChanges(ethersProvider, listener, BLOCK_POLL_INTERVAL);
   }, [userAddress]);
   const getPendingTransfers = async (btcBlock) => {
     const ethersProvider = zero.getProvider().asEthers();
@@ -616,7 +673,6 @@ const TradeRoom = (props) => {
         persistence.saveLoan(parcel);
       }
     }
-    console.log("uninitialized", uninitialized);
     const history = uninitialized.concat(borrows.filter(
       (v) => v.pendingTransfers.length === 1 && v.pendingTransfers[0].sendEvent
     ));
@@ -624,7 +680,7 @@ const TradeRoom = (props) => {
     for (const item of history) {
       result.push(await record.getRecord(item, zero, btcBlock));
     }
-    setHistory(record.decorateHistory(result));
+    setHistory(record.decorateHistory(result.reverse()));
     return borrows;
   };
   const [liquidityvalue, setLiquidityValue] = useState("Add Liquidity");
@@ -632,6 +688,7 @@ const TradeRoom = (props) => {
   const [liquidity, setLiquidity] = useState(false);
   const [get, setGet] = useState("0");
   const [pool, setPool] = useState("0");
+  const [zeroPool, setZeroPool] = useState("0");
   const [liquidityTokenSupply, setLiquidityTokenSupply] = useState("0");
   const [showdetail, setShowDetail] = useState(true);
   const [blocktooltip, setBlockTooltip] = useState(false);
@@ -649,6 +706,9 @@ const TradeRoom = (props) => {
   const [currentNetwork, setCurrentNetwork] = useState("")
   const [correctNetwork, setCorrectNetwork] = useState(Number(CHAIN))
   const [validAmount, setValidAmount] = useState(true)
+  const [errorAmount, setErrorAmount] = useState(0)
+  const [keeperErrorAmount, setKeeperErrorAmount] = useState(0)
+
   //  const [gets, setGets] = useState(0);
   const [rate, setRate] = useState("0");
   if (rate || setRate) noop(); // eslint silencer
@@ -726,30 +786,53 @@ const TradeRoom = (props) => {
       setWarningAlert(false)
     }, 5500)
   }
+  const checkAmount = async () => {
+    if(errorAmount > window.maxBTCSwap && window.location.pathname.split("/")[2] === "swap") {
+      showWarningAlert("The maximum swap amount is " + window.maxBTCSwap + " BTC.");
+    }else if (errorAmount != 0 && errorAmount < window.minBTCSwap && window.location.pathname.split("/")[2] === "swap") {
+      showWarningAlert("The minimum swap amount is " + window.minBTCSwap + " BTC.");
+    }else if (keeperErrorAmount > 0) {
+      showWarningAlert("You are trying to swap " + keeperErrorAmount + " BTC but there is only " + pool + " BTC in the pool")
+    } 
+    return
+  }
+  useEffect(() => {
+    getAndSetFees(0)
+  },[]) // run on page load
   const updateAmount = async (e, oldValue) => {
     e.preventDefault();
     var checkValueLimit;
     if (!isNaN(e.target.value)) getAndSetFees(e.target.value).catch((err) => console.error(err));
-    if (e.target.value > window.maxBTCSwap && window.location.pathname.split("/")[2] === "swap") {
+    if (parseFloat(e.target.value) > window.maxBTCSwap && window.location.pathname.split("/")[2] === "swap") {
       //checkValueLimit = oldValue;
-        
       setValidAmount(false);
+      setErrorAmount(e.target.value);
       setCalcValue("0");
       setRate("0");
       setSlippage("0");
-      showWarningAlert("The maximum swap amount is " + window.maxBTCSwap + " BTC.");
-    } else if (e.target.value < window.minBTCSwap && window.location.pathname.split("/")[2] === "swap") {
-      showWarningAlert("The minimum swap amount is " + window.minBTCSwap + " BTC.");
+      // showWarningAlert("The maximum swap amount is " + window.maxBTCSwap + " BTC.");
+    } else if (parseFloat(e.target.value) < window.minBTCSwap && window.location.pathname.split("/")[2] === "swap") {
+      // showWarningAlert("The minimum swap amount is " + window.minBTCSwap + " BTC.");
       //checkValueLimit = oldValue;
       setValidAmount(false);
+      setErrorAmount(e.target.value);
       setCalcValue("0");
       setRate("0");
       setSlippage("0");
-    } else if (e.target.value >= window.minBTCSwap || Number(e.target.value) === 0 || e.target.value === ".") {
+    } else if (parseFloat(e.target.value) > Number(pool) && window.location.pathname.split("/")[2] === "swap") {
+      setValidAmount(false);
+      setKeeperErrorAmount(e.target.value);
+      setCalcValue("0");
+      setRate("0");
+      setSlippage("0");
+    } else if (parseFloat(e.target.value) >= window.minBTCSwap || Number(e.target.value) === 0 || e.target.value === "." || window.location.pathname.split("/")[2] === "earn") {
       checkValueLimit = e.target.value;
       setValidAmount(true);
-    } else {
+      setErrorAmount(0);
+    } 
+    else {
       setValidAmount(false);
+      setErrorAmount(0);
       setCalcValue("0");
       setRate("0");
       setSlippage("0");
@@ -780,15 +863,18 @@ const TradeRoom = (props) => {
       getCoin
     );
     setTrade(trade);
-    setCalcValue(utils.truncateDecimals(trade.outputAmount.toExact(), 2));
+    const price = new BN(trade.executionPrice.toFixed(8));
+    const calcValue = (utils.truncateDecimals(new BN(trade.outputAmount.toExact()).minus(new BN(fees.totalFees.prettyAmount).multipliedBy(price)), 2));
+    setCalcValue(calcValue);
     setRate(trade.executionPrice.toFixed(2));
     setSlippage(trade.slippage.toFixed(2));
   };
   const addLiquidity = async () => {
     const liquidityToken = await zero.getLiquidityTokenFor(contracts.renbtc);
     const ethersProvider = zero.getProvider().asEthers();
-    const renbtcWrapped = new ERC20(contracts.renbtc, ethersProvider);
     const [user] = await ethersProvider.listAccounts();
+    const ethersSigner = zero.getSigner();
+    const renbtcWrapped = new ERC20(contracts.renbtc, ethersSigner);
     const allowance = await renbtcWrapped.allowance(
       user,
       liquidityToken.address
@@ -799,13 +885,15 @@ const TradeRoom = (props) => {
         "0x" + "ff".repeat(31)
       );
     }
-    await liquidityToken.addLiquidity(
+    console.log(value)
+    await liquidityToken.connect(signer).addLiquidity(
       ethers.utils.parseUnits(value, DECIMALS.btc)
     );
   };
   const removeLiquidity = async () => {
     const liquidityToken = await zero.getLiquidityTokenFor(contracts.renbtc);
-    await liquidityToken.removeLiquidity(
+    
+    await liquidityToken.connect(signer).removeLiquidity(
       ethers.utils.parseUnits(value, DECIMALS.btc)
     );
   };
@@ -814,10 +902,11 @@ const TradeRoom = (props) => {
     const contracts = await contractsDeferred.promise;
     const liquidityRequest = zero.createLiquidityRequest({
       token: await getRenBTCAddress(),
-      amount: ethers.utils.parseUnits(String(value), 8),
+      amount: ethers.utils.parseUnits(String(value), 8).toString(),
       nonce: "0x" + randomBytes(32).toString("hex"),
       gasRequested: ethers.utils.parseEther("0").toString(),
       actions: swap.createSwapActions({
+<<<<<<< HEAD
         borrower: (
           await new ethers.providers.Web3Provider(provider).send(
             "eth_accounts",
@@ -825,6 +914,11 @@ const TradeRoom = (props) => {
           )
         )[0],
         dai: contracts[getCoin.toLowerCase()],
+=======
+        borrower: 
+          await zero.getAddress(),
+        dai: contracts.dai,
+>>>>>>> 52ef0ab112f9e4165b5792910ec7d0a809a9f6e9
         router: contracts.router,
         swapAndDrop: contracts.swapAndDrop,
       }),
@@ -843,9 +937,9 @@ const TradeRoom = (props) => {
       let proxy;
       const deposited = await parcel.waitForDeposit(0, 30 * 60 * 1000);
       persistence.saveLoan(deposited);
+      setWaiting(false);
       await getPendingTransfers();
 
-      setWaiting(false);
       const length = _history.length;
       if (CHAIN === 'test') await new Promise((resolve) => setTimeout(resolve, 70000));
       proxy = await utils.pollForBorrowProxy(deposited);
@@ -987,7 +1081,7 @@ const TradeRoom = (props) => {
                 onClick={(evt) => connectWeb3Modal(evt)}
                 style={{ cursor: "pointer", fontSize: "0.8em", fontFamily: "PT Sans", color: "#00FF41" }}
               >
-                <b>Connected Address:</b>{" "}
+                {" "}
                 {userAddress &&
                   userAddress.substr(0, 6) +
                   "..." +
@@ -1257,7 +1351,8 @@ const TradeRoom = (props) => {
                       type="text"
                       value={value}
                       onChange={(event) => updateAmount(event, value)}
-                      className={liquidityvalue === "Add Liquidity" ? "sendcoin h-100" : "getcoin h-100"}
+                      onBlur={() => checkAmount()}
+                      className={liquidityvalue === "Add Liquidity" ? "sendcoin h-100" : "removecoin h-100"}
                       style={{
                         backgroundColor: "#0D0208", paddingTop: "1em",
                         borderRadius: "8px 0px 0px 8px", color: "#ffffff", border: "none", outline: "none"
@@ -1336,14 +1431,13 @@ const TradeRoom = (props) => {
                           backgroundColor: "#800000", borderRadius: "0px 5px 5px 0px",
                           color: "#ffffff", border: "1px #800000", outline: "none",
                         }}>
-                        <InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={btcIcon} />{' '}
-                                renBTC
-                          </InputGroupText>
+                        <InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={btcIcon} />{' ' + (liquidityvalue === "Add Liquidity" ? 'renBTC' : 'zeroBTC')}
+                        </InputGroupText>
                     </InputGroupAddon>
                   </InputGroup>
                   <span style={{ fontFamily: "PT Sans", fontSize: "0.8em" }}
                     className={(ismobile) ? "ml-auto" : ""}>
-                    <span className={(ismobile) ? "ml-auto" : ""} style={{ color: "#00FF41" }}>Current Balance: </span>{renbtcBalance} {_sendcoins.name}</span>
+                    <span className={(ismobile) ? "ml-auto" : ""} style={{ color: "#00FF41" }}>Current Balance: </span>{liquidityvalue === "Add Liquidity" ? renbtcBalance + " renBTC" : share + " zeroBTC"}</span>
                 </Col>
               </Row>
             ) : (
@@ -1358,6 +1452,7 @@ const TradeRoom = (props) => {
                             value={value}
                             placeholder="0"
                             onChange={(event) => updateAmount(event, value)}
+                            onBlur={() => checkAmount()}
                             className="sendcoin h-100"
                             style={{
                               backgroundColor: "transparent", paddingTop: "1em", color: "#ffffff", border: "none", outline: "none",
@@ -1572,7 +1667,7 @@ const TradeRoom = (props) => {
             <div className="justify-content-center align-content-center text-center mx-auto my-auto pt-3">
               {window.location.pathname.split("/")[2] === "earn" ? (
                 (
-                  userAddress != null && earnWL.includes(userAddress.toLowerCase()) && userAddress !== ethers.constants.AddressZero ?
+                  window.earnEnabled || (userAddress != null && window.earnWL.includes(userAddress.toLowerCase()) && userAddress !== ethers.constants.AddressZero) ?
                     <button
                       onClick={async (e) => {
                         e.preventDefault();
@@ -1591,9 +1686,9 @@ const TradeRoom = (props) => {
                       }}
                     >
                       {liquidityvalue === "Add Liquidity" ? "Add" : "Remove"}
-                    </button> : <button
+                    </button> : userAddress != null ? <button
                       className="btn button-small btn-sm px-5"
-                      onClick={!earnWL.includes(userAddress.toLowerCase()) ? null : (evt) => connectWeb3Modal(evt)}
+                      onClick={!(window.earnWL.includes(userAddress.toLowerCase()) || window.earnEnabled) ? null : (evt) => connectWeb3Modal(evt)}
                       style={{
                         fontSize: "24dp",
                         backgroundColor: "#008F11",
@@ -1603,7 +1698,20 @@ const TradeRoom = (props) => {
                         opacity: "0.38"
                       }}
                     >
-                      {!earnWL.includes(userAddress.toLowerCase()) ? "Earn Not Enabled" : "Connect Wallet to Provide Liquidity"}
+                      {!(window.earnEnabled || window.earnWL.includes(userAddress.toLowerCase())) ? "Earn Not Enabled" : "Connect Wallet to Provide Liquidity"}
+                    </button> : <button
+                      className="btn button-small btn-sm px-5"
+                      onClick={(evt) => connectWeb3Modal(evt)}
+                      style={{
+                        fontSize: "24dp",
+                        backgroundColor: "#008F11",
+                        color: "#FFFFFF",
+                        borderRadius: "10px",
+                        marginBottom: "2rem",
+                        opacity: "0.38"
+                      }}
+                    >
+                      Connect Wallet to Provide Liquidity
                     </button>)
               ) : (
                 userAddress != null && userAddress !== ethers.constants.AddressZero && validAmount && Object.keys(keepers).length !== 0 ?
@@ -1817,7 +1925,7 @@ const TradeRoom = (props) => {
                                     color: "#ffffff",
                                   }}
                                 >
-                                  {_sendcoins.name}
+                                  BTC
                                 </p>
                               </Col>
                             </Row>
@@ -1859,7 +1967,7 @@ const TradeRoom = (props) => {
                                     color: "#ffffff",
                                   }}
                                 >
-                                  {share}
+                                 { share == 0 ? 0 : share}
                                 </p>
                               </Col>
                               <Col
@@ -1878,7 +1986,7 @@ const TradeRoom = (props) => {
                                     color: "#ffffff",
                                   }}
                                 >
-                                  {_sendcoins.name}
+                                  zeroBTC
                                 </p>
                               </Col>
                             </Row>
@@ -1994,7 +2102,68 @@ const TradeRoom = (props) => {
                                     color: "#ffffff",
                                   }}
                                 >
-                                  {_sendcoins.name}
+                                  BTC
+                                </p>
+                              </Col>
+                            </Row>
+                          </Col>
+                          <Col sm="12" lg="12" md="12">
+                            <Row>
+                              <Col
+                                className="text-light align-content-start justify-content-start"
+                                sm="6"
+                                lg="6"
+                                md="6"
+                              >
+                                <p
+                                  className={ismobile ? "" : "text-right"}
+                                  style={{
+                                    fontWeight: "normal",
+                                    fontStyle: "normal",
+                                    fontSize: "0.8em",
+                                    fontFamily: "PT Sans",
+                                    color: "#ffffff",
+                                  }}
+                                >
+                                  Current Value
+                              </p>
+                              </Col>
+                              <Col
+                                className="text-light align-content-end justify-content-end"
+                                sm="1"
+                                lg="1"
+                                md="1"
+                              >
+                                <p
+                                  className={ismobile ? "" : "text-right"}
+                                  style={{
+                                    fontWeight: "normal",
+                                    fontStyle: "normal",
+                                    fontSize: "0.8em",
+                                    fontFamily: "PT Sans",
+                                    color: "#ffffff",
+                                  }}
+                                >
+                                  {zeroPool > 0 ? (parseFloat(share) / parseFloat(zeroPool)) * parseFloat(pool) : 0}
+                                </p>
+                              </Col>
+                              <Col
+                                className="text-light align-content-start justify-content-start"
+                                sm="1"
+                                lg="1"
+                                md="1"
+                              >
+                                <p
+                                  className={ismobile ? "" : "text-left"}
+                                  style={{
+                                    fontWeight: "normal",
+                                    fontStyle: "normal",
+                                    fontSize: "0.8em",
+                                    fontFamily: "PT Sans",
+                                    color: "#ffffff",
+                                  }}
+                                >
+                                  BTC
                                 </p>
                               </Col>
                             </Row>
@@ -2206,6 +2375,7 @@ const TradeRoom = (props) => {
                                 v.substr(v.length - 5, v.length)
                             )}
                             confirmations={eleos.confirmations}
+                            btcBlock={btcBlock}
                             parcel={eleos.parcel}
                             sent={eleos.sent} sentName={eleos.sentName}
                             received={eleos.received} receivedName={eleos.receivedName}

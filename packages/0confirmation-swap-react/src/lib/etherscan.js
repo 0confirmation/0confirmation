@@ -17,20 +17,23 @@ export const createEtherscanLinkFor = (s) =>
   //     s.length === 64 ? "/tx/" : "/address/" + s
   //   : "";
   {
-    console.log("S = " + s)
     let r = null
-    if (s.length === 55 || s.length === 42) {
+    if (s.length === 55 || s.length === 42 || s.length === 66) {
+      let etherscanPrefix = ''
+      if (Number(CHAIN) !== 1) etherscanPrefix = 'kovan.';
       r = ("https://" +
-            Number(CHAIN) === 1 ? 'mainnet' : 'kovan' +
-            ".etherscan.io/" +
+            etherscanPrefix +
+            "etherscan.io/" +
             (s.length === 66 ? "tx/" : "address/") +
             s)
-    } else if (s.length === 66) {
+    } else {
+      let btcPrefix = 'btc'
+      let txOrAddress = '/address/'
+      if (Number(CHAIN) !== 1) btcPrefix = 'btc-testnet'
+      if (s.length === 64) txOrAddress = '/tx/'
       r = ("https://www.blockchain.com/" + 
-          Number(CHAIN) === 1 ? 'btc' : 'btc-testnet' + 
-          s.length === 64 ? "/tx/" : "/address/" + s)
+           btcPrefix + txOrAddress + s);  
     }
-    console.log("r = " + r)
     return r
   }
   
@@ -39,7 +42,7 @@ export const createEtherscanLink = (s, text) => {
   const link = createEtherscanLinkFor(s);
   if (!link) return text;
   return (
-    <a style={{ color: "white" }} target="_blank" rel="noreferrer" href={link}>
+    <a style={{ color: "white", textDecoration: "none" }} target="_blank" rel="noreferrer" href={link}>
       {text}
     </a>
   );

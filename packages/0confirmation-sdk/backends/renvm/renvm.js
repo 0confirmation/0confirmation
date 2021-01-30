@@ -1,6 +1,6 @@
 'use strict';
 
-const { RenVM } = require('@0confirmation/renvm');
+const RenJS = require('../../renvm');
 const RPCWrapper = require('../../util/rpc-wrapper');
 const promiseRetry = require('promise-retry');
 const resultToJsonRpc = require('../../util/result-to-jsonrpc');
@@ -13,7 +13,7 @@ class RenVMBackend extends RPCWrapper {
     super();
     this.name = 'renvm';
     this.prefixes = ['ren'];
-    this.ren = new RenVM(network);
+    this.ren = new RenJS(network);
   }
   async sendPromise({
     method,

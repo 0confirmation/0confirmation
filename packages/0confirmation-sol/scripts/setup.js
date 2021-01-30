@@ -34,22 +34,23 @@ const environment = require('@0confirmation/sdk/environments').getAddresses('mai
 const yargs = require('yargs');
 
 (async () => {
-  const wallet = fromV3(wallets[infuraChain], process.env.SECRET).getPrivateKeyString();
-  const provider = new Web3Provider(fromSecret(wallet, fromEthers(new InfuraProvider(infuraChain))));
-  const shifterPool = new ShifterPool(environment.shifterPool, provider);
+//  const wallet = fromV3(wallets[infuraChain], process.env.SECRET).getPrivateKeyString();
+  const signer = new ethers.Wallet(process.env.PRIVATE_KEY, new ethers.providers.InfuraProvider('mainnet'));
+  const shifterPool = new ShifterPool(environment.shifterPool, signer);
   tx =  (
     await shifterPool.setup(
       {
         shifterRegistry: environment.shifterRegistry,
         minTimeout: chain === "test" ? "1" : "10000",
-        daoFee: ethers.utils.parseEther("0.01"),
-        poolFee: ethers.utils.parseEther("0.01"),
+        daoFee: ethers.utils.parseEther("0.001"),
+        poolFee: ethers.utils.parseEther("0.001"),
         gasEstimate: '1460000',
         maxGasPriceForRefund: ethers.utils.parseUnits('500', 9),
         maxLoan:
           chain === "mainnet"
             ? ethers.utils.parseEther("1")
             : ethers.utils.parseEther("10"),
+<<<<<<< HEAD
       }, ...((v) => [
         v.map((v) => ({
           moduleType: v.moduleType,
@@ -70,10 +71,14 @@ const yargs = require('yargs');
           },
         }
       ]), [])
+=======
+      }, [], [], [{
+        liqToken: '0x2Cd31ac784B848d9D579a3940302c73788b8db0e',
+        token: require('@0confirmation/sdk/environments').getAddresses('mainnet').renbtc,
+        baseFee: ethers.utils.parseUnits('0.001', 8)
+      }])
+>>>>>>> 52ef0ab112f9e4165b5792910ec7d0a809a9f6e9
     );
-  
-  console.log(chalk.bold('txhash: ' + tx.hash));
-  await tx.wait();
-  console.log(chalk.bold.cyan('mined!'));
+  console.log(tx.hash);
   process.exit(0);
 })().catch((err) => console.error(err));

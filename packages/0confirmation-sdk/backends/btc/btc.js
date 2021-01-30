@@ -4,7 +4,6 @@ const RPCWrapper = require('../../util/rpc-wrapper');
 const resultToJsonRpc = require('../../util/result-to-jsonrpc');
 const handler = require('send-crypto/build/main/handlers/BTC/BTCHandler');
 
-
 class BTCBackend extends RPCWrapper {
   constructor(options) {
     super();
@@ -20,7 +19,7 @@ class BTCBackend extends RPCWrapper {
   }) {
     switch (method) {
       case 'btc_getUTXOs':
-        return await resultToJsonRpc(id, async () => await this.handler.getUTXOs(this.testnet, ...params));
+        return await resultToJsonRpc(id, async () => await this.handler.BTCHandler.getUTXOs(this.testnet, ...params));
       case 'btc_broadcastTransaction':
         return await resultToJsonRpc(id, () => this.handler._apiFallbacks.broadcastTransaction(this.testnet, ...params));
     }

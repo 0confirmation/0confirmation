@@ -53,8 +53,10 @@ class MockZeroBackend extends EventEmitterAndRPCWrapper {
     return ee;
   }
   async _unsubscribeLiquidityRequests() {
+    if (this.filtering === false) return;
     this.filtering = false;
-    this.filterTargets.forEach((instance) => instance.removeAllListeners());
+    this.removeAllListeners();
+    this.filterTargets.forEach((instance) => instance._unsubscribeLiquidityRequests());
   }
   async send({
     id,

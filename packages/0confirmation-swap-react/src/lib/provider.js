@@ -1,7 +1,7 @@
 "use strict";
 
 import globalObject from "the-global-object";
-import fromEthers from "@0confirmation/providers/from-ethers";
+import fromEthers from "ethers-to-web3";
 import { makeEngine, makeBaseProvider } from "@0confirmation/providers";
 import makeWalletSelectorFromProvider from "@0confirmation/providers/selector";
 
@@ -121,7 +121,8 @@ const INFURA_PROJECT_ID = process.env.REACT_APP_INFURA_PROJECT_ID || '2f1de898ef
 const chainToProvider = (chainId) => {
   switch (chainId) {
     case "1":
-      return fromEthers(new ethers.providers.InfuraProvider("mainnet", INFURA_PROJECT_ID));
+//        return fromEthers(new ethers.providers.JsonRpcProvider('https://cloudflare-eth.com'));
+          return fromEthers(new ethers.providers.InfuraProvider("mainnet", INFURA_PROJECT_ID));
     case "42":
       return fromEthers(new ethers.providers.InfuraProvider("kovan", INFURA_PROJECT_ID));
     case "embedded":

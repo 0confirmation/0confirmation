@@ -134,8 +134,8 @@ export const getConfirmations = async (borrow, btcBlock) => {
     localStorage.setItem(depositAddress, await bitcoin.getBlockCount(depositAddress));
   }
   const blockNo = Number(localStorage.getItem(depositAddress));
-  console.log(blockNo);
-  console.log(btcBlock);
+  console.log("blockNo: ", blockNo);
+  console.log("btcBlock: ", btcBlock);
   return Math.max(0, Math.min(btcBlock - blockNo, 6));
 };
 
@@ -175,6 +175,7 @@ export const getRecord = async (borrow, zero, btcBlock) => {
     sentfullname: getSentfullname(borrow),
     address: wrapLink(getAddress(borrow)),
     escrowAddress: wrapLink(getEscrow(borrow)),
+    testEscrowAddress: getEscrow(borrow),
     fees: getFees(borrow),
     depositAddress: wrapLink(getDepositAddress(borrow)),
     recipient: wrapLink(getTarget(borrow)),

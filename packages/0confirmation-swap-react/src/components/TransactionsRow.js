@@ -55,22 +55,23 @@ export default function TransactionRow(props) {
                 setTransactionModal(!transactionModal);
                 }}>
                 <div className="break-words" style={{lineHeight:"2.2rem", width: "16.5%"}}>{props.created}</div>
-                <div className="break-words" style={{lineHeight:"2.2rem", width: "16.5%"}}>{props.escrowAddress}</div>
+                <div className="break-words" style={{lineHeight:"2.2rem", width: "16.5%"}}>
+                  <a href={props.escrowAddress.props.href} target="_blank" referrerPolicy="no-referrer" style={{color:"white", textDecoration:"none"}}>{props.escrowAddress.props.children}</a>
+                </div>
                 <div className="break-words" style={{width: "16.5%"}}>
-                    <img
+                  {Number(props.btcBlock) === 0 ? getSvgForConfirmations('N/A') : 
+                  (<img
                         alt={`${props.confirmations} of 6`}
                         // width="30%"
                         // height="30%"
-                        src={getSvgForConfirmations(
-                            props.confirmations
-                        )}
+                        src={getSvgForConfirmations(props.confirmations)}
                         className="img-fluid"
-                    />
+                    />) 
+                  }
                 </div>
                 <div className="break-words" style={{lineHeight:"2.2rem", width: "16.5%"}}>{props.sent} {props.sentName}</div>
                 <div className="break-words" style={{lineHeight:"2.2rem", width: "16.5%"}}>{props.received} {props.receivedName}</div>
                 <div className="break-words" style={{lineHeight:"2.2rem", width: "16.5%"}}>
-                  {console.log(props.status)}
       {/* { props.parcel && props.parcel.isReady && <button onClick={ (evt) => shiftFallback(evt, props.parcel) } style={ { color: '#000000', backgroundColor: '#317333' } }>Click to force swap</button> ||*/ <p 
                         style={{
                         color: "#000000",
@@ -99,6 +100,7 @@ export default function TransactionRow(props) {
                 transactionModal={transactionModal}
                 onFallbackShift={ onFallbackShift.bind(null, props.parcel) }
                 _history={props._history}
+                btcBlock={props.btcBlock}
                 transactionDetails={transactionDetails}
                 setTransactionModal={setTransactionModal}
             />

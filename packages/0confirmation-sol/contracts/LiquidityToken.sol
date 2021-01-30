@@ -1,5 +1,5 @@
-pragma experimental ABIEncoderV2;
 // SPDX-License-Identifier: MIT
+pragma experimental ABIEncoderV2;
 pragma solidity ^0.6.0;
 
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
@@ -8,7 +8,6 @@ import { ERC20Burnable } from "@openzeppelin/contracts/token/ERC20/ERC20Burnable
 import { TokenUtils } from "./utils/TokenUtils.sol";
 import { IUniswapV2Router01 } from "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router01.sol";
 import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
-import { console } from "@nomiclabs/buidler/console.sol";
 
 contract LiquidityToken is ERC20, ERC20Burnable {
   using TokenUtils for *;

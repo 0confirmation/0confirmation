@@ -13,6 +13,7 @@ const TransactionDetailsModal = ({
   transactionDetails,
   setBlockTooltip,
   blocktooltip,
+  btcBlock,
   onFallbackShift,
   ismobile,
 }) => {
@@ -23,6 +24,12 @@ const TransactionDetailsModal = ({
     e.preventDefault();
     setTransactionModal(false);
   };
+  const txHash = _history[transactionDetails].transactionHash(
+    (v) =>
+      v.substr(0, 6) +
+      "..." +
+      v.substr(v.length - 5, v.length)
+  );
   const closeBtn = (
     <button
       className="btn"
@@ -234,12 +241,7 @@ const TransactionDetailsModal = ({
                 </Col>
                 <Col lg="6" md="6" sm="6">
                   <p style={{color:"#00FF41", fontFamily:"PT Sans", fontStyle:"normal", fontWeight:"normal", fontSize:"0.9em"}}>
-                    {_history[`${transactionDetails}`].transactionHash(
-                      (v) =>
-                        v.substr(0, 6) +
-                        "..." +
-                        v.substr(v.length - 5, v.length)
-                    )}
+                    <a style={{color:"white", textDecoration: "none"}} href={txHash.props ? txHash.props.href : ''} target="_blank" referrerPolicy="no-referrer">{txHash.props ? txHash.props.children : ''}</a>
                   </p>
                 </Col>
               </Row>
@@ -260,17 +262,20 @@ const TransactionDetailsModal = ({
                     }}
                   >
                     {" "}
-                    <img
-                      alt={`${
-                        _history[`${transactionDetails}`].confirmations
-                      } of 6`}
-                      width="30%"
-                      height="30%"
-                      src={getSvgForConfirmations(
-                        _history[transactionDetails].confirmations
-                      )}
-                      className="img-fluid"
-                    />{" "}
+                    {Number(btcBlock) === 0 ? getSvgForConfirmations('N/A') : 
+                  (<img
+                    alt={`${
+                      _history[`${transactionDetails}`].confirmations
+                    } of 6`}
+                    width="30%"
+                    height="30%"
+                    src={getSvgForConfirmations(
+                      _history[transactionDetails].confirmations
+                    )}
+                    className="img-fluid"
+                  />) 
+                  }
+                    {" "}
                   </p>
                 </Col>
               </Row>

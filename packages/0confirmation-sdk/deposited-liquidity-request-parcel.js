@@ -1,6 +1,6 @@
 'use strict';
 
-const { RenVM } = require('@0confirmation/renvm');
+const RenJS = require('./renvm');
 const LiquidityRequestParcel = require('./liquidity-request-parcel');
 const ethers = require('ethers');
 const { BigNumber } = require('@ethersproject/bignumber');
@@ -78,12 +78,12 @@ class DepositedLiquidityRequestParcel extends LiquidityRequestParcel {
       } else await timeout(constants.DARKNODE_QUERY_TX_INTERVAL);
     }
   }
-  async executeShiftFallback(actions = []) {
+  async executeShiftFallback(actions = [], overrides) {
     const {
       signature: darknodeSignature,
       amount: darknodeAmount
     }  = await this.waitForSignature();
-    return this.zero.shifterPool.executeShiftSansBorrow({
+    return await this.zero.shifterPool.executeShiftSansBorrow({
       liquidityRequestParcel: {
         signature: this.signature,
         gasRequested: this.gasRequested,
@@ -110,11 +110,11 @@ class DepositedLiquidityRequestParcel extends LiquidityRequestParcel {
         txData: v.txData || v.calldata,
         to: v.to
       }))
-    });
+    }, overrides || {});
   }
   computeShiftInTxHash() {
     return utils.computeShiftInTxHash({
-      renContract: RenVM.Tokens.BTC.Mint,
+      renContract: RenJS.Tokens.BTC.Mint,
       g: {
         to: this.proxyAddress,
         p: constants.CONST_PHASH,

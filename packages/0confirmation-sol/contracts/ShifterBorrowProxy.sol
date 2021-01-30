@@ -73,7 +73,7 @@ contract ShifterBorrowProxy is BorrowProxy, SafeViewExecutor, NullCloneConstruct
   function relayMint(address shifter, address token, bytes32 pHash, uint256 amount, bytes32 nHash, bytes memory darknodeSignature, uint256 fee) public returns (bool) {
     require(isolate.masterAddress == msg.sender, "must be called by shifter pool");
     IShifter(shifter).mint(pHash, amount, nHash, darknodeSignature);
-    require(token.sendToken(msg.sender, fee), "failed to send token");
+    if (fee != 0) require(token.sendToken(msg.sender, fee), "failed to send token");
     isolate.unbound = true;
   }
   function getBalanceOf(address token, address user) internal view returns (uint256) {

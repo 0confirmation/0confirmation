@@ -3,7 +3,7 @@
 const ethers = require('ethers');
 const addHexPrefix = (s) => s.substr(0, 2) === '0x' ? s : '0x' + s;
 const { defaultAbiCoder: abi } = ethers.utils;
-const { makeManagerClass } = require('@0confirmation/eth-manager');
+const { makeEthersBase } = require('ethers-base');
 const { safeViewExecutorMixin } = require('./mixins');
 const LiquidityRequestParcel = require('./liquidity-request-parcel');
 const constants = require('./constants');
@@ -16,8 +16,19 @@ const TriggerParcelABI = Exports.abi.find((v) => v.name === 'TriggerParcelExport
 
 const decodeProxyRecord = (input) => abi.decode([ ProxyRecordABI ], input)[0];
 const encodeTriggerParcel = (input) => abi.encode([ TriggerParcelABI ], [ input ]);
+const { VoidSigner } = require('@ethersproject/abstract-signer');
 
-class BorrowProxy extends makeManagerClass(ShifterBorrowProxy) {
+const getProvider = (borrowProxy) => {
+  const provider = borrowProxy.zero.getSigner();
+  return VoidSigner.isSigner(provider) ? provider.provider : provider;
+};
+
+const getSigner = (borrowProxy) => {
+  const signer = borrowProxy.zero.getSigner();
+  return signer;
+};
+
+class BorrowProxy extends makeEthersBase(ShifterBorrowProxy) {
   constructor ({
     zero,
     transactionHash,
@@ -30,7 +41,7 @@ class BorrowProxy extends makeManagerClass(ShifterBorrowProxy) {
     proxyAddress,
     record
   }) {
-    super(proxyAddress, zero.getProvider().asEthers());
+    super(proxyAddress, zero.getSigner());
     this.transactionHash = transactionHash;
     this.zero = zero;
     this.shifterPool = shifterPool; 
@@ -44,10 +55,10 @@ class BorrowProxy extends makeManagerClass(ShifterBorrowProxy) {
     Object.assign(this, this.decodedRecord.request);
   }
   async getTransaction() {
-    return await (this.zero.getProvider().asEthers()).send('eth_getTransactionByHash', [ this.transactionHash ]);
+    return await getProvider(this).getTransactionByHash(this.transactionHash);
   }
   async getTransactionReceipt() {
-    return await (this.zero.getProvider().asEthers()).send('eth_getTransactionReceipt', [ this.transactionHash ]);
+    return await getProvider(this).getTransactionReceipt(this.transactionHash);
   }
   async queryTransfers(fromBlock) {
     if (!fromBlock) fromBlock = await this.zero.shifterPool.getGenesis();

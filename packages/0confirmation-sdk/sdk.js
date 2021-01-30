@@ -2,21 +2,19 @@
 
 const staticPreprocessor = require('./static-preprocessor');
 const ISafeViewExecutor = require('@0confirmation/sol/build/ISafeViewExecutor');
+const { Provider } = require('@ethersproject/providers');
+const { VoidSigner } = require('@ethersproject/abstract-signer');
 const pendingTransfersQuery = require('./queries/query-pending-transfers');
 const genesisQuery = require('./queries/query-genesis');
-const { makeManagerClass } = require('@0confirmation/eth-manager');
+const { makeEthersBase } = require('ethers-base');
 const environment = require('./environments');
 const constants = require('./constants');
 const BN = require('bignumber.js');
 const resultToJsonRpc = require('./util/result-to-jsonrpc');
 const { AddressZero } = require('@ethersproject/constants');
 const { Buffer } = require('safe-buffer');
-const {
-  Common: {
-    RenVMType
-  },
-  RenVM
-} = require('@0confirmation/renvm');
+const { RenVMType } = require('@renproject/interfaces');
+const RenJS = require('./renvm');
 const makeBaseProvider = require('@0confirmation/providers/base-provider');
 const { toHex, toBase64 } = require('./util');
 const { joinSignature } = require('@ethersproject/bytes');
@@ -28,7 +26,7 @@ const Driver = require('./driver');
 const { getDefaultProvider, Web3Provider, JsonRpcProvider } = require('@ethersproject/providers');
 const defaultProvider = getDefaultProvider();
 const Web3ProviderEngine = require('web3-provider-engine');
-const LiquidityToken = makeManagerClass(require('@0confirmation/sol/build/LiquidityToken'));
+const LiquidityToken = makeEthersBase(require('@0confirmation/sol/build/LiquidityToken'));
 const LiquidityRequestParcel = require('./liquidity-request-parcel');
 const LiquidityRequest = require('./liquidity-request');
 const DepositedLiquidityRequestParcel = require('./deposited-liquidity-request-parcel');
@@ -41,6 +39,11 @@ const filterABI = (abi) => abi.filter((v) => v.type !== 'receive');
 const shifterPoolInterface = new Interface(filterABI(ShifterPoolArtifact.abi));
 const shifterBorrowProxyInterface = new Interface(filterABI(ShifterBorrowProxy.abi));
 const uniq = require('lodash/uniq');
+
+const getProvider = (zero) => {
+  const provider = zero.getProvider().asEthers();
+  return provider;
+};
 
 const getSignatures = (abi) => {
   const iface = new Interface(filterABI(abi));
@@ -88,10 +91,10 @@ class Zero {
   setEnvironment(env) {
     this.network = env;
     this.network.shifterPool = this.network.shifterPool || AddressZero;
-    this.shifterPool = new ShifterPool(this.network.shifterPool, this.getProvider().asEthers(), this);
+    this.shifterPool = new ShifterPool(this.network.shifterPool, this.getSigner(), this);
   }
   constructor(o, ...args) {
-    if (o.send || o.sendAsync) {
+    if (o.send || o.sendAsync || Provider.isProvider(o) || VoidSigner.isSigner(o)) {
       if (args.length && args[0]) {
         if (args[0] === 'mock') o = environment.getMockEnvironment(o);
         else o = environment.getEnvironment(o, ...args);
@@ -123,9 +126,18 @@ class Zero {
   async setBorrowProxy(address) {
     return await this.driver.sendWrapped('0cf_setBorrowProxy', [ address ]);
   }
+  getSigner() {
+    const backend = this.driver.getBackend('ethereum');
+    return backend.provider._ethers;
+  }
   getProvider() {
     const eth = this.driver.getBackend('ethereum');
-    return makeBaseProvider(eth.provider);
+    const provider = eth.provider;
+    provider.asEthers = () => {
+      const signer = this.getSigner();
+      return signer.getAddress && signer.provider || signer;
+    };
+    return provider;
   }
   getBorrowProvider() {
     const wrappedEthProvider = this.getProvider(this.driver);
@@ -193,7 +205,7 @@ class Zero {
   }
   subscribeBorrows(filterArgs, callback) {
     const contract = this.shifterPool;
-    const filter = contract.contract.filters.BorrowProxyMade(...filterArgs);
+    const filter = contract.filters.BorrowProxyMade(...filterArgs);
     contract.on(filter, (user, proxyAddress, data) => callback(new BorrowProxy({
       zero: this,
       user,
@@ -205,12 +217,20 @@ class Zero {
     })));
     return () => contract.removeListener(filter);
   }
+  async getAddress() {
+    const signerOrProvider = this.getSigner();
+    if (signerOrProvider.addressPromise) return await signerOrProvider.addressPromise;
+    if (signerOrProvider.address) return await signerOrProvider.address;
+    if (signerOrProvider.getAddress) return await signerOrProvider.getAddress();
+    const accounts = await signerOrProvider.listAccounts();
+    return accounts[0] || null;
+  }
   async getBorrowProxies(borrower) {
     if (!borrower) {
-      borrower = (await (this.getProvider().asEthers()).send('eth_accounts', []))[0];
+      borrower = await this.getAddress();
     }
-    const provider = this.getProvider().asEthers();
-    const contract = this.shifterPool.contract;
+    const provider = getProvider(this);
+    const contract = this.shifterPool;
     const filter = contract.filters.BorrowProxyMade(...[ borrower ]);
     const logs = await provider.getLogs(Object.assign({
       fromBlock: await this.shifterPool.getGenesis() 
@@ -254,7 +274,7 @@ class Zero {
   }) {
     return await this.driver.sendWrapped('ren_submitTx', {
       tx: {
-        to: RenVM.Tokens.BTC.Mint,
+        to: RenJS.Tokens.BTC.Mint,
         in: [{
           name: 'p',
           type: RenVMType.ExtEthCompatPayload,
@@ -318,17 +338,17 @@ class Zero {
     return await (this.driver.getBackend('zero'))._unsubscribeLiquidityRequests();
   }
   async approvePool(token, overrides) {
-    const contract = new LiquidityToken(token, this.getProvider().asEthers());
+    const contract = new LiquidityToken(token, this.getSigner());
     return await contract.approve(this.network.shifterPool, '0x' + Array(64).fill('f').join(''), overrides || {});
   }
   async getLiquidityTokenFor(token) {
     const contract = this.shifterPool;
-    const liquidityToken = new LiquidityToken(await contract.getLiquidityTokenHandler(token), this.getProvider().asEthers());
+    const liquidityToken = new LiquidityToken(await contract.getLiquidityTokenHandler(token), this.getSigner());
     return liquidityToken;
   }
   async approveLiquidityToken(token, overrides) {
     const liquidityToken = await this.getLiquidityTokenFor(token);
-    const contract = new LiquidityToken(token, this.getProvider().asEthers());
+    const contract = new LiquidityToken(token, this.getSigner());
     return await contract.approve(liquidityToken.address, '0x' + Array(62).fill('f').join(''), overrides || {});
   }
   async addLiquidity(token, value, overrides) {

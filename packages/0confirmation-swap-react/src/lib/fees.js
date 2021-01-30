@@ -1,11 +1,12 @@
 import axios from 'axios';
 import BN from 'bignumber.js';
 import {ChainId, Token, WETH, Route, Pair} from "@uniswap/sdk";
-import {RenVM} from '@0confirmation/renvm';
 import {ethers} from 'ethers';
 import {InfuraProvider} from '@ethersproject/providers';
 import { mapValues } from 'lodash';
-const { RenJS } = RenVM;
+import  provider  from './provider';
+import { BigNumber } from '@ethersproject/bignumber';
+const RenJS = require('@0confirmation/sdk/renvm');
 
 const renBTC = new Token (ChainId.MAINNET, '0xeb4c2781e4eba804ce9a9803c67d0893436bb27d', 18);
 const getPair = async(renbtc, weth, provider) =>  (await Pair.fetchData(renbtc, weth, provider));
@@ -13,7 +14,7 @@ const getRoute = async(renbtc, weth, provider) => new Route([await getPair(renbt
 export var getPrice = async(renbtc, weth, provider) => new BN((await getRoute(renbtc, weth, provider)).midPrice.toSignificant(5)*10000000000);
 
 let renjs = new RenJS('mainnet')
-let btcGatewayAddress = renjs.network.addresses.gateways.BTCGateway.artifact.networks[1].address
+let btcGatewayAddress = '0xe4b679400F0f267212D5D812B95f58C83243EE71'
 
 const abi =[{
     type: 'function',
@@ -24,7 +25,7 @@ const abi =[{
         type:'uint256',
         name:'some-output-name-doesnt-matter'}]}]
 ;
-const renGatewayContract = new ethers.Contract(btcGatewayAddress, abi, new InfuraProvider('mainnet','2f1de898efb74331bf933d3ac469b98d' ))
+const renGatewayContract = new ethers.Contract(btcGatewayAddress, abi, provider.asEthers());
 
 export let getFast = async () => (await axios.get('https://ethgasstation.info/api/ethgasAPI.json')).data.fast;
 var gasEstimate=new  BN('1.46e6');
@@ -87,7 +88,7 @@ const addAggregateFees = (o) => {
 
 export const DEFAULT_FEES = addData({
   keeperFee: {
-    ratio: new BN('0.001'),
+    ratio: new BN('0.0005'),
     amount: new BN('0')
   },
   daoFee: {
@@ -103,7 +104,7 @@ export const DEFAULT_FEES = addData({
     amount: new BN('0')
   },
   liquidityPoolFee: {
-    ratio: new BN('0.001'),
+    ratio: new BN('0.0005'),
     amount: new BN('0')
   },
   baseFee: {
@@ -112,8 +113,26 @@ export const DEFAULT_FEES = addData({
   }
 }, 0, 0);
 
+let last;
+
+const cacheResult = (v) => {
+  if (v && v.totalFees && isNaN(Number(v.totalFees.amount))) v = last || DEFAULT_FEES;
+  last = v;
+  return last;
+};
+
+const getMintFee = async () => {
+  return process.env.JEST_WORKER_ID ? BigNumber.from(7e8) : await renGatewayContract.mintFee();
+};
+
+export const getRenFees = async () => {
+  let fees = await renjs.getFees()
+  console.log("BTC: ", fees.btc.ethereum.mint)
+}
+
 export const getFees = async (swapAmount, renbtc, weth, provider) => {
-  const mintFeeProportion = new BN(String(await renGatewayContract.mintFee())).dividedBy(new BN('1e8'));
+  if (!swapAmount || swapAmount === '.') return cacheResult(DEFAULT_FEES);
+  const mintFeeProportion = new BN(String(await getMintFee())).multipliedBy(new BN('0.0001'));
   const mintFee = mintFeeProportion.multipliedBy(swapAmount);
   const fast = new BN(await getFast());
   const ethGasFee = gasEstimate.multipliedBy(divisorForGwei).multipliedBy(fast).dividedBy(oneEther);
@@ -129,7 +148,7 @@ export const getFees = async (swapAmount, renbtc, weth, provider) => {
     const baseFeeProportion = Number(swapAmount) != 0 ? new BN(baseFee).dividedBy(swapAmount) : new BN(0);
   const totalFeeProportion = [ mintFeeProportion, btcGasFeeProportion, keeperFeeProportion, daoFeeProportion, liquidityPoolFeeProportion, baseFeeProportion ].reduce((r, v) => r.plus(v), new BN(0));
   const totalFee = totalFeeProportion.multipliedBy(swapAmount);
-  return coerceNaNsToZero(addData({
+  return cacheResult(addData({
     mintFee: {
       ratio: mintFeeProportion,
       amount: mintFee

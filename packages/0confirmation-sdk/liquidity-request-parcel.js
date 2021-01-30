@@ -52,7 +52,7 @@ class LiquidityRequestParcel extends LiquidityRequest {
   }
   async getBorrowProxy() {
     const proxies = await this.zero.getBorrowProxies(this.borrower);
-    const proxy = proxies.find((v) => v.contract.address === this.proxyAddress) || null;
+    const proxy = proxies.find((v) => v.address === this.proxyAddress) || null;
     proxy.utxo = this.utxo;
     return proxy;
   }

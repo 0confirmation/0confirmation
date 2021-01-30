@@ -1,9 +1,13 @@
 const url = require('url');
+const dotenv = require('dotenv');
+
 const bip39 = require('bip39');
 const path = require('path');
 const { InfuraProvider } = require('@ethersproject/providers');
 const { fromV3, fromPrivateKey } = require('ethereumjs-wallet');
 const { sync: randomBytes } = require('random-bytes');
+
+dotenv.config();
 
 const wallets = {
   mainnet: require('./private/mainnet'),
@@ -16,13 +20,9 @@ const unhook = modifyEnvironmentIfMonorepo();
 
 const unlockWalletIfPasswordSet = (wallet) => (process.env.SECRET ? fromV3(wallet, process.env.SECRET) : fromPrivateKey(randomBytes(32))).getPrivateKeyString()
 
-usePlugin("@nomiclabs/buidler-solhint");
 usePlugin("@nomiclabs/buidler-etherscan");
 usePlugin("@nomiclabs/buidler-ethers");
-usePlugin("@nomiclabs/buidler-waffle");
-usePlugin("buidler-gas-reporter");
 usePlugin("buidler-deploy");
-usePlugin("solidity-coverage");
 
 unhook();
 
@@ -61,12 +61,6 @@ Object.assign(module.exports, {
     url: "https://api.etherscan.io/api",
     apiKey: process.env.ETHERSCAN_API_KEY,
   },
-  gasReporter: {
-    currency: "USD",
-    showTimeSpent: true,
-    enabled: true,
-    currency: "USD",
-  },
   namedAccounts: {
     deployer: {
       default: 0
@@ -87,4 +81,7 @@ Object.assign(module.exports, {
     deploy: path.join(__dirname, "deploy"),
     deployments: path.join(__dirname, "deployments")
   },
+  etherscan: {
+    apiKey: process.env.ETHERSCAN_API_KEY
+  }
 });

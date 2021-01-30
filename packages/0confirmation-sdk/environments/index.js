@@ -1,6 +1,6 @@
 'use strict';
 
-const { RenVM } = require('@0confirmation/renvm');
+const RenJS = require('../renvm');
 const uniswap = require('@uniswap/sdk');
 const ethers = require('ethers');
 const randomBytes = require('random-bytes').sync;
@@ -15,54 +15,53 @@ const requireMaybe = (s) => {
 };
 const ShifterPool = {
   kovan: require('@0confirmation/sol/deployments/kovan/ShifterPool'),
-  mainnet: require('@0confirmation/sol/deployments/live_1/ShifterPool'),
-  buidler: requireMaybe('@0confirmation/sol/deployments/local_31337/ShifterPool')
+  mainnet: require('@0confirmation/sol/deployments/live/ShifterPool'),
+  buidler: requireMaybe('@0confirmation/sol/deployments/local/ShifterPool')
 };
 const USDC = {
   buidler: requireMaybe('@0confirmation/sol/deployments/local_31337/USDC')
 };
 const UniswapV2Factory = {
   kovan: require('@0confirmation/sol/deployments/kovan/UniswapV2Factory'),
-  buidler: requireMaybe('@0confirmation/sol/deployments/local_31337/UniswapV2Factory')
+  buidler: requireMaybe('@0confirmation/sol/deployments/local/UniswapV2Factory')
 };
 const UniswapV2Router01 = {
   kovan: require('@0confirmation/sol/deployments/kovan/UniswapV2Router01'),
-  buidler: requireMaybe('@0confirmation/sol/deployments/local_31337/UniswapV2Router01')
+  buidler: requireMaybe('@0confirmation/sol/deployments/local/UniswapV2Router01')
 };
 const DAI = {
   kovan: require('@0confirmation/sol/deployments/kovan/DAI'),
-  buidler: requireMaybe('@0confirmation/sol/deployments/local_31337/DAI')
+  buidler: requireMaybe('@0confirmation/sol/deployments/local/DAI')
 };
 const WETH9 = {
   kovan: require('@0confirmation/sol/deployments/kovan/WETH9'),
-  buidler: requireMaybe('@0confirmation/sol/deployments/local_31337/WETH9')
+  buidler: requireMaybe('@0confirmation/sol/deployments/local/WETH9')
 };
 const ShifterRegistryMock = {
-  buidler: requireMaybe('@0confirmation/sol/deployments/local_31337/ShifterRegistryMock')
+  buidler: requireMaybe('@0confirmation/sol/deployments/local/ShifterRegistryMock')
 };
 //const SwapEntireLoan = require('@0confirmation/sol/deployments/kovan/SwapEntireLoan');
 
 const TransferAll = {
   kovan: require('@0confirmation/sol/deployments/kovan/TransferAll'),
-  mainnet: require('@0confirmation/sol/deployments/live_1/TransferAll'),
-  buidler: requireMaybe('@0confirmation/sol/deployments/local_31337/TransferAll')
+  mainnet: require('@0confirmation/sol/deployments/live/TransferAll'),
+  buidler: requireMaybe('@0confirmation/sol/deployments/local/TransferAll')
 };
 const V2SwapAndDrop = {
   kovan: require('@0confirmation/sol/deployments/kovan/V2SwapAndDrop'),
-  mainnet: require('@0confirmation/sol/deployments/live_1/V2SwapAndDrop'),
-  buidler: requireMaybe('@0confirmation/sol/deployments/local_31337/V2SwapAndDrop')
+  mainnet: require('@0confirmation/sol/deployments/live/V2SwapAndDrop'),
+  buidler: requireMaybe('@0confirmation/sol/deployments/local/V2SwapAndDrop')
 };
 
 if (isBrowser) {
-  ShifterPool.buidler = require('@0confirmation/sol/deployments/local_31337/ShifterPool');
-  UniswapV2Factory.buidler = require('@0confirmation/sol/deployments/local_31337/UniswapV2Factory');
-  UniswapV2Router01.buidler = require('@0confirmation/sol/deployments/local_31337/UniswapV2Router01');
-  DAI.buidler = require('@0confirmation/sol/deployments/local_31337/DAI');
-  USDC.buidler = require('@0confiramtion/sol/deployments/local_31337/USDC');
-  WETH9.buidler = require('@0confirmation/sol/deployments/local_31337/WETH9');
-  ShifterRegistryMock.buidler = require('@0confirmation/sol/deployments/local_31337/ShifterRegistryMock');
-  V2SwapAndDrop.buidler = require('@0confirmation/sol/deployments/local_31337/V2SwapAndDrop');
-  TransferAll.buidler = require('@0confirmation/sol/deployments/local_31337/TransferAll');
+  ShifterPool.buidler = require('@0confirmation/sol/deployments/local/ShifterPool');
+  UniswapV2Factory.buidler = require('@0confirmation/sol/deployments/local/UniswapV2Factory');
+  UniswapV2Router01.buidler = require('@0confirmation/sol/deployments/local/UniswapV2Router01');
+  DAI.buidler = require('@0confirmation/sol/deployments/local/DAI');
+  WETH9.buidler = require('@0confirmation/sol/deployments/local/WETH9');
+  ShifterRegistryMock.buidler = require('@0confirmation/sol/deployments/local/ShifterRegistryMock');
+  V2SwapAndDrop.buidler = require('@0confirmation/sol/deployments/local/V2SwapAndDrop');
+  TransferAll.buidler = require('@0confirmation/sol/deployments/local/TransferAll');
 }
 
 const networkToEthereumNetwork = (n) => n === 'testnet' ? 'kovan' : n;
@@ -98,7 +97,7 @@ const renvmFromEnvironment = (network) => {
       mpkh: '0x' + randomBytes(20).toString('hex')
     }
   }
-  const renvm = new RenVM(renNetworkFromNetwork(network));
+  const renvm = new RenJS(renNetworkFromNetwork(network));
   const chainId = chainIdFromNetwork(network);
   const renbtcShifter = renvm.network.addresses.gateways.BTCGateway._address;
   const renbtc = renvm.network.addresses.tokens.BTC.address;
@@ -206,14 +205,14 @@ const getEnvironment = (provider, network, backends) => ({
 
 const getMockEnvironment = (provider) => getEnvironment(provider, 'buidler', makeMockBackends(provider));
 
-const { makeManagerClass } = require('@0confirmation/eth-manager');
 
+const { makeEthersBase } = require('ethers-base');
 /*
-const CurvefiManager = makeManagerClass(Curvefi);
+const CurvefiManager = makeEthersBase(Curvefi);
 */
-const ShifterPoolManager = makeManagerClass(ShifterPool.mainnet);
+const ShifterPoolManager = makeEthersBase(ShifterPool.mainnet);
 /*
-const CurveTokenManager = makeManagerClass(CurveToken);
+const CurveTokenManager = makeEthersBase(CurveToken);
 */
 
 Object.assign(module.exports, {

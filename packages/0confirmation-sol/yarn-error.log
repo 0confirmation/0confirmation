@@ -1,0 +1,84 @@
+Arguments: 
+  /home/ray/.nvm/versions/node/v12.18.3/bin/node /home/ray/.nvm/versions/node/v12.18.3/bin/yarn
+
+PATH: 
+  /home/ray/.local/bin:/home/ray/.venv/bin:/home/ray/.local/bin:/home/ray/.venv/bin:/home/ray/.nvm/versions/node/v12.18.3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/usr/local/go/bin:/usr/local/go/bin
+
+Yarn version: 
+  1.19.0
+
+Node version: 
+  12.18.3
+
+Platform: 
+  linux x64
+
+Trace: 
+  SyntaxError: /home/ray/0confirmation/packages/0confirmation-sol/package.json: Unexpected string in JSON at position 1291
+      at JSON.parse (<anonymous>)
+      at /home/ray/.nvm/versions/node/v12.18.3/lib/node_modules/yarn/lib/cli.js:1625:59
+      at Generator.next (<anonymous>)
+      at step (/home/ray/.nvm/versions/node/v12.18.3/lib/node_modules/yarn/lib/cli.js:304:30)
+      at /home/ray/.nvm/versions/node/v12.18.3/lib/node_modules/yarn/lib/cli.js:315:13
+
+npm manifest: 
+  {
+    "name": "@0confirmation/sol",
+    "version": "0.1.17",
+    "description": "0confirmation buidler port",
+    "main": "index.js",
+    "repository": "https://github.com/0confirmation/0confirmation",
+    "author": "Raymond Pulver IV",
+    "license": "MIT",
+    "private": false,
+    "scripts": {
+      "task:build:mkdir": "mkdirp build",
+      "task:build:clean": "rimraf build",
+      "task:build:insert-uniswap": "cross-env node internal/insert-uniswap",
+      "task:build:insert-curvefi": "cross-env node internal/insert-curvefi",
+      "task:build:insert-uniswap-v2": "cross-env node internal/insert-uniswap-v2",
+      "task:build:buidler": "buidler compile",
+      "freeze": "cp build/AssetForwarder.json build/AssetForwarderFreeze.json; cp build/ShifterBorrowProxy.json build/ShifterBorrowProxyFreeze.json",
+      "verify-kovan": "cross-env buidler run scripts/verify-kovan",
+      "verify-mainnet": "cross-env buidler run scripts/verify-mainnet.js",
+      "build": "npm-run-all task:build:mkdir task:build:buidler task:build:insert-uniswap-v2 task:build:insert-curvefi",
+      "test": "buidler test",
+      "prettier": "prettier --write ./deploy/*.js ./test/*.js scripts/*.js",
+      "eslint": "cross-env eslint --fix ./deploy/*",
+      "deploy": "buidler deploy"
+    },
+    "dependencies": {
+      "@nomiclabs/buidler": "^0.2.8"
+      "@nomiclabs/buidler-ethers": "^2.0.2",
+      "@nomiclabs/buidler-etherscan": "^2.1.0",
+      "ethers": "^5.0.8",
+      "prettier": "^2.0.5",
+      "random-bytes": "^1.0.0",
+      "solidity-coverage": "^0.7.9"
+    },
+    "devDependencies": {
+      "@chainlink/contracts": "^0.0.7-beta",
+      "@nomiclabs/buidler": "^1.4.8",
+      "@openzeppelin/contracts": "^3.2.0",
+      "@uniswap/v2-periphery": "^1.1.0-beta.0",
+      "bip39": "^3.0.2",
+      "bluebird": "^3.7.2",
+      "buidler": "^2.0.0",
+      "buidler-deploy": "^0.6.0-beta.37",
+      "canonical-weth": "^1.4.0",
+      "eslint": "^7.4.0",
+      "ethers": "^5.0.19",
+      "ethers-to-web3": "^0.1.5",
+      "local-repl": "^4.0.0",
+      "npm-run-all": "^4.1.5",
+      "prettier": "^2.0.5",
+      "prettier-plugin-solidity": "^1.0.0-alpha.54",
+      "random-bytes": "^1.0.0"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
