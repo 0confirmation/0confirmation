@@ -151,7 +151,7 @@ const getDAIToken = () =>
   );
 
 const getUSDCToken = () => new Token(ChainId.MAINNET, contracts.usdc, DECIMALS.usdc, "USDC", "USDC Stablecoin");
-const getRenBTCToken = () =>
+const getRenBTCToken = async () =>
   new Token(
     ChainId.MAINNET,
     await getRenBTCAddress(),
@@ -172,7 +172,7 @@ const getters = {
 const getUniswapMarket = async (provider, token) => {
   const route = new UniRoute(
     [
-      await Pair.fetchData(getRenBTCToken(), getWETHToken(), provider),
+      await Pair.fetchData(await getRenBTCToken(), getWETHToken(), provider),
       await Pair.fetchData(getters[token](), getWETHToken(), provider),
     ],
     renbtc
@@ -183,7 +183,7 @@ const getUniswapMarket = async (provider, token) => {
 const getTradeExecution = async (provider, route, amount, token) => {
   return new Trade(
     route || (await getUniswapMarket(provider, token)),
-    new TokenAmount(getRenBTCToken(), amount),
+    new TokenAmount(await getRenBTCToken(), amount),
     TradeType.EXACT_INPUT
   );
 };
@@ -905,19 +905,9 @@ const TradeRoom = (props) => {
       nonce: "0x" + randomBytes(32).toString("hex"),
       gasRequested: ethers.utils.parseEther("0").toString(),
       actions: swap.createSwapActions({
-<<<<<<< HEAD
-        borrower: (
-          await new ethers.providers.Web3Provider(provider).send(
-            "eth_accounts",
-            []
-          )
-        )[0],
-        dai: contracts[getCoin.toLowerCase()],
-=======
         borrower: 
           await zero.getAddress(),
         dai: contracts.dai,
->>>>>>> 52ef0ab112f9e4165b5792910ec7d0a809a9f6e9
         router: contracts.router,
         swapAndDrop: contracts.swapAndDrop,
       }),
@@ -1342,6 +1332,8 @@ const TradeRoom = (props) => {
             Read more about the risks <a href="https://docs.0confirmation.com/security-considerations" target="_blank" style={{ color: "#008F11", textDecoration: "none" }}>here</a></span>
               </Col>
             </Row>
+      <>
+      <Row>
             {window.location.pathname.split("/")[2] === "earn" ? (
               <Row className="justify-content-center align-content-center text-center mx-auto my-3 text-light">
                 <Col lg="4" md="12" sm="12" className="mt-2">
@@ -1655,15 +1647,19 @@ const TradeRoom = (props) => {
                           );
                         })}
                       </DropdownMenu>
-                    </InputGroupButtonDropdown>*/}
-                        </InputGroup>
-                      </Col>
+                      */}
+                              </InputGroupText>
+                </InputGroupAddon>
+                </InputGroup>
+                              </Col>
                     </Row>
                   </Col>
-                </Row>
               )}
+      </Row>
+      <Row>
 
             <div className="justify-content-center align-content-center text-center mx-auto my-auto pt-3">
+      
               {window.location.pathname.split("/")[2] === "earn" ? (
                 (
                   window.earnEnabled || (userAddress != null && window.earnWL.includes(userAddress.toLowerCase()) && userAddress !== ethers.constants.AddressZero) ?
@@ -1741,26 +1737,6 @@ const TradeRoom = (props) => {
                     {userAddress == null || userAddress === ethers.constants.AddressZero ? "Connect Wallet to Swap" : validAmount ? "There are no keepers available" : "Enter Valid Amount"}
                   </button>
               )}
-            </div>
-            {/*<Row className="justify-content-center align-content-center text-center mx-auto py-3">
-              <Col lg="6" md="6" sm="6">
-                <span
-                  onClick={async () => {
-                    setShowDetail(!showdetail);
-                  }}
-                  style={{
-                    fontWeight: "normal",
-                    cursor: "pointer",
-                    fontStyle: "normal",
-                    fontSize: "0.7em",
-                    fontFamily: "PT Sans",
-                    color: "#00FF41",
-                  }}
-                >
-                  Details {showdetail ? <FaAngleDown /> : <FaAngleUp />}
-                </span>
-              </Col>
-            </Row>*/}
             {showdetail ? (
               <Row className="justify-content-center align-content-center text-center mx-auto mt-1 mb-5">
                 {window.location.pathname.split("/")[2] === "earn" ? (
@@ -2037,7 +2013,6 @@ const TradeRoom = (props) => {
                                 md="1"
                               >
                                 {_sendcoins.name}
-                              </p>
                             </Col>
                           </Row>
                         </Col>
@@ -2086,11 +2061,11 @@ const TradeRoom = (props) => {
                           <br />
                           Additional slippage limit: <b>{slippage}%</b>
                         </p>
-                      </Col>
-                    </Row>
+                      </Col>)
                     {/* <p className="text-center text-break" style={{ fontWeight: "normal", fontStyle: "normal", fontSize: "0.8em", fontFamily: "PT Sans", color: "#ffffff" }}>
                                         You are selling <b>{sendvalue} {_sendcoins.name}</b> for at least <b>{sendvalue * rate} {_getcoins.name}</b> <br />Expected Price Slippage: <b>{slippage}%</b>  <br />Additional slippage limit: <b>{slippage}%</b>  <br />fee disclosures
                                     </p> */}
+                    <Col><Row><Col>
                                 <p
                                   className={ismobile ? "" : "text-left"}
                                   style={{
@@ -2165,11 +2140,12 @@ const TradeRoom = (props) => {
                                   BTC
                                 </p>
                               </Col>
-                            </Row>
-                          </Col>
-                        </Row>
+                    </Row>
+                            </Col>
+                    </Row>
+                    </Col>
                       )}
-                  </Col>
+                  </Row>
                 ) : null
                 // (
                     // <Col
@@ -2221,10 +2197,9 @@ const TradeRoom = (props) => {
                     // </Col>
                   // )
                   
-                  }
-              </Row>
-            ) : null}
-            {window.location.pathname.split("/")[2] === "earn" ? null : (
+              }
+
+            {window.location.pathname.split("/")[2] === "earn" ? <span></span> : (
               <Row className="justify-content-center align-content-center mx-auto">
                 {_history.length > 0 ? (
                   <Col lg="12" sm="12" md="12" className="min-vh-100 mt-5 pt-5">
@@ -2388,11 +2363,9 @@ const TradeRoom = (props) => {
                         </div>)
                     })}
                   </Col>
-                ) : null}
+                ) : <span></span>}
               </Row>
-            )}
-          </Col>
-        </Row>
+            )}</Row></></div>
         <Row className="align-content-center justify-content-center mt-5 pt-5 mb-2">
           <Col lg="10" md="10" sm="10" className="align-content-center justify-content-center mt-5 mx-auto text-center text-white-50"
             style={{
@@ -2400,20 +2373,8 @@ const TradeRoom = (props) => {
               fontFamily: "PT Sans",
             }}
           >
-            Fully decentralized, maintained and operated by the 0cf community.<br /> <b>Original software build by JKR Labs LLC.</b></Col>
+i            Fully decentralized, maintained and operated by the 0cf community.<br /> <b>Original software build by JKR Labs LLC.</b></Col>
         </Row>
-      </div>
-      {/* <TransactionDetailsModal
-        ismobile={ismobile}
-        setBlockTooltip={setBlockTooltip}
-        blocktooltip={blocktooltip}
-        transactionModal={transactionModal}
-        _history={_history}
-        transactionDetails={transactionDetails}
-        setTransactionModal={setTransactionModal}
-      /> */}
-    </>
-  );
 };
 
 export default App;
