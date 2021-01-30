@@ -1096,7 +1096,7 @@ const TradeRoom = (props) => {
           )
           }
         </div>
-
+      </div>
         <div className="alert-box">
           {showAlert ? (
             <Alert
@@ -1332,7 +1332,7 @@ const TradeRoom = (props) => {
             Read more about the risks <a href="https://docs.0confirmation.com/security-considerations" target="_blank" style={{ color: "#008F11", textDecoration: "none" }}>here</a></span>
               </Col>
             </Row>
-      <>
+      
       <Row>
             {window.location.pathname.split("/")[2] === "earn" ? (
               <Row className="justify-content-center align-content-center text-center mx-auto my-3 text-light">
@@ -1581,7 +1581,6 @@ const TradeRoom = (props) => {
                        <InputGroupText style={{ backgroundColor: "#003B00", borderRadius: "0px 8px 8px 0px", color: "#ffffff", border: "none", outline: "none" }}>
                           <InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={daiIcon} />{' '}
                           { getCoin } 
-                          />
                           <InputGroupAddon style={{ backgroundColor: "#003B00", borderRadius: "0px 6px 6px 0px", color: "#ffffff" }} addonType="append">
                             <InputGroupText style={{ backgroundColor: "#003B00", borderRadius: "0px 6px 6px 0px", color: "#ffffff", border: "none", outline: "none" }}>
                               <InlineIcon color="#ffffff" style={{ fontSize: "1.5em" }} className="mr-2" icon={daiIcon} />{' '}
@@ -1654,8 +1653,7 @@ const TradeRoom = (props) => {
                               </Col>
                     </Row>
                   </Col>
-              )}
-      </Row>
+      </Row>)      
       <Row>
 
             <div className="justify-content-center align-content-center text-center mx-auto my-auto pt-3">
@@ -2365,7 +2363,7 @@ const TradeRoom = (props) => {
                   </Col>
                 ) : <span></span>}
               </Row>
-            )}</Row></></div>
+            )}</div> }</Row></Col></Row>
         <Row className="align-content-center justify-content-center mt-5 pt-5 mb-2">
           <Col lg="10" md="10" sm="10" className="align-content-center justify-content-center mt-5 mx-auto text-center text-white-50"
             style={{
@@ -2375,6 +2373,6 @@ const TradeRoom = (props) => {
           >
 i            Fully decentralized, maintained and operated by the 0cf community.<br /> <b>Original software build by JKR Labs LLC.</b></Col>
         </Row>
-};
-
+        </>);
+          }
 export default App;
