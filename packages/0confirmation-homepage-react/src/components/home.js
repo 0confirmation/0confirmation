@@ -3,6 +3,7 @@ import '../App.css';
 import Navigation from './navbar';
 import LandingPage from './landingpage';
 
+
 export default class Home extends React.Component {
     constructor(props) {
         super(props)
