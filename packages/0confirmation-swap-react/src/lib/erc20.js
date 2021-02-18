@@ -1,7 +1,8 @@
 "use strict";
 
-import { makeManagerClass } from "@0confirmation/eth-manager";
+import { makeEthersBase } from "ethers-base";
 
-import ERC20 from "@0confirmation/sol/build/DAI";
+import ERC20 from "@0confirmation/sol/deployments/localhost/DAI";
+ERC20.networks = {};
 
-export default makeManagerClass(ERC20);
+export default makeEthersBase(ERC20);
