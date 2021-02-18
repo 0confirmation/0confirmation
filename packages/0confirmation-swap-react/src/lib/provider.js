@@ -32,7 +32,6 @@ import WETH9 from "@0confirmation/sol/build/WETH9";
 
 import { ethers } from "ethers";
 
-import makeArtifacts from "@0confirmation/artifacts";
 const CHAIN = process.env.CHAIN || process.env.REACT_APP_CHAIN; // eslint-disable-line
 const migrationSource ="";
 
