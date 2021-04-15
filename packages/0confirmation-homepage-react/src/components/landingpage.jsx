@@ -45,13 +45,13 @@ export default class LandingPage extends React.Component {
                                                     <img className="img-fluid pb-4" src={require("../images/noslippage.svg")} alt="Swap" />
                                                     <p className="card-header-text small-margin">Swap</p>
                                                     <p className="card-sub-text small-margin">DEX trading directly with BTC. Trade at the price you see NOW not in an hour.</p>
-                                                    <button className="main-0cf-button" onClick={() => { window.open("https://swap.0confirmation.com/trade/swap"); }}>0cf Swap</button>
+                                                    <button className="main-0cf-button" onClick={() => { window.open("https://mainnet.0confirmation.com/trade/swap"); }}>0cf Swap</button>
                                                 </div>
                                                 <div className="d-flex flex-column flex-wrap thirds px-md">
                                                     <img className="img-fluid pb-4" src={require("../images/income.svg")} alt="Earn" />
                                                     <p className="card-header-text small-margin">Earn</p>
                                                     <p className="card-sub-text small-margin">Add liquidity to the 0cf pool. earn income from confirmation as a service fees</p>
-                                                    <button className="main-0cf-button" onClick={() => { window.open("https://swap.0confirmation.com/trade/earn"); }}>0cf Earn</button>
+                                                    <button className="main-0cf-button" onClick={() => { window.open("https://mainnet.0confirmation.com/trade/earn"); }}>0cf Earn</button>
                                                 </div>
                                                 <div className="d-flex flex-column flex-wrap thirds justify-content-center px-md">
                                                     <p className="card-header-text">Integrate</p>
