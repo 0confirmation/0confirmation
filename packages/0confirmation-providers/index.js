@@ -1,11 +1,11 @@
 'use strict';
 
-const RpcEngine = require('json-rpc-engine');
+const { JsonRpcEngine } = require('json-rpc-engine');
 const ethers = require('ethers');
 const providerFromEngine = require('eth-json-rpc-middleware/providerFromEngine');
 const providerAsMiddleware = require('eth-json-rpc-middleware/providerAsMiddleware');
 
-const baseProviderProto = Object.getPrototypeOf(providerFromEngine(new RpcEngine()));
+const baseProviderProto = Object.getPrototypeOf(providerFromEngine(new JsonRpcEngine()));
 
 class BaseProvider {
   constructor(provider) { return makeBaseProvider(provider); }
@@ -23,7 +23,7 @@ class BaseProvider {
 
 const convertToBaseProvider = (provider) => Object.setPrototypeOf(provider, BaseProvider.prototype);
 
-class ProviderEngine extends RpcEngine {
+class ProviderEngine extends JsonRpcEngine {
   asProvider() {
     const provider = convertToBaseProvider(providerFromEngine(this));
     if (provider.setMaxListeners) provider.setMaxListeners(0xffff);

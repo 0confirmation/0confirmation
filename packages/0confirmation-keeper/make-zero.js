@@ -17,7 +17,6 @@ const INFURA_PROJECT_ID =
   process.env.INFURA_PROJECT_ID || "2f1de898efb74331bf933d3ac469b98d";
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY.substr(2);
-
 const provider =
   NETWORK === "buidler"
     ? new ethers.providers.JsonRpcProvider("http://localhost:8545")
@@ -33,7 +32,7 @@ const signer =
         ).getSigner(),
         {startWatching() {}, on() {}}
       )
-    : new ethers.Wallet("0x" + PRIVATE_KEY).connect(provider);
+    : new ethers.Wallet("0x" + PRIVATE_KEY, provider);
 const gasnow = require("ethers-gasnow");
 const {RedispatchSigner} = require("ethers-redispatch-signer");
 signer.provider.getGasPrice = gasnow.createGetGasPrice("rapid");
