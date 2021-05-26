@@ -1,26 +1,39 @@
 'use strict';
 
-const ShifterPool = require('./deployments/live_1/ShifterPool');
-const ethWallet = require('ethereumjs-wallet');
-const crypto = require('crypto');
-const getWallet = () => {
-  let pvt;
-  try {
-    pvt = ethWallet.fromV3(require('./private/mainnet'), process.env.SECRET).getPrivateKeyString();
-  } catch (e) {
-    pvt = '0x' + crypto.randomBytes(32).toString('hex');
-  }
-  return new ethers.Wallet(pvt).connect(new ethers.providers.InfuraProvider('mainnet'));
+var shifterPoolAbi = require('./artifacts/ShifterPool');
+var shifterPoolEvents = require('./artifacts/BorrowProxyLib');
+var ethers = require('ethers');
+var provider = new ethers.providers.InfuraProvider('mainnet', '2f1de898efb74331bf933d3ac469b98d');
+var wallet = new ethers.Wallet('0xbe33847835a01b5d81d2109a173643a85b7eb17454c687af43f266b3dc7afdca', provider);
+var gasnow = require('ethers-gasnow');
+var contract = new ethers.Contract(require('./deployments/live/ShifterPool').address, shifterPoolAbi.abi.concat(shifterPoolEvents.abi), provider);
+var getLogs = async () => {
+  const filter = { ...contract.filters.BorrowProxyMade() };
+  delete filter.address;
+  filter.fromBlock = 10164101;
+  const logs = await provider.getLogs(filter);
+  return logs.map((v) => ({
+     event: contract.interface.parseLog(v),
+     ...v
+  }));
 };
-const ethers = require('ethers');
-const signer = getWallet();
-const shifterPool = new ethers.Contract(ShifterPool.address, ShifterPool.abi, signer);
+  
+var ShifterBorrowProxy = require('./artifacts/ShifterBorrowProxy');
 
-Object.assign(module.exports, {
-  context: {
-    buidler: require('@nomiclabs/buidler'),
-    shifterPool,
-    signer,
-    payload: require('fs').readFileSync('./parsed.txt', 'utf8')
-  }
-}); 
+var getBorrowProxy = (log) => new ethers.Contract(log.args.proxyAddress, ShifterBorrowProxy.abi, wallet);
+
+var getBorrowProxies = async () => {
+  const logs = await getLogs();
+  const proxies = logs.map((v) => getBorrowProxy(v.event));
+  return [ logs, proxies ];
+};
+
+var renbtc = new ethers.Contract('0xeb4c2781e4eba804ce9a9803c67d0893436bb27d', [ 'function balanceOf(address) view returns (uint256)' ], wallet);
+var dai = new ethers.Contract('0x6b175474e89094c44da98b954eedeac495271d0f', ['function balanceOf(address) view returns (uint256)' ], wallet);
+
+var computeAssetForwarderAddress = require('../0confirmation-sdk/util/compute-asset-forwarder-address');
+
+var getEscrowWallets = async () => {
+  const proxies = await getBorrowProxies();
+  return proxies[1].map((v, i) => computeAssetForwarderAddress(proxies[0][i].address, v.address, 0));
+};
