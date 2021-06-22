@@ -89,8 +89,8 @@ export default class LandingPage extends React.Component {
 														/>
 														<p className="card-header-text small-margin">Swap</p>
 														<p className="card-sub-text small-margin">
-															DEX trading directly with Bitcoin. Trade at the price you see
-															now, not in an hour.
+															DEX trading directly with Bitcoin. Trade at the price you
+															see now, not in an hour.
 														</p>
 														<button
 															className="main-0cf-button"
@@ -111,8 +111,8 @@ export default class LandingPage extends React.Component {
 														/>
 														<p className="card-header-text small-margin">Earn</p>
 														<p className="card-sub-text small-margin">
-															Add liquidity to the Zero Swap pool. Earn income from the Zero "confirmation
-															as a service" fees.
+															Add liquidity to the Zero Swap pool. Earn income from Zero
+															"confirmation as a service" fees.
 														</p>
 														<button
 															className="main-0cf-button"
@@ -299,8 +299,8 @@ export default class LandingPage extends React.Component {
 																						})
 																					}
 																				>
-																					Total liquidity available in the Zero Swap
-																					renBTC Pool
+																					Total liquidity available in the
+																					Zero Swap renBTC Pool
 																				</Tooltip>
 																			</span>
 																		</p>
@@ -440,7 +440,8 @@ export default class LandingPage extends React.Component {
 																					}
 																				>
 																					Amount of renBTC available to be
-																					used for loans in the Zero Swap system.
+																					used for loans in the Zero Swap
+																					system.
 																				</Tooltip>
 																			</span>
 																		</p>
