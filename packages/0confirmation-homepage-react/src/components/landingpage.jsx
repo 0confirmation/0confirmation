@@ -535,7 +535,9 @@ export default class LandingPage extends React.Component {
 								style={{
 									backgroundColor: '#0D0208',
 									border: '1px solid #008F11',
-									borderRadius: '10px'
+									borderRadius: '10px',
+									paddingLeft: '1rem',
+									paddingRight: '1rem'
 								}}
 								className="py-2"
 							>
