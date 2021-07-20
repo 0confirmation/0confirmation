@@ -39,8 +39,8 @@ export default class LandingPage extends React.Component {
 											<div className="flex-column d-flex" style={{ flexBasis: '40%' }}>
 												<img
 													className="img-fluid"
-													src={require('../images/0cflogo.svg')}
-													alt="0CF"
+													src={require('../images/ZeroDAO-logo.svg')}
+													alt="zeroDAO"
 												/>
 												<p className="card-hero-text text-center">
 													Interoperability, Optimized
@@ -602,6 +602,7 @@ export default class LandingPage extends React.Component {
 										<a
 											href="https://netlify.com/"
 											target="_blank"
+											rel="noreferrer"
 											style={{ color: '#008F11', textDecoration: 'none' }}
 										>
 											Netlify
